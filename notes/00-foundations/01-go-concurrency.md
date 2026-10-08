@@ -239,3 +239,216 @@ if err := <-errc; err != nil { // errc 已关闭且无值时拿到 nil
 4. `context.WithTimeout` 之后不调用 `cancel()`，会有什么后果？
 
 > 做完练习后，把代码放到 `projects/00-stream-proxy/`，在聊天里告诉我结果或卡点，我来批改并写当天日志。
+
+---
+
+# 参考答案与详解
+
+> 先自己做，卡住超过 20 分钟再看。
+
+## 自测题答案
+
+### 1. `errc` 为什么要缓冲 1？换成无缓冲会怎样？
+
+出错时，后台 goroutine 的顺序是：`errc <- err` → `return` → 执行 defer（关闭 tokens）。
+
+- **无缓冲**：发送必须等到有人接收才完成。但此时调用方正卡在 `for tok := range tokens`，在等 tokens 被关闭；而 tokens 要等 goroutine 退出才关闭。两边互相等待 → **死锁**（或 goroutine 永久泄漏）。
+- **缓冲 1**：错误直接放进缓冲区，发送立即完成，goroutine 退出，tokens 关闭，调用方跳出循环后再从 errc 读到错误。
+
+规律：**“报告最终结果”的 channel，如果最多只发一次，就给缓冲 1**，发送方永远不会因为没人读而卡住。
+
+### 2. `errgroup.WithContext` 返回的 ctx 什么时候会被取消？
+
+三种情况，任一发生即取消：
+1. 某个 `g.Go` 里的函数**第一次返回非 nil 错误**（其余 goroutine 通过这个 ctx 感知到，应尽快退出）；
+2. `g.Wait()` 返回时（所有任务都结束了，ctx 随之取消）；
+3. 传进来的**父 ctx 被取消**（比如客户端断开、整轮超时）。
+
+所以第 4 节里每个工具都要用这个派生 ctx，而不是外层的 ctx，才能享受“一个失败、全体停”。
+
+### 3. 工具失败为什么 `return nil`？什么时候该 `return err`？
+
+- **`return nil`**：工具报错（文件不存在、命令退出码非 0、单个工具超时）对模型来说是一条**有用的观察**。把错误写进 `ToolResult.Err`，作为 `tool_result` 发回给模型，它往往能自己换参数重试。如果 `return err`，errgroup 会取消其他正在跑的工具，整轮白做。
+- **`return err`**：当错误说明**这一轮已经没意义**时：
+  - 父 ctx 被取消（用户走了、整轮超时）——注意区分：单个工具的 20s 超时是 `tctx` 的 `DeadlineExceeded`，而父 ctx 取消时 `ctx.Err() != nil`；
+  - 基础设施故障，比如沙箱进程崩溃、鉴权失效，所有工具都会失败；
+  - 安全违规，比如工具试图越权访问，应立即中止。
+
+```go
+out, err := execTool(tctx, c)
+if ctx.Err() != nil {          // 父级被取消：整轮中止
+    return ctx.Err()
+}
+results[i] = ToolResult{ID: c.ID, Output: out, Err: err}
+return nil
+```
+
+### 4. `context.WithTimeout` 之后不调 `cancel()` 会怎样？
+
+- 派生出的 ctx 会一直挂在父 ctx 的子节点列表上，**直到超时触发才释放**。如果父 ctx 生命周期很长（比如服务级的 ctx），高 QPS 下这些对象会堆积，表现为内存缓慢上涨。
+- 依赖这个 ctx 的下游资源（HTTP 连接、子 goroutine）也不会被提前释放。
+- `go vet` 会报 `lostcancel` 警告。
+
+结论：**`ctx, cancel := context.WithXxx(...)` 的下一行永远是 `defer cancel()`**，提前完成时它会立刻释放资源；多调一次 cancel 也是安全的。
+
+---
+
+## 练习参考实现
+
+### 练习 1：`fanIn`
+
+```go
+func fanIn(ctx context.Context, chs ...<-chan string) <-chan string {
+    out := make(chan string)
+    var wg sync.WaitGroup
+    wg.Add(len(chs))
+
+    for _, ch := range chs {
+        go func() {
+            defer wg.Done()
+            for {
+                select {
+                case v, ok := <-ch:
+                    if !ok {
+                        return // 这一路输入结束
+                    }
+                    select {
+                    case out <- v: // 发送也要能被取消
+                    case <-ctx.Done():
+                        return
+                    }
+                case <-ctx.Done():
+                    return
+                }
+            }
+        }()
+    }
+
+    go func() {
+        wg.Wait()  // 所有输入都结束（或被取消）后
+        close(out) // 才由“发送方”统一关闭 out
+    }()
+    return out
+}
+```
+
+**详解**
+- 每路输入一个 goroutine，谁读完谁退出；`WaitGroup` 计数归零才关闭 `out`。不能让某个 worker 自己关 `out`，因为别的 worker 可能还在发（违反规则 1，会 panic）。
+- **两层 select**：外层等“有数据 or 取消”，内层等“发得出去 or 取消”。只写外层的话，下游不读时会卡在 `out <- v` 上泄漏。
+- `v, ok := <-ch`：`ok == false` 表示 channel 已关闭，这是判断“输入结束”的标准写法。
+
+### 练习 2：并行工具与超时
+
+把超时提成包级变量，测试里调小，免得一次测试跑 20 秒：
+
+```go
+var toolTimeout = 20 * time.Second // runTools 里用它替换写死的 20*time.Second
+
+var fakeDelay = map[string]time.Duration{}
+
+func execTool(ctx context.Context, c ToolCall) (string, error) {
+    select {
+    case <-time.After(fakeDelay[c.Name]):
+        return c.Name + " ok", nil
+    case <-ctx.Done(): // 工具必须响应取消，否则超时形同虚设
+        return "", ctx.Err()
+    }
+}
+
+func TestRunTools(t *testing.T) {
+    toolTimeout = 2 * time.Second
+    fakeDelay = map[string]time.Duration{
+        "a": 100 * time.Millisecond,
+        "b": 200 * time.Millisecond,
+        "c": 2500 * time.Millisecond, // 会超时
+    }
+    calls := []ToolCall{{ID: "1", Name: "a"}, {ID: "2", Name: "b"}, {ID: "3", Name: "c"}}
+
+    start := time.Now()
+    res, err := runTools(context.Background(), calls)
+    elapsed := time.Since(start)
+
+    if err != nil {
+        t.Fatalf("unexpected err: %v", err)
+    }
+    if elapsed < 1900*time.Millisecond || elapsed > 2300*time.Millisecond {
+        t.Fatalf("elapsed = %v, want ~2s (并行，受最慢的超时限制)", elapsed)
+    }
+    if res[0].Err != nil || res[1].Err != nil {
+        t.Fatalf("a/b should succeed: %+v", res)
+    }
+    if !errors.Is(res[2].Err, context.DeadlineExceeded) {
+        t.Fatalf("c should time out, got %v", res[2].Err)
+    }
+}
+```
+
+**详解**
+- 总耗时 ≈ 最慢那个（被 2s 超时截断），而不是三者相加——这就是并行的收益。
+- 结果按**下标**写入，顺序和 `calls` 一一对应，回传给模型时 `tool_call_id` 不会错位。
+- 关键认识：**超时只是发出信号，工具自己必须监听 `ctx.Done()`。** 如果 `execTool` 里写的是 `time.Sleep`，ctx 超时了它也照样睡满，goroutine 不会提前结束。真实工具里，用 `exec.CommandContext`、`http.NewRequestWithContext` 就能自动响应取消。
+
+### 练习 3：取消流式读取，服务端感知断开
+
+```go
+func TestStreamCancel(t *testing.T) {
+    disconnected := make(chan struct{})
+
+    srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        w.Header().Set("Content-Type", "text/event-stream")
+        flusher := w.(http.Flusher)
+        for i := 0; ; i++ {
+            select {
+            case <-r.Context().Done(): // 客户端断开时触发
+                close(disconnected)
+                return
+            case <-time.After(100 * time.Millisecond):
+                fmt.Fprintf(w, "data: {\"choices\":[{\"delta\":{\"content\":\"t%d\"}}]}\n\n", i)
+                flusher.Flush() // 不 Flush，数据会留在缓冲区里，客户端收不到
+            }
+        }
+    }))
+    defer srv.Close()
+
+    ctx, cancel := context.WithCancel(context.Background())
+    req, _ := http.NewRequestWithContext(ctx, http.MethodGet, srv.URL, nil)
+    resp, err := http.DefaultClient.Do(req)
+    if err != nil {
+        t.Fatal(err)
+    }
+
+    tokens, errc := streamTokens(ctx, resp.Body)
+    for i := 0; i < 5; i++ {
+        <-tokens
+    }
+    cancel()
+
+    for range tokens { // 读干净，直到后台 goroutine 关闭 tokens
+    }
+    if err := <-errc; err == nil {
+        t.Fatal("want a cancellation error, got nil")
+    }
+
+    select {
+    case <-disconnected:
+    case <-time.After(2 * time.Second):
+        t.Fatal("server never saw the disconnect: 上游连接没断，还在烧钱")
+    }
+}
+```
+
+**详解**
+- `cancel()` 之后发生两件事：`http.NewRequestWithContext` 让 Transport **关闭底层 TCP 连接**，服务端的 `r.Context()` 随之被取消；同时 `streamTokens` 里的 `sc.Scan()` 读 body 失败，或者 select 命中 `ctx.Done()`，goroutine 退出。
+- 这里只断言 `err != nil`，而不是 `errors.Is(err, context.Canceled)`：取决于 goroutine 当时卡在哪一步，你可能拿到 `ctx.Err()`，也可能拿到 body 读取错误，两者都正确。
+- `for range tokens {}` 是“排空”：确保后台 goroutine 已经真正退出，再去读 errc。
+- 这个测试验证的正是生产里最值钱的一点：**用户关掉页面 → 你到模型供应商的连接也断开 → 停止计费。**
+
+### 练习 4：`go test -race`
+
+```bash
+go test -race -count=1 ./...
+```
+
+- `-race` 会检测数据竞争。第 4 节里如果把 `results` 换成 `map[string]ToolResult` 而不加锁，这里会直接报 `DATA RACE`。
+- `-count=1` 关闭测试缓存，并发测试建议每次都真跑。
+- 想自动检查 goroutine 泄漏，可以引入 `go.uber.org/goleak`，在 `TestMain` 里加 `goleak.VerifyTestMain(m)`。
