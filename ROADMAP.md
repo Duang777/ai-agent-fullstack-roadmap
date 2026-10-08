@@ -2,9 +2,12 @@
 
 > 勾选规则：学完并有笔记/代码产出才打 `[x]`。面板按本文件的勾选数统计进度。
 
+> 技术栈：主力 Go / TypeScript，Python 作为读懂 ML 生态与评测脚本的辅助语言。
+
 ## 0. 基础功底
-- [ ] Python 进阶：asyncio、类型标注、Pydantic v2
-- [ ] TypeScript / Node.js：异步模型、Zod
+- [ ] Go 并发与工程：goroutine/channel/select、context 取消、errgroup、泛型
+- [ ] TypeScript：严格类型、Zod、async iterator、AbortController
+- [ ] Python（够用即可）：asyncio、Pydantic、uv
 - [ ] HTTP / SSE / WebSocket 流式协议
 - [ ] Git 工作流、Docker、Linux 基础
 
@@ -35,7 +38,8 @@
 - [ ] LangGraph（状态图、持久化、interrupt）
 - [ ] OpenAI Agents SDK
 - [ ] Claude Agent SDK
-- [ ] Google ADK / Vercel AI SDK
+- [ ] Go 生态：Eino（CloudWeGo）、Genkit Go、官方 MCP Go SDK
+- [ ] TS 生态：Vercel AI SDK、Mastra、OpenAI Agents SDK (JS)
 - [ ] 框架取舍：何时不用框架
 
 ## 5. 记忆与检索（RAG）
@@ -57,7 +61,7 @@
 - [ ] Reward Hacking 与测试篡改检测
 
 ## 8. 工程化与生产部署
-- [ ] 后端：FastAPI / Node 服务、任务队列（Celery、Temporal）
+- [ ] 后端：Go 服务（net/http、gRPC）+ Node 服务、任务队列
 - [ ] 持久化工作流（Temporal / Inngest / Durable Execution）
 - [ ] 流式前端：React/Next.js、Generative UI
 - [ ] 模型网关：路由、降级、限流（LiteLLM 等）
