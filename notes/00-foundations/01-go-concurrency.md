@@ -148,6 +148,7 @@ func streamTokens(ctx context.Context, body io.ReadCloser) (<-chan string, <-cha
     errc := make(chan error, 1) // 缓冲 1：即使没人读也不会卡住 goroutine
 
     go func() {
+        defer close(errc)   // 结束时关闭，调用方读 errc 不会永远阻塞
         defer close(tokens)
         defer body.Close() // 必须关闭，否则连接无法复用
 
@@ -188,6 +189,28 @@ func streamTokens(ctx context.Context, body io.ReadCloser) (<-chan string, <-cha
     return tokens, errc
 }
 ```
+
+调用方这样用：
+
+```go
+tokens, errc := streamTokens(ctx, resp.Body)
+for tok := range tokens { // 一直读到 tokens 被关闭
+    fmt.Print(tok)
+}
+if err := <-errc; err != nil { // errc 已关闭且无值时拿到 nil
+    return err
+}
+```
+
+### 逐段解读
+
+- **SSE 是什么**：服务器不一次性返回结果，而是保持连接、一行行推文本。每个事件以 `data: ` 开头，空行分隔。模型每生成一小段就推一个事件，`delta.content` 是这次新增的文字；`[DONE]` 是 OpenAI 约定的结束标记。
+- **为什么返回两个 channel**：函数立即返回，真正的读取在后台 goroutine 里做。`tokens` 传正常数据，`errc` 传“为什么结束”。调用方用 `for range` 边收边显示。
+- **三个 defer**：退出时按“后进先出”执行——先关 body（释放连接），再关 tokens（让调用方的 `for range` 结束），最后关 errc。
+- **`sc.Buffer`**：Scanner 默认一行最多 64KB，带长工具参数的 chunk 可能超过，所以放宽到 1MB。
+- **只取需要的字段**：匿名 struct 只声明 `choices[].delta.content`，其余字段 JSON 解码时自动忽略；Go 的 JSON 字段名匹配不区分大小写，所以 `Content` 能对上 `content`。
+- **`len(Choices) == 0`**：有些 chunk（比如最后带 usage 统计的那条）没有 choices，直接跳过。
+- **为什么 errc 缓冲 1**：出错时 goroutine 先往 errc 发错误再退出。若无缓冲，它会卡在发送上，而调用方还卡在 `for range tokens` 等关闭——互相等待，死锁。缓冲 1 让发送立刻完成。
 
 关键点：**每一次 channel 发送都要和 `ctx.Done()` 放进同一个 select。** 否则下游走了，这个 goroutine 会永远卡在 `tokens <- ...`。
 
