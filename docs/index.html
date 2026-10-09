@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#0A0A0A" />
     <title>AI Agent 全栈学习计划 · 从零到生产</title>
-    <meta name="description" content="11 个模块，54 个知识点。每天一课、一份日志、一次提交，全部开源。" />
+    <meta name="description" content="14 个模块，77 个知识点。每天一课、一份日志、一次提交，全部开源。" />
     <link rel="stylesheet" href="hark.css" />
     <link rel="stylesheet" href="hark-hero.css" />
     <script>
@@ -134,7 +134,7 @@
       .x-progress__row strong { font: var(--weight-regular) var(--size-heading)/1 var(--x-mono); color: var(--text-primary); }
       .x-bar { position: relative; height: 6px; border-radius: var(--r-pill); background: rgb(255 255 255 / 0.06); overflow: hidden; }
       .x-bar span { position: absolute; inset: 0 auto 0 0; min-width: 6px; border-radius: inherit; background: #ffffff; }
-      .x-ticks { display: grid; grid-template-columns: repeat(54, 1fr); gap: 2px; }
+      .x-ticks { display: grid; grid-template-columns: repeat(77, 1fr); gap: 2px; }
       .x-ticks i { height: 10px; border-radius: 1px; background: rgb(255 255 255 / 0.08); }
       .x-ticks i.is-on { background: #ffffff; }
 
@@ -196,7 +196,7 @@
           <div class="hero__copy">
             <p class="hero__eyebrow x-mono">PUBLIC LEARNING · DAY 1</p>
             <h1 class="x-display">从零到生产，<br />公开学习 <span class="x-grad">AI Agent 全栈</span></h1>
-            <p class="hero__sub">11 个模块，54 个知识点。每天一课、一份日志、一次提交，全部开源。</p>
+            <p class="hero__sub">14 个模块，77 个知识点。每天一课、一份日志、一次提交，全部开源。</p>
             <div class="links">
               <a class="x-btn x-btn--primary" href="https://github.com/Duang777/ai-agent-fullstack-roadmap" target="_blank" rel="noopener">在 GitHub 上关注</a>
               <a class="x-btn x-btn--ghost" href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/ROADMAP.md" target="_blank" rel="noopener">查看路线图</a>
@@ -206,10 +206,10 @@
         </section>
 
         <section class="stats" data-reveal>
-          <div class="stat"><span class="stat__fig x-mono">11</span><span class="stat__label">模块</span></div>
-          <div class="stat"><span class="stat__fig x-mono">54</span><span class="stat__label">知识点</span></div>
+          <div class="stat"><span class="stat__fig x-mono">14</span><span class="stat__label">模块</span></div>
+          <div class="stat"><span class="stat__fig x-mono">77</span><span class="stat__label">知识点</span></div>
           <div class="stat"><span class="stat__fig x-mono">Day 2</span><span class="stat__label">今天</span></div>
-          <div class="stat"><span class="stat__fig x-mono">2/54</span><span class="stat__label">已完成</span></div>
+          <div class="stat"><span class="stat__fig x-mono">2/77</span><span class="stat__label">已完成</span></div>
         </section>
 
         <section class="section" id="progress" data-nav="进度">
@@ -219,8 +219,8 @@
             <p class="head__sub">学完且有笔记或代码产出，才在 ROADMAP 里打勾。</p>
           </div>
           <div class="x-progress" data-reveal>
-            <div class="x-progress__row"><span>已勾选知识点</span><strong>4%</strong></div>
-            <div class="x-ticks" id="ticks" role="img" aria-label="54 个知识点中已完成 2 个"></div>
+            <div class="x-progress__row"><span>已勾选知识点</span><strong>3%</strong></div>
+            <div class="x-ticks" id="ticks" role="img" aria-label="77 个知识点中已完成 2 个"></div>
           </div>
           <div class="steps" data-reveal>
             <article class="step">
@@ -325,7 +325,7 @@
         <section class="section" id="roadmap" data-nav="路线图">
           <div class="head" data-reveal>
             <p class="head__eyebrow x-kicker">路线图</p>
-            <h2 class="x-h2">11 个模块，从基础功底到上线实战。</h2>
+            <h2 class="x-h2">14 个模块，从基础功底到生产级上线。</h2>
             <p class="head__sub"><a class="link" href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/ROADMAP.md" target="_blank" rel="noopener">完整 ROADMAP.md</a></p>
           </div>
           <div class="cards" data-reveal>
@@ -334,119 +334,160 @@
               <h3>基础功底</h3>
               <ul>
                 <li>Go 并发与工程</li>
-                <li>TypeScript 严格类型 / Zod / async iterator / AbortController</li>
-                <li>Python asyncio / Pydantic / uv</li>
+                <li>TypeScript</li>
+                <li>Python（够用即可）</li>
                 <li>HTTP / SSE / WebSocket 流式协议</li>
-                <li>Git / Docker / Linux</li>
+                <li>Git 工作流、Docker、Linux 基础</li>
               </ul>
             </div>
             <div class="x-card">
               <div class="x-card__top"><span class="x-card__num">01</span><span class="chip x-chip">未开始</span></div>
               <h3>LLM 原理与使用</h3>
               <ul>
-                <li>Transformer、Tokenizer、采样参数</li>
-                <li>OpenAI Responses / Anthropic Messages / Gemini</li>
-                <li>结构化输出与 constrained decoding</li>
-                <li>推理模型与成本权衡</li>
+                <li>Transformer、Tokenizer、采样参数（temperature/top-p）</li>
+                <li>主流 API</li>
+                <li>结构化输出</li>
+                <li>推理模型（reasoning / thinking budget）与成本权衡</li>
                 <li>上下文窗口、Prompt Caching、长上下文退化</li>
-                <li>Prompt / Context Engineering</li>
+                <li>Prompt / Context Engineering 系统方法</li>
               </ul>
             </div>
             <div class="x-card">
               <div class="x-card__top"><span class="x-card__num">02</span><span class="chip x-chip">未开始</span></div>
               <h3>工具调用与协议</h3>
               <ul>
-                <li>Function Calling 与并行调用</li>
-                <li>MCP</li>
-                <li>A2A</li>
-                <li>Computer Use / Browser Use</li>
-                <li>代码执行沙箱（E2B、Docker、gVisor）</li>
+                <li>Function Calling / Tool Use 机制与并行调用</li>
+                <li>MCP（Model Context Protocol）</li>
+                <li>A2A（Agent-to-Agent）协议</li>
+                <li>Computer Use / Browser Use 代理</li>
+                <li>Code Execution 沙箱（E2B、Docker、gVisor）</li>
               </ul>
             </div>
             <div class="x-card">
               <div class="x-card__top"><span class="x-card__num">03</span><span class="chip x-chip">未开始</span></div>
               <h3>Agent 架构</h3>
               <ul>
-                <li>ReAct / Plan-and-Execute / Reflexion</li>
-                <li>Agent Loop（停止条件、预算、重试）</li>
-                <li>多智能体（Supervisor、Handoff、Swarm）</li>
-                <li>长任务（检查点、可恢复执行、Human-in-the-loop）</li>
-                <li>Coding Agent 拆解</li>
-                <li>Deep Research Agent</li>
+                <li>ReAct、Plan-and-Execute、Reflexion</li>
+                <li>Agent Loop 设计：停止条件、预算、重试</li>
+                <li>多智能体</li>
+                <li>长任务 Agent</li>
+                <li>Coding Agent 架构（Claude Code / Codex / SWE-agent 拆解）</li>
+                <li>Deep Research Agent 架构</li>
               </ul>
             </div>
             <div class="x-card">
               <div class="x-card__top"><span class="x-card__num">04</span><span class="chip x-chip">未开始</span></div>
               <h3>框架与 SDK</h3>
               <ul>
-                <li>LangGraph</li>
+                <li>LangGraph（状态图、持久化、interrupt）</li>
                 <li>OpenAI Agents SDK</li>
                 <li>Claude Agent SDK</li>
-                <li>Go 生态：Eino / Genkit Go / MCP Go SDK</li>
-                <li>TS 生态：Vercel AI SDK / Mastra / OpenAI Agents SDK JS</li>
-                <li>何时不用框架</li>
+                <li>Go 生态</li>
+                <li>TS 生态</li>
+                <li>框架取舍：何时不用框架</li>
               </ul>
             </div>
             <div class="x-card">
               <div class="x-card__top"><span class="x-card__num">05</span><span class="chip x-chip">未开始</span></div>
               <h3>记忆与检索</h3>
               <ul>
-                <li>Embedding 与向量库（pgvector、Qdrant、Milvus）</li>
-                <li>分块、混合检索、Rerank</li>
+                <li>Embedding、向量库（pgvector、Qdrant、Milvus）</li>
+                <li>分块、混合检索（BM25 + 向量）、Rerank</li>
                 <li>GraphRAG / Agentic RAG</li>
-                <li>Agent 记忆与上下文压缩</li>
+                <li>Agent 记忆：短期/长期/情景记忆、上下文压缩</li>
+                <li>检索质量评测</li>
               </ul>
             </div>
             <div class="x-card">
               <div class="x-card__top"><span class="x-card__num">06</span><span class="chip x-chip">未开始</span></div>
-              <h3>评测与可观测性</h3>
+              <h3>评测体系</h3>
               <ul>
-                <li>离线集、LLM-as-Judge、人工标注</li>
-                <li>SWE-bench、Terminal-Bench、τ-bench、GAIA</li>
-                <li>OpenTelemetry GenAI、Langfuse / LangSmith</li>
-                <li>CI 中的 Eval</li>
+                <li>Eval 设计</li>
+                <li>指标</li>
+                <li>LLM-as-Judge</li>
+                <li>公开 Benchmark</li>
+                <li>Eval 框架</li>
+                <li>CI 回归门禁</li>
+                <li>线上评估：A/B 实验、灰度对比、用户反馈回流成新用例</li>
               </ul>
             </div>
             <div class="x-card">
               <div class="x-card__top"><span class="x-card__num">07</span><span class="chip x-chip">未开始</span></div>
-              <h3>安全与可靠性</h3>
+              <h3>可观测性</h3>
               <ul>
-                <li>Prompt Injection 防御</li>
-                <li>最小权限与工具审批</li>
-                <li>Guardrails 与可验证完成</li>
-                <li>Reward Hacking 检测</li>
+                <li>Tracing</li>
+                <li>平台</li>
+                <li>核心指标</li>
+                <li>结构化日志与会话回放</li>
+                <li>SLO 与告警：可用性 / 延迟目标、错误预算、值班手册</li>
               </ul>
             </div>
             <div class="x-card">
               <div class="x-card__top"><span class="x-card__num">08</span><span class="chip x-chip">未开始</span></div>
-              <h3>工程化与部署</h3>
+              <h3>高可用与可靠性</h3>
               <ul>
-                <li>Go（net/http、gRPC）+ Node 服务与任务队列</li>
-                <li>Temporal / Inngest 持久化工作流</li>
-                <li>React / Next.js 流式前端与 Generative UI</li>
-                <li>模型网关（路由、降级、限流）</li>
-                <li>成本与延迟优化</li>
-                <li>Kubernetes / Serverless / vLLM / SGLang</li>
+                <li>超时、重试（指数退避 + 抖动）、幂等键，避免重复扣费和重复执行工具</li>
+                <li>熔断、限流（令牌桶）、背压、舱壁隔离</li>
+                <li>多模型供应商容灾</li>
+                <li>持久化执行</li>
+                <li>无状态服务与水平扩展</li>
+                <li>故障演练：注入超时、429、断流，验证系统按预期降级</li>
               </ul>
             </div>
             <div class="x-card">
               <div class="x-card__top"><span class="x-card__num">09</span><span class="chip x-chip">未开始</span></div>
-              <h3>模型侧前沿</h3>
+              <h3>高性能与成本</h3>
               <ul>
-                <li>LoRA / QLoRA / SFT</li>
-                <li>DPO、GRPO、Agentic RL</li>
-                <li>合成数据与轨迹构造</li>
-                <li>开源模型部署与量化</li>
+                <li>流式链路与首 token 延迟优化</li>
+                <li>缓存</li>
+                <li>服务端性能</li>
+                <li>推理服务</li>
+                <li>模型路由：大小模型分层、按任务难度路由</li>
+                <li>成本治理：按用户 / 租户计量、预算上限、用量看板</li>
               </ul>
             </div>
             <div class="x-card">
               <div class="x-card__top"><span class="x-card__num">10</span><span class="chip x-chip">未开始</span></div>
+              <h3>安全与治理</h3>
+              <ul>
+                <li>Prompt Injection / 间接注入防御</li>
+                <li>权限与沙箱：最小权限、高风险工具人工审批</li>
+                <li>Guardrails、输出校验、可验证完成（Verification）</li>
+                <li>Reward Hacking 与测试篡改检测</li>
+                <li>数据与合规：PII 脱敏、审计日志、多租户隔离</li>
+              </ul>
+            </div>
+            <div class="x-card">
+              <div class="x-card__top"><span class="x-card__num">11</span><span class="chip x-chip">未开始</span></div>
+              <h3>工程化与部署</h3>
+              <ul>
+                <li>后端</li>
+                <li>流式前端</li>
+                <li>模型网关：统一接口、鉴权、配额（LiteLLM 或自研）</li>
+                <li>容器化与编排</li>
+                <li>CI/CD 与版本管理</li>
+                <li>发布策略：灰度、Feature Flag、一键回滚</li>
+              </ul>
+            </div>
+            <div class="x-card">
+              <div class="x-card__top"><span class="x-card__num">12</span><span class="chip x-chip">未开始</span></div>
+              <h3>模型侧前沿</h3>
+              <ul>
+                <li>微调：LoRA / QLoRA、SFT</li>
+                <li>偏好与强化学习：DPO、GRPO、Agentic RL</li>
+                <li>合成数据与轨迹数据构造</li>
+                <li>开源模型部署与量化</li>
+              </ul>
+            </div>
+            <div class="x-card">
+              <div class="x-card__top"><span class="x-card__num">13</span><span class="chip x-chip">未开始</span></div>
               <h3>项目实战</h3>
               <ul>
-                <li>MCP 个人助理 Agent</li>
-                <li>生产级 RAG（含 Eval + Tracing）</li>
-                <li>多智能体 Coding Agent（沙箱 + 测试验证）</li>
-                <li>上线监控与成本看板</li>
+                <li>带 MCP 工具的个人助理 Agent</li>
+                <li>生产级 RAG 问答服务</li>
+                <li>多智能体 Coding Agent</li>
+                <li>高可用 Agent 网关</li>
+                <li>上线运营</li>
               </ul>
             </div>
           </div>
@@ -486,7 +527,7 @@
     <script src="hark.js"></script>
     <script>
       (function () {
-        var done = 2, total = 54, box = document.getElementById("ticks");
+        var done = 2, total = 77, box = document.getElementById("ticks");
         for (var i = 0; i < total; i++) {
           var t = document.createElement("i");
           if (i < done) t.className = "is-on";
