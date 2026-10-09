@@ -5,8 +5,8 @@
 > 技术栈：主力 Go / TypeScript，Python 作为读懂 ML 生态与评测脚本的辅助语言。
 
 ## 0. 基础功底
-- [ ] Go 并发与工程：goroutine/channel/select、context 取消、errgroup、泛型
-- [ ] TypeScript：严格类型、Zod、async iterator、AbortController
+- [x] Go 并发与工程：goroutine/channel/select、context 取消、errgroup、泛型
+- [x] TypeScript：严格类型、Zod、async iterator、AbortController
 - [ ] Python（够用即可）：asyncio、Pydantic、uv
 - [ ] HTTP / SSE / WebSocket 流式协议
 - [ ] Git 工作流、Docker、Linux 基础
