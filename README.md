@@ -50,7 +50,7 @@
 
 | # | 主题 | 核心内容 | 课件 | 练习 | 状态 |
 |---|---|---|---|---|---|
-| 0.1 | Go 并发 | goroutine、channel、context 取消链、errgroup、可取消 SSE | [课件](notes/00-foundations/01-go-concurrency.md) | [`00-stream-proxy`](projects/00-stream-proxy) | ✅ 完成 |
+| 0.1 | Go 基础与并发 | 模块、错误处理、接口、JSON、表驱动测试；goroutine、channel、context、errgroup、可取消 SSE | [课件](notes/00-foundations/01-go.md) | [`00-stream-proxy`](projects/00-stream-proxy) | ✅ 完成 |
 | 0.2 | TypeScript | 可辨识联合、Zod、AsyncGenerator、AbortController | [课件](notes/00-foundations/02-typescript.md) | [`01-ts-agent-core`](projects/01-ts-agent-core) | ✅ 完成 |
 | 0.3 | Python | uv、Pydantic、asyncio TaskGroup、异步生成器 | [课件](notes/00-foundations/03-python.md) | 进行中 | 🔄 学习中 |
 | 0.4 | 流式协议 | HTTP / SSE / WebSocket | 即将更新 | | ⏳ |
@@ -89,7 +89,7 @@ cd ai-agent-fullstack-roadmap
 运行任意一课的练习：
 
 ```bash
-# 0.1 Go 并发
+# 0.1 Go
 cd projects/00-stream-proxy && go test -race -count=1 ./...
 
 # 0.2 TypeScript
@@ -105,7 +105,7 @@ cd projects/01-ts-agent-core && npm install && npm run typecheck && npm test
 ├── ROADMAP.md              # 77 个知识点清单 + 生产就绪检查清单
 ├── notes/                  # 课件，按模块分目录
 │   └── 00-foundations/
-│       ├── 01-go-concurrency.md
+│       ├── 01-go.md
 │       ├── 02-typescript.md
 │       └── 03-python.md
 ├── projects/               # 每课一个可运行的练习目录
