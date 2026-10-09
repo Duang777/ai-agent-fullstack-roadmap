@@ -13,6 +13,7 @@
 [![Go](https://img.shields.io/badge/Go-1.23+-111111?style=flat-square&logo=go&logoColor=white)](projects/00-stream-proxy)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-111111?style=flat-square&logo=typescript&logoColor=white)](projects/01-ts-agent-core)
 [![Python](https://img.shields.io/badge/Python-3.12+-111111?style=flat-square&logo=python&logoColor=white)](notes/00-foundations/03-python.md)
+[![License](https://img.shields.io/badge/license-MIT%20%2B%20CC%20BY--NC--SA-111111?style=flat-square)](#许可证)
 [![Last commit](https://img.shields.io/github/last-commit/Duang777/ai-agent-fullstack-roadmap?style=flat-square&color=111111)](https://github.com/Duang777/ai-agent-fullstack-roadmap/commits/main)
 [![Stars](https://img.shields.io/github/stars/Duang777/ai-agent-fullstack-roadmap?style=flat-square&color=111111)](https://github.com/Duang777/ai-agent-fullstack-roadmap/stargazers)
 
@@ -121,6 +122,11 @@ cd projects/01-ts-agent-core && npm install && npm run typecheck && npm test
 - 觉得有用，点个 **Star** 方便追更，每天都会有新内容。
 - 发现错误或有更好的写法，欢迎提 [Issue](https://github.com/Duang777/ai-agent-fullstack-roadmap/issues) 或 PR。
 - 想一起打卡：Fork 这个仓库，用 `logs/TEMPLATE.md` 写你自己的日志。
+
+## 许可证
+
+- 代码（`projects/` 及其他源码）：[MIT](LICENSE)
+- 课件与文档（`notes/`、`logs/`、`ROADMAP.md`）：[CC BY-NC-SA 4.0](notes/LICENSE)，转载请注明出处，禁止商用，改编需以相同协议共享
 
 ## Star History
 
