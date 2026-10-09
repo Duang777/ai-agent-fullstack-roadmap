@@ -9,7 +9,7 @@
 用 Go / TypeScript 写 Agent 运行时，用 Python 读懂模型生态。<br/>
 每一课都有课件、可运行练习、测试和参考答案。
 
-[![Progress](https://img.shields.io/badge/progress-2%2F54-111111?style=flat-square)](ROADMAP.md)
+[![Progress](https://img.shields.io/badge/progress-2%2F77-111111?style=flat-square)](ROADMAP.md)
 [![Go](https://img.shields.io/badge/Go-1.23+-111111?style=flat-square&logo=go&logoColor=white)](projects/00-stream-proxy)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-111111?style=flat-square&logo=typescript&logoColor=white)](projects/01-ts-agent-core)
 [![Python](https://img.shields.io/badge/Python-3.12+-111111?style=flat-square&logo=python&logoColor=white)](notes/00-foundations/03-python.md)
@@ -32,7 +32,7 @@
 - 模型给的 JSON 参数是错的，**程序崩溃还是把错误回传给模型自我修正**？
 - 怎么证明 Agent“做完了”，而不是“说做完了”？
 
-这个仓库按工程师的视角，把这些问题拆成 54 个知识点、11 个模块，**每个知识点都要求有代码、有测试、能跑通**才算完成。
+这个仓库按工程师的视角，把这些问题拆成 77 个知识点、14 个模块，**每个知识点都要求有代码、有测试、能跑通**才算完成。
 
 ## 特点
 
@@ -58,21 +58,26 @@
 
 ### 全部模块
 
-| 模块 | 内容 | 进度 |
-|---|---|---|
-| 00 基础功底 | Go / TS / Python、流式协议、工程基础 | `██░░░` 2/5 |
-| 01 LLM 原理与使用 | Transformer、主流 API、结构化输出、推理模型、Prompt Caching | `░░░░░░` 0/6 |
-| 02 工具调用与协议 | Function Calling、MCP、A2A、Computer Use、代码沙箱 | `░░░░░` 0/5 |
-| 03 Agent 架构 | ReAct、Agent Loop、多智能体、长任务、Coding / Deep Research Agent | `░░░░░░` 0/6 |
-| 04 框架与 SDK | LangGraph、OpenAI / Claude Agent SDK、Eino、Vercel AI SDK、Mastra | `░░░░░░` 0/6 |
-| 05 记忆与检索 | 向量库、混合检索、Rerank、GraphRAG、Agent 记忆 | `░░░░` 0/4 |
-| 06 评测与可观测性 | Eval 体系、SWE-bench / τ-bench、OpenTelemetry、CI Eval | `░░░░` 0/4 |
-| 07 安全与可靠性 | Prompt Injection、权限沙箱、Guardrails、Reward Hacking | `░░░░` 0/4 |
-| 08 工程化与部署 | Go / Node 服务、Temporal、流式前端、模型网关、vLLM | `░░░░░░` 0/6 |
-| 09 模型侧前沿 | LoRA、DPO / GRPO、Agentic RL、合成数据、量化部署 | `░░░░` 0/4 |
-| 10 项目实战 | MCP 助理、生产级 RAG、多智能体 Coding Agent、上线监控 | `░░░░` 0/4 |
+四个阶段：**A 打地基** → **B 能做出来** → **C 上生产** → **D 深入与实战**。阶段 C 是 Demo 和生产系统的分水岭：Eval 回答“有多准”，Tracing 回答“哪里坏了”，高可用回答“挂了怎么办”，性能与成本回答“为什么慢、为什么贵”。
 
-完整清单见 [ROADMAP.md](ROADMAP.md)。
+| 阶段 | 模块 | 内容 | 进度 |
+|---|---|---|---|
+| A | 00 基础功底 | Go / TS / Python、流式协议、工程基础 | `██░░░` 2/5 |
+| A | 01 LLM 原理与使用 | Transformer、主流 API、结构化输出、推理模型、Prompt Caching | `░░░░░░` 0/6 |
+| A | 02 工具调用与协议 | Function Calling、MCP、A2A、Computer Use、代码沙箱 | `░░░░░` 0/5 |
+| B | 03 Agent 架构 | ReAct、Agent Loop、多智能体、长任务、Coding / Deep Research Agent | `░░░░░░` 0/6 |
+| B | 04 框架与 SDK | LangGraph、OpenAI / Claude Agent SDK、Eino、Vercel AI SDK、Mastra | `░░░░░░` 0/6 |
+| B | 05 记忆与检索 | 向量库、混合检索、Rerank、GraphRAG、记忆、检索评测 | `░░░░░` 0/5 |
+| C | 06 评测体系 | 任务集构造、pass^k、LLM-as-Judge 校准、SWE-bench / τ²-bench、CI 门禁、A/B | `░░░░░░░` 0/7 |
+| C | 07 可观测性 | OpenTelemetry GenAI、Langfuse、TTFT / P99 / 成本指标、会话回放、SLO | `░░░░░` 0/5 |
+| C | 08 高可用与可靠性 | 超时重试幂等、熔断限流、多供应商容灾、Temporal 断点恢复、故障演练 | `░░░░░░` 0/6 |
+| C | 09 高性能与成本 | 首 token 延迟、缓存、压测与 pprof、vLLM / SGLang、模型路由、成本治理 | `░░░░░░` 0/6 |
+| C | 10 安全与治理 | Prompt Injection、权限沙箱、Guardrails、Reward Hacking、PII 与审计 | `░░░░░` 0/5 |
+| C | 11 工程化与部署 | Go / Node 服务、流式前端、模型网关、K8s、Prompt 版本化、灰度回滚 | `░░░░░░` 0/6 |
+| D | 12 模型侧前沿 | LoRA、DPO / GRPO、Agentic RL、合成数据、量化部署 | `░░░░` 0/4 |
+| D | 13 项目实战 | MCP 助理、生产级 RAG、Coding Agent、高可用网关、上线运营 | `░░░░░` 0/5 |
+
+完整清单和**生产就绪检查清单**见 [ROADMAP.md](ROADMAP.md)。
 
 ## 快速开始
 
@@ -97,7 +102,7 @@ cd projects/01-ts-agent-core && npm install && npm run typecheck && npm test
 
 ```
 .
-├── ROADMAP.md              # 54 个知识点清单，勾选即进度
+├── ROADMAP.md              # 77 个知识点清单 + 生产就绪检查清单
 ├── notes/                  # 课件，按模块分目录
 │   └── 00-foundations/
 │       ├── 01-go-concurrency.md
