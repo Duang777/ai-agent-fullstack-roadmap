@@ -18,7 +18,7 @@
 > 阶段 C 是“Demo”和“生产系统”的分水岭：一个 Agent 能演示不难，难的是知道它**有多准**（Eval）、**哪里坏了**（Tracing）、**挂了怎么办**（高可用）、**为什么慢、为什么贵**（性能与成本）。
 
 ## 0. 基础功底
-- [x] Go 并发与工程：goroutine/channel/select、context 取消、errgroup、泛型
+- [x] Go 基础与并发：模块、错误处理、接口、JSON、测试；goroutine/channel/select、context 取消、errgroup、泛型
 - [x] TypeScript：严格类型、Zod、async iterator、AbortController
 - [ ] Python（够用即可）：asyncio、Pydantic、uv
 - [ ] HTTP / SSE / WebSocket 流式协议
