@@ -208,8 +208,8 @@
         <section class="stats" data-reveal>
           <div class="stat"><span class="stat__fig x-mono">11</span><span class="stat__label">模块</span></div>
           <div class="stat"><span class="stat__fig x-mono">54</span><span class="stat__label">知识点</span></div>
-          <div class="stat"><span class="stat__fig x-mono">Day 1</span><span class="stat__label">今天</span></div>
-          <div class="stat"><span class="stat__fig x-mono">0/54</span><span class="stat__label">已完成</span></div>
+          <div class="stat"><span class="stat__fig x-mono">Day 2</span><span class="stat__label">今天</span></div>
+          <div class="stat"><span class="stat__fig x-mono">2/54</span><span class="stat__label">已完成</span></div>
         </section>
 
         <section class="section" id="progress" data-nav="进度">
@@ -219,14 +219,14 @@
             <p class="head__sub">学完且有笔记或代码产出，才在 ROADMAP 里打勾。</p>
           </div>
           <div class="x-progress" data-reveal>
-            <div class="x-progress__row"><span>已勾选知识点</span><strong>0%</strong></div>
-            <div class="x-ticks" id="ticks" role="img" aria-label="54 个知识点中已完成 0 个"></div>
+            <div class="x-progress__row"><span>已勾选知识点</span><strong>4%</strong></div>
+            <div class="x-ticks" id="ticks" role="img" aria-label="54 个知识点中已完成 2 个"></div>
           </div>
           <div class="steps" data-reveal>
             <article class="step">
               <div class="step__intro">
-                <p class="step__num x-step-num x-grad">0.1</p>
-                <p class="step__eyebrow">当前课程 · 00 基础功底</p>
+                <p class="step__num x-step-num">0.1</p>
+                <p class="step__eyebrow">已完成 · 00 基础功底</p>
               </div>
               <div>
                 <h3>Go 并发：Agent 运行时的地基</h3>
@@ -239,19 +239,44 @@
                 <dt>课件</dt>
                 <dd><span class="chip x-chip x-chip--done">已完成</span></dd>
                 <dt>练习</dt>
-                <dd><span class="chip x-chip x-chip--live">进行中</span></dd>
+                <dd><span class="chip x-chip x-chip--done">已完成</span></dd>
               </dl>
             </article>
             <article class="step">
               <div class="step__intro">
                 <p class="step__num x-step-num">0.2</p>
-                <p class="step__eyebrow">下一课</p>
+                <p class="step__eyebrow">已完成 · 00 基础功底</p>
               </div>
               <div>
-                <h3>TypeScript：严格类型、Zod、AsyncGenerator、AbortController</h3>
+                <h3>TypeScript：给 Agent 套上类型的安全带</h3>
+                <p class="sub">可辨识联合、Zod 校验工具参数、AsyncGenerator 解析 SSE、AbortController 取消链。</p>
+                <div class="links" style="margin-top: 16px">
+                  <a class="x-btn x-btn--ghost" href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/notes/00-foundations/02-typescript.md" target="_blank" rel="noopener">阅读课件</a>
+                </div>
               </div>
               <dl class="step__panel">
-                <dt>状态</dt>
+                <dt>课件</dt>
+                <dd><span class="chip x-chip x-chip--done">已完成</span></dd>
+                <dt>练习</dt>
+                <dd><span class="chip x-chip x-chip--done">已完成</span></dd>
+              </dl>
+            </article>
+            <article class="step">
+              <div class="step__intro">
+                <p class="step__num x-step-num x-grad">0.3</p>
+                <p class="step__eyebrow">当前课程 · 00 基础功底</p>
+              </div>
+              <div>
+                <h3>Python（够用即可）：asyncio、Pydantic、uv</h3>
+                <p class="sub">读懂 ML 生态与评测脚本：用 Go / TS 的概念对照学 Python。</p>
+                <div class="links" style="margin-top: 16px">
+                  <a class="x-btn x-btn--ghost" href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/notes/00-foundations/03-python.md" target="_blank" rel="noopener">阅读课件</a>
+                </div>
+              </div>
+              <dl class="step__panel">
+                <dt>课件</dt>
+                <dd><span class="chip x-chip x-chip--live">进行中</span></dd>
+                <dt>练习</dt>
                 <dd><span class="chip x-chip">未开始</span></dd>
               </dl>
             </article>
@@ -265,6 +290,21 @@
           </div>
           <ol class="timeline" data-reveal>
             <li class="is-current">
+              <p class="timeline__when"><span class="x-mono">Day 2 · 2026-10-09</span></p>
+              <div class="timeline__what">
+                <p><strong>TypeScript</strong></p>
+                <ul>
+                  <li>可辨识联合描述流式事件，assertNever 让漏处理变成编译错误</li>
+                  <li>Zod：一份定义同时得到校验、类型和 JSON Schema</li>
+                  <li>AsyncGenerator + for await 解析 SSE</li>
+                  <li>AbortController / AbortSignal.any 对应 Go 的 context</li>
+                  <li>0.1、0.2 练习提交：go test -race、tsc、vitest 全部通过</li>
+                </ul>
+                <p class="x-think">思考：为什么 JS 里 next++ 不需要锁？</p>
+              </div>
+              <p><a class="x-btn x-btn--ghost" href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/logs/2026-10-09.md" target="_blank" rel="noopener">日志</a></p>
+            </li>
+            <li>
               <p class="timeline__when"><span class="x-mono">Day 1 · 2026-10-08</span></p>
               <div class="timeline__what">
                 <p><strong>Go 并发</strong></p>
@@ -446,7 +486,7 @@
     <script src="hark.js"></script>
     <script>
       (function () {
-        var done = 0, total = 54, box = document.getElementById("ticks");
+        var done = 2, total = 54, box = document.getElementById("ticks");
         for (var i = 0; i < total; i++) {
           var t = document.createElement("i");
           if (i < done) t.className = "is-on";
