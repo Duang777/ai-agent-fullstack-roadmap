@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#0A0A0A" />
+    <title>AI Agent 全栈学习计划 · 从零到生产</title>
+    <meta name="description" content="11 个模块，54 个知识点。每天一课、一份日志、一次提交，全部开源。" />
+    <link rel="stylesheet" href="hark.css" />
+    <link rel="stylesheet" href="hark-hero.css" />
+    <script>
+      if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches && "IntersectionObserver" in window) {
+        document.documentElement.classList.add("x-motion");
+      }
+    </script>
+    <style>
+      /* Requested design: a fixed dark theme, set through the library's own tokens. */
+      :root,
+      :root[data-theme="light"],
+      :root[data-theme="dark"] {
+        color-scheme: dark;
+        --text-primary: #ededed;
+        --text-secondary: #a1a1a1;
+        --text-tertiary: rgb(255 255 255 / 0.32);
+        --text-primary-on: #0a0a0a;
+        --text-secondary-on: #555555;
+        --fill-primary: #ededed;
+        --fill-primary-on: #0a0a0a;
+        --fill-tertiary: #111111;
+        --fill-segment: #1a1a1a;
+        --fill-system-green: #22c55e;
+        --fill-system-orange: #ededed;
+        --stroke-system-orange: rgb(255 255 255 / 0.12);
+        --stroke-primary: rgb(255 255 255 / 0.1);
+        --stroke-secondary: rgb(255 255 255 / 0.08);
+        --stroke-primary-on: rgb(0 0 0 / 0.1);
+        --stroke-composer: rgb(255 255 255 / 0.08);
+        --hover-wash: rgb(255 255 255 / 0.05);
+        --hover-wash-primary-on: rgb(0 0 0 / 0.06);
+        --mat-agent: rgb(17 17 17 / 0.72);
+        --hark-shadow: 0 1px 0 rgb(255 255 255 / 0.04) inset;
+        --hero-surface: #0a0a0a;
+        --hero-text: #ededed;
+        --hero-text-muted: #a1a1a1;
+        --hero-scrim-strong: rgb(10 10 10 / 0.9);
+        --hero-scrim-soft: rgb(10 10 10 / 0.4);
+        --hero-scrim-side: rgb(10 10 10 / 0.6);
+        --hero-glass: rgb(10 10 10 / 0.5);
+        --hero-glass-stroke: rgb(255 255 255 / 0.1);
+        --sans: Inter, -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
+        --x-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+      }
+      body { background: var(--fill-primary-on); }
+      /* Faint grid behind everything */
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        pointer-events: none;
+        background:
+          linear-gradient(to right, rgb(255 255 255 / 0.025) 1px, transparent 1px) 0 0 / 64px 64px,
+          linear-gradient(to bottom, rgb(255 255 255 / 0.025) 1px, transparent 1px) 0 0 / 64px 64px;
+        -webkit-mask-image: linear-gradient(to bottom, #000 0%, rgb(0 0 0 / 0.35) 60%, transparent 100%);
+        mask-image: linear-gradient(to bottom, #000 0%, rgb(0 0 0 / 0.35) 60%, transparent 100%);
+      }
+
+      .x-mono { font-family: var(--x-mono); letter-spacing: 0.02em; }
+      .x-grad { color: #ffffff; }
+      .x-hero h1 { color: #d4d4d4; }
+      .x-hero h1 .x-grad { color: #ffffff; }
+
+      /* Top bar */
+      .x-top {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        min-height: 56px;
+        padding-top: env(safe-area-inset-top, 0px);
+        margin-inline: calc(var(--gutter) * -1);
+        padding-inline: var(--gutter);
+        background: rgb(10 10 10 / 0.72);
+        -webkit-backdrop-filter: var(--hark-blur);
+        backdrop-filter: var(--hark-blur);
+        border-bottom: 1px solid var(--stroke-secondary);
+      }
+      .x-brand { display: inline-flex; align-items: center; gap: 10px; font: var(--type-label); text-decoration: none; min-height: var(--tap); }
+      .x-brand i { width: 10px; height: 10px; border-radius: 3px; background: #ffffff; }
+      .x-top nav { display: flex; align-items: center; gap: 4px; }
+      .x-top nav a:not(.x-btn) {
+        display: inline-flex; align-items: center; min-height: var(--tap);
+        padding-inline: 10px; font: var(--type-small); color: var(--text-secondary); text-decoration: none;
+        transition: color var(--dur-quick) ease;
+      }
+      .x-top nav a:not(.x-btn):hover { color: var(--text-primary); }
+      @media (max-width: 760px) { .x-top nav a:not(.x-btn) { display: none; } }
+
+      /* Hero */
+      .x-hero { border: 1px solid var(--stroke-primary); min-height: clamp(520px, 78vh, 720px); }
+      .x-hero .hero__copy { max-width: 46rem; gap: 20px; }
+      .x-hero .hero__eyebrow.x-mono { font: var(--weight-regular) var(--size-caption)/var(--lh) var(--x-mono); letter-spacing: 0.08em; color: var(--hero-text-muted); }
+      .x-display {
+        font: var(--weight-bold) clamp(40px, 7.2vw, 80px)/1.06 var(--sans) !important;
+        letter-spacing: -0.035em !important;
+      }
+      .x-hero .hero__sub { font: var(--weight-regular) var(--size-lede)/1.5 var(--sans); color: var(--hero-text-muted); max-width: 38ch; }
+      @media (max-width: 760px) { .x-hero .hero__copy { padding-top: 220px; } }
+
+      /* Buttons: solid white primary and hairline secondary */
+      .x-btn {
+        display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+        min-height: var(--tap); padding: 0 18px; border-radius: 10px;
+        font: var(--type-label); text-decoration: none; white-space: nowrap;
+        transition: transform var(--dur-quick) var(--ease-out), box-shadow var(--dur-quick) ease, background var(--dur-quick) ease;
+      }
+      .x-btn--primary { background: #ffffff; color: #000000; border: 1px solid #ffffff; }
+      .x-btn--primary:hover { background: #e5e5e5; border-color: #e5e5e5; transform: translateY(-1px); }
+      .x-btn--ghost { background: transparent; color: #ffffff; border: 1px solid rgb(255 255 255 / 0.12); }
+      .x-btn--ghost:hover { background: rgb(255 255 255 / 0.05); border-color: rgb(255 255 255 / 0.24); }
+      .x-btn[target="_blank"]::after { content: "\2197"; font-size: 12px; opacity: 0.7; }
+      .x-btn:focus-visible { outline-color: var(--text-primary); }
+
+      /* Section headings: larger and tighter */
+      .x-h2 { font: var(--weight-bold) clamp(28px, 4vw, 44px)/1.12 var(--sans) !important; letter-spacing: -0.025em; }
+      .x-kicker { font: var(--weight-regular) var(--size-caption)/var(--lh) var(--x-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-secondary); }
+
+      /* Progress */
+      .x-progress { display: grid; gap: 12px; padding: 24px; border: 1px solid var(--stroke-primary); border-radius: var(--r-m); background: var(--fill-tertiary); }
+      .x-progress__row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-size: var(--size-small); color: var(--text-secondary); }
+      .x-progress__row strong { font: var(--weight-regular) var(--size-heading)/1 var(--x-mono); color: var(--text-primary); }
+      .x-bar { position: relative; height: 6px; border-radius: var(--r-pill); background: rgb(255 255 255 / 0.06); overflow: hidden; }
+      .x-bar span { position: absolute; inset: 0 auto 0 0; min-width: 6px; border-radius: inherit; background: #ffffff; }
+      .x-ticks { display: grid; grid-template-columns: repeat(54, 1fr); gap: 2px; }
+      .x-ticks i { height: 10px; border-radius: 1px; background: rgb(255 255 255 / 0.08); }
+      .x-ticks i.is-on { background: #ffffff; }
+
+      /* Hover glow cards */
+      .x-card { position: relative; border: 1px solid var(--stroke-primary); transition: border-color var(--dur-quick) ease, box-shadow 300ms var(--ease-out), background 300ms ease; }
+      .x-card:hover { border-color: rgb(255 255 255 / 0.18); background: #151515; box-shadow: inset 0 0 40px -16px rgb(255 255 255 / 0.12), inset 0 1px 0 rgb(255 255 255 / 0.06); }
+      .x-card__top { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 14px; }
+      .x-card__num { font: var(--weight-regular) var(--size-small)/1 var(--x-mono); color: var(--text-secondary); }
+      .x-card.is-now .x-card__num { color: #ffffff; }
+      .x-card.is-now { border-color: rgb(255 255 255 / 0.2); }
+
+      /* Status chips: neutral; only "in progress" carries the green dot */
+      .x-chip { background: transparent; color: var(--text-secondary); border: 1px solid var(--stroke-primary); }
+      .x-chip::before { background: transparent; box-shadow: inset 0 0 0 1.5px var(--text-tertiary); }
+      .x-chip--live { color: var(--text-primary); }
+      .x-chip--live::before { background: #22c55e; box-shadow: none; }
+      .x-chip--done { color: var(--text-primary); }
+      .x-chip--done::before { background: #ededed; box-shadow: none; }
+      .x-card li { font-size: var(--size-small); color: var(--text-secondary); padding: 8px 0 !important; }
+
+      .x-step-num { font-family: var(--x-mono); font-size: 40px; letter-spacing: -0.02em; }
+
+
+      /* Closing band */
+      .x-band {
+        position: relative; overflow: hidden;
+        display: grid; gap: 20px; justify-items: start;
+        padding: clamp(32px, 6vw, 72px);
+        border: 1px solid var(--stroke-primary); border-radius: var(--r-xl);
+        background-color: var(--fill-tertiary);
+      }
+      .x-band h2 { font: var(--weight-bold) clamp(28px, 4.4vw, 48px)/1.12 var(--sans); letter-spacing: -0.03em; max-width: 18ch; }
+      .x-band p { color: var(--text-secondary); font-size: var(--size-prose); max-width: 46ch; line-height: 1.6; }
+      .x-band .links { gap: 12px; }
+
+      /* Fade-up on scroll */
+      .x-motion [data-reveal] { opacity: 0; transform: translateY(16px); transition: opacity 700ms var(--ease-out), transform 700ms var(--ease-out); }
+      .x-motion [data-reveal].x-in { opacity: 1; transform: none; }
+
+      .timeline__what ul { color: var(--text-secondary); }
+      .x-think { color: var(--text-primary); }
+    </style>
+  </head>
+  <body>
+    <div class="page" id="top">
+      <header class="x-top">
+        <a class="x-brand" href="#top"><i aria-hidden="true"></i>AI Agent 全栈</a>
+        <nav aria-label="页面导航">
+          <a href="#progress">进度</a>
+          <a href="#log">日志</a>
+          <a href="#roadmap">路线图</a>
+          <a class="x-btn x-btn--ghost" href="https://github.com/Duang777/ai-agent-fullstack-roadmap" target="_blank" rel="noopener">GitHub</a>
+        </nav>
+      </header>
+
+      <main class="main">
+        <section class="hero x-hero">
+          <img class="hero__img" src="hero-mono.webp" alt="黑色背景上的白色节点连线图" />
+          <div class="hero__copy">
+            <p class="hero__eyebrow x-mono">PUBLIC LEARNING · DAY 1</p>
+            <h1 class="x-display">从零到生产，<br />公开学习 <span class="x-grad">AI Agent 全栈</span></h1>
+            <p class="hero__sub">11 个模块，54 个知识点。每天一课、一份日志、一次提交，全部开源。</p>
+            <div class="links">
+              <a class="x-btn x-btn--primary" href="https://github.com/Duang777/ai-agent-fullstack-roadmap" target="_blank" rel="noopener">在 GitHub 上关注</a>
+              <a class="x-btn x-btn--ghost" href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/ROADMAP.md" target="_blank" rel="noopener">查看路线图</a>
+            </div>
+            <p class="hero__meta">duang777 · Go / TypeScript 为主，Python 辅助</p>
+          </div>
+        </section>
+
+        <section class="stats" data-reveal>
+          <div class="stat"><span class="stat__fig x-mono">11</span><span class="stat__label">模块</span></div>
+          <div class="stat"><span class="stat__fig x-mono">54</span><span class="stat__label">知识点</span></div>
+          <div class="stat"><span class="stat__fig x-mono">Day 1</span><span class="stat__label">今天</span></div>
+          <div class="stat"><span class="stat__fig x-mono">0/54</span><span class="stat__label">已完成</span></div>
+        </section>
+
+        <section class="section" id="progress" data-nav="进度">
+          <div class="head" data-reveal>
+            <p class="head__eyebrow x-kicker">当前进度</p>
+            <h2 class="x-h2">第一个模块已开课，练习正在进行。</h2>
+            <p class="head__sub">学完且有笔记或代码产出，才在 ROADMAP 里打勾。</p>
+          </div>
+          <div class="x-progress" data-reveal>
+            <div class="x-progress__row"><span>已勾选知识点</span><strong>0%</strong></div>
+            <div class="x-ticks" id="ticks" role="img" aria-label="54 个知识点中已完成 0 个"></div>
+          </div>
+          <div class="steps" data-reveal>
+            <article class="step">
+              <div class="step__intro">
+                <p class="step__num x-step-num x-grad">0.1</p>
+                <p class="step__eyebrow">当前课程 · 00 基础功底</p>
+              </div>
+              <div>
+                <h3>Go 并发：Agent 运行时的地基</h3>
+                <p class="sub">goroutine、channel、context 取消链、errgroup 并行工具调用、可取消的 SSE 流式读取。</p>
+                <div class="links" style="margin-top: 16px">
+                  <a class="x-btn x-btn--ghost" href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/notes/00-foundations/01-go-concurrency.md" target="_blank" rel="noopener">阅读课件</a>
+                </div>
+              </div>
+              <dl class="step__panel">
+                <dt>课件</dt>
+                <dd><span class="chip x-chip x-chip--done">已完成</span></dd>
+                <dt>练习</dt>
+                <dd><span class="chip x-chip x-chip--live">进行中</span></dd>
+              </dl>
+            </article>
+            <article class="step">
+              <div class="step__intro">
+                <p class="step__num x-step-num">0.2</p>
+                <p class="step__eyebrow">下一课</p>
+              </div>
+              <div>
+                <h3>TypeScript：严格类型、Zod、AsyncGenerator、AbortController</h3>
+              </div>
+              <dl class="step__panel">
+                <dt>状态</dt>
+                <dd><span class="chip x-chip">未开始</span></dd>
+              </dl>
+            </article>
+          </div>
+        </section>
+
+        <section class="section" id="log" data-nav="日志">
+          <div class="head" data-reveal>
+            <p class="head__eyebrow x-kicker">每日日志</p>
+            <h2 class="x-h2">每天一份日志，最新的在最上面。</h2>
+          </div>
+          <ol class="timeline" data-reveal>
+            <li class="is-current">
+              <p class="timeline__when"><span class="x-mono">Day 1 · 2026-10-08</span></p>
+              <div class="timeline__what">
+                <p><strong>Go 并发</strong></p>
+                <ul>
+                  <li>goroutine / channel / select</li>
+                  <li>context 取消链：客户端断开 → LLM 调用与工具全部停止</li>
+                  <li>errgroup 并行工具调用：SetLimit 限流、单工具超时</li>
+                  <li>可取消的 SSE 流式读取：data: 解析、[DONE]、发送与 ctx.Done() 同 select</li>
+                  <li>常见坑：goroutine 泄漏、body 未关闭、map 并发写</li>
+                </ul>
+                <p class="x-think">思考：为什么 errc 要缓冲 1？</p>
+              </div>
+              <p><a class="x-btn x-btn--ghost" href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/logs/2026-10-08.md" target="_blank" rel="noopener">日志</a></p>
+            </li>
+          </ol>
+        </section>
+
+        <section class="section" id="roadmap" data-nav="路线图">
+          <div class="head" data-reveal>
+            <p class="head__eyebrow x-kicker">路线图</p>
+            <h2 class="x-h2">11 个模块，从基础功底到上线实战。</h2>
+            <p class="head__sub"><a class="link" href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/ROADMAP.md" target="_blank" rel="noopener">完整 ROADMAP.md</a></p>
+          </div>
+          <div class="cards" data-reveal>
+            <div class="x-card is-now">
+              <div class="x-card__top"><span class="x-card__num">00</span><span class="chip x-chip x-chip--live">进行中</span></div>
+              <h3>基础功底</h3>
+              <ul>
+                <li>Go 并发与工程</li>
+                <li>TypeScript 严格类型 / Zod / async iterator / AbortController</li>
+                <li>Python asyncio / Pydantic / uv</li>
+                <li>HTTP / SSE / WebSocket 流式协议</li>
+                <li>Git / Docker / Linux</li>
+              </ul>
+            </div>
+            <div class="x-card">
+              <div class="x-card__top"><span class="x-card__num">01</span><span class="chip x-chip">未开始</span></div>
+              <h3>LLM 原理与使用</h3>
+              <ul>
+                <li>Transformer、Tokenizer、采样参数</li>
+                <li>OpenAI Responses / Anthropic Messages / Gemini</li>
+                <li>结构化输出与 constrained decoding</li>
+                <li>推理模型与成本权衡</li>
+                <li>上下文窗口、Prompt Caching、长上下文退化</li>
+                <li>Prompt / Context Engineering</li>
+              </ul>
+            </div>
+            <div class="x-card">
+              <div class="x-card__top"><span class="x-card__num">02</span><span class="chip x-chip">未开始</span></div>
+              <h3>工具调用与协议</h3>
+              <ul>
+                <li>Function Calling 与并行调用</li>
+                <li>MCP</li>
+                <li>A2A</li>
+                <li>Computer Use / Browser Use</li>
+                <li>代码执行沙箱（E2B、Docker、gVisor）</li>
+              </ul>
+            </div>
+            <div class="x-card">
+              <div class="x-card__top"><span class="x-card__num">03</span><span class="chip x-chip">未开始</span></div>
+              <h3>Agent 架构</h3>
+              <ul>
+                <li>ReAct / Plan-and-Execute / Reflexion</li>
+                <li>Agent Loop（停止条件、预算、重试）</li>
+                <li>多智能体（Supervisor、Handoff、Swarm）</li>
+                <li>长任务（检查点、可恢复执行、Human-in-the-loop）</li>
+                <li>Coding Agent 拆解</li>
+                <li>Deep Research Agent</li>
+              </ul>
+            </div>
+            <div class="x-card">
+              <div class="x-card__top"><span class="x-card__num">04</span><span class="chip x-chip">未开始</span></div>
+              <h3>框架与 SDK</h3>
+              <ul>
+                <li>LangGraph</li>
+                <li>OpenAI Agents SDK</li>
+                <li>Claude Agent SDK</li>
+                <li>Go 生态：Eino / Genkit Go / MCP Go SDK</li>
+                <li>TS 生态：Vercel AI SDK / Mastra / OpenAI Agents SDK JS</li>
+                <li>何时不用框架</li>
+              </ul>
+            </div>
+            <div class="x-card">
+              <div class="x-card__top"><span class="x-card__num">05</span><span class="chip x-chip">未开始</span></div>
+              <h3>记忆与检索</h3>
+              <ul>
+                <li>Embedding 与向量库（pgvector、Qdrant、Milvus）</li>
+                <li>分块、混合检索、Rerank</li>
+                <li>GraphRAG / Agentic RAG</li>
+                <li>Agent 记忆与上下文压缩</li>
+              </ul>
+            </div>
+            <div class="x-card">
+              <div class="x-card__top"><span class="x-card__num">06</span><span class="chip x-chip">未开始</span></div>
+              <h3>评测与可观测性</h3>
+              <ul>
+                <li>离线集、LLM-as-Judge、人工标注</li>
+                <li>SWE-bench、Terminal-Bench、τ-bench、GAIA</li>
+                <li>OpenTelemetry GenAI、Langfuse / LangSmith</li>
+                <li>CI 中的 Eval</li>
+              </ul>
+            </div>
+            <div class="x-card">
+              <div class="x-card__top"><span class="x-card__num">07</span><span class="chip x-chip">未开始</span></div>
+              <h3>安全与可靠性</h3>
+              <ul>
+                <li>Prompt Injection 防御</li>
+                <li>最小权限与工具审批</li>
+                <li>Guardrails 与可验证完成</li>
+                <li>Reward Hacking 检测</li>
+              </ul>
+            </div>
+            <div class="x-card">
+              <div class="x-card__top"><span class="x-card__num">08</span><span class="chip x-chip">未开始</span></div>
+              <h3>工程化与部署</h3>
+              <ul>
+                <li>Go（net/http、gRPC）+ Node 服务与任务队列</li>
+                <li>Temporal / Inngest 持久化工作流</li>
+                <li>React / Next.js 流式前端与 Generative UI</li>
+                <li>模型网关（路由、降级、限流）</li>
+                <li>成本与延迟优化</li>
+                <li>Kubernetes / Serverless / vLLM / SGLang</li>
+              </ul>
+            </div>
+            <div class="x-card">
+              <div class="x-card__top"><span class="x-card__num">09</span><span class="chip x-chip">未开始</span></div>
+              <h3>模型侧前沿</h3>
+              <ul>
+                <li>LoRA / QLoRA / SFT</li>
+                <li>DPO、GRPO、Agentic RL</li>
+                <li>合成数据与轨迹构造</li>
+                <li>开源模型部署与量化</li>
+              </ul>
+            </div>
+            <div class="x-card">
+              <div class="x-card__top"><span class="x-card__num">10</span><span class="chip x-chip">未开始</span></div>
+              <h3>项目实战</h3>
+              <ul>
+                <li>MCP 个人助理 Agent</li>
+                <li>生产级 RAG（含 Eval + Tracing）</li>
+                <li>多智能体 Coding Agent（沙箱 + 测试验证）</li>
+                <li>上线监控与成本看板</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <section class="section" id="lesson" data-nav="每课">
+          <div class="head" data-reveal>
+            <p class="head__eyebrow x-kicker">每节课包含什么</p>
+            <h2 class="x-h2">每一课都能读、能跑、能练、能自测。</h2>
+          </div>
+          <div class="cards" data-reveal>
+            <div class="x-card"><div class="x-card__top"><span class="x-card__num">A</span></div><h3>讲解</h3><p class="sub">原理 + 生产场景</p></div>
+            <div class="x-card"><div class="x-card__top"><span class="x-card__num">B</span></div><h3>可运行代码</h3><p class="sub">Go / TS 为主</p></div>
+            <div class="x-card"><div class="x-card__top"><span class="x-card__num">C</span></div><h3>练习与参考实现</h3><p class="sub">先自己写，再对照</p></div>
+            <div class="x-card"><div class="x-card__top"><span class="x-card__num">D</span></div><h3>自测题与详细答案</h3><p class="sub">检验是否真的学会</p></div>
+          </div>
+        </section>
+
+        <section class="section" id="join" data-nav="一起学">
+          <div class="x-band" data-reveal>
+            <p class="x-kicker">一起学</p>
+            <h2>每天一课，<span class="x-grad">欢迎一起打卡。</span></h2>
+            <p>Star 仓库、提 Issue 交作业、或在 X 上和我交流。</p>
+            <div class="links">
+              <a class="x-btn x-btn--primary" href="https://github.com/Duang777/ai-agent-fullstack-roadmap" target="_blank" rel="noopener">在 GitHub 上关注</a>
+              <a class="x-btn x-btn--ghost" href="https://github.com/Duang777/ai-agent-fullstack-roadmap/issues" target="_blank" rel="noopener">提交作业 / 提问</a>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer class="foot">
+        <p>© 2026 duang777 · 内容以 GitHub 仓库为准</p>
+        <nav aria-label="Back to sections" data-auto></nav>
+      </footer>
+    </div>
+    <script src="hark.js"></script>
+    <script>
+      (function () {
+        var done = 0, total = 54, box = document.getElementById("ticks");
+        for (var i = 0; i < total; i++) {
+          var t = document.createElement("i");
+          if (i < done) t.className = "is-on";
+          box.appendChild(t);
+        }
+        if (!document.documentElement.classList.contains("x-motion")) return;
+        var io = new IntersectionObserver(function (entries) {
+          entries.forEach(function (e) {
+            if (e.isIntersecting) { e.target.classList.add("x-in"); io.unobserve(e.target); }
+          });
+        }, { rootMargin: "0px 0px -8% 0px", threshold: 0.05 });
+        document.querySelectorAll("[data-reveal]").forEach(function (el) { io.observe(el); });
+      })();
+    </script>
+  </body>
+</html>
