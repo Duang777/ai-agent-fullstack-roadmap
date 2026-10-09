@@ -53,7 +53,7 @@
 | 0.1 | Go 基础与并发 | 模块、错误处理、接口、JSON、表驱动测试；goroutine、channel、context、errgroup、可取消 SSE | [课件](notes/00-foundations/01-go.md) | [`00-stream-proxy`](projects/00-stream-proxy) | ✅ 完成 |
 | 0.2 | TypeScript | 可辨识联合、Zod、AsyncGenerator、AbortController | [课件](notes/00-foundations/02-typescript.md) | [`01-ts-agent-core`](projects/01-ts-agent-core) | ✅ 完成 |
 | 0.3 | Python | uv、Pydantic、asyncio TaskGroup、异步生成器 | [课件](notes/00-foundations/03-python.md) | 进行中 | 🔄 学习中 |
-| 0.4 | 流式协议 | HTTP / SSE / WebSocket | 即将更新 | | ⏳ |
+| 0.4 | 流式协议 | HTTP 分块与 Flush、SSE 解析器、断线续传、中间层缓冲、WebSocket 双向打断 | [课件](notes/00-foundations/04-streaming.md) | [`03-streaming`](projects/03-streaming) | 📖 课件已出 |
 | 0.5 | 工程基础 | Git 工作流、Docker、Linux | 即将更新 | | ⏳ |
 
 ### 全部模块
@@ -94,6 +94,9 @@ cd projects/00-stream-proxy && go test -race -count=1 ./...
 
 # 0.2 TypeScript
 cd projects/01-ts-agent-core && npm install && npm run typecheck && npm test
+
+# 0.4 流式协议
+cd projects/03-streaming && npm install && npm run typecheck && npm test
 ```
 
 推荐学习方式：先读课件 → 关掉参考答案自己写练习 → 跑测试 → 再对照参考实现。
@@ -107,10 +110,12 @@ cd projects/01-ts-agent-core && npm install && npm run typecheck && npm test
 │   └── 00-foundations/
 │       ├── 01-go.md
 │       ├── 02-typescript.md
-│       └── 03-python.md
+│       ├── 03-python.md
+│       └── 04-streaming.md
 ├── projects/               # 每课一个可运行的练习目录
 │   ├── 00-stream-proxy/    # Go：fanIn、并行工具、可取消 SSE
-│   └── 01-ts-agent-core/   # TS：Zod 事件、可取消 sleep、并行工具、SSE
+│   ├── 01-ts-agent-core/   # TS：Zod 事件、可取消 sleep、并行工具、SSE
+│   └── 03-streaming/       # TS：SSE 解析器、SSE 服务端、续传与断开即停
 ├── logs/                   # 每日学习日志
 └── docs/                   # GitHub Pages 主页
 ```
