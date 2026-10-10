@@ -9,7 +9,7 @@
 用 Go / TypeScript 写 Agent 运行时，用 Python 读懂模型生态。<br/>
 每一课都有课件、可运行练习、测试和参考答案。
 
-[![Progress](https://img.shields.io/badge/progress-2%2F77-111111?style=flat-square)](ROADMAP.md)
+[![Progress](https://img.shields.io/badge/progress-5%2F77-111111?style=flat-square)](ROADMAP.md)
 [![CI](https://github.com/Duang777/ai-agent-fullstack-roadmap/actions/workflows/ci.yml/badge.svg)](https://github.com/Duang777/ai-agent-fullstack-roadmap/actions/workflows/ci.yml)
 [![Go](https://img.shields.io/badge/Go-1.23+-111111?style=flat-square&logo=go&logoColor=white)](projects/00-stream-proxy)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-111111?style=flat-square&logo=typescript&logoColor=white)](projects/01-ts-agent-core)
@@ -53,9 +53,9 @@
 |---|---|---|---|---|---|
 | 0.1 | Go 基础与并发 | 模块、错误处理、接口、JSON、表驱动测试；goroutine、channel、context、errgroup、可取消 SSE | [课件](notes/00-foundations/01-go.md) | [`00-stream-proxy`](projects/00-stream-proxy) | ✅ 完成 |
 | 0.2 | TypeScript | 可辨识联合、Zod、AsyncGenerator、AbortController | [课件](notes/00-foundations/02-typescript.md) | [`01-ts-agent-core`](projects/01-ts-agent-core) | ✅ 完成 |
-| 0.3 | Python | uv、Pydantic、asyncio TaskGroup、异步生成器 | [课件](notes/00-foundations/03-python.md) | [`02-py-agent-core`](projects/02-py-agent-core) | 📖 课件已出 |
-| 0.4 | 流式协议 | HTTP 分块与 Flush、SSE 解析器、断线续传、中间层缓冲、WebSocket 双向打断 | [课件](notes/00-foundations/04-streaming.md) | [`03-streaming`](projects/03-streaming) | 📖 课件已出 |
-| 0.5 | 工程基础 | Git 工作流、Linux 信号与排查、多阶段 Docker、健康检查、优雅退出、CI | [课件](notes/00-foundations/05-engineering.md) | [`04-ship`](projects/04-ship) | 📖 课件已出 |
+| 0.3 | Python | uv、Pydantic、asyncio TaskGroup、异步生成器 | [课件](notes/00-foundations/03-python.md) | [`02-py-agent-core`](projects/02-py-agent-core) | ✅ 完成 |
+| 0.4 | 流式协议 | HTTP 分块与 Flush、SSE 解析器、断线续传、中间层缓冲、WebSocket 双向打断 | [课件](notes/00-foundations/04-streaming.md) | [`03-streaming`](projects/03-streaming) | ✅ 完成 |
+| 0.5 | 工程基础 | Git 工作流、Linux 信号与排查、多阶段 Docker、健康检查、优雅退出、CI | [课件](notes/00-foundations/05-engineering.md) | [`04-ship`](projects/04-ship) | ✅ 完成 |
 
 ### 全部模块
 
@@ -63,7 +63,7 @@
 
 | 阶段 | 模块 | 内容 | 进度 |
 |---|---|---|---|
-| A | 00 基础功底 | Go / TS / Python、流式协议、工程基础 | `██░░░` 2/5（课件 5/5） |
+| A | 00 基础功底 | Go / TS / Python、流式协议、工程基础 | `█████` 5/5 |
 | A | 01 LLM 原理与使用 | Transformer、主流 API、结构化输出、推理模型、Prompt Caching | `░░░░░░` 0/6 |
 | A | 02 工具调用与协议 | Function Calling、MCP、A2A、Computer Use、代码沙箱 | `░░░░░` 0/5 |
 | B | 03 Agent 架构 | ReAct、Agent Loop、多智能体、长任务、Coding / Deep Research Agent | `░░░░░░` 0/6 |
