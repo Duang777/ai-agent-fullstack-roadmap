@@ -1,0 +1,23 @@
+[project]
+name = "py-agent-core"
+version = "0.1.0"
+description = "0.3 Python 练习：Pydantic 事件、asyncio TaskGroup 并行工具、SSE 断开感知"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "httpx>=0.28.1",
+    "pydantic>=2.14.0",
+]
+
+[build-system]
+requires = ["uv_build>=0.12.23,<0.13.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+    "pytest-asyncio>=1.4.0",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
