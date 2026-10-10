@@ -1,0 +1,7 @@
+# 不进构建上下文：更快，也避免把密钥打进镜像
+.git
+.env
+*.env
+*_test.go
+Dockerfile
+README.md
