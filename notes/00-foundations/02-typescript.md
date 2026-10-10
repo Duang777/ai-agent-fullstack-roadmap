@@ -1205,4 +1205,4 @@ npx tsc --noEmit   # 只做类型检查，不输出文件，= go vet + go build 
 npx vitest run     # 跑一遍所有测试后退出，= go test ./...
 ```
 
-两条都通过后，把输出贴给我。我会批改，并在 ROADMAP 里勾上 TypeScript。0.1 Go 的练习和 `go test -race` 结果也一起发来，一并勾。
+两条都通过，这一课就算完成，可以在 ROADMAP 里勾上 TypeScript。
