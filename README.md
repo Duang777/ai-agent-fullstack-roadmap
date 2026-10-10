@@ -10,6 +10,7 @@
 每一课都有课件、可运行练习、测试和参考答案。
 
 [![Progress](https://img.shields.io/badge/progress-2%2F77-111111?style=flat-square)](ROADMAP.md)
+[![CI](https://github.com/Duang777/ai-agent-fullstack-roadmap/actions/workflows/ci.yml/badge.svg)](https://github.com/Duang777/ai-agent-fullstack-roadmap/actions/workflows/ci.yml)
 [![Go](https://img.shields.io/badge/Go-1.23+-111111?style=flat-square&logo=go&logoColor=white)](projects/00-stream-proxy)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-111111?style=flat-square&logo=typescript&logoColor=white)](projects/01-ts-agent-core)
 [![Python](https://img.shields.io/badge/Python-3.12+-111111?style=flat-square&logo=python&logoColor=white)](notes/00-foundations/03-python.md)
@@ -54,7 +55,7 @@
 | 0.2 | TypeScript | 可辨识联合、Zod、AsyncGenerator、AbortController | [课件](notes/00-foundations/02-typescript.md) | [`01-ts-agent-core`](projects/01-ts-agent-core) | ✅ 完成 |
 | 0.3 | Python | uv、Pydantic、asyncio TaskGroup、异步生成器 | [课件](notes/00-foundations/03-python.md) | 进行中 | 🔄 学习中 |
 | 0.4 | 流式协议 | HTTP 分块与 Flush、SSE 解析器、断线续传、中间层缓冲、WebSocket 双向打断 | [课件](notes/00-foundations/04-streaming.md) | [`03-streaming`](projects/03-streaming) | 📖 课件已出 |
-| 0.5 | 工程基础 | Git 工作流、Docker、Linux | 即将更新 | | ⏳ |
+| 0.5 | 工程基础 | Git 工作流、Linux 信号与排查、多阶段 Docker、健康检查、优雅退出、CI | [课件](notes/00-foundations/05-engineering.md) | [`04-ship`](projects/04-ship) | 📖 课件已出 |
 
 ### 全部模块
 
@@ -97,6 +98,9 @@ cd projects/01-ts-agent-core && npm install && npm run typecheck && npm test
 
 # 0.4 流式协议
 cd projects/03-streaming && npm install && npm run typecheck && npm test
+
+# 0.5 工程基础
+cd projects/04-ship && make test        # 有 Docker 的话再 make docker-build docker-run
 ```
 
 推荐学习方式：先读课件 → 关掉参考答案自己写练习 → 跑测试 → 再对照参考实现。
@@ -111,11 +115,14 @@ cd projects/03-streaming && npm install && npm run typecheck && npm test
 │       ├── 01-go.md
 │       ├── 02-typescript.md
 │       ├── 03-python.md
-│       └── 04-streaming.md
+│       ├── 04-streaming.md
+│       └── 05-engineering.md
 ├── projects/               # 每课一个可运行的练习目录
 │   ├── 00-stream-proxy/    # Go：fanIn、并行工具、可取消 SSE
 │   ├── 01-ts-agent-core/   # TS：Zod 事件、可取消 sleep、并行工具、SSE
-│   └── 03-streaming/       # TS：SSE 解析器、SSE 服务端、续传与断开即停
+│   ├── 03-streaming/       # TS：SSE 解析器、SSE 服务端、续传与断开即停
+│   └── 04-ship/            # Go：健康检查、优雅退出、多阶段 Dockerfile
+├── .github/workflows/ci.yml # 每次 push：Go -race、TS 测试、镜像构建与冒烟测试
 ├── logs/                   # 每日学习日志
 └── docs/                   # GitHub Pages 主页
 ```
