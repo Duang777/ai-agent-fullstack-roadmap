@@ -42,6 +42,17 @@ jobs:
       - run: npm run typecheck
       - run: npm test
 
+  python:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: projects/02-py-agent-core
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: uv sync --locked
+      - run: uv run pytest -q
+
   docker:
     needs: go
     runs-on: ubuntu-latest
