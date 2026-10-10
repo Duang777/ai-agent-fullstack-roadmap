@@ -208,14 +208,14 @@
         <section class="stats" data-reveal>
           <div class="stat"><span class="stat__fig x-mono">14</span><span class="stat__label">模块</span></div>
           <div class="stat"><span class="stat__fig x-mono">84</span><span class="stat__label">知识点</span></div>
-          <div class="stat"><span class="stat__fig x-mono">Day 3</span><span class="stat__label">今天</span></div>
+          <div class="stat"><span class="stat__fig x-mono">Day 4</span><span class="stat__label">今天</span></div>
           <div class="stat"><span class="stat__fig x-mono">5/84</span><span class="stat__label">已完成</span></div>
         </section>
 
         <section class="section" id="progress" data-nav="进度">
           <div class="head" data-reveal>
             <p class="head__eyebrow x-kicker">当前进度</p>
-            <h2 class="x-h2">模块 00 已完成 5/6，补上数据库与缓存后进入 01 LLM 原理与使用。</h2>
+            <h2 class="x-h2">0.6 数据库与缓存已上线，做完练习模块 00 收官，接着进入 01 LLM 原理与使用。</h2>
             <p class="head__sub">学完且有笔记或代码产出，才在 ROADMAP 里打勾。</p>
           </div>
           <div class="x-progress" data-reveal>
@@ -318,6 +318,25 @@
                 <dd><span class="chip x-chip x-chip--done">已完成</span></dd>
               </dl>
             </article>
+            <article class="step">
+              <div class="step__intro">
+                <p class="step__num x-step-num">0.6</p>
+                <p class="step__eyebrow">进行中 · 00 基础功底</p>
+              </div>
+              <div>
+                <h3>数据库与缓存：Postgres 与 Redis，给 Agent 一个靠得住的记忆</h3>
+                <p class="sub">会话与消息建模、复合索引与键集分页、隔离级别与写偏斜、幂等键、SKIP LOCKED 任务队列、迁移与线上改表、Cache-Aside 与限流。</p>
+                <div class="links" style="margin-top: 16px">
+                  <a class="x-btn x-btn--primary" href="notes/00-06-database-cache.html">在线阅读</a>
+                </div>
+              </div>
+              <dl class="step__panel">
+                <dt>课件</dt>
+                <dd><span class="chip x-chip x-chip--done">已完成</span></dd>
+                <dt>练习</dt>
+                <dd><span class="chip x-chip x-chip--live">进行中</span></dd>
+              </dl>
+            </article>
           </div>
         </section>
 
@@ -328,6 +347,21 @@
           </div>
           <ol class="timeline" data-reveal>
             <li class="is-current">
+              <p class="timeline__when"><span class="x-mono">Day 4 · 2026-10-11</span></p>
+              <div class="timeline__what">
+                <p><strong>数据库与缓存</strong></p>
+                <ul>
+                  <li>会话、消息、运行记录三张表：约束是最后一道防线</li>
+                  <li>复合索引的最左前缀，EXPLAIN ANALYZE，键集分页取代 OFFSET</li>
+                  <li>实测丢失更新（40 次累加丢了 380）和写偏斜（只有 Serializable 拦得住）</li>
+                  <li>幂等键、FOR UPDATE SKIP LOCKED 任务队列、状态机守卫、咨询锁迁移</li>
+                  <li>Cache-Aside + singleflight：30 次里 18 次失败，补上双重检查才稳定</li>
+                </ul>
+                <p class="x-think">思考：为什么 Repeatable Read 防不住“每个会话最多一个 running”？</p>
+              </div>
+              <p><a class="x-btn x-btn--ghost" href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/logs/2026-10-11.md" target="_blank" rel="noopener">日志</a></p>
+            </li>
+            <li>
               <p class="timeline__when"><span class="x-mono">Day 3 · 2026-10-10</span></p>
               <div class="timeline__what">
                 <p><strong>Python · 流式协议 · 工程基础</strong></p>

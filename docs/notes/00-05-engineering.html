@@ -817,7 +817,7 @@ docker<span class="w"> </span>compose<span class="w"> </span>down<span class="w"
 <p>改成 <code>ENTRYPOINT /server</code> 后，<code>docker stop</code> 会稳定地花约 10 秒，日志里只有 <code>listening</code>，没有 <code>shutting down</code> 和 <code>bye</code>。因为 SIGTERM 发给了 1 号进程 <code>sh</code>，<code>sh</code> 不转发也不退出，10 秒后整个容器被 SIGKILL。另外 distroless 镜像里根本没有 <code>/bin/sh</code>，shell 形式在这个镜像里会直接启动失败，这也是 distroless 帮你提前暴露问题的一个例子。</p>
 <p><strong>选做：为什么 Redis 检查能放 readyz 不能放 healthz</strong></p>
 <p>Redis 不可用时，这个实例确实处理不了请求，从负载均衡摘掉是合理的；Redis 恢复后 readyz 自动变回 200，流量回来，<strong>不需要重启</strong>。如果放在 healthz，Redis 一挂所有实例都被重启，重启后 Redis 还是挂的，于是反复重启，问题更大。但也要想到：如果所有实例共用一个 Redis，它挂了所有实例都会被摘掉，服务一样不可用。到底是“摘掉”还是“降级继续服务”（比如没有缓存也能工作），是第 08 模块高可用要讨论的取舍。</p>
-    <nav class="pager"><a class="prev" href="00-04-streaming.html"><span>← 上一课 0.4</span>HTTP / SSE / WebSocket</a></nav>
+    <nav class="pager"><a class="prev" href="00-04-streaming.html"><span>← 上一课 0.4</span>HTTP / SSE / WebSocket</a><a class="next" href="00-06-database-cache.html"><span>下一课 0.6 →</span>数据库与缓存</a></nav>
     <p class="foot">© 2026 duang777 · 课件源文件：<a href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/notes/00-foundations/05-engineering.md">notes/00-foundations/05-engineering.md</a></p>
   </article>
 </div>

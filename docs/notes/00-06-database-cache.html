@@ -1,0 +1,1313 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>0.6 数据库与缓存：Postgres 与 Redis，给 Agent 一个靠得住的记忆 · AI Agent 全栈</title>
+<meta name="description" content="0.6 数据库与缓存：Postgres 与 Redis，给 Agent 一个靠得住的记忆。duang777 的 AI Agent 全栈公开学习课件。" />
+<style>
+:root{
+  --bg:#0a0a0a;--surface:#111;--text:#ededed;--text-2:#a1a1a1;--text-3:rgb(255 255 255/.4);
+  --line:rgb(255 255 255/.1);--line-2:rgb(255 255 255/.06);
+  --sans:Inter,-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei","Helvetica Neue",sans-serif;
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+}
+*{box-sizing:border-box}
+html{color-scheme:dark}
+.toc{scrollbar-width:none}.toc::-webkit-scrollbar{display:none}
+html{scrollbar-width:thin;scrollbar-color:#333 transparent}
+::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#2a2a2a;border-radius:8px}::-webkit-scrollbar-thumb:hover{background:#3a3a3a}
+html{scroll-behavior:smooth;scroll-padding-top:80px}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;line-height:1.8;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+.nav{position:sticky;top:0;z-index:10;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;border-bottom:1px solid var(--line);background:rgb(10 10 10/.8);backdrop-filter:blur(12px)}
+.nav__brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-size:14px;font-weight:500}
+.nav__dot{width:10px;height:10px;border-radius:3px;background:var(--text)}
+.nav__links{display:flex;gap:20px;font-size:14px;color:var(--text-2)}
+.nav__links a{text-decoration:none}.nav__links a:hover{color:var(--text)}
+.wrap{max-width:1200px;margin:0 auto;padding:0 24px;display:grid;grid-template-columns:220px minmax(0,1fr);gap:56px}
+.toc{position:sticky;top:80px;align-self:start;max-height:calc(100vh - 100px);overflow:auto;padding:40px 0 40px;font-size:13px;line-height:1.6}
+.toc__label{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--text-3);text-transform:uppercase;margin-bottom:12px}
+.toc ul{list-style:none;margin:0;padding:0}
+.toc li{margin:0}
+.toc a{display:block;padding:4px 0 4px 12px;border-left:1px solid var(--line);color:var(--text-2);text-decoration:none}
+.toc a:hover,.toc a.on{color:var(--text);border-left-color:var(--text)}
+.toc ul ul a{padding-left:24px;font-size:12.5px;color:var(--text-3)}
+.toc ul ul a:hover,.toc ul ul a.on{color:var(--text)}
+article{min-width:0;max-width:760px;padding:48px 0 96px}
+.meta{font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--text-3);margin-bottom:16px}
+article h1.title{font-size:40px;line-height:1.2;letter-spacing:-.02em;font-weight:600;margin:0 0 24px}
+article h1{font-size:28px;line-height:1.3;letter-spacing:-.01em;font-weight:600;margin:72px 0 20px;padding-top:32px;border-top:1px solid var(--line)}
+article h2{font-size:22px;line-height:1.4;font-weight:600;margin:48px 0 16px}
+article h3{font-size:18px;font-weight:600;margin:36px 0 12px}
+article h4{font-size:16px;font-weight:600;margin:28px 0 8px}
+article p{margin:0 0 18px;color:#d4d4d4}
+article strong{color:var(--text);font-weight:600}
+article ul,article ol{padding-left:22px;margin:0 0 18px;color:#d4d4d4}
+article li{margin:4px 0}
+article a{text-decoration:underline;text-decoration-color:var(--text-3);text-underline-offset:3px}
+article a:hover{text-decoration-color:var(--text)}
+article hr{border:0;border-top:1px solid var(--line);margin:48px 0}
+article blockquote{margin:0 0 20px;padding:12px 18px;border-left:2px solid var(--text-2);background:var(--surface);border-radius:0 8px 8px 0;color:var(--text-2)}
+article blockquote p{margin:6px 0;color:var(--text-2)}
+article code{font-family:var(--mono);font-size:.88em;background:#1a1a1a;border:1px solid var(--line-2);border-radius:5px;padding:1px 6px}
+article pre{position:relative;margin:0 0 22px;padding:16px 18px;background:#0f0f0f;border:1px solid var(--line);border-radius:10px;overflow:auto;font-size:13.5px;line-height:1.65}
+article pre code{background:none;border:0;padding:0;font-size:inherit}
+.code{position:relative}
+.code__lang{position:absolute;top:8px;right:46px;font-family:var(--mono);font-size:11px;color:var(--text-3);z-index:1}
+.code__copy{position:absolute;top:6px;right:8px;z-index:1;font:11px var(--mono);color:var(--text-2);background:#1a1a1a;border:1px solid var(--line);border-radius:6px;padding:2px 7px;cursor:pointer}
+.code__copy:hover{color:var(--text)}
+.tbl{overflow-x:auto;margin:0 0 22px;border:1px solid var(--line);border-radius:10px}
+article table{border-collapse:collapse;width:100%;font-size:14px}
+article th,article td{padding:10px 14px;border-bottom:1px solid var(--line-2);text-align:left;vertical-align:top}
+article th{font-weight:600;background:var(--surface);color:var(--text)}
+article tr:last-child td{border-bottom:0}
+article details{margin:0 0 18px;border:1px solid var(--line);border-radius:10px;padding:10px 16px;background:var(--surface)}
+article summary{cursor:pointer;font-weight:500}
+.pager{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:72px;padding-top:32px;border-top:1px solid var(--line)}
+.pager a{display:block;padding:16px 18px;border:1px solid var(--line);border-radius:10px;text-decoration:none}
+.pager a:hover{border-color:var(--text-2)}
+.pager span{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--text-3)}
+.pager .next{text-align:right;grid-column:2}
+.foot{margin-top:40px;font-size:13px;color:var(--text-3)}
+/* 代码高亮：黑白灰为主 */
+.hl .c,.hl .c1,.hl .cm,.hl .ch,.hl .cs,.hl .cp,.hl .cpf{color:#6b6b6b;font-style:italic}
+.hl .k,.hl .kd,.hl .kn,.hl .kr,.hl .kt,.hl .kc,.hl .kp,.hl .ow{color:#ffffff;font-weight:600}
+.hl .s,.hl .s1,.hl .s2,.hl .sb,.hl .sc,.hl .sd,.hl .se,.hl .sh,.hl .si,.hl .sx,.hl .sr,.hl .ss,.hl .dl,.hl .sa{color:#86efac}
+.hl .m,.hl .mi,.hl .mf,.hl .mh,.hl .mo,.hl .il{color:#fcd34d}
+.hl .nf,.hl .fm,.hl .nc,.hl .nn{color:#e5e5e5;font-weight:500}
+.hl .nb,.hl .bp,.hl .nd,.hl .na,.hl .nt{color:#bdbdbd}
+.hl .o,.hl .p{color:#9a9a9a}
+.hl .gd{color:#fca5a5}.hl .gi{color:#86efac}
+.hl{color:#d4d4d4}
+@media (max-width:960px){.wrap{grid-template-columns:1fr;gap:0}.toc{display:none}article h1.title{font-size:30px}.nav__links a.hide-sm{display:none}}
+</style>
+</head>
+<body>
+<header class="nav">
+  <a class="nav__brand" href="../index.html"><span class="nav__dot"></span>AI Agent 全栈</a>
+  <nav class="nav__links">
+    <a href="../index.html#progress">课件</a>
+    <a class="hide-sm" href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/ROADMAP.md">路线图</a>
+    <a href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/notes/00-foundations/06-database-cache.md">在 GitHub 上查看</a>
+  </nav>
+</header>
+<div class="wrap">
+  <aside class="toc"><div class="toc__label">本课目录</div><ul>
+<li><a href="#读前说明">读前说明</a></li>
+<li><a href="#第一部分postgres-建模">第一部分：Postgres 建模</a><ul>
+<li><a href="#1-为什么默认选-postgres">1. 为什么默认选 Postgres</a></li>
+<li><a href="#2-agent-平台的三张核心表">2. Agent 平台的三张核心表</a></li>
+<li><a href="#3-约束是最后一道防线">3. 约束是最后一道防线</a></li>
+</ul>
+</li>
+<li><a href="#第二部分索引">第二部分：索引</a><ul>
+<li><a href="#4-索引的心智模型">4. 索引的心智模型</a></li>
+<li><a href="#5-复合索引列的顺序决定能不能用上">5. 复合索引：列的顺序决定能不能用上</a></li>
+<li><a href="#6-读懂-explain-analyze">6. 读懂 EXPLAIN ANALYZE</a></li>
+<li><a href="#7-分页别用-offset">7. 分页：别用 OFFSET</a></li>
+<li><a href="#8-部分索引和-jsonb-索引">8. 部分索引和 JSONB 索引</a></li>
+</ul>
+</li>
+<li><a href="#第三部分事务与并发">第三部分：事务与并发</a><ul>
+<li><a href="#9-事务要么全做要么全不做">9. 事务：要么全做，要么全不做</a></li>
+<li><a href="#10-隔离级别并发事务能看到彼此多少">10. 隔离级别：并发事务能看到彼此多少</a></li>
+<li><a href="#11-丢失更新最常见的并发-bug">11. 丢失更新：最常见的并发 bug</a></li>
+<li><a href="#12-写偏斜只有-serializable-防得住">12. 写偏斜：只有 Serializable 防得住</a></li>
+<li><a href="#13-消息序号为什么要-last_seq">13. 消息序号：为什么要 last_seq</a></li>
+<li><a href="#14-幂等键客户端重试不重复扣费">14. 幂等键：客户端重试不重复扣费</a></li>
+<li><a href="#15-用-postgres-做任务队列skip-locked">15. 用 Postgres 做任务队列：SKIP LOCKED</a></li>
+<li><a href="#16-状态机守卫用-where-防止非法状态转换">16. 状态机守卫：用 WHERE 防止非法状态转换</a></li>
+<li><a href="#17-连接池">17. 连接池</a></li>
+</ul>
+</li>
+<li><a href="#第四部分迁移">第四部分：迁移</a><ul>
+<li><a href="#18-迁移表结构也要版本管理">18. 迁移：表结构也要版本管理</a></li>
+<li><a href="#19-线上改表哪些操作会锁表">19. 线上改表：哪些操作会锁表</a></li>
+</ul>
+</li>
+<li><a href="#第五部分redis">第五部分：Redis</a><ul>
+<li><a href="#20-redis-是什么适合放什么">20. Redis 是什么，适合放什么</a></li>
+<li><a href="#21-cache-aside最常用的缓存模式">21. Cache-Aside：最常用的缓存模式</a></li>
+<li><a href="#22-缓存的三个经典问题">22. 缓存的三个经典问题</a></li>
+<li><a href="#23-限流用-lua-保证原子性">23. 限流：用 Lua 保证原子性</a></li>
+<li><a href="#本课小结">本课小结</a></li>
+<li><a href="#练习今天做完">练习（今天做完）</a></li>
+<li><a href="#自测题">自测题</a></li>
+</ul>
+</li>
+<li><a href="#参考答案与详解">参考答案与详解</a><ul>
+<li><a href="#自测题答案">自测题答案</a></li>
+<li><a href="#练习参考答案">练习参考答案</a></li>
+<li><a href="#完成标准">完成标准</a></li>
+</ul>
+</li>
+</ul>
+</aside>
+  <article>
+    <div class="meta">模块 00 · 基础功底 · 第 0.6 课</div>
+    <h1 class="title">0.6 数据库与缓存：Postgres 与 Redis，给 Agent 一个靠得住的记忆</h1>
+    <blockquote>
+<p>第 0 部分 · 第 6 课 ｜ 预计 5–6 小时 ｜ 前置：0.1 Go、0.5 工程基础</p>
+<p>配套练习：<code>projects/05-store/</code>（Go + <code>pgx/v5</code> + <code>go-redis/v9</code>，12 个集成测试）。CI 里用 GitHub Actions 的 <code>services</code> 起真实的 Postgres 17 和 Redis 7 来跑。</p>
+</blockquote>
+<h2 id="读前说明">读前说明</h2>
+<p>前五课的服务都是“无状态”的：进程重启，什么都没了。真正的 Agent 平台至少要记住这些东西：</p>
+<ul>
+<li><strong>会话和消息</strong>：用户关掉页面再打开，历史还在；流式输出断了，能从第几条接着读；</li>
+<li><strong>运行记录</strong>：每次 Agent 运行的状态（排队、运行中、成功、失败）、用了多少 token、花了多少钱；</li>
+<li><strong>热数据和计数器</strong>：会话标题这种读多写少的数据要快；每个用户每分钟最多调几次模型要准。</li>
+</ul>
+<p>前两类放 <strong>Postgres</strong>，第三类放 <strong>Redis</strong>。这一课不讲成数据库教材，只讲做 Agent 后端绕不开的部分，而且每个知识点都对应练习里一段能跑、有测试的代码。</p>
+<p>本课结束时你能：</p>
+<ol>
+<li>为会话、消息、运行记录设计表结构，知道每一列的类型和约束为什么这么选；</li>
+<li>根据查询设计索引，会读 <code>EXPLAIN ANALYZE</code>，知道为什么不用 <code>OFFSET</code> 分页；</li>
+<li>说清楚四种隔离级别各防住什么、防不住什么，亲手复现“丢失更新”和“写偏斜”；</li>
+<li>用 Postgres 实现幂等建任务、并发安全的序号、<code>SKIP LOCKED</code> 任务队列；</li>
+<li>写一个迁移执行器，知道线上改表结构哪些操作会锁表；</li>
+<li>用 Redis 做 Cache-Aside 缓存和限流，并处理好穿透、击穿、雪崩和 Redis 故障。</li>
+</ol>
+<hr />
+<h1 id="第一部分postgres-建模">第一部分：Postgres 建模</h1>
+<h2 id="1-为什么默认选-postgres">1. 为什么默认选 Postgres</h2>
+<p>做 Agent 后端，存储的默认答案是 Postgres，原因很实际：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>需求</th>
+<th>Postgres 怎么满足</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>会话、消息、用户、计费这些关系型数据</td>
+<td>本职工作，有事务、约束、外键</td>
+</tr>
+<tr>
+<td>工具调用参数、模型返回这类结构不固定的数据</td>
+<td><code>JSONB</code> 列，能建索引、能查询</td>
+</tr>
+<tr>
+<td>向量检索（第 05 模块 RAG）</td>
+<td><code>pgvector</code> 扩展，几百万向量以内不必另上向量库</td>
+</tr>
+<tr>
+<td>后台任务队列</td>
+<td><code>FOR UPDATE SKIP LOCKED</code>，本课第 15 节</td>
+</tr>
+<tr>
+<td>全文检索</td>
+<td>内置 <code>tsvector</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>一个库能覆盖大部分需求，就少运维一个系统。等某一项真的成了瓶颈（比如上亿向量），再拆出去。<strong>先用一个可靠的系统做对，再根据测量结果拆分。</strong></p>
+<h2 id="2-agent-平台的三张核心表">2. Agent 平台的三张核心表</h2>
+<div class="hl"><pre><span></span><code>conversations  1 ──── N  messages        一个会话有很多条消息，按 seq 排序
+      │
+      └────── 1 ──── N  runs             一个会话可以运行很多次 Agent
+</code></pre></div>
+
+<p>练习里的 <code>migrations/0001_init.sql</code>，先看会话和消息：</p>
+<div class="hl"><pre><span></span><code><span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">conversations</span><span class="w"> </span><span class="p">(</span>
+<span class="w">    </span><span class="n">id</span><span class="w">          </span><span class="nb">BIGINT</span><span class="w"> </span><span class="k">GENERATED</span><span class="w"> </span><span class="n">ALWAYS</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="k">IDENTITY</span><span class="w"> </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="p">,</span>
+<span class="w">    </span><span class="n">user_id</span><span class="w">     </span><span class="nb">TEXT</span><span class="w">        </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span>
+<span class="w">    </span><span class="n">title</span><span class="w">       </span><span class="nb">TEXT</span><span class="w">        </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="s1">''</span><span class="p">,</span>
+<span class="w">    </span><span class="n">last_seq</span><span class="w">    </span><span class="nb">INT</span><span class="w">         </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">          </span><span class="c1">-- 已分配的最大消息序号</span>
+<span class="w">    </span><span class="n">created_at</span><span class="w">  </span><span class="n">TIMESTAMPTZ</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="n">now</span><span class="p">(),</span>
+<span class="w">    </span><span class="n">updated_at</span><span class="w">  </span><span class="n">TIMESTAMPTZ</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="n">now</span><span class="p">()</span>
+<span class="p">);</span>
+
+<span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">messages</span><span class="w"> </span><span class="p">(</span>
+<span class="w">    </span><span class="n">id</span><span class="w">               </span><span class="nb">BIGINT</span><span class="w"> </span><span class="k">GENERATED</span><span class="w"> </span><span class="n">ALWAYS</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="k">IDENTITY</span><span class="w"> </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="p">,</span>
+<span class="w">    </span><span class="n">conversation_id</span><span class="w">  </span><span class="nb">BIGINT</span><span class="w">      </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="k">REFERENCES</span><span class="w"> </span><span class="n">conversations</span><span class="w"> </span><span class="p">(</span><span class="n">id</span><span class="p">)</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="k">DELETE</span><span class="w"> </span><span class="k">CASCADE</span><span class="p">,</span>
+<span class="w">    </span><span class="n">seq</span><span class="w">              </span><span class="nb">INT</span><span class="w">         </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span>
+<span class="w">    </span><span class="k">role</span><span class="w">             </span><span class="nb">TEXT</span><span class="w">        </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="k">CHECK</span><span class="w"> </span><span class="p">(</span><span class="k">role</span><span class="w"> </span><span class="k">IN</span><span class="w"> </span><span class="p">(</span><span class="s1">'system'</span><span class="p">,</span><span class="w"> </span><span class="s1">'user'</span><span class="p">,</span><span class="w"> </span><span class="s1">'assistant'</span><span class="p">,</span><span class="w"> </span><span class="s1">'tool'</span><span class="p">)),</span>
+<span class="w">    </span><span class="n">content</span><span class="w">          </span><span class="n">JSONB</span><span class="w">       </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span>
+<span class="w">    </span><span class="n">tokens</span><span class="w">           </span><span class="nb">INT</span><span class="w">         </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="k">CHECK</span><span class="w"> </span><span class="p">(</span><span class="n">tokens</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">0</span><span class="p">),</span>
+<span class="w">    </span><span class="n">created_at</span><span class="w">       </span><span class="n">TIMESTAMPTZ</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="n">now</span><span class="p">(),</span>
+<span class="w">    </span><span class="k">UNIQUE</span><span class="w"> </span><span class="p">(</span><span class="n">conversation_id</span><span class="p">,</span><span class="w"> </span><span class="n">seq</span><span class="p">)</span>
+<span class="p">);</span>
+</code></pre></div>
+
+<p><strong>逐行解读</strong></p>
+<ul>
+<li><strong><code>BIGINT GENERATED ALWAYS AS IDENTITY</code></strong>：自增主键的标准写法（取代老的 <code>SERIAL</code>）。用 <code>BIGINT</code> 而不是 <code>INT</code>：<code>INT</code> 上限约 21 亿，消息表一天几百万行，几年就能用完，到时候改类型要重写整张表。</li>
+<li><strong><code>user_id TEXT</code></strong>：用户体系可能来自外部（OAuth 的 subject），用文本最省事。</li>
+<li><strong><code>last_seq</code></strong>：这个会话已经分配到第几号消息。看起来冗余（<code>max(seq)</code> 也能算），它的作用在第 13 节讲，是“并发追加消息不重号”的关键。</li>
+<li><strong><code>TIMESTAMPTZ</code></strong>：永远用带时区的时间。<code>TIMESTAMP</code>（不带时区）存进去的是“墙上时间”，服务器和客户端时区一不一致就会错 8 小时。</li>
+<li><strong><code>REFERENCES ... ON DELETE CASCADE</code></strong>：外键。消息不能指向不存在的会话；删会话时消息一起删。</li>
+<li><strong><code>CHECK (role IN (...))</code></strong>：数据库层面保证 role 只能是这四个值。应用代码有 bug 写了个 <code>"assitant"</code>，会在写入时直接报错，而不是半年后统计时才发现。</li>
+<li><strong><code>content JSONB</code></strong>：一条消息可能是纯文本，也可能是工具调用（函数名 + 参数）、工具结果、图片引用。结构各不相同，用 JSONB 存。</li>
+<li><strong><code>UNIQUE (conversation_id, seq)</code></strong>：同一会话里序号不能重复。唯一约束会自动建一个索引，这个索引同时服务于“按会话、按顺序读消息”这个最常见的查询，一举两得。</li>
+</ul>
+<h3 id="主键用自增还是-uuid">主键用自增还是 UUID</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th></th>
+<th>自增 <code>BIGINT</code></th>
+<th><code>UUID</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>大小</td>
+<td>8 字节</td>
+<td>16 字节</td>
+</tr>
+<tr>
+<td>插入性能</td>
+<td>总是插在索引末尾，最好</td>
+<td>随机 UUIDv4 插在索引随机位置，表大了明显变慢</td>
+</tr>
+<tr>
+<td>暴露信息</td>
+<td>能猜出总量、能遍历</td>
+<td>不能</td>
+</tr>
+<tr>
+<td>客户端生成</td>
+<td>不行</td>
+<td>可以，离线创建、合并数据方便</td>
+</tr>
+</tbody>
+</table></div>
+<p>折中做法：内部用 <code>BIGINT</code>，对外暴露的 ID 用 <strong>UUIDv7</strong>（前缀是时间戳，所以基本有序，插入性能接近自增）。练习为了简单全用 <code>BIGINT</code>。</p>
+<h3 id="jsonb-还是拆成列">JSONB 还是拆成列</h3>
+<p>经验规则：<strong>要用来过滤、排序、关联、求和的字段，拆成独立的列；只需要整体存取的，放 JSONB。</strong> 比如 <code>tokens</code> 要按会话求和算钱，所以是独立列；消息正文只会整体读出来发给模型，所以放 <code>content</code>。</p>
+<h2 id="3-约束是最后一道防线">3. 约束是最后一道防线</h2>
+<p>应用代码里也可以校验，为什么还要在数据库里写 <code>NOT NULL</code>、<code>CHECK</code>、<code>UNIQUE</code>、外键？</p>
+<p>因为写数据库的不只是你这一个函数：还有后台任务、数据修复脚本、三个月后的同事、并发执行的两个请求。<strong>应用层校验防的是“正常情况下的错误”，数据库约束防的是“所有情况下的错误”</strong>，尤其是并发：两个请求同时检查“这个幂等键用过没有”，都发现没用过，都去插入。只有 <code>UNIQUE</code> 约束能保证最终只有一行。</p>
+<p>本课后面的幂等键（第 14 节）、消息序号（第 13 节）都依赖唯一约束兜底。</p>
+<hr />
+<h1 id="第二部分索引">第二部分：索引</h1>
+<h2 id="4-索引的心智模型">4. 索引的心智模型</h2>
+<p>没有索引，<code>WHERE user_id = 'u1'</code> 就得把整张表从头读到尾（<strong>顺序扫描</strong>，Seq Scan）。</p>
+<p>Postgres 默认的 <strong>B-tree 索引</strong>可以想象成一本按某列排好序的目录：每一项是“列的值 → 这一行在表里的位置”。查找是二分，100 万行大约 20 次比较；而且因为有序，<strong>范围查询和排序也能直接用它</strong>。</p>
+<p>代价：每次 <code>INSERT</code> / <code>UPDATE</code> 被索引的列，都要同时维护索引。一张表上 10 个索引，写入就要多做 10 次。所以<strong>索引是为具体查询建的，不是给每一列都建一个</strong>。</p>
+<h2 id="5-复合索引列的顺序决定能不能用上">5. 复合索引：列的顺序决定能不能用上</h2>
+<p>会话列表页的查询是：“某个用户的会话，最近活跃的排前面”。</p>
+<div class="hl"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">conversations</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">user_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="err">$</span><span class="mi">1</span>
+<span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">updated_at</span><span class="w"> </span><span class="k">DESC</span><span class="p">,</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="k">DESC</span>
+<span class="k">LIMIT</span><span class="w"> </span><span class="mi">20</span><span class="p">;</span>
+</code></pre></div>
+
+<p>对应的索引：</p>
+<div class="hl"><pre><span></span><code><span class="k">CREATE</span><span class="w"> </span><span class="k">INDEX</span><span class="w"> </span><span class="n">conversations_user_recent_idx</span>
+<span class="w">    </span><span class="k">ON</span><span class="w"> </span><span class="n">conversations</span><span class="w"> </span><span class="p">(</span><span class="n">user_id</span><span class="p">,</span><span class="w"> </span><span class="n">updated_at</span><span class="w"> </span><span class="k">DESC</span><span class="p">,</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="k">DESC</span><span class="p">);</span>
+</code></pre></div>
+
+<p>复合索引按第一列排序，第一列相同再按第二列，以此类推，就像字典先按第一个字母、再按第二个字母排。所以：</p>
+<ul>
+<li><code>WHERE user_id = ?</code> 能用：先定位到这个用户那一段；</li>
+<li><code>WHERE user_id = ? ORDER BY updated_at DESC</code> 能用，而且<strong>不用排序</strong>：这一段里本来就按 <code>updated_at</code> 倒序排好了，读前 20 条就停；</li>
+<li><code>WHERE updated_at &gt; ?</code>（不带 user_id）基本用不上：就像只知道第二个字母，没法在字典里查。</li>
+</ul>
+<p>这叫<strong>最左前缀</strong>原则。设计复合索引的顺序：<strong>等值条件的列在前，范围条件或排序的列在后。</strong></p>
+<p>末尾的 <code>id DESC</code> 是为了让排序<strong>唯一</strong>：两个会话 <code>updated_at</code> 完全相同时，顺序由 id 决定。没有它，分页时同一行可能在两页都出现或者都不出现（第 7 节）。</p>
+<h2 id="6-读懂-explain-analyze">6. 读懂 EXPLAIN ANALYZE</h2>
+<p>判断一个查询有没有用上索引，不靠猜，靠 <code>EXPLAIN ANALYZE</code>。它会真的执行一次查询，并告诉你每一步做了什么、花了多久。</p>
+<div class="hl"><pre><span></span><code>Limit  (cost=0.42..2.31 rows=20 width=60) (actual time=0.031..0.049 rows=20 loops=1)
+  -&gt;  Index Scan using conversations_user_recent_idx on conversations
+        (cost=0.42..946.12 rows=10000 width=60) (actual time=0.030..0.045 rows=20 loops=1)
+        Index Cond: (user_id = 'u1'::text)
+Planning Time: 0.120 ms
+Execution Time: 0.068 ms
+</code></pre></div>
+
+<p>从下往上、从里往外读：</p>
+<ul>
+<li><strong><code>Index Scan using conversations_user_recent_idx</code></strong>：用上了我们的索引；</li>
+<li><strong><code>Index Cond</code></strong>：索引用来定位的条件；</li>
+<li><strong><code>actual ... rows=20</code></strong>：实际只读了 20 行就停了，因为 <code>Limit</code> 够了；</li>
+<li><strong><code>cost=...</code></strong>：优化器的估算，单位是相对值，不是毫秒；<strong><code>actual time</code></strong> 才是真实耗时。</li>
+</ul>
+<p>常见的几种节点：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>节点</th>
+<th>含义</th>
+<th>什么时候是问题</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Seq Scan</code></td>
+<td>全表扫描</td>
+<td>大表上、只要少量行时</td>
+</tr>
+<tr>
+<td><code>Index Scan</code></td>
+<td>走索引，再回表取整行</td>
+<td>一般是好事</td>
+</tr>
+<tr>
+<td><code>Index Only Scan</code></td>
+<td>索引里就有所需的全部列，不用回表</td>
+<td>最好</td>
+</tr>
+<tr>
+<td><code>Bitmap Heap Scan</code></td>
+<td>先从索引收集一批位置，再批量读表</td>
+<td>返回行数中等时的正常选择</td>
+</tr>
+<tr>
+<td><code>Sort</code></td>
+<td>在内存或磁盘上排序</td>
+<td>出现 <code>external merge</code>（排序溢出到磁盘）就要警惕</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p>小表上优化器选 <code>Seq Scan</code> 很正常：几百行的表，直接读一遍比走索引还快。验证索引要先灌足够多的数据，练习 1 会做这件事。</p>
+</blockquote>
+<h2 id="7-分页别用-offset">7. 分页：别用 OFFSET</h2>
+<p>最直观的分页写法是：</p>
+<div class="hl"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">updated_at</span><span class="w"> </span><span class="k">DESC</span><span class="p">,</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="k">DESC</span><span class="w"> </span><span class="k">LIMIT</span><span class="w"> </span><span class="mi">20</span><span class="w"> </span><span class="k">OFFSET</span><span class="w"> </span><span class="mi">10000</span><span class="p">;</span>
+</code></pre></div>
+
+<p>两个问题：</p>
+<ol>
+<li><strong>越往后越慢</strong>。<code>OFFSET 10000</code> 的意思是“读 10020 行，扔掉前 10000 行”，数据库没法跳过。</li>
+<li><strong>结果会错</strong>。用户翻页的间隙里有一个会话更新了、跑到了最前面，所有行往后挪一位，下一页就会把上一页最后一条再显示一次。</li>
+</ol>
+<p><strong>键集分页</strong>（keyset pagination，也叫游标分页）：记住上一页最后一行的排序键，下一页从它后面开始。</p>
+<div class="hl"><pre><span></span><code><span class="c1">// store.go · ListConversations（节选）</span>
+<span class="nx">rows</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">s</span><span class="p">.</span><span class="nx">pool</span><span class="p">.</span><span class="nx">Query</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">cols</span><span class="o">+</span><span class="s">`</span>
+<span class="s">    WHERE user_id = $1 AND (updated_at, id) &lt; ($2, $3)</span>
+<span class="s">    ORDER BY updated_at DESC, id DESC LIMIT $4`</span><span class="p">,</span><span class="w"> </span><span class="nx">userID</span><span class="p">,</span><span class="w"> </span><span class="nx">cursor</span><span class="p">.</span><span class="nx">UpdatedAt</span><span class="p">,</span><span class="w"> </span><span class="nx">cursor</span><span class="p">.</span><span class="nx">ID</span><span class="p">,</span><span class="w"> </span><span class="nx">limit</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+<span class="c1">// ...</span>
+<span class="c1">// 多查一行用来判断“还有没有下一页”，省掉一次 COUNT(*)</span>
+<span class="k">if</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">list</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="nx">limit</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">list</span><span class="p">,</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="kc">nil</span>
+<span class="p">}</span>
+<span class="nx">list</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">list</span><span class="p">[:</span><span class="nx">limit</span><span class="p">]</span>
+<span class="nx">last</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">list</span><span class="p">[</span><span class="nx">limit</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="k">return</span><span class="w"> </span><span class="nx">list</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">Cursor</span><span class="p">{</span><span class="nx">UpdatedAt</span><span class="p">:</span><span class="w"> </span><span class="nx">last</span><span class="p">.</span><span class="nx">UpdatedAt</span><span class="p">,</span><span class="w"> </span><span class="nx">ID</span><span class="p">:</span><span class="w"> </span><span class="nx">last</span><span class="p">.</span><span class="nx">ID</span><span class="p">},</span><span class="w"> </span><span class="kc">nil</span>
+</code></pre></div>
+
+<p><strong>逐行解读</strong></p>
+<ul>
+<li><strong><code>(updated_at, id) &lt; ($2, $3)</code></strong>：行比较，意思是“先比 <code>updated_at</code>，相同再比 <code>id</code>”，正好和 <code>ORDER BY</code> 的顺序一致，所以能直接用第 5 节的索引定位到起点，不管翻到第几页都只读 <code>limit+1</code> 行。</li>
+<li><strong>为什么要带上 <code>id</code></strong>：只用 <code>updated_at &lt; $2</code> 的话，和上一页最后一行时间相同的其他行会被跳过。测试 <code>TestListConversationsCursor</code> 故意把所有会话的 <code>updated_at</code> 设成同一时刻，就是为了测这种情况。</li>
+<li><strong><code>limit+1</code></strong>：多查一行。查到了说明还有下一页，把多的那行去掉；查不到说明到底了，<code>next</code> 返回 <code>nil</code>。</li>
+<li><strong>游标交给客户端</strong>：实际接口里会把 <code>Cursor</code> 序列化成 JSON 再 base64，作为不透明的字符串返回给前端，前端下次原样带回来。</li>
+</ul>
+<p>代价：键集分页不能直接“跳到第 50 页”。但聊天列表、消息流、日志这类场景本来就是“加载更多”，正好适用。</p>
+<p>消息的续读更简单：<code>seq</code> 本身就是唯一有序的，<code>ListMessages(convID, afterSeq, limit)</code> 直接用 <code>seq &gt; afterSeq</code>。这和 0.4 课 SSE 的 <code>Last-Event-ID</code> 断线续传是一个思路：<strong>客户端告诉服务端“我收到第几条了”，服务端从下一条开始发。</strong></p>
+<h2 id="8-部分索引和-jsonb-索引">8. 部分索引和 JSONB 索引</h2>
+<p><strong>部分索引</strong>只索引满足条件的行：</p>
+<div class="hl"><pre><span></span><code><span class="k">CREATE</span><span class="w"> </span><span class="k">INDEX</span><span class="w"> </span><span class="n">runs_queued_idx</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">runs</span><span class="w"> </span><span class="p">(</span><span class="n">created_at</span><span class="p">,</span><span class="w"> </span><span class="n">id</span><span class="p">)</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'queued'</span><span class="p">;</span>
+</code></pre></div>
+
+<p><code>runs</code> 表会越来越大（每次运行一行，成功的永远留着），但任务队列只关心“排队中”的那一小部分。这个索引只包含 <code>queued</code> 的行，任务被领走后就从索引里消失，所以表再大，这个索引也只有“当前待处理数”那么大。查询的 <code>WHERE</code> 里必须带 <code>status = 'queued'</code>，优化器才会用它。</p>
+<p><strong>JSONB 的 GIN 索引</strong>，用来查 JSON 内部的字段：</p>
+<div class="hl"><pre><span></span><code><span class="k">CREATE</span><span class="w"> </span><span class="k">INDEX</span><span class="w"> </span><span class="n">messages_content_gin</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">messages</span><span class="w"> </span><span class="k">USING</span><span class="w"> </span><span class="n">gin</span><span class="w"> </span><span class="p">(</span><span class="n">content</span><span class="w"> </span><span class="n">jsonb_path_ops</span><span class="p">);</span>
+<span class="c1">-- 能加速：找出调用过 web_search 工具的消息</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">messages</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">content</span><span class="w"> </span><span class="o">@&gt;</span><span class="w"> </span><span class="s1">'{"tool": "web_search"}'</span><span class="p">;</span>
+</code></pre></div>
+
+<p>练习里没有建这个索引，因为目前没有这个查询。<strong>先有查询，再有索引。</strong></p>
+<hr />
+<h1 id="第三部分事务与并发">第三部分：事务与并发</h1>
+<h2 id="9-事务要么全做要么全不做">9. 事务：要么全做，要么全不做</h2>
+<p>追加一条消息要做两件事：会话的 <code>last_seq</code> 加一、插入消息。如果第一步成功、第二步失败，就会留下一个永远空着的序号。事务保证这两步<strong>要么都生效，要么都不生效</strong>。</p>
+<div class="hl"><pre><span></span><code><span class="c1">// store.go · AppendMessage</span>
+<span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">pgx</span><span class="p">.</span><span class="nx">BeginFunc</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">s</span><span class="p">.</span><span class="nx">pool</span><span class="p">,</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">tx</span><span class="w"> </span><span class="nx">pgx</span><span class="p">.</span><span class="nx">Tx</span><span class="p">)</span><span class="w"> </span><span class="kt">error</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nx">seq</span><span class="w"> </span><span class="kt">int</span>
+<span class="w">    </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">tx</span><span class="p">.</span><span class="nx">QueryRow</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span>
+<span class="w">        </span><span class="s">`UPDATE conversations SET last_seq = last_seq + 1, updated_at = now()</span>
+<span class="s">         WHERE id = $1 RETURNING last_seq`</span><span class="p">,</span><span class="w"> </span><span class="nx">convID</span><span class="p">).</span><span class="nx">Scan</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">seq</span><span class="p">)</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">errors</span><span class="p">.</span><span class="nx">Is</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span><span class="w"> </span><span class="nx">pgx</span><span class="p">.</span><span class="nx">ErrNoRows</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">ErrNotFound</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">err</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">tx</span><span class="p">.</span><span class="nx">QueryRow</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span>
+<span class="w">        </span><span class="s">`INSERT INTO messages (conversation_id, seq, role, content, tokens)</span>
+<span class="s">         VALUES ($1, $2, $3, $4, $5)</span>
+<span class="s">         RETURNING id, conversation_id, seq, role, content, tokens, created_at`</span><span class="p">,</span>
+<span class="w">        </span><span class="nx">convID</span><span class="p">,</span><span class="w"> </span><span class="nx">seq</span><span class="p">,</span><span class="w"> </span><span class="nx">role</span><span class="p">,</span><span class="w"> </span><span class="nx">content</span><span class="p">,</span><span class="w"> </span><span class="nx">tokens</span><span class="p">).</span>
+<span class="w">        </span><span class="nx">Scan</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">m</span><span class="p">.</span><span class="nx">ID</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">m</span><span class="p">.</span><span class="nx">ConversationID</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">m</span><span class="p">.</span><span class="nx">Seq</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">m</span><span class="p">.</span><span class="nx">Role</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">m</span><span class="p">.</span><span class="nx">Content</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">m</span><span class="p">.</span><span class="nx">Tokens</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">m</span><span class="p">.</span><span class="nx">CreatedAt</span><span class="p">)</span>
+<span class="p">})</span>
+</code></pre></div>
+
+<p><strong>逐行解读</strong></p>
+<ul>
+<li><strong><code>pgx.BeginFunc</code></strong>：开事务，执行函数，函数返回 <code>nil</code> 就提交，返回错误或 panic 就回滚。比手写 <code>Begin</code> / <code>Commit</code> / <code>Rollback</code> 不容易漏。</li>
+<li><strong>函数里必须用 <code>tx</code> 而不是 <code>s.pool</code></strong>：用 <code>s.pool</code> 执行的语句会拿另一个连接，不在这个事务里。这是新手最常见的事务 bug。</li>
+<li><strong><code>RETURNING last_seq</code></strong>：<code>UPDATE</code> 完直接把新值带回来，一次往返，不用再 <code>SELECT</code>。</li>
+<li><strong><code>pgx.ErrNoRows</code></strong>：会话不存在，<code>UPDATE</code> 影响 0 行，<code>RETURNING</code> 没有结果。转换成我们自己的 <code>ErrNotFound</code>，上层（HTTP handler）不需要知道底下用的是 pgx。</li>
+</ul>
+<p>ACID 四个字母里，这里用到的是 <strong>A（原子性）</strong>。<strong>I（隔离性）</strong> 才是并发问题的来源，接下来重点讲。</p>
+<h2 id="10-隔离级别并发事务能看到彼此多少">10. 隔离级别：并发事务能看到彼此多少</h2>
+<p>两个事务同时运行时，一个能不能看到另一个还没提交、或者刚提交的修改？SQL 标准定义了四个级别，Postgres 实际实现了三个：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>级别</th>
+<th>脏读</th>
+<th>不可重复读</th>
+<th>幻读</th>
+<th>写偏斜</th>
+<th>Postgres 里</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Read Uncommitted</td>
+<td>可能</td>
+<td>可能</td>
+<td>可能</td>
+<td>可能</td>
+<td>当作 Read Committed</td>
+</tr>
+<tr>
+<td><strong>Read Committed</strong></td>
+<td>不会</td>
+<td>可能</td>
+<td>可能</td>
+<td>可能</td>
+<td><strong>默认</strong></td>
+</tr>
+<tr>
+<td>Repeatable Read</td>
+<td>不会</td>
+<td>不会</td>
+<td>不会</td>
+<td>可能</td>
+<td>快照隔离</td>
+</tr>
+<tr>
+<td>Serializable</td>
+<td>不会</td>
+<td>不会</td>
+<td>不会</td>
+<td>不会</td>
+<td>检测到冲突时报错，需重试</td>
+</tr>
+</tbody>
+</table></div>
+<p>术语翻译成人话：</p>
+<ul>
+<li><strong>脏读</strong>：读到了别人还没提交的数据（别人后来回滚了，你读到的就是不存在的数据）。Postgres 任何级别都不会出现。</li>
+<li><strong>不可重复读</strong>：同一个事务里读两次同一行，结果不一样，因为中间有别人提交了修改。</li>
+<li><strong>幻读</strong>：同一个事务里执行两次同一个范围查询，第二次多出了别人新插入的行。</li>
+<li><strong>写偏斜</strong>（write skew）：两个事务各自读了一些数据、做出判断，然后各自写<strong>不同的行</strong>；单看每一个都没问题，合在一起违反了规则。第 12 节有实例。</li>
+</ul>
+<p><strong>Read Committed</strong> 的规则：<strong>每条语句</strong>开始时拍一个快照，只能看到在这之前已提交的数据。所以同一事务里的两条 <code>SELECT</code> 可能看到不同结果。</p>
+<p><strong>Repeatable Read</strong> 的规则：<strong>整个事务</strong>用第一条语句时的快照。如果你要修改的行在你的快照之后被别人改过，Postgres 直接报错 <code>could not serialize access due to concurrent update</code>，让你重试。</p>
+<h3 id="动手两个-psql-窗口">动手：两个 psql 窗口</h3>
+<p>打开两个终端，都执行 <code>make psql</code>（会话 A 和会话 B），先准备一行数据：</p>
+<div class="hl"><pre><span></span><code><span class="k">INSERT</span><span class="w"> </span><span class="k">INTO</span><span class="w"> </span><span class="n">conversations</span><span class="w"> </span><span class="p">(</span><span class="n">user_id</span><span class="p">,</span><span class="w"> </span><span class="n">title</span><span class="p">)</span><span class="w"> </span><span class="k">VALUES</span><span class="w"> </span><span class="p">(</span><span class="s1">'u1'</span><span class="p">,</span><span class="w"> </span><span class="s1">'原标题'</span><span class="p">);</span>
+</code></pre></div>
+
+<p><strong>实验 1：Read Committed 的不可重复读</strong></p>
+<div class="hl"><pre><span></span><code><span class="c1">-- A</span>
+<span class="k">BEGIN</span><span class="p">;</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="n">title</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">conversations</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">        </span><span class="c1">-- 原标题</span>
+
+<span class="c1">-- B</span>
+<span class="k">UPDATE</span><span class="w"> </span><span class="n">conversations</span><span class="w"> </span><span class="k">SET</span><span class="w"> </span><span class="n">title</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'新标题'</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">  </span><span class="c1">-- 自动提交</span>
+
+<span class="c1">-- A</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="n">title</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">conversations</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">        </span><span class="c1">-- 新标题：同一事务里读到了不同结果</span>
+<span class="k">COMMIT</span><span class="p">;</span>
+</code></pre></div>
+
+<p><strong>实验 2：Repeatable Read 的快照</strong></p>
+<div class="hl"><pre><span></span><code><span class="c1">-- A</span>
+<span class="k">BEGIN</span><span class="w"> </span><span class="k">ISOLATION</span><span class="w"> </span><span class="k">LEVEL</span><span class="w"> </span><span class="k">REPEATABLE</span><span class="w"> </span><span class="k">READ</span><span class="p">;</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="n">title</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">conversations</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">        </span><span class="c1">-- 新标题</span>
+
+<span class="c1">-- B</span>
+<span class="k">UPDATE</span><span class="w"> </span><span class="n">conversations</span><span class="w"> </span><span class="k">SET</span><span class="w"> </span><span class="n">title</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'第三个标题'</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+
+<span class="c1">-- A</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="n">title</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">conversations</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">        </span><span class="c1">-- 还是“新标题”：一直读同一个快照</span>
+<span class="k">UPDATE</span><span class="w"> </span><span class="n">conversations</span><span class="w"> </span><span class="k">SET</span><span class="w"> </span><span class="n">title</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'A 改的'</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="c1">-- ERROR: could not serialize access due to concurrent update</span>
+<span class="k">ROLLBACK</span><span class="p">;</span>
+</code></pre></div>
+
+<p>第二个实验最后那一步很重要：Repeatable Read 不会让 A 在旧快照上覆盖 B 的修改，而是报错。<strong>报错不是 bug，是数据库在告诉你“你基于的数据已经过时了，请重试”。</strong></p>
+<h2 id="11-丢失更新最常见的并发-bug">11. 丢失更新：最常见的并发 bug</h2>
+<p>计费场景：模型每返回一段，就把 token 数累加到运行记录上。直觉写法是“读出来，加上，写回去”：</p>
+<div class="hl"><pre><span></span><code><span class="c1">// store_test.go · addUsageNaive（反例，只在测试里）</span>
+<span class="kd">var</span><span class="w"> </span><span class="nx">cur</span><span class="w"> </span><span class="kt">int64</span>
+<span class="nx">s</span><span class="p">.</span><span class="nx">pool</span><span class="p">.</span><span class="nx">QueryRow</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="s">`SELECT input_tokens FROM runs WHERE id = $1`</span><span class="p">,</span><span class="w"> </span><span class="nx">runID</span><span class="p">).</span><span class="nx">Scan</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">cur</span><span class="p">)</span>
+<span class="nx">time</span><span class="p">.</span><span class="nx">Sleep</span><span class="p">(</span><span class="nx">time</span><span class="p">.</span><span class="nx">Millisecond</span><span class="p">)</span><span class="w"> </span><span class="c1">// 放大读和写之间的窗口，让问题稳定复现</span>
+<span class="nx">s</span><span class="p">.</span><span class="nx">pool</span><span class="p">.</span><span class="nx">Exec</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="s">`UPDATE runs SET input_tokens = $2 WHERE id = $1`</span><span class="p">,</span><span class="w"> </span><span class="nx">runID</span><span class="p">,</span><span class="w"> </span><span class="nx">cur</span><span class="o">+</span><span class="nx">in</span><span class="p">)</span>
+</code></pre></div>
+
+<p>两个请求同时执行：都读到 100，都算出 110，都写入 110。本该是 120，丢了一次。<code>TestLostUpdate</code> 并发 40 次，每次加 10，实际跑出来的结果是：</p>
+<div class="hl"><pre><span></span><code>读-改-写: 期望 400, 实际 20（丢了 380）
+</code></pre></div>
+
+<p>这就是<strong>丢失更新</strong>（lost update）。在 Agent 平台里它意味着少算钱、配额失效。四种解法，从简单到复杂：</p>
+<p><strong>解法 1：在 SQL 里做运算（首选）</strong></p>
+<div class="hl"><pre><span></span><code><span class="c1">// store.go · AddUsage</span>
+<span class="s">`UPDATE runs SET input_tokens = input_tokens + $2, output_tokens = output_tokens + $3</span>
+<span class="s"> WHERE id = $1`</span>
+</code></pre></div>
+
+<p><code>UPDATE</code> 执行时会给这一行加<strong>行锁</strong>，并且读的是最新提交的值。两个并发的 <code>+10</code> 会排队执行，结果一定是 120。<strong>能写成一条 SQL 的，就别在应用里读改写。</strong></p>
+<p><strong>解法 2：悲观锁 <code>SELECT ... FOR UPDATE</code></strong></p>
+<p>逻辑复杂、没法写成一条 SQL 时（比如要根据当前值调用其他服务做判断）：</p>
+<div class="hl"><pre><span></span><code><span class="k">BEGIN</span><span class="p">;</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="n">input_tokens</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">runs</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="err">$</span><span class="mi">1</span><span class="w"> </span><span class="k">FOR</span><span class="w"> </span><span class="k">UPDATE</span><span class="p">;</span><span class="w">  </span><span class="c1">-- 锁住这一行，别人要改得等我提交</span>
+<span class="c1">-- ... 应用里计算 ...</span>
+<span class="k">UPDATE</span><span class="w"> </span><span class="n">runs</span><span class="w"> </span><span class="k">SET</span><span class="w"> </span><span class="n">input_tokens</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="err">$</span><span class="mi">2</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="err">$</span><span class="mi">1</span><span class="p">;</span>
+<span class="k">COMMIT</span><span class="p">;</span>
+</code></pre></div>
+
+<p>注意：锁一直持有到事务结束，<strong>事务里千万不要调用模型 API</strong>，否则一次模型调用 30 秒，这行就被锁 30 秒。</p>
+<p><strong>解法 3：乐观锁（版本号）</strong></p>
+<p>表上加一个 <code>version</code> 列，更新时检查版本没变：</p>
+<div class="hl"><pre><span></span><code><span class="k">UPDATE</span><span class="w"> </span><span class="n">conversations</span><span class="w"> </span><span class="k">SET</span><span class="w"> </span><span class="n">title</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="err">$</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="k">version</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">version</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="err">$</span><span class="mi">1</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="k">version</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="err">$</span><span class="mi">3</span><span class="p">;</span><span class="w">   </span><span class="c1">-- 影响 0 行 = 被别人抢先改了，重新读再试</span>
+</code></pre></div>
+
+<p>不持锁，适合冲突很少的场景，比如用户在两个标签页里编辑同一个会话标题。</p>
+<p><strong>解法 4：Repeatable Read / Serializable + 重试</strong></p>
+<p>把事务开在更高的隔离级别，冲突时数据库报 <code>40001</code> 错误，应用捕获后整个事务重试。最通用，但需要所有相关代码都有重试逻辑。</p>
+<h2 id="12-写偏斜只有-serializable-防得住">12. 写偏斜：只有 Serializable 防得住</h2>
+<p>规则：<strong>一个会话同时最多只能有一个运行中的 run</strong>（不然两个 Agent 同时往一个会话里写消息，就乱了）。直觉写法：</p>
+<div class="hl"><pre><span></span><code><span class="k">BEGIN</span><span class="p">;</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="k">count</span><span class="p">(</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">runs</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">conversation_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="n">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'running'</span><span class="p">;</span><span class="w">  </span><span class="c1">-- 0</span>
+<span class="c1">-- 是 0，可以启动</span>
+<span class="k">INSERT</span><span class="w"> </span><span class="k">INTO</span><span class="w"> </span><span class="n">runs</span><span class="w"> </span><span class="p">(</span><span class="n">conversation_id</span><span class="p">,</span><span class="w"> </span><span class="n">idempotency_key</span><span class="p">,</span><span class="w"> </span><span class="n">status</span><span class="p">)</span><span class="w"> </span><span class="k">VALUES</span><span class="w"> </span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="s1">'a'</span><span class="p">,</span><span class="w"> </span><span class="s1">'running'</span><span class="p">);</span>
+<span class="k">COMMIT</span><span class="p">;</span>
+</code></pre></div>
+
+<p>两个请求同时执行，都查到 0，都插入。两个事务改的是<strong>不同的行</strong>（各插各的），行锁防不住，Repeatable Read 也防不住。实测三个隔离级别下的结果：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>隔离级别</th>
+<th>两个事务都提交了吗</th>
+<th>最终 running 数</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Read Committed</td>
+<td>都提交</td>
+<td>2 ❌</td>
+</tr>
+<tr>
+<td>Repeatable Read</td>
+<td>都提交</td>
+<td>2 ❌</td>
+</tr>
+<tr>
+<td>Serializable</td>
+<td>第二个提交时报错 <code>40001 could not serialize access due to read/write dependencies</code></td>
+<td>1 ✅</td>
+</tr>
+</tbody>
+</table></div>
+<p>两种正确做法：</p>
+<ol>
+<li><strong>用约束表达规则（首选）</strong>：部分唯一索引，“running 状态下，每个会话只能有一行”。</li>
+</ol>
+<p><code>sql
+   CREATE UNIQUE INDEX runs_one_running_per_conv ON runs (conversation_id) WHERE status = 'running';</code></p>
+<p>第二个插入直接报唯一冲突。规则写在数据库里，任何代码路径都绕不过去。</p>
+<ol start="2">
+<li><strong>Serializable + 重试</strong>：规则复杂到没法用约束表达时（比如“这个用户今天所有 run 的花费加起来不超过 10 美元”）。</li>
+</ol>
+<p><strong>经验</strong>：默认用 Read Committed；能用约束和原子 SQL 解决的就用它们解决；剩下的少数复杂规则，单独对那几个事务用 Serializable 并写好重试。</p>
+<h2 id="13-消息序号为什么要-last_seq">13. 消息序号：为什么要 last_seq</h2>
+<p>回到 <code>AppendMessage</code>。最直觉的序号分配方式是：</p>
+<div class="hl"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="k">coalesce</span><span class="p">(</span><span class="k">max</span><span class="p">(</span><span class="n">seq</span><span class="p">),</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">messages</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">conversation_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="err">$</span><span class="mi">1</span><span class="p">;</span>
+<span class="k">INSERT</span><span class="w"> </span><span class="k">INTO</span><span class="w"> </span><span class="n">messages</span><span class="w"> </span><span class="p">(...,</span><span class="w"> </span><span class="n">seq</span><span class="p">,</span><span class="w"> </span><span class="p">...)</span><span class="w"> </span><span class="k">VALUES</span><span class="w"> </span><span class="p">(...,</span><span class="w"> </span><span class="err">上一步的结果</span><span class="p">,</span><span class="w"> </span><span class="p">...);</span>
+</code></pre></div>
+
+<p>这就是第 11 节的“读改写”：两个并发请求读到同一个 <code>max</code>，插入同一个 <code>seq</code>。好在我们有 <code>UNIQUE (conversation_id, seq)</code>，第二个会报错而不是写入脏数据。练习 2 你会亲手改成这个写法，看到测试里出现：</p>
+<div class="hl"><pre><span></span><code>ERROR: duplicate key value violates unique constraint "messages_conversation_id_seq_key" (SQLSTATE 23505)
+</code></pre></div>
+
+<p>约束兜住了数据正确性，但用户的消息发送失败了。正确做法是让分配序号这一步本身变成原子操作：</p>
+<div class="hl"><pre><span></span><code><span class="k">UPDATE</span><span class="w"> </span><span class="n">conversations</span><span class="w"> </span><span class="k">SET</span><span class="w"> </span><span class="n">last_seq</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">last_seq</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="err">$</span><span class="mi">1</span><span class="w"> </span><span class="n">RETURNING</span><span class="w"> </span><span class="n">last_seq</span><span class="p">;</span>
+</code></pre></div>
+
+<p><code>UPDATE</code> 给会话这一行加了行锁，<strong>同一个会话</strong>的并发追加在这里排队，拿到 1、2、3……；<strong>不同会话</strong>锁的是不同的行，互不影响。而且锁只持有到事务结束（插入一条消息，几毫秒）。<code>TestAppendMessageConcurrentSeq</code> 并发追加 50 条，验证 seq 正好是 1 到 50。</p>
+<p>这个写法还顺带检查了会话是否存在：<code>UPDATE</code> 影响 0 行就返回 <code>ErrNotFound</code>。用 <code>max(seq)</code> 的写法，会话不存在时会一直走到 <code>INSERT</code>，被外键拦下，报的是 <code>violates foreign key constraint (SQLSTATE 23503)</code>，上层很难把它转成清晰的 404。</p>
+<h2 id="14-幂等键客户端重试不重复扣费">14. 幂等键：客户端重试不重复扣费</h2>
+<p>客户端发起一次 Agent 运行，网络超时了。它不知道服务端到底收到没有，于是重试。如果服务端每次都新建一个 run，用户就被扣了两次钱。</p>
+<p>做法：客户端为每个<strong>逻辑请求</strong>生成一个唯一的幂等键（比如 UUID，放在 <code>Idempotency-Key</code> 请求头里），重试时带同一个键。服务端用唯一约束保证一个键只对应一个 run：</p>
+<div class="hl"><pre><span></span><code><span class="c1">// store.go · EnqueueRun</span>
+<span class="nx">r</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">scanRun</span><span class="p">(</span><span class="nx">s</span><span class="p">.</span><span class="nx">pool</span><span class="p">.</span><span class="nx">QueryRow</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span>
+<span class="w">    </span><span class="s">`INSERT INTO runs (conversation_id, idempotency_key, model) VALUES ($1, $2, $3)</span>
+<span class="s">     ON CONFLICT (idempotency_key) DO NOTHING</span>
+<span class="s">     RETURNING `</span><span class="o">+</span><span class="nx">runCols</span><span class="p">,</span><span class="w"> </span><span class="nx">convID</span><span class="p">,</span><span class="w"> </span><span class="nx">key</span><span class="p">,</span><span class="w"> </span><span class="nx">model</span><span class="p">))</span>
+<span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">r</span><span class="p">,</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="kc">nil</span>
+<span class="p">}</span>
+<span class="k">if</span><span class="w"> </span><span class="o">!</span><span class="nx">errors</span><span class="p">.</span><span class="nx">Is</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span><span class="w"> </span><span class="nx">pgx</span><span class="p">.</span><span class="nx">ErrNoRows</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">Run</span><span class="p">{},</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span>
+<span class="p">}</span>
+<span class="c1">// 冲突了：说明已经有人用这个 key 建过，查出来返回</span>
+<span class="nx">r</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">scanRun</span><span class="p">(</span><span class="nx">s</span><span class="p">.</span><span class="nx">pool</span><span class="p">.</span><span class="nx">QueryRow</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span>
+<span class="w">    </span><span class="s">`SELECT `</span><span class="o">+</span><span class="nx">runCols</span><span class="o">+</span><span class="s">` FROM runs WHERE idempotency_key = $1`</span><span class="p">,</span><span class="w"> </span><span class="nx">key</span><span class="p">))</span>
+<span class="k">return</span><span class="w"> </span><span class="nx">r</span><span class="p">,</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span>
+</code></pre></div>
+
+<p><strong>逐行解读</strong></p>
+<ul>
+<li><strong><code>ON CONFLICT (idempotency_key) DO NOTHING</code></strong>：键已经存在时不报错，什么也不做。判断“存在不存在”和“插入”是数据库在一个原子操作里完成的，不存在“都检查了、都插入了”的窗口。</li>
+<li><strong><code>RETURNING</code></strong>：插入成功时返回新行；<code>DO NOTHING</code> 时没有返回行，<code>Scan</code> 得到 <code>pgx.ErrNoRows</code>。</li>
+<li><strong>查已有的那条</strong>：重试的请求拿到和第一次完全相同的 run，前端可以接着订阅它的进度。<code>created</code> 告诉调用方这是新建的还是重放的，HTTP 层可以据此返回 201 或 200。</li>
+</ul>
+<p><code>TestEnqueueRunIdempotent</code> 让 10 个 goroutine 用同一个键同时调用，验证只建了 1 条。</p>
+<blockquote>
+<p>不要先 <code>SELECT</code> 看键存不存在、再决定 <code>INSERT</code>，那又是一个读改写。第 08 模块“重试与幂等”会把这个模式扩展到整个请求链路。</p>
+</blockquote>
+<h2 id="15-用-postgres-做任务队列skip-locked">15. 用 Postgres 做任务队列：SKIP LOCKED</h2>
+<p>Agent 运行可能要几分钟，不能放在 HTTP 请求里同步执行。常见架构：API 只负责建一条 <code>queued</code> 状态的 run 并立即返回，后台多个 worker 从表里领任务执行。</p>
+<p>难点在于<strong>多个 worker 同时领，不能领到同一个</strong>：</p>
+<div class="hl"><pre><span></span><code><span class="c1">// store.go · ClaimRun</span>
+<span class="s">`UPDATE runs SET status = 'running', worker = $1, started_at = now()</span>
+<span class="s"> WHERE id = (</span>
+<span class="s">     SELECT id FROM runs WHERE status = 'queued'</span>
+<span class="s">     ORDER BY created_at, id</span>
+<span class="s">     FOR UPDATE SKIP LOCKED</span>
+<span class="s">     LIMIT 1)</span>
+<span class="s"> RETURNING ...`</span>
+</code></pre></div>
+
+<p><strong>逐行解读</strong></p>
+<ul>
+<li><strong>子查询</strong>：找最早的一条排队中的任务。<code>WHERE status = 'queued'</code> 和 <code>ORDER BY created_at, id</code> 正好命中第 8 节的部分索引。</li>
+<li><strong><code>FOR UPDATE</code></strong>：给选中的行加锁，别人在我提交前改不了它。</li>
+<li><strong><code>SKIP LOCKED</code></strong>：如果某一行已经被别的 worker 锁住了，<strong>不等它，直接跳过</strong>，去拿下一条。这样 6 个 worker 同时来，会各自拿到不同的 6 条。</li>
+<li><strong>外层 <code>UPDATE</code></strong>：把领到的任务改成 <code>running</code>，记上是谁领的。整条语句是一个原子操作。</li>
+</ul>
+<p>两个对照实验（练习 2 里你会亲手做）：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>改动</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>去掉 <code>FOR UPDATE SKIP LOCKED</code></td>
+<td>测试失败，出现 <code>run 18 被 worker-0 和 worker-5 重复领取</code>。两个 worker 的子查询选中了同一个 id，外层 <code>UPDATE</code> 只按 <code>id</code> 过滤，两次都成功</td>
+</tr>
+<tr>
+<td>只去掉 <code>SKIP LOCKED</code></td>
+<td>测试仍然通过，但所有 worker 都在等同一行的锁，变成一个接一个地领，并发 worker 失去了意义</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>为什么不直接用 Kafka / RabbitMQ？</strong> 规模不大时（每秒几百个任务以内），用 Postgres 做队列有一个巨大优势：<strong>建任务和写业务数据可以在同一个事务里</strong>。“创建会话消息 + 创建 run”要么都成功要么都失败，不会出现“消息写了但任务没进队列”。用外部消息队列就得处理这种不一致（第 08 模块的 Outbox 模式）。</p>
+<h2 id="16-状态机守卫用-where-防止非法状态转换">16. 状态机守卫：用 WHERE 防止非法状态转换</h2>
+<p>run 的状态只能这样走：<code>queued → running → succeeded / failed</code>。不允许 <code>queued</code> 直接变 <code>succeeded</code>，也不允许已经 <code>succeeded</code> 的再被改成 <code>failed</code>（比如一个超时的 worker 迟到了才来汇报）。</p>
+<div class="hl"><pre><span></span><code><span class="c1">// store.go · FinishRun</span>
+<span class="nx">tag</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">s</span><span class="p">.</span><span class="nx">pool</span><span class="p">.</span><span class="nx">Exec</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span>
+<span class="w">    </span><span class="s">`UPDATE runs SET status = $2, finished_at = now()</span>
+<span class="s">     WHERE id = $1 AND status = 'running'`</span><span class="p">,</span><span class="w"> </span><span class="nx">id</span><span class="p">,</span><span class="w"> </span><span class="nx">status</span><span class="p">)</span>
+<span class="c1">// ...</span>
+<span class="k">if</span><span class="w"> </span><span class="nx">tag</span><span class="p">.</span><span class="nx">RowsAffected</span><span class="p">()</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">ErrConflict</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>把“前一个状态必须是 running”写进 <code>WHERE</code>。不满足就影响 0 行，返回 <code>ErrConflict</code>。检查和修改在同一条语句里，没有并发窗口。这其实就是第 11 节乐观锁的思路，只是用 <code>status</code> 代替了 <code>version</code>。</p>
+<h2 id="17-连接池">17. 连接池</h2>
+<p>每个 Postgres 连接在服务端是一个独立的进程，大约占 10 MB 内存，建立连接要几毫秒。所以应用不能每个请求新建连接，而是维护一个<strong>连接池</strong>：</p>
+<div class="hl"><pre><span></span><code><span class="nx">pool</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">pgxpool</span><span class="p">.</span><span class="nx">New</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">url</span><span class="p">)</span><span class="w">   </span><span class="c1">// url 里可以带 ?pool_max_conns=10</span>
+</code></pre></div>
+
+<p>要点：</p>
+<ul>
+<li><strong>池子不是越大越好</strong>。Postgres 的并发能力受 CPU 核数限制，一个 8 核数据库，几十个同时执行的查询就饱和了。10 个服务实例、每个池子 100 个连接，就是 1000 个连接，数据库先被压垮。经验起点：每个实例 <code>pool_max_conns</code> 设成 10 到 20，再根据压测调整。</li>
+<li><strong>连接被长时间占着，池子就被耗尽</strong>。最常见的原因是事务里做了慢操作（调模型、调外部 API）。<strong>事务要短：只包住数据库操作。</strong></li>
+<li><strong>服务实例很多时</strong>，在应用和数据库之间加 <strong>PgBouncer</strong> 做连接复用（第 09 模块）。</li>
+</ul>
+<hr />
+<h1 id="第四部分迁移">第四部分：迁移</h1>
+<h2 id="18-迁移表结构也要版本管理">18. 迁移：表结构也要版本管理</h2>
+<p>表结构的每一次改动都写成一个 SQL 文件，按顺序编号，提交到 Git，服务启动时自动执行还没执行过的那些。这样任何环境（你的电脑、CI、线上）的表结构都能从零重建，而且一致。</p>
+<p>练习里的执行器 <code>migrate.go</code> 只有几十行，主流工具（goose、golang-migrate、Atlas）原理是一样的：</p>
+<div class="hl"><pre><span></span><code><span class="c1">//go:embed migrations/*.sql</span>
+<span class="kd">var</span><span class="w"> </span><span class="nx">migrationFS</span><span class="w"> </span><span class="nx">embed</span><span class="p">.</span><span class="nx">FS</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">s</span><span class="w"> </span><span class="o">*</span><span class="nx">Store</span><span class="p">)</span><span class="w"> </span><span class="nx">Migrate</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">)</span><span class="w"> </span><span class="p">([]</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// ...</span>
+<span class="w">    </span><span class="nx">tx</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">s</span><span class="p">.</span><span class="nx">pool</span><span class="p">.</span><span class="nx">Begin</span><span class="p">(</span><span class="nx">ctx</span><span class="p">)</span>
+<span class="w">    </span><span class="k">defer</span><span class="w"> </span><span class="nx">tx</span><span class="p">.</span><span class="nx">Rollback</span><span class="p">(</span><span class="nx">ctx</span><span class="p">)</span><span class="w"> </span><span class="c1">// 已 Commit 时这是空操作</span>
+
+<span class="w">    </span><span class="c1">// 事务级咨询锁：事务结束自动释放，进程崩了也不会留下死锁</span>
+<span class="w">    </span><span class="nx">tx</span><span class="p">.</span><span class="nx">Exec</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="s">`SELECT pg_advisory_xact_lock($1)`</span><span class="p">,</span><span class="w"> </span><span class="nx">migrationLockID</span><span class="p">)</span>
+<span class="w">    </span><span class="nx">tx</span><span class="p">.</span><span class="nx">Exec</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="s">`CREATE TABLE IF NOT EXISTS schema_migrations (...)`</span><span class="p">)</span>
+<span class="w">    </span><span class="c1">// 读出已执行的版本 ...</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">f</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">files</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">done</span><span class="p">[</span><span class="nx">version</span><span class="p">]</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">continue</span><span class="w"> </span><span class="p">}</span>
+<span class="w">        </span><span class="nx">tx</span><span class="p">.</span><span class="nx">Exec</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="kt">string</span><span class="p">(</span><span class="nx">sql</span><span class="p">))</span>
+<span class="w">        </span><span class="nx">tx</span><span class="p">.</span><span class="nx">Exec</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="s">`INSERT INTO schema_migrations (version) VALUES ($1)`</span><span class="p">,</span><span class="w"> </span><span class="nx">version</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">applied</span><span class="p">,</span><span class="w"> </span><span class="nx">tx</span><span class="p">.</span><span class="nx">Commit</span><span class="p">(</span><span class="nx">ctx</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>逐行解读</strong></p>
+<ul>
+<li><strong><code>//go:embed</code></strong>：编译时把 SQL 文件打进二进制。0.5 课的 distroless 镜像里只有一个可执行文件，迁移文件跟着走，不用额外拷贝。</li>
+<li><strong><code>schema_migrations</code> 表</strong>：记录执行过哪些版本。执行器每次启动先读它，只执行没有记录的文件。</li>
+<li><strong>咨询锁 <code>pg_advisory_xact_lock</code></strong>：K8s 一次滚动发布可能同时启动 3 个新实例，3 个都去执行迁移就会冲突。咨询锁是 Postgres 提供的“按数字加锁”，和任何表无关。拿到锁的执行，其余的等；轮到它们时发现版本已经记录了，直接跳过。<code>_xact_</code> 表示锁跟着事务，提交或回滚时自动释放，进程崩溃也不会留下一把永远不释放的锁。</li>
+<li><strong>所有迁移在一个事务里</strong>：Postgres 的 DDL（建表、改表）是事务性的，这是它比 MySQL 方便的地方：迁移跑到一半失败，整个回滚，表结构不会停在一个半成品状态。</li>
+<li><strong><code>defer tx.Rollback(ctx)</code></strong>：任何一步出错提前返回，都会回滚；已经提交了的话 <code>Rollback</code> 什么也不做。</li>
+</ul>
+<p><code>TestMigrateIsIdempotent</code> 并发调用 5 次 <code>Migrate</code>，验证没有一次重复执行。</p>
+<h3 id="只写-up不写-down">只写 up，不写 down</h3>
+<p>很多工具支持写“回滚迁移”（down）。实践中线上很少真的用它：删掉一个已经有数据的列是不可逆的。更常见的做法是<strong>只往前走</strong>：发现问题，再写一个新的迁移修正。</p>
+<h2 id="19-线上改表哪些操作会锁表">19. 线上改表：哪些操作会锁表</h2>
+<p>线上的表一直在被读写。有些 DDL 会拿到很强的锁，执行期间整张表的读写都被阻塞。表小时无感，表大了就是一次事故。</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>操作</th>
+<th>风险</th>
+<th>安全做法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ADD COLUMN ... DEFAULT 常量</code></td>
+<td>Postgres 11 起只改元数据，瞬间完成</td>
+<td>直接做（练习的 <code>0002_runs_model.sql</code>）</td>
+</tr>
+<tr>
+<td><code>ADD COLUMN ... DEFAULT now()</code> 这类易变默认值</td>
+<td>重写整张表</td>
+<td>先加可空列，再分批回填</td>
+</tr>
+<tr>
+<td><code>CREATE INDEX</code></td>
+<td>建索引期间阻塞写入</td>
+<td><code>CREATE INDEX CONCURRENTLY</code>（不能放在事务里，需要单独执行）</td>
+</tr>
+<tr>
+<td><code>ALTER COLUMN TYPE</code></td>
+<td>重写整张表并锁表</td>
+<td>新建列 → 双写 → 回填 → 切读 → 删旧列</td>
+</tr>
+<tr>
+<td><code>ADD CONSTRAINT ... NOT NULL / CHECK / FK</code></td>
+<td>扫全表校验，期间锁表</td>
+<td>先 <code>NOT VALID</code> 加上，再单独 <code>VALIDATE CONSTRAINT</code></td>
+</tr>
+<tr>
+<td>重命名或删除列</td>
+<td>正在运行的旧版本代码立刻报错</td>
+<td>分两次发版，见下</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>扩展-收缩</strong>（expand / contract）模式，以“把 <code>title</code> 改名为 <code>name</code>”为例：</p>
+<ol>
+<li><strong>扩展</strong>：加 <code>name</code> 列；代码同时写 <code>title</code> 和 <code>name</code>；回填旧数据；</li>
+<li><strong>切换</strong>：代码改为只读 <code>name</code>；</li>
+<li><strong>收缩</strong>：确认没有旧版本代码在跑了，再删 <code>title</code>。</li>
+</ol>
+<p>核心原则：<strong>任何时刻，线上同时在跑的新旧两个版本的代码，都要能和当前的表结构正常工作。</strong> 因为滚动发布时新旧版本就是会同时存在（0.5 课优雅退出的那几十秒）。</p>
+<p>另一个保命设置：迁移前 <code>SET lock_timeout = '5s'</code>。DDL 拿不到锁时，与其无限等下去、在它后面堵住所有正常查询，不如 5 秒后失败，换个时间再试。</p>
+<hr />
+<h1 id="第五部分redis">第五部分：Redis</h1>
+<h2 id="20-redis-是什么适合放什么">20. Redis 是什么，适合放什么</h2>
+<p>Redis 是一个<strong>内存里的键值存储</strong>，单线程执行命令，每条命令都是原子的，单实例每秒能处理十万级的操作。它的值不只是字符串，还有好几种数据结构：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>结构</th>
+<th>常用命令</th>
+<th>Agent 平台里的用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>String</td>
+<td><code>GET</code> <code>SET EX</code> <code>INCR</code></td>
+<td>缓存（会话、用户配置）、计数器、固定窗口限流</td>
+</tr>
+<tr>
+<td>Hash</td>
+<td><code>HSET</code> <code>HGET</code> <code>HINCRBY</code></td>
+<td>一个对象的多个字段，比如一次 run 的实时进度</td>
+</tr>
+<tr>
+<td>List</td>
+<td><code>LPUSH</code> <code>BRPOP</code></td>
+<td>简单队列（但没有确认机制，worker 崩了任务就丢）</td>
+</tr>
+<tr>
+<td>Set</td>
+<td><code>SADD</code> <code>SISMEMBER</code></td>
+<td>去重，比如“这条 webhook 处理过了吗”</td>
+</tr>
+<tr>
+<td>Sorted Set</td>
+<td><code>ZADD</code> <code>ZRANGEBYSCORE</code> <code>ZREMRANGEBYSCORE</code></td>
+<td>排行榜、滑动窗口限流、延迟任务</td>
+</tr>
+<tr>
+<td>Stream</td>
+<td><code>XADD</code> <code>XREADGROUP</code> <code>XACK</code></td>
+<td>带确认的消息流，比如把流式 token 广播给多个订阅者</td>
+</tr>
+<tr>
+<td>Pub/Sub</td>
+<td><code>PUBLISH</code> <code>SUBSCRIBE</code></td>
+<td>实时通知，但订阅者不在线时消息直接丢失</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Redis 不是数据库的替代品。</strong> 它默认的持久化是定期快照（RDB）和追加日志（AOF），配置得当也可能丢最近一秒的数据，内存满了还会按策略淘汰 key。规则：<strong>丢了能从别处重建的数据才放 Redis</strong>（缓存、计数器、限流），丢了就找不回来的放 Postgres（消息、运行记录、账单）。</p>
+<h2 id="21-cache-aside最常用的缓存模式">21. Cache-Aside：最常用的缓存模式</h2>
+<p><strong>读</strong>：先查缓存，命中直接返回；没命中查数据库，再写回缓存。
+<strong>写</strong>：先写数据库，成功后<strong>删除</strong>缓存（不是更新缓存）。</p>
+<div class="hl"><pre><span></span><code><span class="c1">// cache.go · GetConversation</span>
+<span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">c</span><span class="w"> </span><span class="o">*</span><span class="nx">Cache</span><span class="p">)</span><span class="w"> </span><span class="nx">GetConversation</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">id</span><span class="w"> </span><span class="kt">int64</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="nx">Conversation</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">key</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">convKey</span><span class="p">(</span><span class="nx">id</span><span class="p">)</span>
+<span class="w">    </span><span class="nx">conv</span><span class="p">,</span><span class="w"> </span><span class="nx">hit</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">c</span><span class="p">.</span><span class="nx">lookup</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">key</span><span class="p">)</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// Redis 挂了：降级直接查库，缓存是加速，不能变成单点</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">c</span><span class="p">.</span><span class="nx">store</span><span class="p">.</span><span class="nx">GetConversation</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">id</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">hit</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">conv</span><span class="p">.</span><span class="nx">value</span><span class="p">()</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="c1">// 未命中：同一个 key 的并发请求只放一个去查库（防缓存击穿）</span>
+<span class="w">    </span><span class="nx">v</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">c</span><span class="p">.</span><span class="nx">sf</span><span class="p">.</span><span class="nx">Do</span><span class="p">(</span><span class="nx">key</span><span class="p">,</span><span class="w"> </span><span class="kd">func</span><span class="p">()</span><span class="w"> </span><span class="p">(</span><span class="kt">any</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">lctx</span><span class="p">,</span><span class="w"> </span><span class="nx">cancel</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">WithTimeout</span><span class="p">(</span><span class="nx">context</span><span class="p">.</span><span class="nx">WithoutCancel</span><span class="p">(</span><span class="nx">ctx</span><span class="p">),</span><span class="w"> </span><span class="mi">3</span><span class="o">*</span><span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="p">)</span>
+<span class="w">        </span><span class="k">defer</span><span class="w"> </span><span class="nx">cancel</span><span class="p">()</span>
+<span class="w">        </span><span class="c1">// 双重检查：可能在我们 GET 未命中之后、进入 Do 之前，上一轮 Do 刚把缓存填好</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">conv</span><span class="p">,</span><span class="w"> </span><span class="nx">hit</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">c</span><span class="p">.</span><span class="nx">lookup</span><span class="p">(</span><span class="nx">lctx</span><span class="p">,</span><span class="w"> </span><span class="nx">key</span><span class="p">);</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">hit</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="nx">conv</span><span class="p">.</span><span class="nx">value</span><span class="p">()</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="nx">c</span><span class="p">.</span><span class="nx">loads</span><span class="p">.</span><span class="nx">Add</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="w">        </span><span class="nx">conv</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">c</span><span class="p">.</span><span class="nx">store</span><span class="p">.</span><span class="nx">GetConversation</span><span class="p">(</span><span class="nx">lctx</span><span class="p">,</span><span class="w"> </span><span class="nx">id</span><span class="p">)</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">errors</span><span class="p">.</span><span class="nx">Is</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span><span class="w"> </span><span class="nx">ErrNotFound</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nx">c</span><span class="p">.</span><span class="nx">rdb</span><span class="p">.</span><span class="nx">Set</span><span class="p">(</span><span class="nx">lctx</span><span class="p">,</span><span class="w"> </span><span class="nx">key</span><span class="p">,</span><span class="w"> </span><span class="nx">notFoundMarker</span><span class="p">,</span><span class="w"> </span><span class="mi">30</span><span class="o">*</span><span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="p">)</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">b</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">json</span><span class="p">.</span><span class="nx">Marshal</span><span class="p">(</span><span class="nx">conv</span><span class="p">);</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nx">c</span><span class="p">.</span><span class="nx">rdb</span><span class="p">.</span><span class="nx">Set</span><span class="p">(</span><span class="nx">lctx</span><span class="p">,</span><span class="w"> </span><span class="nx">key</span><span class="p">,</span><span class="w"> </span><span class="nx">b</span><span class="p">,</span><span class="w"> </span><span class="nx">c</span><span class="p">.</span><span class="nx">jitter</span><span class="p">(</span><span class="nx">c</span><span class="p">.</span><span class="nx">ttl</span><span class="p">))</span><span class="w"> </span><span class="c1">// 回填失败不影响返回结果</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">conv</span><span class="p">,</span><span class="w"> </span><span class="kc">nil</span>
+<span class="w">    </span><span class="p">})</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">Conversation</span><span class="p">{},</span><span class="w"> </span><span class="nx">err</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">v</span><span class="p">.(</span><span class="nx">Conversation</span><span class="p">),</span><span class="w"> </span><span class="kc">nil</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>逐行解读</strong></p>
+<ul>
+<li><strong><code>lookup</code> 把三种结果分开</strong>：命中（<code>hit=true</code>）、未命中（<code>hit=false</code>）、Redis 本身出错（<code>err != nil</code>）。这三种情况的处理完全不同，混在一起就会出 bug。</li>
+<li><strong>Redis 出错时降级查库</strong>：缓存的作用是加速。如果 Redis 一挂整个服务就不可用，你等于给系统加了一个单点故障。<code>TestCacheNegativeAndFallback</code> 连一个不存在的 Redis 地址，验证仍然能从库里读到数据。</li>
+<li><strong><code>singleflight</code></strong>：<code>golang.org/x/sync/singleflight</code>，同一个 key 同时只有一个函数在执行，其他调用者等着共享它的结果。一个热门会话的缓存过期瞬间涌进来 100 个请求，只有 1 个去查库。</li>
+<li><strong><code>context.WithoutCancel(ctx)</code></strong>：这次查库是替所有等待者做的。如果直接用第一个调用者的 <code>ctx</code>，它的用户一关页面，ctx 取消，其他 99 个等待者也一起拿到 <code>context canceled</code>。所以去掉取消信号（Go 1.21 起有这个函数），另设 3 秒超时，保证这次加载不会无限挂着。</li>
+<li><strong>双重检查</strong>：这是写测试时真实踩到的坑。最初没有这一步，<code>TestCacheAsideSingleflight</code> 连跑 30 次有 18 次失败（期望查库 1 次，实际 2 次）。原因是时序：goroutine X 执行 <code>GET</code> 时缓存还空着；接着第一轮 <code>Do</code> 完成、写好缓存、退出；然后 X 才进入 <code>Do</code>，此时已经没有正在执行的同 key 函数可以共享，于是又查了一次库。进入 <code>Do</code> 后先再查一次缓存就解决了。<strong><code>singleflight</code> 只合并“同时”的调用，不合并“先后”的调用。</strong></li>
+<li><strong><code>c.loads</code></strong>：一个原子计数器，记录真实查库次数，测试用它验证 singleflight 和负缓存是否生效。</li>
+<li><strong>回填失败不报错</strong>：缓存写不进去，数据仍然是对的，下次再查库而已。</li>
+</ul>
+<h3 id="写路径为什么删缓存而不是更新缓存">写路径：为什么删缓存而不是更新缓存</h3>
+<div class="hl"><pre><span></span><code><span class="c1">// cache.go · RenameConversation</span>
+<span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">c</span><span class="p">.</span><span class="nx">store</span><span class="p">.</span><span class="nx">RenameConversation</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">id</span><span class="p">,</span><span class="w"> </span><span class="nx">title</span><span class="p">);</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">err</span>
+<span class="p">}</span>
+<span class="k">return</span><span class="w"> </span><span class="nx">c</span><span class="p">.</span><span class="nx">rdb</span><span class="p">.</span><span class="nx">Del</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">convKey</span><span class="p">(</span><span class="nx">id</span><span class="p">)).</span><span class="nx">Err</span><span class="p">()</span>
+</code></pre></div>
+
+<p>如果改成“写库后更新缓存”，两个并发的修改可能这样交错：</p>
+<div class="hl"><pre><span></span><code>请求 1：写库 title=A
+请求 2：写库 title=B
+请求 2：写缓存 title=B
+请求 1：写缓存 title=A      ← 库里是 B，缓存里是 A，直到过期都是错的
+</code></pre></div>
+
+<p>删除没有这个问题：不管谁先删，缓存都是空的，下次读取从库里拿最新值。删缓存的方案也不是绝对一致（极端时序下仍可能写回旧值），所以<strong>TTL 是最后的兜底</strong>：再坏的情况，过期后也会恢复正确。对一致性要求极高的数据（余额），干脆不缓存。</p>
+<h2 id="22-缓存的三个经典问题">22. 缓存的三个经典问题</h2>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>问题</th>
+<th>现象</th>
+<th>练习里的对策</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>穿透</strong></td>
+<td>大量请求查询<strong>根本不存在</strong>的 key（恶意扫描、bug），每次都未命中，全部打到数据库</td>
+<td><strong>负缓存</strong>：不存在也缓存一个 <code>"null"</code> 标记，TTL 30 秒</td>
+</tr>
+<tr>
+<td><strong>击穿</strong></td>
+<td>一个<strong>热点 key</strong> 过期的瞬间，大量并发请求同时未命中，同时查库</td>
+<td><strong>singleflight</strong>：同一实例内同 key 只放一个请求去查库</td>
+</tr>
+<tr>
+<td><strong>雪崩</strong></td>
+<td><strong>大量 key 同时过期</strong>（比如服务启动时一起写入、TTL 都是 1 小时），或 Redis 整体宕机</td>
+<td><strong>TTL 加随机抖动</strong>（<code>jitter</code>，0~10%）；Redis 故障时<strong>降级查库</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p>两点补充：</p>
+<ul>
+<li>singleflight 只在<strong>单个进程内</strong>合并请求。10 个实例最多还是有 10 个请求同时查库，一般可以接受；如果要做到全局只有 1 个，需要用 Redis 分布式锁（<code>SET key value NX PX 3000</code>），复杂度上升很多，一般不值得。</li>
+<li>负缓存的 TTL 要短：用户刚创建的会话，如果之前被查过一次“不存在”，在负缓存过期前都会被当成不存在。</li>
+</ul>
+<h2 id="23-限流用-lua-保证原子性">23. 限流：用 Lua 保证原子性</h2>
+<p>每个用户每分钟最多发起 N 次模型调用，防止滥用和账单爆炸。最简单的是<strong>固定窗口</strong>：每个窗口一个计数器，超过上限就拒绝。</p>
+<div class="hl"><pre><span></span><code><span class="c1">// cache.go</span>
+<span class="kd">var</span><span class="w"> </span><span class="nx">fixedWindow</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">redis</span><span class="p">.</span><span class="nx">NewScript</span><span class="p">(</span><span class="s">`</span>
+<span class="s">local n = redis.call('INCR', KEYS[1])</span>
+<span class="s">if n == 1 then</span>
+<span class="s">  redis.call('PEXPIRE', KEYS[1], ARGV[1])</span>
+<span class="s">end</span>
+<span class="s">return n`</span><span class="p">)</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="nx">Allow</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">rdb</span><span class="w"> </span><span class="o">*</span><span class="nx">redis</span><span class="p">.</span><span class="nx">Client</span><span class="p">,</span><span class="w"> </span><span class="nx">key</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">limit</span><span class="w"> </span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="nx">window</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Duration</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="kt">bool</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">n</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">fixedWindow</span><span class="p">.</span><span class="nx">Run</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">rdb</span><span class="p">,</span><span class="w"> </span><span class="p">[]</span><span class="kt">string</span><span class="p">{</span><span class="s">"rl:"</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">key</span><span class="p">},</span><span class="w"> </span><span class="nx">window</span><span class="p">.</span><span class="nx">Milliseconds</span><span class="p">()).</span><span class="nx">Int</span><span class="p">()</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Errorf</span><span class="p">(</span><span class="s">"rate limit: %w"</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">n</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="nx">limit</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="kc">nil</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="nx">limit</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nx">n</span><span class="p">,</span><span class="w"> </span><span class="kc">nil</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>逐行解读</strong></p>
+<ul>
+<li><strong><code>INCR</code></strong>：计数加一并返回新值。key 不存在时从 0 开始，所以第一次返回 1。</li>
+<li><strong><code>n == 1</code> 时设过期</strong>：第一次计数时开启这个窗口，到期 key 自动消失，下一个窗口从头计数。</li>
+<li><strong>为什么用 Lua</strong>：如果在 Go 里分两次调用 <code>INCR</code> 和 <code>PEXPIRE</code>，进程恰好在两次调用之间崩溃，这个 key 就永远没有过期时间，这个用户被永久限流。Redis 执行一段 Lua 脚本时不会插入其他命令，两步是原子的。</li>
+<li><strong><code>redis.NewScript</code></strong>：go-redis 会先用 <code>EVALSHA</code> 按脚本哈希执行，Redis 里没有缓存这个脚本时自动退回 <code>EVAL</code> 上传，不用每次传输整段脚本。</li>
+<li><strong>返回剩余次数</strong>：HTTP 层可以放进 <code>X-RateLimit-Remaining</code> 响应头，被拒绝时返回 <code>429 Too Many Requests</code> 和 <code>Retry-After</code>。</li>
+</ul>
+<p>固定窗口的缺点：限制每分钟 100 次，用户在 0:59 打 100 次、1:00 再打 100 次，两秒内打了 200 次。要更平滑，用<strong>滑动窗口</strong>（选做练习）或<strong>令牌桶</strong>。另外，按“次数”限流对 Agent 不够：一次调用可能是 100 token 也可能是 10 万 token，生产中往往还要按 <strong>token 数</strong>限流（第 09 模块）。</p>
+<hr />
+<h2 id="本课小结">本课小结</h2>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>问题</th>
+<th>方案</th>
+<th>练习里的位置</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>数据必须对，不管调用方多粗心</td>
+<td><code>NOT NULL</code> / <code>CHECK</code> / <code>UNIQUE</code> / 外键</td>
+<td><code>0001_init.sql</code></td>
+</tr>
+<tr>
+<td>列表页翻页又慢又重复</td>
+<td>复合索引 + 键集分页</td>
+<td><code>ListConversations</code></td>
+</tr>
+<tr>
+<td>并发追加消息重号</td>
+<td><code>UPDATE ... last_seq + 1 RETURNING</code> 行锁分配序号</td>
+<td><code>AppendMessage</code></td>
+</tr>
+<tr>
+<td>计费并发累加丢数</td>
+<td>SQL 内原子运算</td>
+<td><code>AddUsage</code> / <code>TestLostUpdate</code></td>
+</tr>
+<tr>
+<td>“最多一个运行中”被并发绕过</td>
+<td>部分唯一索引，或 Serializable + 重试</td>
+<td>第 12 节</td>
+</tr>
+<tr>
+<td>客户端重试重复扣费</td>
+<td>幂等键 + <code>ON CONFLICT DO NOTHING</code></td>
+<td><code>EnqueueRun</code></td>
+</tr>
+<tr>
+<td>多 worker 领到同一个任务</td>
+<td><code>FOR UPDATE SKIP LOCKED</code></td>
+<td><code>ClaimRun</code></td>
+</tr>
+<tr>
+<td>迟到的 worker 覆盖最终状态</td>
+<td><code>WHERE status = 'running'</code> 状态守卫</td>
+<td><code>FinishRun</code></td>
+</tr>
+<tr>
+<td>多实例同时迁移</td>
+<td>咨询锁 + <code>schema_migrations</code></td>
+<td><code>migrate.go</code></td>
+</tr>
+<tr>
+<td>热点数据读得慢</td>
+<td>Cache-Aside + 写后删缓存</td>
+<td><code>cache.go</code></td>
+</tr>
+<tr>
+<td>穿透 / 击穿 / 雪崩 / Redis 故障</td>
+<td>负缓存 / singleflight / TTL 抖动 / 降级查库</td>
+<td><code>cache.go</code></td>
+</tr>
+<tr>
+<td>防滥用</td>
+<td>Lua 固定窗口限流</td>
+<td><code>Allow</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>一句话：<strong>正确性交给数据库的约束和原子语句，速度交给缓存，缓存挂了不能影响正确性。</strong></p>
+<hr />
+<h2 id="练习今天做完">练习（今天做完）</h2>
+<p><strong>准备</strong>：装好 Docker，进入 <code>projects/05-store</code>，执行 <code>make up &amp;&amp; make test</code>，12 个测试全部通过（<code>TestLostUpdate</code> 会打印丢了多少次更新，每次数字不同）。</p>
+<p><strong>练习 1：验证索引和分页</strong></p>
+<p><code>make psql</code> 进入数据库，灌入 20 万个会话：</p>
+<div class="hl"><pre><span></span><code><span class="k">INSERT</span><span class="w"> </span><span class="k">INTO</span><span class="w"> </span><span class="n">conversations</span><span class="w"> </span><span class="p">(</span><span class="n">user_id</span><span class="p">,</span><span class="w"> </span><span class="n">title</span><span class="p">,</span><span class="w"> </span><span class="n">updated_at</span><span class="p">)</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="s1">'u'</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">100</span><span class="p">),</span><span class="w"> </span><span class="s1">'c'</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">now</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="s1">' seconds'</span><span class="p">)::</span><span class="nb">interval</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">generate_series</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">200000</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">i</span><span class="p">;</span>
+<span class="k">ANALYZE</span><span class="w"> </span><span class="n">conversations</span><span class="p">;</span>
+</code></pre></div>
+
+<p>然后：</p>
+<ol>
+<li>对 <code>ListConversations</code> 第一页的查询（<code>user_id = 'u7'</code>，<code>LIMIT 21</code>）执行 <code>EXPLAIN ANALYZE</code>，确认用的是 <code>conversations_user_recent_idx</code>，记下 <code>Execution Time</code>；</li>
+<li>写一个等价的 <code>OFFSET 1900 LIMIT 21</code> 查询，和一个从第 1900 行之后开始的键集查询（游标取第 1900 行的 <code>updated_at</code> 和 <code>id</code>），分别 <code>EXPLAIN ANALYZE</code>，对比两者实际读取的行数和耗时；</li>
+<li><code>DROP INDEX conversations_user_recent_idx;</code> 后再执行第 1 步，看计划变成了什么。做完重新执行 <code>0001_init.sql</code> 里那条 <code>CREATE INDEX</code> 恢复。</li>
+</ol>
+<p><strong>练习 2：弄坏它，看哪个测试报警</strong></p>
+<p>每次只做一处修改，运行 <code>make test</code>，记下哪个测试失败、错误信息是什么、为什么，然后 <code>git checkout .</code> 还原：</p>
+<ol>
+<li><code>AppendMessage</code> 改为先 <code>SELECT coalesce(max(seq), 0) + 1 FROM messages WHERE conversation_id = $1</code> 取序号，再插入；</li>
+<li><code>ClaimRun</code> 去掉 <code>FOR UPDATE SKIP LOCKED</code> 整行；再试只去掉 <code>SKIP LOCKED</code>；</li>
+<li><code>cache.go</code> 删掉 <code>Do</code> 里的双重检查那三行，用 <code>go test -race -count=30 -run TestCacheAsideSingleflight ./...</code> 跑 30 次，数一下失败几次。</li>
+</ol>
+<p><strong>练习 3：复现写偏斜</strong></p>
+<p>在两个 psql 窗口里，按第 12 节的步骤交错执行（A 查询、B 查询、A 插入、B 插入、A 提交、B 提交），分别用默认级别和 <code>BEGIN ISOLATION LEVEL SERIALIZABLE</code>，记录最终 running 的行数。然后加上第 12 节的部分唯一索引，用默认级别再做一次，看是哪一步报错、报的什么错。</p>
+<p><strong>选做：滑动窗口限流</strong></p>
+<p>用 Sorted Set 实现 <code>AllowSliding(ctx, rdb, key, limit, window)</code>：每次请求以当前毫秒时间戳为 score 加入集合，先删掉窗口之外的旧记录，再数集合里有多少个。整个过程写成一个 Lua 脚本。仿照 <code>TestRateLimitFixedWindow</code> 写一个测试，并额外验证固定窗口的“边界两倍流量”问题在滑动窗口下不会出现。</p>
+<hr />
+<h2 id="自测题">自测题</h2>
+<ol>
+<li>为什么 <code>created_at</code> 要用 <code>TIMESTAMPTZ</code> 而不是 <code>TIMESTAMP</code>？主键为什么用 <code>BIGINT</code> 而不是 <code>INT</code>？</li>
+<li>有一个复合索引 <code>(user_id, updated_at DESC, id DESC)</code>。下面三个查询，哪个能用它避免排序，哪个基本用不上？
+   (a) <code>WHERE user_id = ? ORDER BY updated_at DESC LIMIT 20</code>
+   (b) <code>WHERE updated_at &gt; now() - interval '1 day'</code>
+   (c) <code>WHERE user_id = ? AND updated_at &gt; ?</code></li>
+<li>键集分页的游标为什么必须包含 <code>id</code>，只用 <code>updated_at</code> 会出什么问题？</li>
+<li>在 Read Committed 下，<code>UPDATE runs SET input_tokens = input_tokens + 10 WHERE id = 1</code> 被两个事务并发执行，结果会丢更新吗？为什么？</li>
+<li>同事说：“我把事务改成 Repeatable Read 了，‘每个会话最多一个 running’ 的检查就安全了。”对吗？你会怎么改？</li>
+<li><code>EnqueueRun</code> 如果写成“先 <code>SELECT</code> 查幂等键是否存在，不存在再 <code>INSERT</code>”，在没有唯一约束的情况下会发生什么？有唯一约束的情况下呢？</li>
+<li>一个 worker 领了任务后进程被 <code>kill -9</code>，这个 run 会永远停在 <code>running</code>。你会怎么设计，让它能被别的 worker 重新领走？</li>
+<li>为什么写数据后选择“删缓存”而不是“更新缓存”？删缓存就能保证缓存和数据库完全一致吗？</li>
+<li>解释缓存穿透、击穿、雪崩的区别，并分别说出练习里的对策。</li>
+<li>固定窗口限流的 <code>INCR</code> 和 <code>PEXPIRE</code> 为什么要放在 Lua 脚本里？不放会出什么问题？</li>
+<li>迁移里要给一张 5000 万行的 <code>messages</code> 表加索引，直接写 <code>CREATE INDEX</code> 会有什么后果？练习里的迁移执行器能直接跑 <code>CREATE INDEX CONCURRENTLY</code> 吗？</li>
+</ol>
+<hr />
+<h1 id="参考答案与详解">参考答案与详解</h1>
+<h2 id="自测题答案">自测题答案</h2>
+<p><strong>1.</strong> <code>TIMESTAMPTZ</code> 存的是一个绝对时刻（内部统一转成 UTC），读出时按会话时区显示；<code>TIMESTAMP</code> 只存“年月日时分秒”这几个数字，不知道是哪个时区的。服务器在 UTC、开发机在北京时间时，同一条记录在两边会差 8 小时，而且无法事后修正，因为原始时区信息已经丢了。<code>INT</code> 上限约 21.4 亿，消息、运行记录这种按天几百万增长的表几年就会用完，到时改成 <code>BIGINT</code> 需要重写整张表并长时间锁表；一开始就用 <code>BIGINT</code> 每行只多 4 字节。</p>
+<p><strong>2.</strong> (a) 能用，而且不需要排序：定位到 <code>user_id</code> 那一段后，这一段本来就按 <code>updated_at DESC</code> 排好，读前 20 行就停。(b) 基本用不上：缺少最左列 <code>user_id</code>，就像只知道第二个字母没法查字典，优化器通常会选全表扫描（Postgres 有时会做 Skip Scan 之类的优化，但不能指望）。(c) 能用：<code>user_id</code> 等值定位，<code>updated_at</code> 在那一段里做范围扫描。</p>
+<p><strong>3.</strong> 只用 <code>updated_at &lt; 游标时间</code> 的话，所有与上一页最后一行 <code>updated_at</code> <strong>相同</strong>的行都会被跳过（它们不满足严格小于）；改成 <code>&lt;=</code> 又会把上一页最后一行重复返回。时间戳精度是微秒，看起来很难相同，但批量导入、同一个事务里创建的多行，<code>now()</code> 返回的是同一个值（事务开始时间）。带上唯一的 <code>id</code> 组成 <code>(updated_at, id)</code>，排序就是全序，每一行都有唯一的位置。</p>
+<p><strong>4.</strong> 不会。<code>UPDATE</code> 会对目标行加行锁，第二个事务在这里等待第一个提交。第一个提交后，Read Committed 下第二个事务会<strong>重新读取这一行的最新版本</strong>，再计算 <code>input_tokens + 10</code>，所以结果是 +20。丢失更新只发生在“值在应用里算好、再写回去”的情况，因为那样数据库不知道你是基于哪个旧值算的。</p>
+<p><strong>5.</strong> 不对。实测 Repeatable Read 下两个事务都能提交，最终有 2 个 running。这是写偏斜：两个事务读的是同一个范围，但写的是不同的行（各自插入一行），没有写写冲突，快照隔离检测不到。改法：首选加部分唯一索引 <code>CREATE UNIQUE INDEX ... ON runs (conversation_id) WHERE status = 'running'</code>，让第二个插入（或第二个“改成 running 的更新”）直接因唯一冲突失败；如果规则无法用约束表达，就用 Serializable 并在应用层捕获 <code>40001</code> 重试。</p>
+<p><strong>6.</strong> 没有唯一约束时：两个并发请求都 <code>SELECT</code> 到“不存在”，都执行 <code>INSERT</code>，产生两条 run，用户被扣两次钱，这就是“检查再执行”（check-then-act）的竞态。有唯一约束时：第二个 <code>INSERT</code> 会因为唯一冲突报错（23505），数据是对的，但调用方拿到的是一个错误，还得写代码捕获这个错误再去查已有的记录。<code>ON CONFLICT DO NOTHING</code> 把“检查 + 插入”合成一个原子操作，并且冲突时不报错，代码最简洁。</p>
+<p><strong>7.</strong> 常见方案是<strong>租约</strong>（lease）：领任务时写入 <code>lease_until = now() + interval '60 seconds'</code>，worker 运行期间定期（比如每 20 秒）续约，延长 <code>lease_until</code>。<code>ClaimRun</code> 的条件改成 <code>status = 'queued' OR (status = 'running' AND lease_until &lt; now())</code>，过期的任务就能被别的 worker 领走。配套要做两件事：一是 <code>FinishRun</code> 的守卫里加上 <code>worker = $我</code>，防止原来那个 worker 只是卡住而不是死了、恢复后覆盖新 worker 的结果；二是任务本身要能安全重做（幂等）或从断点恢复，这是第 08 模块“断点恢复”的内容。</p>
+<p><strong>8.</strong> 更新缓存时，两个并发写入的“写库”和“写缓存”顺序可能交错，导致库里是新值、缓存里是旧值，并一直保持到过期。删除缓存是幂等的，无论顺序如何结果都是“缓存为空”，下次读取会从库里拿最新值。但删缓存也不能保证完全一致：比如读请求 R 未命中、从库里读到旧值；此时写请求 W 写库并删缓存；然后 R 才把旧值写回缓存。这个窗口很小（需要 R 的读库和写缓存之间恰好夹着 W 的整个过程），所以实践中可以接受，并靠 TTL 兜底。需要更强一致时可以“延迟双删”（写库后删一次，过几百毫秒再删一次），或者干脆不缓存这类数据。</p>
+<p><strong>9.</strong> <strong>穿透</strong>：查询的数据在库里根本不存在，所以永远不会被缓存，每次都打到库，对策是负缓存（缓存一个短 TTL 的“不存在”标记），还可以在入口用布隆过滤器拦截明显不存在的 id。<strong>击穿</strong>：某一个热点 key 过期的瞬间，大量请求同时未命中并同时查库，对策是 singleflight（进程内合并同 key 请求）。<strong>雪崩</strong>：大量 key 在同一时刻过期，或 Redis 整体不可用，压力全部落到数据库，对策是 TTL 加随机抖动打散过期时间，以及 Redis 故障时降级查库（还可以配合限流，避免数据库被降级流量压垮）。</p>
+<p><strong>10.</strong> 分两次调用时，如果进程在 <code>INCR</code> 之后、<code>PEXPIRE</code> 之前崩溃或网络断开，这个 key 就没有过期时间，计数只增不减，这个用户从此被永久限流。Lua 脚本在 Redis 里原子执行，两步要么都执行要么都不执行。另一种写法是 <code>SET key 0 PX window NX</code> 后再 <code>INCR</code>，同样需要考虑原子性，用脚本最简单。</p>
+<p><strong>11.</strong> 普通 <code>CREATE INDEX</code> 在建索引期间持有阻止写入的锁，5000 万行可能要几分钟甚至更久，这段时间所有往 <code>messages</code> 写消息的请求都会被阻塞，用户发不出消息，相当于服务中断。应该用 <code>CREATE INDEX CONCURRENTLY</code>，它允许建索引期间正常读写（代价是更慢，失败时会留下一个无效索引需要手动删掉）。练习里的执行器<strong>不能</strong>直接跑它：<code>CONCURRENTLY</code> 不能在事务块里执行，而我们的执行器把所有迁移放在一个事务里，会报 <code>CREATE INDEX CONCURRENTLY cannot run inside a transaction block</code>。成熟的迁移工具会提供“这个文件不包事务”的标记（比如 goose 的 <code>-- +goose NO TRANSACTION</code>），我们的执行器要支持的话，需要对带这个标记的文件单独执行、单独记录版本。</p>
+<h2 id="练习参考答案">练习参考答案</h2>
+<p><strong>练习 1：索引和分页</strong></p>
+<p>第一页查询的计划是 <code>Limit → Index Scan using conversations_user_recent_idx</code>，<code>Index Cond: (user_id = 'u7')</code>，实际读取 21 行，耗时在 0.1 毫秒以内。</p>
+<p>键集查询的写法：</p>
+<div class="hl"><pre><span></span><code><span class="c1">-- 先拿到第 1900 行的排序键</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="n">updated_at</span><span class="p">,</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">conversations</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">user_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'u7'</span>
+<span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">updated_at</span><span class="w"> </span><span class="k">DESC</span><span class="p">,</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="k">DESC</span><span class="w"> </span><span class="k">OFFSET</span><span class="w"> </span><span class="mi">1899</span><span class="w"> </span><span class="k">LIMIT</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+
+<span class="c1">-- 用它做游标</span>
+<span class="k">EXPLAIN</span><span class="w"> </span><span class="k">ANALYZE</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="n">title</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">conversations</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">user_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'u7'</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="p">(</span><span class="n">updated_at</span><span class="p">,</span><span class="w"> </span><span class="n">id</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="p">(</span><span class="s1">'上一步的 updated_at'</span><span class="p">,</span><span class="w"> </span><span class="err">上一步的</span><span class="w"> </span><span class="n">id</span><span class="p">)</span>
+<span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">updated_at</span><span class="w"> </span><span class="k">DESC</span><span class="p">,</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="k">DESC</span><span class="w"> </span><span class="k">LIMIT</span><span class="w"> </span><span class="mi">21</span><span class="p">;</span>
+</code></pre></div>
+
+<p>一次实测结果（Postgres 17，具体毫秒数因机器而异）：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>查询</th>
+<th>计划</th>
+<th>实际读取</th>
+<th>耗时</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>第一页 <code>LIMIT 21</code></td>
+<td><code>Limit → Index Scan using conversations_user_recent_idx</code></td>
+<td>21 行</td>
+<td>0.04 ms</td>
+</tr>
+<tr>
+<td><code>OFFSET 1900 LIMIT 21</code></td>
+<td><code>Limit → Sort → Bitmap Heap Scan</code>（<code>Bitmap Index Scan</code> 取出 u7 全部行）</td>
+<td>2000 行，排序后扔掉前 1900 行</td>
+<td>1.6 ms</td>
+</tr>
+<tr>
+<td>键集，从第 1900 行之后</td>
+<td><code>Limit → Index Scan</code>，<code>Index Cond</code> 里多了行比较条件</td>
+<td>21 行</td>
+<td>和第一页相当</td>
+</tr>
+<tr>
+<td>删掉索引后的第一页</td>
+<td><code>Limit → Gather Merge → Sort (top-N heapsort) → Parallel Seq Scan</code></td>
+<td>扫描 20 万行，<code>Rows Removed by Filter: 99000</code>（每个并行进程）</td>
+<td>9.6 ms</td>
+</tr>
+</tbody>
+</table></div>
+<p>几点观察：</p>
+<ul>
+<li>OFFSET 这一行里优化器甚至放弃了“按索引顺序读”，因为它算出反正要读 1921 行，不如用 Bitmap 一次把 u7 的 2000 行全取出来再排序。<strong>OFFSET 的代价随页码线性增长</strong>，每个用户的会话越多、页码越深越慢；键集分页的代价是常数。</li>
+<li>删掉索引后要扫全表，耗时上升两个多数量级。<code>top-N heapsort</code> 是优化器知道只要前 21 行时用的堆排序，内存只要 26 kB，但它省不掉扫描本身。</li>
+<li>20 万行的表上差距是毫秒级，看起来不大；表到几千万行、并发上来以后，就是慢查询和数据库 CPU 打满的区别。</li>
+</ul>
+<p><strong>练习 2：弄坏之后</strong></p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>改动</th>
+<th>失败的测试</th>
+<th>原因</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>用 <code>max(seq)+1</code> 分配序号</td>
+<td><code>TestAppendMessageConcurrentSeq</code>：大量 <code>duplicate key value violates unique constraint "messages_conversation_id_seq_key" (SQLSTATE 23505)</code>；<code>TestAppendMessageUnknownConversation</code>：期望 <code>ErrNotFound</code>，实际是 <code>violates foreign key constraint "messages_conversation_id_fkey" (SQLSTATE 23503)</code></td>
+<td>并发事务读到同一个 <code>max</code>，插入同一个 seq，被唯一约束拦下；会话不存在时没有 <code>UPDATE</code> 那一步来发现，一路走到 <code>INSERT</code> 才被外键拦下</td>
+</tr>
+<tr>
+<td>去掉 <code>FOR UPDATE SKIP LOCKED</code></td>
+<td><code>TestClaimRunSkipLocked</code>：<code>run 18 被 worker-0 和 worker-5 重复领取</code></td>
+<td>两个 worker 的子查询看到同一个最早的 queued 行；第二个 worker 的外层 <code>UPDATE</code> 等第一个提交后重新检查，条件只有 <code>id = 18</code>，仍然成立，于是又改了一次</td>
+</tr>
+<tr>
+<td>只去掉 <code>SKIP LOCKED</code></td>
+<td>测试通过</td>
+<td>第二个 worker 在被锁的行上等待，等到后发现它已不是 queued，再去找下一行。结果正确，但 6 个 worker 实际上在排队</td>
+</tr>
+<tr>
+<td>删双重检查</td>
+<td><code>TestCacheAsideSingleflight</code> 在 30 次里失败十几次（实测 18 次），<code>want 1 load, got 2</code></td>
+<td>第 21 节讲的时序：未命中的 goroutine 进入 <code>Do</code> 时上一轮已经结束，没有可共享的调用，于是再次查库</td>
+</tr>
+</tbody>
+</table></div>
+<p>第一项值得多想一步：唯一约束保住了数据，<strong>测试照样报警</strong>，因为用户的请求失败了。“数据不会错”和“功能是对的”是两个层次。第二、三项说明，有些问题只在并发时出现，单线程测试永远发现不了；而第四项说明，有些问题即使并发也只是<strong>有时</strong>出现，所以写并发测试要用 <code>-count</code> 多跑几遍。</p>
+<p><strong>练习 3：写偏斜</strong></p>
+<p>默认级别（Read Committed）下两个事务都提交，最终 2 个 running。Serializable 下 A 正常提交，B 在 <code>COMMIT</code> 时报错：</p>
+<div class="hl"><pre><span></span><code>ERROR:  could not serialize access due to read/write dependencies among transactions
+DETAIL:  Reason code: Canceled on identification as a pivot, during commit attempt.
+HINT:  The transaction might succeed if retried.
+</code></pre></div>
+
+<p>（报错也可能出现在 B 的 <code>INSERT</code> 那一步，取决于检测到冲突的时机。）最终 1 个 running。<code>HINT</code> 明确告诉你要重试：重试时 B 会重新查询，看到 A 插入的那一行，于是不再插入。</p>
+<p>加上部分唯一索引后，用默认级别：两个 <code>SELECT</code> 都返回 0，A 的 <code>INSERT</code> 成功；B 的 <code>INSERT</code> <strong>会卡住</strong>，因为它要插入的唯一键和 A 未提交的行冲突，需要等 A 的结果。A 提交后，B 报错：</p>
+<div class="hl"><pre><span></span><code>ERROR:  duplicate key value violates unique constraint "runs_one_running_per_conv"
+</code></pre></div>
+
+<p>如果 A 回滚，B 的插入就会成功。这说明唯一约束在任何隔离级别下都有效，而且不需要应用写重试逻辑，只需要把这个错误转成“该会话已有运行中的任务”返回给用户。</p>
+<p><strong>选做：滑动窗口限流</strong></p>
+<div class="hl"><pre><span></span><code><span class="kd">var</span><span class="w"> </span><span class="nx">slidingWindow</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">redis</span><span class="p">.</span><span class="nx">NewScript</span><span class="p">(</span><span class="s">`</span>
+<span class="s">local key    = KEYS[1]</span>
+<span class="s">local now    = tonumber(ARGV[1])</span>
+<span class="s">local window = tonumber(ARGV[2])</span>
+<span class="s">local limit  = tonumber(ARGV[3])</span>
+<span class="s">local member = ARGV[4]</span>
+
+<span class="s">redis.call('ZREMRANGEBYSCORE', key, '-inf', now - window)  -- 删掉窗口之外的记录</span>
+<span class="s">local n = redis.call('ZCARD', key)</span>
+<span class="s">if n &gt;= limit then</span>
+<span class="s">  return -1</span>
+<span class="s">end</span>
+<span class="s">redis.call('ZADD', key, now, member)</span>
+<span class="s">redis.call('PEXPIRE', key, window)                         -- 整个 key 在空闲一个窗口后自动清理</span>
+<span class="s">return limit - n - 1`</span><span class="p">)</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="nx">AllowSliding</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">rdb</span><span class="w"> </span><span class="o">*</span><span class="nx">redis</span><span class="p">.</span><span class="nx">Client</span><span class="p">,</span><span class="w"> </span><span class="nx">key</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">limit</span><span class="w"> </span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="nx">window</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Duration</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="kt">bool</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">now</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Now</span><span class="p">().</span><span class="nx">UnixMilli</span><span class="p">()</span>
+<span class="w">    </span><span class="nx">member</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Sprintf</span><span class="p">(</span><span class="s">"%d-%d"</span><span class="p">,</span><span class="w"> </span><span class="nx">now</span><span class="p">,</span><span class="w"> </span><span class="nx">rand</span><span class="p">.</span><span class="nx">Int64</span><span class="p">())</span><span class="w"> </span><span class="c1">// 同一毫秒的多次请求也要是不同的成员</span>
+<span class="w">    </span><span class="nx">left</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">slidingWindow</span><span class="p">.</span><span class="nx">Run</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">rdb</span><span class="p">,</span><span class="w"> </span><span class="p">[]</span><span class="kt">string</span><span class="p">{</span><span class="s">"rls:"</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">key</span><span class="p">},</span>
+<span class="w">        </span><span class="nx">now</span><span class="p">,</span><span class="w"> </span><span class="nx">window</span><span class="p">.</span><span class="nx">Milliseconds</span><span class="p">(),</span><span class="w"> </span><span class="nx">limit</span><span class="p">,</span><span class="w"> </span><span class="nx">member</span><span class="p">).</span><span class="nx">Int</span><span class="p">()</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">left</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="kc">nil</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="nx">left</span><span class="p">,</span><span class="w"> </span><span class="kc">nil</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>要点：</p>
+<ul>
+<li><strong>成员要唯一</strong>：Sorted Set 的成员不能重复，同一毫秒内两次请求如果都用时间戳做成员，第二次会覆盖第一次，少计一次。所以加一个随机后缀。</li>
+<li><strong>被拒绝的请求不记录</strong>：先判断再 <code>ZADD</code>，否则一个被限流的用户不停重试，会让自己永远出不了限流。</li>
+<li><strong>时间用应用的时钟</strong>：多个实例的时钟有偏差时会有误差。更严格的做法是在脚本里用 <code>redis.call('TIME')</code> 取 Redis 自己的时间。</li>
+<li><strong>代价</strong>：每个请求在集合里占一个成员，限额 1 万次每分钟的用户就要存 1 万个成员。量大时用令牌桶（只存“剩余令牌数”和“上次补充时间”两个数）更省内存。</li>
+</ul>
+<p>验证边界问题的测试思路：窗口 300 毫秒、上限 5；先打 5 次，等 250 毫秒再打 5 次。固定窗口如果恰好跨过了窗口边界，第二批会全部放行（0.3 秒内 10 次）；滑动窗口下第二批全部被拒绝，再等 60 毫秒（第一批出了窗口）后才恢复放行。</p>
+<hr />
+<h2 id="完成标准">完成标准</h2>
+<ul>
+<li>[ ] <code>make test</code> 12 个测试全部通过，并且能说出每个测试在验证什么；</li>
+<li>[ ] 练习 1：拿到三组 <code>EXPLAIN ANALYZE</code> 结果，能解释 OFFSET 和键集分页读取行数的差别，以及删掉索引后计划的变化；</li>
+<li>[ ] 练习 2：四处修改都做过，每一处都能说出失败的测试、错误码（23505、23503）和根本原因；</li>
+<li>[ ] 练习 3：在两个 psql 窗口里复现了写偏斜，看到 Serializable 的 40001 错误和部分唯一索引的冲突错误；</li>
+<li>[ ] 自测题 11 道都能不看答案讲清楚，尤其是第 5、7、8 题；</li>
+<li>[ ] 能凭记忆写出 <code>ClaimRun</code> 那条 SQL 和 Cache-Aside 的读写流程。</li>
+</ul>
+<p>做到以上几条，0.6 就可以勾选。模块 00 到此全部完成，下一课进入 <strong>01 LLM 原理与使用</strong>：Transformer、Tokenizer 和采样参数。</p>
+    <nav class="pager"><a class="prev" href="00-05-engineering.html"><span>← 上一课 0.5</span>Git、Docker、Linux</a></nav>
+    <p class="foot">© 2026 duang777 · 课件源文件：<a href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/notes/00-foundations/06-database-cache.md">notes/00-foundations/06-database-cache.md</a></p>
+  </article>
+</div>
+<script>
+document.querySelectorAll('article pre').forEach(function(pre){
+  var b=document.createElement('button');b.className='code__copy';b.textContent='复制';
+  b.onclick=function(){navigator.clipboard.writeText(pre.innerText).then(function(){b.textContent='已复制';setTimeout(function(){b.textContent='复制'},1200)})};
+  pre.parentNode.insertBefore(b,pre);
+});
+var links=[].slice.call(document.querySelectorAll('.toc a')),map={};
+links.forEach(function(a){map[decodeURIComponent(a.getAttribute('href').slice(1))]=a});
+var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting&&map[e.target.id]){links.forEach(function(l){l.classList.remove('on')});map[e.target.id].classList.add('on')}})},{rootMargin:'-80px 0px -70% 0px'});
+document.querySelectorAll('article h1[id],article h2[id]').forEach(function(h){io.observe(h)});
+</script>
+</body>
+</html>

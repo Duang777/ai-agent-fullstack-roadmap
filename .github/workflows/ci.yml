@@ -10,7 +10,24 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        project: [00-stream-proxy, 04-ship]
+        project: [00-stream-proxy, 04-ship, 05-store]
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: agent
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 2s --health-retries 15
+      redis:
+        image: redis:7
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping" --health-interval 2s --health-retries 15
+    env:
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/agent?sslmode=disable
+      REDIS_URL: redis://localhost:6379/0
     defaults:
       run:
         working-directory: projects/${{ matrix.project }}

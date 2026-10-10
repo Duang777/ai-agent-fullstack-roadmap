@@ -56,7 +56,7 @@
 | 0.3 | Python | uv、Pydantic、asyncio TaskGroup、异步生成器 | [课件](notes/00-foundations/03-python.md) | [`02-py-agent-core`](projects/02-py-agent-core) | ✅ 完成 |
 | 0.4 | 流式协议 | HTTP 分块与 Flush、SSE 解析器、断线续传、中间层缓冲、WebSocket 双向打断 | [课件](notes/00-foundations/04-streaming.md) | [`03-streaming`](projects/03-streaming) | ✅ 完成 |
 | 0.5 | 工程基础 | Git 工作流、Linux 信号与排查、多阶段 Docker、健康检查、优雅退出、CI | [课件](notes/00-foundations/05-engineering.md) | [`04-ship`](projects/04-ship) | ✅ 完成 |
-| 0.6 | 数据库与缓存 | Postgres 建模、索引、事务与隔离级别、迁移；Redis | 即将更新 | | ⏳ |
+| 0.6 | 数据库与缓存 | Postgres 建模、索引与键集分页、隔离级别与写偏斜、幂等键、SKIP LOCKED 队列、迁移；Redis 缓存与限流 | [课件](notes/00-foundations/06-database-cache.md) | [`05-store`](projects/05-store) | 📖 学习中 |
 
 ### 全部模块
 
@@ -105,6 +105,9 @@ cd projects/03-streaming && npm install && npm run typecheck && npm test
 
 # 0.5 工程基础
 cd projects/04-ship && make test        # 有 Docker 的话再 make docker-build docker-run
+
+# 0.6 数据库与缓存（需要 Docker 起 Postgres + Redis）
+cd projects/05-store && make up && make test
 ```
 
 推荐学习方式：先读课件 → 关掉参考答案自己写练习 → 跑测试 → 再对照参考实现。
@@ -120,14 +123,16 @@ cd projects/04-ship && make test        # 有 Docker 的话再 make docker-build
 │       ├── 02-typescript.md
 │       ├── 03-python.md
 │       ├── 04-streaming.md
-│       └── 05-engineering.md
+│       ├── 05-engineering.md
+│       └── 06-database-cache.md
 ├── projects/               # 每课一个可运行的练习目录
 │   ├── 00-stream-proxy/    # Go：fanIn、并行工具、可取消 SSE
 │   ├── 01-ts-agent-core/   # TS：Zod 事件、可取消 sleep、并行工具、SSE
 │   ├── 02-py-agent-core/   # Python：Pydantic 事件、TaskGroup 并行工具、SSE
 │   ├── 03-streaming/       # TS：SSE 解析器、SSE 服务端、续传与断开即停
-│   └── 04-ship/            # Go：健康检查、优雅退出、多阶段 Dockerfile
-├── .github/workflows/ci.yml # 每次 push：Go -race、TS 测试、镜像构建与冒烟测试
+│   ├── 04-ship/            # Go：健康检查、优雅退出、多阶段 Dockerfile
+│   └── 05-store/           # Go：Postgres 会话/消息/任务队列、迁移、Redis 缓存与限流
+├── .github/workflows/ci.yml # 每次 push：Go -race（含 Postgres/Redis 集成测试）、TS、Python、镜像冒烟测试
 ├── logs/                   # 每日学习日志
 └── docs/                   # GitHub Pages 主页
 ```
