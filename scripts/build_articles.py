@@ -35,6 +35,10 @@ CSS = r"""
   --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
 }
 *{box-sizing:border-box}
+html{color-scheme:dark}
+.toc{scrollbar-width:none}.toc::-webkit-scrollbar{display:none}
+html{scrollbar-width:thin;scrollbar-color:#333 transparent}
+::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#2a2a2a;border-radius:8px}::-webkit-scrollbar-thumb:hover{background:#3a3a3a}
 html{scroll-behavior:smooth;scroll-padding-top:80px}
 body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;line-height:1.8;-webkit-font-smoothing:antialiased}
 a{color:inherit}
