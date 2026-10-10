@@ -208,19 +208,19 @@
         <section class="stats" data-reveal>
           <div class="stat"><span class="stat__fig x-mono">14</span><span class="stat__label">模块</span></div>
           <div class="stat"><span class="stat__fig x-mono">77</span><span class="stat__label">知识点</span></div>
-          <div class="stat"><span class="stat__fig x-mono">Day 2</span><span class="stat__label">今天</span></div>
-          <div class="stat"><span class="stat__fig x-mono">2/77</span><span class="stat__label">已完成</span></div>
+          <div class="stat"><span class="stat__fig x-mono">Day 3</span><span class="stat__label">今天</span></div>
+          <div class="stat"><span class="stat__fig x-mono">5/77</span><span class="stat__label">已完成</span></div>
         </section>
 
         <section class="section" id="progress" data-nav="进度">
           <div class="head" data-reveal>
             <p class="head__eyebrow x-kicker">当前进度</p>
-            <h2 class="x-h2">第一个模块已开课，练习正在进行。</h2>
+            <h2 class="x-h2">模块 00 基础功底全部完成，下一站：01 LLM 原理与使用。</h2>
             <p class="head__sub">学完且有笔记或代码产出，才在 ROADMAP 里打勾。</p>
           </div>
           <div class="x-progress" data-reveal>
-            <div class="x-progress__row"><span>已勾选知识点</span><strong>3%</strong></div>
-            <div class="x-ticks" id="ticks" role="img" aria-label="77 个知识点中已完成 2 个"></div>
+            <div class="x-progress__row"><span>已勾选知识点</span><strong>6%</strong></div>
+            <div class="x-ticks" id="ticks" role="img" aria-label="77 个知识点中已完成 5 个"></div>
           </div>
           <div class="steps" data-reveal>
             <article class="step">
@@ -264,7 +264,7 @@
             <article class="step">
               <div class="step__intro">
                 <p class="step__num x-step-num">0.3</p>
-                <p class="step__eyebrow">课件已出 · 00 基础功底</p>
+                <p class="step__eyebrow">已完成 · 00 基础功底</p>
               </div>
               <div>
                 <h3>Python（够用即可）：asyncio、Pydantic、uv</h3>
@@ -277,13 +277,13 @@
                 <dt>课件</dt>
                 <dd><span class="chip x-chip x-chip--done">已完成</span></dd>
                 <dt>练习</dt>
-                <dd><span class="chip x-chip">未开始</span></dd>
+                <dd><span class="chip x-chip x-chip--done">已完成</span></dd>
               </dl>
             </article>
             <article class="step">
               <div class="step__intro">
                 <p class="step__num x-step-num">0.4</p>
-                <p class="step__eyebrow">课件已出 · 00 基础功底</p>
+                <p class="step__eyebrow">已完成 · 00 基础功底</p>
               </div>
               <div>
                 <h3>流式协议：HTTP、SSE 与 WebSocket</h3>
@@ -296,13 +296,13 @@
                 <dt>课件</dt>
                 <dd><span class="chip x-chip x-chip--done">已完成</span></dd>
                 <dt>练习</dt>
-                <dd><span class="chip x-chip">未开始</span></dd>
+                <dd><span class="chip x-chip x-chip--done">已完成</span></dd>
               </dl>
             </article>
             <article class="step">
               <div class="step__intro">
                 <p class="step__num x-step-num">0.5</p>
-                <p class="step__eyebrow">课件已出 · 00 基础功底</p>
+                <p class="step__eyebrow">已完成 · 00 基础功底</p>
               </div>
               <div>
                 <h3>工程基础：Git、Docker、Linux，把 Agent 服务送上线</h3>
@@ -315,7 +315,7 @@
                 <dt>课件</dt>
                 <dd><span class="chip x-chip x-chip--done">已完成</span></dd>
                 <dt>练习</dt>
-                <dd><span class="chip x-chip">未开始</span></dd>
+                <dd><span class="chip x-chip x-chip--done">已完成</span></dd>
               </dl>
             </article>
           </div>
@@ -328,6 +328,21 @@
           </div>
           <ol class="timeline" data-reveal>
             <li class="is-current">
+              <p class="timeline__when"><span class="x-mono">Day 3 · 2026-10-10</span></p>
+              <div class="timeline__what">
+                <p><strong>Python · 流式协议 · 工程基础</strong></p>
+                <ul>
+                  <li>Python：Pydantic 事件、TaskGroup 并行工具、取消与 CancelledError</li>
+                  <li>手写 SSE 解析器：任意切块模糊测试抓出空块重置 pendingCR 的 bug</li>
+                  <li>断线续传、中间层缓冲排查、WebSocket 双向打断</li>
+                  <li>多阶段 Dockerfile、liveness 与 readiness、优雅退出不掐断流式对话</li>
+                  <li>GitHub Actions CI：Go -race、TS、Python、镜像冒烟测试全部通过</li>
+                </ul>
+                <p class="x-think">思考：为什么 Shutdown 的超时 context 不能从信号 ctx 派生？</p>
+              </div>
+              <p><a class="x-btn x-btn--ghost" href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/logs/2026-10-10.md" target="_blank" rel="noopener">日志</a></p>
+            </li>
+            <li>
               <p class="timeline__when"><span class="x-mono">Day 2 · 2026-10-09</span></p>
               <div class="timeline__what">
                 <p><strong>TypeScript</strong></p>
@@ -367,8 +382,8 @@
             <p class="head__sub"><a class="link" href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/ROADMAP.md" target="_blank" rel="noopener">完整 ROADMAP.md</a></p>
           </div>
           <div class="cards" data-reveal>
-            <div class="x-card is-now">
-              <div class="x-card__top"><span class="x-card__num">00</span><span class="chip x-chip x-chip--live">进行中</span></div>
+            <div class="x-card">
+              <div class="x-card__top"><span class="x-card__num">00</span><span class="chip x-chip x-chip--done">已完成</span></div>
               <h3>基础功底</h3>
               <ul>
                 <li>Go 基础与并发</li>
@@ -565,7 +580,7 @@
     <script src="hark.js"></script>
     <script>
       (function () {
-        var done = 2, total = 77, box = document.getElementById("ticks");
+        var done = 5, total = 77, box = document.getElementById("ticks");
         for (var i = 0; i < total; i++) {
           var t = document.createElement("i");
           if (i < done) t.className = "is-on";
