@@ -1003,4 +1003,4 @@ uv run pytest -q
 # 6 passed in 0.51s
 ```
 
-做完把输出贴给我，我帮你批改，并在 ROADMAP 里勾上 Python。
+全部通过，这一课就算完成，可以在 ROADMAP 里勾上 Python。
