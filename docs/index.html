@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#0A0A0A" />
     <title>AI Agent 全栈学习计划 · 从零到生产</title>
-    <meta name="description" content="14 个模块，77 个知识点。每天一课、一份日志、一次提交，全部开源。" />
+    <meta name="description" content="14 个模块，84 个知识点。每天一课、一份日志、一次提交，全部开源。" />
     <link rel="stylesheet" href="hark.css" />
     <link rel="stylesheet" href="hark-hero.css" />
     <script>
@@ -134,7 +134,7 @@
       .x-progress__row strong { font: var(--weight-regular) var(--size-heading)/1 var(--x-mono); color: var(--text-primary); }
       .x-bar { position: relative; height: 6px; border-radius: var(--r-pill); background: rgb(255 255 255 / 0.06); overflow: hidden; }
       .x-bar span { position: absolute; inset: 0 auto 0 0; min-width: 6px; border-radius: inherit; background: #ffffff; }
-      .x-ticks { display: grid; grid-template-columns: repeat(77, 1fr); gap: 2px; }
+      .x-ticks { display: grid; grid-template-columns: repeat(84, 1fr); gap: 2px; }
       .x-ticks i { height: 10px; border-radius: 1px; background: rgb(255 255 255 / 0.08); }
       .x-ticks i.is-on { background: #ffffff; }
 
@@ -196,7 +196,7 @@
           <div class="hero__copy">
             <p class="hero__eyebrow x-mono">PUBLIC LEARNING · DAY 1</p>
             <h1 class="x-display">从零到生产，<br />公开学习 <span class="x-grad">AI Agent 全栈</span></h1>
-            <p class="hero__sub">14 个模块，77 个知识点。每天一课、一份日志、一次提交，全部开源。</p>
+            <p class="hero__sub">14 个模块，84 个知识点。每天一课、一份日志、一次提交，全部开源。</p>
             <div class="links">
               <a class="x-btn x-btn--primary" href="https://github.com/Duang777/ai-agent-fullstack-roadmap" target="_blank" rel="noopener">在 GitHub 上关注</a>
               <a class="x-btn x-btn--ghost" href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/ROADMAP.md" target="_blank" rel="noopener">查看路线图</a>
@@ -207,20 +207,20 @@
 
         <section class="stats" data-reveal>
           <div class="stat"><span class="stat__fig x-mono">14</span><span class="stat__label">模块</span></div>
-          <div class="stat"><span class="stat__fig x-mono">77</span><span class="stat__label">知识点</span></div>
+          <div class="stat"><span class="stat__fig x-mono">84</span><span class="stat__label">知识点</span></div>
           <div class="stat"><span class="stat__fig x-mono">Day 3</span><span class="stat__label">今天</span></div>
-          <div class="stat"><span class="stat__fig x-mono">5/77</span><span class="stat__label">已完成</span></div>
+          <div class="stat"><span class="stat__fig x-mono">5/84</span><span class="stat__label">已完成</span></div>
         </section>
 
         <section class="section" id="progress" data-nav="进度">
           <div class="head" data-reveal>
             <p class="head__eyebrow x-kicker">当前进度</p>
-            <h2 class="x-h2">模块 00 基础功底全部完成，下一站：01 LLM 原理与使用。</h2>
+            <h2 class="x-h2">模块 00 已完成 5/6，补上数据库与缓存后进入 01 LLM 原理与使用。</h2>
             <p class="head__sub">学完且有笔记或代码产出，才在 ROADMAP 里打勾。</p>
           </div>
           <div class="x-progress" data-reveal>
             <div class="x-progress__row"><span>已勾选知识点</span><strong>6%</strong></div>
-            <div class="x-ticks" id="ticks" role="img" aria-label="77 个知识点中已完成 5 个"></div>
+            <div class="x-ticks" id="ticks" role="img" aria-label="84 个知识点中已完成 5 个"></div>
           </div>
           <div class="steps" data-reveal>
             <article class="step">
@@ -382,8 +382,8 @@
             <p class="head__sub"><a class="link" href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/ROADMAP.md" target="_blank" rel="noopener">完整 ROADMAP.md</a></p>
           </div>
           <div class="cards" data-reveal>
-            <div class="x-card">
-              <div class="x-card__top"><span class="x-card__num">00</span><span class="chip x-chip x-chip--done">已完成</span></div>
+            <div class="x-card is-now">
+              <div class="x-card__top"><span class="x-card__num">00</span><span class="chip x-chip x-chip--live">进行中</span></div>
               <h3>基础功底</h3>
               <ul>
                 <li>Go 基础与并发</li>
@@ -391,6 +391,7 @@
                 <li>Python（够用即可）</li>
                 <li>HTTP / SSE / WebSocket 流式协议</li>
                 <li>Git 工作流、Docker、Linux 基础</li>
+                <li>数据库与缓存基础</li>
               </ul>
             </div>
             <div class="x-card">
@@ -424,6 +425,7 @@
                 <li>Agent Loop 设计：停止条件、预算、重试</li>
                 <li>多智能体</li>
                 <li>长任务 Agent</li>
+                <li>Agent 状态与数据模型</li>
                 <li>Coding Agent 架构（Claude Code / Codex / SWE-agent 拆解）</li>
                 <li>Deep Research Agent 架构</li>
               </ul>
@@ -455,12 +457,14 @@
               <div class="x-card__top"><span class="x-card__num">06</span><span class="chip x-chip">未开始</span></div>
               <h3>评测体系</h3>
               <ul>
+                <li>Agent 测试工程</li>
                 <li>Eval 设计</li>
                 <li>指标</li>
                 <li>LLM-as-Judge</li>
                 <li>公开 Benchmark</li>
                 <li>Eval 框架</li>
                 <li>CI 回归门禁</li>
+                <li>模型版本管理与迁移</li>
                 <li>线上评估：A/B 实验、灰度对比、用户反馈回流成新用例</li>
               </ul>
             </div>
@@ -483,6 +487,7 @@
                 <li>熔断、限流（令牌桶）、背压、舱壁隔离</li>
                 <li>多模型供应商容灾</li>
                 <li>持久化执行</li>
+                <li>异步与后台 Agent</li>
                 <li>无状态服务与水平扩展</li>
                 <li>故障演练：注入超时、429、断流，验证系统按预期降级</li>
               </ul>
@@ -505,9 +510,11 @@
               <ul>
                 <li>Prompt Injection / 间接注入防御</li>
                 <li>权限与沙箱：最小权限、高风险工具人工审批</li>
+                <li>身份、凭证与多租户</li>
                 <li>Guardrails、输出校验、可验证完成（Verification）</li>
                 <li>Reward Hacking 与测试篡改检测</li>
                 <li>数据与合规：PII 脱敏、审计日志、多租户隔离</li>
+                <li>内容安全与合规（国内）</li>
               </ul>
             </div>
             <div class="x-card">
@@ -580,7 +587,7 @@
     <script src="hark.js"></script>
     <script>
       (function () {
-        var done = 5, total = 77, box = document.getElementById("ticks");
+        var done = 5, total = 84, box = document.getElementById("ticks");
         for (var i = 0; i < total; i++) {
           var t = document.createElement("i");
           if (i < done) t.className = "is-on";
