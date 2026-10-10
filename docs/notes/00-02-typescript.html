@@ -1,0 +1,1370 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>0.2 TypeScript：给 Agent 套上类型的安全带（Go 程序员版） · AI Agent 全栈</title>
+<meta name="description" content="0.2 TypeScript：给 Agent 套上类型的安全带（Go 程序员版）。duang777 的 AI Agent 全栈公开学习课件。" />
+<style>
+:root{
+  --bg:#0a0a0a;--surface:#111;--text:#ededed;--text-2:#a1a1a1;--text-3:rgb(255 255 255/.4);
+  --line:rgb(255 255 255/.1);--line-2:rgb(255 255 255/.06);
+  --sans:Inter,-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei","Helvetica Neue",sans-serif;
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:80px}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;line-height:1.8;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+.nav{position:sticky;top:0;z-index:10;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;border-bottom:1px solid var(--line);background:rgb(10 10 10/.8);backdrop-filter:blur(12px)}
+.nav__brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-size:14px;font-weight:500}
+.nav__dot{width:10px;height:10px;border-radius:3px;background:var(--text)}
+.nav__links{display:flex;gap:20px;font-size:14px;color:var(--text-2)}
+.nav__links a{text-decoration:none}.nav__links a:hover{color:var(--text)}
+.wrap{max-width:1200px;margin:0 auto;padding:0 24px;display:grid;grid-template-columns:220px minmax(0,1fr);gap:56px}
+.toc{position:sticky;top:80px;align-self:start;max-height:calc(100vh - 100px);overflow:auto;padding:40px 0 40px;font-size:13px;line-height:1.6}
+.toc__label{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--text-3);text-transform:uppercase;margin-bottom:12px}
+.toc ul{list-style:none;margin:0;padding:0}
+.toc li{margin:0}
+.toc a{display:block;padding:4px 0 4px 12px;border-left:1px solid var(--line);color:var(--text-2);text-decoration:none}
+.toc a:hover,.toc a.on{color:var(--text);border-left-color:var(--text)}
+.toc ul ul a{padding-left:24px;font-size:12.5px;color:var(--text-3)}
+.toc ul ul a:hover,.toc ul ul a.on{color:var(--text)}
+article{min-width:0;max-width:760px;padding:48px 0 96px}
+.meta{font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--text-3);margin-bottom:16px}
+article h1.title{font-size:40px;line-height:1.2;letter-spacing:-.02em;font-weight:600;margin:0 0 24px}
+article h1{font-size:28px;line-height:1.3;letter-spacing:-.01em;font-weight:600;margin:72px 0 20px;padding-top:32px;border-top:1px solid var(--line)}
+article h2{font-size:22px;line-height:1.4;font-weight:600;margin:48px 0 16px}
+article h3{font-size:18px;font-weight:600;margin:36px 0 12px}
+article h4{font-size:16px;font-weight:600;margin:28px 0 8px}
+article p{margin:0 0 18px;color:#d4d4d4}
+article strong{color:var(--text);font-weight:600}
+article ul,article ol{padding-left:22px;margin:0 0 18px;color:#d4d4d4}
+article li{margin:4px 0}
+article a{text-decoration:underline;text-decoration-color:var(--text-3);text-underline-offset:3px}
+article a:hover{text-decoration-color:var(--text)}
+article hr{border:0;border-top:1px solid var(--line);margin:48px 0}
+article blockquote{margin:0 0 20px;padding:12px 18px;border-left:2px solid var(--text-2);background:var(--surface);border-radius:0 8px 8px 0;color:var(--text-2)}
+article blockquote p{margin:6px 0;color:var(--text-2)}
+article code{font-family:var(--mono);font-size:.88em;background:#1a1a1a;border:1px solid var(--line-2);border-radius:5px;padding:1px 6px}
+article pre{position:relative;margin:0 0 22px;padding:16px 18px;background:#0f0f0f;border:1px solid var(--line);border-radius:10px;overflow:auto;font-size:13.5px;line-height:1.65}
+article pre code{background:none;border:0;padding:0;font-size:inherit}
+.code{position:relative}
+.code__lang{position:absolute;top:8px;right:46px;font-family:var(--mono);font-size:11px;color:var(--text-3);z-index:1}
+.code__copy{position:absolute;top:6px;right:8px;z-index:1;font:11px var(--mono);color:var(--text-2);background:#1a1a1a;border:1px solid var(--line);border-radius:6px;padding:2px 7px;cursor:pointer}
+.code__copy:hover{color:var(--text)}
+.tbl{overflow-x:auto;margin:0 0 22px;border:1px solid var(--line);border-radius:10px}
+article table{border-collapse:collapse;width:100%;font-size:14px}
+article th,article td{padding:10px 14px;border-bottom:1px solid var(--line-2);text-align:left;vertical-align:top}
+article th{font-weight:600;background:var(--surface);color:var(--text)}
+article tr:last-child td{border-bottom:0}
+article details{margin:0 0 18px;border:1px solid var(--line);border-radius:10px;padding:10px 16px;background:var(--surface)}
+article summary{cursor:pointer;font-weight:500}
+.pager{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:72px;padding-top:32px;border-top:1px solid var(--line)}
+.pager a{display:block;padding:16px 18px;border:1px solid var(--line);border-radius:10px;text-decoration:none}
+.pager a:hover{border-color:var(--text-2)}
+.pager span{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--text-3)}
+.pager .next{text-align:right;grid-column:2}
+.foot{margin-top:40px;font-size:13px;color:var(--text-3)}
+/* 代码高亮：黑白灰为主 */
+.hl .c,.hl .c1,.hl .cm,.hl .ch,.hl .cs,.hl .cp,.hl .cpf{color:#6b6b6b;font-style:italic}
+.hl .k,.hl .kd,.hl .kn,.hl .kr,.hl .kt,.hl .kc,.hl .kp,.hl .ow{color:#ffffff;font-weight:600}
+.hl .s,.hl .s1,.hl .s2,.hl .sb,.hl .sc,.hl .sd,.hl .se,.hl .sh,.hl .si,.hl .sx,.hl .sr,.hl .ss,.hl .dl,.hl .sa{color:#86efac}
+.hl .m,.hl .mi,.hl .mf,.hl .mh,.hl .mo,.hl .il{color:#fcd34d}
+.hl .nf,.hl .fm,.hl .nc,.hl .nn{color:#e5e5e5;font-weight:500}
+.hl .nb,.hl .bp,.hl .nd,.hl .na,.hl .nt{color:#bdbdbd}
+.hl .o,.hl .p{color:#9a9a9a}
+.hl .gd{color:#fca5a5}.hl .gi{color:#86efac}
+.hl{color:#d4d4d4}
+@media (max-width:960px){.wrap{grid-template-columns:1fr;gap:0}.toc{display:none}article h1.title{font-size:30px}.nav__links a.hide-sm{display:none}}
+</style>
+</head>
+<body>
+<header class="nav">
+  <a class="nav__brand" href="../index.html"><span class="nav__dot"></span>AI Agent 全栈</a>
+  <nav class="nav__links">
+    <a href="../index.html#progress">课件</a>
+    <a class="hide-sm" href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/ROADMAP.md">路线图</a>
+    <a href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/notes/00-foundations/02-typescript.md">在 GitHub 上查看</a>
+  </nav>
+</header>
+<div class="wrap">
+  <aside class="toc"><div class="toc__label">本课目录</div><ul>
+<li><a href="#为什么学这个">为什么学这个</a></li>
+<li><a href="#0-go-程序员的-ts-语法速成">0. Go 程序员的 TS 语法速成</a></li>
+<li><a href="#1-严格模式先把编译器调到最凶">1. 严格模式：先把编译器调到最凶</a></li>
+<li><a href="#2-可辨识联合一个流里的多种事件">2. 可辨识联合：一个流里的多种事件</a></li>
+<li><a href="#3-zod运行时校验-类型推导-json-schema-一次写完">3. Zod：运行时校验 + 类型推导 + JSON Schema 一次写完</a></li>
+<li><a href="#4-asyncgenerator把-sse-变成-for-await">4. AsyncGenerator：把 SSE 变成 for await</a></li>
+<li><a href="#5-abortcontrollerts-版的-context">5. AbortController：TS 版的 context</a></li>
+<li><a href="#6-并行工具调用带并发上限-单工具超时">6. 并行工具调用：带并发上限 + 单工具超时</a></li>
+<li><a href="#7-三个高频坑">7. 三个高频坑</a></li>
+<li><a href="#练习今天做完">练习（今天做完）</a></li>
+<li><a href="#自测题">自测题</a></li>
+<li><a href="#参考答案与详解">参考答案与详解</a><ul>
+<li><a href="#自测题答案">自测题答案</a></li>
+<li><a href="#练习参考实现">练习参考实现</a></li>
+</ul>
+</li>
+</ul>
+</aside>
+  <article>
+    <div class="meta">模块 00 · 基础功底 · 第 0.2 课</div>
+    <h1 class="title">0.2 TypeScript：给 Agent 套上类型的安全带（Go 程序员版）</h1>
+    <blockquote>
+<p>第 0 部分 · 第 2 课 ｜ 预计 3–4 小时 ｜ 前置：学完 0.1 Go 并发，Node 22+</p>
+<p>本课默认你熟悉 Go、不熟悉 TS。每个新语法第一次出现都会对照 Go 讲一遍；每段代码后面都有“逐行解读”。</p>
+</blockquote>
+<h2 id="为什么学这个">为什么学这个</h2>
+<p>Go 那一课解决的是“并发不出错”，这一课解决的是“数据不出错”。Agent 里最危险的数据有三种：</p>
+<div class="hl"><pre><span></span><code>LLM 返回的 tool_call 参数（模型随时可能编错 JSON）
+流式事件（text / tool_call / done / error 混在一个流里）
+外部取消（用户点了“停止”、超时、上游断开）
+</code></pre></div>
+
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>问题</th>
+<th>Go 里你怎么做</th>
+<th>TS 里怎么做</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>一个流里有多种事件</td>
+<td><code>interface</code> + <code>switch v := ev.(type)</code></td>
+<td><strong>可辨识联合</strong> + <code>switch (ev.type)</code></td>
+</tr>
+<tr>
+<td>校验外部 JSON</td>
+<td><code>json.Unmarshal</code> + 手写 <code>Validate()</code></td>
+<td><strong>Zod</strong></td>
+</tr>
+<tr>
+<td>流式读取</td>
+<td>goroutine 往 channel 里塞</td>
+<td><strong>AsyncGenerator</strong> + <code>for await</code></td>
+</tr>
+<tr>
+<td>取消</td>
+<td><code>context.Context</code></td>
+<td><strong>AbortController / AbortSignal</strong></td>
+</tr>
+<tr>
+<td>并行工具</td>
+<td><code>errgroup</code></td>
+<td><code>Promise.all</code> + worker</td>
+</tr>
+</tbody>
+</table></div>
+<p>本课结束时，你能写出 TS 版的“流式解析 + 工具参数校验 + 可取消的并行工具执行”，和 0.1 的 Go 代码一一对应。</p>
+<hr />
+<h2 id="0-go-程序员的-ts-语法速成">0. Go 程序员的 TS 语法速成</h2>
+<p>先把后面会用到的语法一次讲清楚。看不懂后面的代码时，回到这一节查。</p>
+<h3 id="01-变量">0.1 变量</h3>
+<div class="hl"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"search"</span><span class="p">;</span><span class="w">   </span><span class="c1">// 不能重新赋值，类似 Go 的 name := "search" 但之后不能改</span>
+<span class="kd">let</span><span class="w"> </span><span class="nx">count</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0</span><span class="p">;</span><span class="w">           </span><span class="c1">// 可以重新赋值</span>
+<span class="nx">count</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1</span><span class="p">;</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">limit</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">4</span><span class="p">;</span><span class="w"> </span><span class="c1">// 显式写类型：变量名: 类型（Go 是 var limit int = 4，类型在后面，这点一样）</span>
+</code></pre></div>
+
+<ul>
+<li>默认用 <code>const</code>，需要改才用 <code>let</code>。<strong>不要用 <code>var</code></strong>（老语法，作用域有坑）。</li>
+<li>TS 会自动推导类型，<code>const name = "search"</code> 里 <code>name</code> 就是 <code>string</code>，不用写。</li>
+</ul>
+<h3 id="02-基本类型">0.2 基本类型</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>TS</th>
+<th>Go</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>string</code></td>
+<td><code>string</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>number</code></td>
+<td><code>int</code> / <code>float64</code></td>
+<td>TS 只有一种数字，没有 int/float 之分</td>
+</tr>
+<tr>
+<td><code>boolean</code></td>
+<td><code>bool</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>string[]</code></td>
+<td><code>[]string</code></td>
+<td>数组</td>
+</tr>
+<tr>
+<td><code>Record&lt;string, number&gt;</code></td>
+<td><code>map[string]int</code></td>
+<td>键值对象</td>
+</tr>
+<tr>
+<td><code>undefined</code> / <code>null</code></td>
+<td><code>nil</code></td>
+<td>两种“空”，<code>undefined</code> 更常见</td>
+</tr>
+<tr>
+<td><code>unknown</code></td>
+<td><code>any</code>（<code>interface{}</code>）</td>
+<td><strong>不知道是什么</strong>，用之前必须先检查</td>
+</tr>
+<tr>
+<td><code>any</code></td>
+<td>没有对应</td>
+<td>关掉类型检查，尽量别用</td>
+</tr>
+<tr>
+<td><code>never</code></td>
+<td>没有对应</td>
+<td>“不可能出现的值”，后面讲</td>
+</tr>
+<tr>
+<td><code>void</code></td>
+<td>函数无返回值</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="03-对象类型type">0.3 对象类型：<code>type</code></h3>
+<div class="hl"><pre><span></span><code><span class="kr">type</span><span class="w"> </span><span class="nx">ToolCall</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">args</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span>
+<span class="p">};</span>
+</code></pre></div>
+
+<p>等价于 Go：</p>
+<div class="hl"><pre><span></span><code><span class="kd">type</span><span class="w"> </span><span class="nx">ToolCall</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">ID</span><span class="w">   </span><span class="kt">string</span>
+<span class="w">    </span><span class="nx">Name</span><span class="w"> </span><span class="kt">string</span>
+<span class="w">    </span><span class="nx">Args</span><span class="w"> </span><span class="kt">string</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>区别：TS 的对象不需要 <code>ToolCall{...}</code> 这种构造，直接写字面量就行：</p>
+<div class="hl"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">c</span><span class="o">:</span><span class="w"> </span><span class="kt">ToolCall</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="s2">"1"</span><span class="p">,</span><span class="w"> </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="s2">"search"</span><span class="p">,</span><span class="w"> </span><span class="nx">args</span><span class="o">:</span><span class="w"> </span><span class="s2">"{}"</span><span class="w"> </span><span class="p">};</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">c</span><span class="p">.</span><span class="nx">name</span><span class="p">);</span><span class="w"> </span><span class="c1">// "search"</span>
+</code></pre></div>
+
+<p>字段后面加 <code>?</code> 表示可选（可以不传）：</p>
+<div class="hl"><pre><span></span><code><span class="kr">type</span><span class="w"> </span><span class="nx">Options</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">limit?</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="w"> </span><span class="p">};</span><span class="w">   </span><span class="c1">// limit 的类型是 number | undefined</span>
+</code></pre></div>
+
+<blockquote>
+<p>你也会看到 <code>interface ToolCall { ... }</code>，作用和 <code>type</code> 基本一样。本课统一用 <code>type</code>。</p>
+</blockquote>
+<h3 id="04-联合类型-要么是-a要么是-b">0.4 联合类型 <code>|</code>：“要么是 A，要么是 B”</h3>
+<div class="hl"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="nx">x</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span><span class="w">  </span><span class="c1">// x 可以是 string，也可以是 number</span>
+<span class="nx">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"hi"</span><span class="p">;</span>
+<span class="nx">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">42</span><span class="p">;</span>
+</code></pre></div>
+
+<p>Go 没有这个语法，最接近的是“用一个 interface 装多种类型”。</p>
+<p><strong>字面量类型</strong>：类型可以是一个具体的值。</p>
+<div class="hl"><pre><span></span><code><span class="kr">type</span><span class="w"> </span><span class="nx">Role</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"user"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">"assistant"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">"tool"</span><span class="p">;</span><span class="w"> </span><span class="c1">// Role 只能是这三个字符串之一</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">r</span><span class="o">:</span><span class="w"> </span><span class="kt">Role</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"user"</span><span class="p">;</span><span class="w">      </span><span class="c1">// ✅</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">r2</span><span class="o">:</span><span class="w"> </span><span class="kt">Role</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"admin"</span><span class="p">;</span><span class="w">    </span><span class="c1">// ❌ 编译报错</span>
+</code></pre></div>
+
+<p>相当于 Go 里的 <code>type Role string</code> + 三个 <code>const</code>，但 TS 会在编译期拦住非法值，Go 不会。</p>
+<h3 id="05-函数">0.5 函数</h3>
+<div class="hl"><pre><span></span><code><span class="c1">// 普通函数：参数名: 类型，返回值类型写在括号后面</span>
+<span class="kd">function</span><span class="w"> </span><span class="nx">add</span><span class="p">(</span><span class="nx">a</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">,</span><span class="w"> </span><span class="nx">b</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="nx">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">b</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c1">// 箭头函数：另一种写法，常用于回调和短函数</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">add2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="nx">a</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">,</span><span class="w"> </span><span class="nx">b</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">b</span><span class="p">;</span>
+<span class="c1">//          ^^^^^^^^^^^^^^^^^^^^^^^^  ^^^^^^   ^^^^^</span>
+<span class="c1">//          参数                      返回类型 函数体（只有一个表达式时可省略 return 和 {}）</span>
+
+<span class="c1">// 函数类型：描述“一个函数长什么样”</span>
+<span class="kr">type</span><span class="w"> </span><span class="nx">Tool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="nx">args</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">signal</span><span class="o">:</span><span class="w"> </span><span class="kt">AbortSignal</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="kt">string</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="c1">// 读作：Tool 是一个函数，接收 args 和 signal 两个参数，返回 Promise&lt;string&gt;</span>
+</code></pre></div>
+
+<p>对照 Go：</p>
+<div class="hl"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nx">add</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span><span class="w"> </span><span class="nx">b</span><span class="w"> </span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nx">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">b</span><span class="w"> </span><span class="p">}</span>
+<span class="nx">add2</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span><span class="w"> </span><span class="nx">b</span><span class="w"> </span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nx">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">b</span><span class="w"> </span><span class="p">}</span>
+<span class="kd">type</span><span class="w"> </span><span class="nx">Tool</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">args</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span>
+</code></pre></div>
+
+<p>注意：TS 函数<strong>只有一个返回值</strong>，错误靠 <code>throw</code> 抛出，而不是 <code>(string, error)</code>。</p>
+<h3 id="06-错误处理throw-try-catch-finally">0.6 错误处理：throw / try / catch / finally</h3>
+<div class="hl"><pre><span></span><code><span class="kd">function</span><span class="w"> </span><span class="nx">mustPositive</span><span class="p">(</span><span class="nx">n</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">n</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">0</span><span class="p">)</span><span class="w"> </span><span class="k">throw</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="ne">Error</span><span class="p">(</span><span class="s2">"负数"</span><span class="p">);</span><span class="w">  </span><span class="c1">// 相当于 Go 的 return 0, errors.New("负数")</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="nx">n</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">try</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">mustPositive</span><span class="p">(</span><span class="o">-</span><span class="mf">1</span><span class="p">);</span>
+<span class="w">  </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">"不会执行到这里"</span><span class="p">);</span><span class="w">      </span><span class="c1">// throw 之后的代码直接跳过</span>
+<span class="p">}</span><span class="w"> </span><span class="k">catch</span><span class="w"> </span><span class="p">(</span><span class="nx">err</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">"出错了："</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="p">);</span><span class="w">        </span><span class="c1">// 相当于 if err != nil { ... }</span>
+<span class="p">}</span><span class="w"> </span><span class="k">finally</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">"无论成功失败都执行"</span><span class="p">);</span><span class="w">  </span><span class="c1">// 相当于 defer</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<ul>
+<li><code>throw</code> 会一路往上冒，直到被某个 <code>catch</code> 接住；没人接，程序崩（类似 panic）。</li>
+<li><code>catch (err)</code> 里 <code>err</code> 的类型是 <code>unknown</code>，因为 JS 里什么都能被 throw。</li>
+</ul>
+<h3 id="07-promise-与-asyncawaitts-的异步">0.7 Promise 与 async/await：TS 的“异步”</h3>
+<p>这是 Go 程序员最需要转换思路的地方。</p>
+<ul>
+<li><strong>Go</strong>：你开 goroutine，多个真正并行运行，用 channel 等结果。</li>
+<li><strong>JS/TS</strong>：只有<strong>一个线程</strong>。遇到 I/O（网络、定时器）时不阻塞线程，而是登记一个“等结果的凭证”，这个凭证就叫 <strong>Promise</strong>。</li>
+</ul>
+<div class="hl"><pre><span></span><code><span class="c1">// fetch 返回 Promise&lt;Response&gt;：一个“将来会给你 Response”的凭证</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">p</span><span class="o">:</span><span class="w"> </span><span class="kt">Promise</span><span class="o">&lt;</span><span class="nx">Response</span><span class="o">&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">fetch</span><span class="p">(</span><span class="s2">"https://example.com"</span><span class="p">);</span>
+
+<span class="c1">// await：在这里暂停当前函数，等凭证兑现，拿到真正的值</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">res</span><span class="o">:</span><span class="w"> </span><span class="kt">Response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">fetch</span><span class="p">(</span><span class="s2">"https://example.com"</span><span class="p">);</span>
+</code></pre></div>
+
+<p><code>await</code> 只能在 <code>async</code> 函数里用：</p>
+<div class="hl"><pre><span></span><code><span class="k">async</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">getText</span><span class="p">(</span><span class="nx">url</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="kt">string</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">res</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">fetch</span><span class="p">(</span><span class="nx">url</span><span class="p">);</span><span class="w">   </span><span class="c1">// 暂停，等网络返回；此时线程去处理别的事</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">res</span><span class="p">.</span><span class="nx">text</span><span class="p">();</span><span class="w">        </span><span class="c1">// 再暂停，等 body 读完</span>
+<span class="p">}</span>
+<span class="c1">// async 函数的返回值会自动包一层 Promise：写 return "abc"，调用方拿到 Promise&lt;string&gt;</span>
+</code></pre></div>
+
+<p>对照 Go 心智模型：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>TS</th>
+<th>Go 大致对应</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>const p = doWork()</code>（不 await）</td>
+<td><code>go doWork()</code>，开始跑了，但你没等它</td>
+</tr>
+<tr>
+<td><code>await p</code></td>
+<td><code>&lt;-done</code>，阻塞等结果</td>
+</tr>
+<tr>
+<td><code>await Promise.all([p1, p2, p3])</code></td>
+<td><code>wg.Wait()</code>，等三个都完成</td>
+</tr>
+<tr>
+<td>Promise reject（失败）</td>
+<td>返回了 error</td>
+</tr>
+</tbody>
+</table></div>
+<p>关键区别：<strong><code>await</code> 只暂停当前函数，不暂停整个程序</strong>。所以同一时间可以有很多个函数“停在 await 上”，看起来像并发。但同一时刻真正在执行 JS 代码的只有一个，所以<strong>普通变量读写不会有数据竞争，不需要锁</strong>。</p>
+<h3 id="08-泛型">0.8 泛型 <code>&lt;T&gt;</code></h3>
+<div class="hl"><pre><span></span><code><span class="kr">type</span><span class="w"> </span><span class="nx">Box</span><span class="o">&lt;</span><span class="nx">T</span><span class="o">&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">value</span><span class="o">:</span><span class="w"> </span><span class="kt">T</span><span class="w"> </span><span class="p">};</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">b</span><span class="o">:</span><span class="w"> </span><span class="kt">Box</span><span class="o">&lt;</span><span class="kt">string</span><span class="o">&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">value</span><span class="o">:</span><span class="w"> </span><span class="s2">"hi"</span><span class="w"> </span><span class="p">};</span>
+
+<span class="nb">Promise</span><span class="o">&lt;</span><span class="kt">string</span><span class="o">&gt;</span><span class="w">   </span><span class="c1">// 一个最终会给出 string 的 Promise</span>
+<span class="nb">Array</span><span class="o">&lt;</span><span class="kt">number</span><span class="o">&gt;</span><span class="w">     </span><span class="c1">// 等同于 number[]</span>
+</code></pre></div>
+
+<p>和 Go 1.18 的泛型一样，<code>Box[T any]</code> 写成 <code>Box&lt;T&gt;</code>，用尖括号。</p>
+<h3 id="09-几个小语法后面代码里都会出现">0.9 几个小语法（后面代码里都会出现）</h3>
+<div class="hl"><pre><span></span><code><span class="c1">// 解构：一次从对象里取多个字段，可带默认值</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">opts</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">signal</span><span class="o">:</span><span class="w"> </span><span class="kt">s</span><span class="p">,</span><span class="w"> </span><span class="nx">limit</span><span class="o">:</span><span class="w"> </span><span class="kt">8</span><span class="w"> </span><span class="p">};</span>
+<span class="kd">const</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">signal</span><span class="p">,</span><span class="w"> </span><span class="nx">limit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">4</span><span class="p">,</span><span class="w"> </span><span class="nx">perToolMs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">20</span><span class="nx">_000</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">opts</span><span class="p">;</span>
+<span class="c1">// 等价于：</span>
+<span class="c1">// const signal = opts.signal;</span>
+<span class="c1">// const limit = opts.limit ?? 4;          // opts 里有 limit=8，所以是 8</span>
+<span class="c1">// const perToolMs = opts.perToolMs ?? 20000; // 没有，所以用默认值 20000</span>
+<span class="c1">// 20_000 就是 20000，下划线只是方便阅读（Go 也支持）</span>
+
+<span class="c1">// 可选链 ?.：左边是 undefined/null 时不报错，直接得到 undefined</span>
+<span class="nx">signal</span><span class="o">?</span><span class="p">.</span><span class="nx">aborted</span><span class="w">   </span><span class="c1">// signal 为空 → undefined；否则 → signal.aborted</span>
+
+<span class="c1">// 非空断言 !：告诉编译器“我保证这里不是 undefined”</span>
+<span class="nx">signal</span><span class="o">!</span><span class="p">.</span><span class="nx">reason</span>
+
+<span class="c1">// 模板字符串：反引号 + ${}，相当于 fmt.Sprintf</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">msg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="sb">`未知工具 </span><span class="si">${</span><span class="nx">name</span><span class="si">}</span><span class="sb">`</span><span class="p">;</span><span class="w">   </span><span class="c1">// Go: fmt.Sprintf("未知工具 %s", name)</span>
+
+<span class="c1">// 类型断言 as：告诉编译器“把它当成这个类型”，运行时不做任何检查</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">JSON</span><span class="p">.</span><span class="nx">parse</span><span class="p">(</span><span class="nx">raw</span><span class="p">)</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="nx">ToolCall</span><span class="p">;</span><span class="w"> </span><span class="c1">// 危险！后面专门讲为什么</span>
+
+<span class="c1">// typeof（在类型位置）：取一个变量的类型</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">cfg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">a</span><span class="o">:</span><span class="w"> </span><span class="kt">1</span><span class="w"> </span><span class="p">};</span>
+<span class="kr">type</span><span class="w"> </span><span class="nx">Cfg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">typeof</span><span class="w"> </span><span class="nx">cfg</span><span class="p">;</span><span class="w">   </span><span class="c1">// { a: number }</span>
+
+<span class="c1">// import / export：模块，相当于 Go 的 package 导入导出</span>
+<span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">z</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">"zod"</span><span class="p">;</span><span class="w">           </span><span class="c1">// 从 zod 包里导入名字 z</span>
+<span class="k">export</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">parseEvent</span><span class="p">()</span><span class="w"> </span><span class="p">{}</span><span class="w">    </span><span class="c1">// 让别的文件能 import 它（Go 里是首字母大写）</span>
+</code></pre></div>
+
+<p>好，有了这些，下面的代码都能读懂了。</p>
+<hr />
+<h2 id="1-严格模式先把编译器调到最凶">1. 严格模式：先把编译器调到最凶</h2>
+<p>TS 编译器的检查强度是可调的。<code>tsconfig.json</code> 是项目配置文件（类似 <code>go.mod</code> + <code>go vet</code> 规则），最少这样开：</p>
+<div class="hl"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">"compilerOptions"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"target"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ES2022"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"module"</span><span class="p">:</span><span class="w"> </span><span class="s2">"NodeNext"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"moduleResolution"</span><span class="p">:</span><span class="w"> </span><span class="s2">"NodeNext"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"strict"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"noUncheckedIndexedAccess"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"exactOptionalPropertyTypes"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"noImplicitOverride"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"verbatimModuleSyntax"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>逐项解释：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>选项</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>target: ES2022</code></td>
+<td>编译输出的 JS 版本，ES2022 Node 22 全支持</td>
+</tr>
+<tr>
+<td><code>module / moduleResolution: NodeNext</code></td>
+<td>按 Node 的规则解析 <code>import</code></td>
+</tr>
+<tr>
+<td><code>strict: true</code></td>
+<td>打开一整套严格检查，最重要的是：不许隐式 <code>any</code>、<code>undefined</code> 必须处理</td>
+</tr>
+<tr>
+<td><code>noUncheckedIndexedAccess</code></td>
+<td><code>arr[0]</code> 的类型变成 <code>T \| undefined</code></td>
+</tr>
+<tr>
+<td><code>exactOptionalPropertyTypes</code></td>
+<td>可选字段不许显式传 <code>undefined</code></td>
+</tr>
+<tr>
+<td><code>noImplicitOverride</code></td>
+<td>子类覆盖方法必须写 <code>override</code></td>
+</tr>
+<tr>
+<td><code>verbatimModuleSyntax</code></td>
+<td>只导入类型时必须写 <code>import type</code>，避免打包问题</td>
+</tr>
+</tbody>
+</table></div>
+<p>重点看 <code>noUncheckedIndexedAccess</code>：</p>
+<div class="hl"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">choices</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">[]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[];</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">first</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">choices</span><span class="p">[</span><span class="mf">0</span><span class="p">];</span><span class="w">   </span><span class="c1">// 开启后，first 的类型是 string | undefined</span>
+<span class="nx">first</span><span class="p">.</span><span class="nx">toUpperCase</span><span class="p">();</span><span class="w">        </span><span class="c1">// ❌ 编译报错：first 可能是 undefined</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">first</span><span class="p">)</span><span class="w"> </span><span class="nx">first</span><span class="p">.</span><span class="nx">toUpperCase</span><span class="p">();</span><span class="w"> </span><span class="c1">// ✅ 检查过了，可以用</span>
+</code></pre></div>
+
+<p>Go 里 <code>choices[0]</code> 越界会运行时 panic；TS 默认会让你得到 <code>undefined</code> 然后在别处崩。开了这个选项，<strong>编译期就逼你处理“模型返回空 choices”的情况</strong>。</p>
+<p>两条规范：
+- 外部数据（模型输出、HTTP 请求体、第三方 API）一律先当 <code>unknown</code>，校验后才变成具体类型。<strong>禁止用 <code>as</code> 强转外部数据。</strong>
+- 不用 <code>any</code>。真要用，旁边写注释说明为什么。</p>
+<h2 id="2-可辨识联合一个流里的多种事件">2. 可辨识联合：一个流里的多种事件</h2>
+<p>LLM 流式返回时，同一个流里会混着几种事件：一段文字、一次工具调用、结束、出错。怎么用类型描述“这几种之一”？</p>
+<div class="hl"><pre><span></span><code><span class="kr">type</span><span class="w"> </span><span class="nx">StreamEvent</span><span class="w"> </span><span class="o">=</span>
+<span class="w">  </span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="kr">type</span><span class="o">:</span><span class="w"> </span><span class="s2">"text"</span><span class="p">;</span><span class="w"> </span><span class="nx">delta</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="p">}</span>
+<span class="w">  </span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="kr">type</span><span class="o">:</span><span class="w"> </span><span class="s2">"tool_call"</span><span class="p">;</span><span class="w"> </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w"> </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w"> </span><span class="nx">args</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="p">}</span>
+<span class="w">  </span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="kr">type</span><span class="o">:</span><span class="w"> </span><span class="s2">"done"</span><span class="p">;</span><span class="w"> </span><span class="nx">usage</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">input</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span><span class="w"> </span><span class="nx">output</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">}</span>
+<span class="w">  </span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="kr">type</span><span class="o">:</span><span class="w"> </span><span class="s2">"error"</span><span class="p">;</span><span class="w"> </span><span class="nx">message</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="p">};</span>
+</code></pre></div>
+
+<h3 id="逐行解读">逐行解读</h3>
+<ul>
+<li><code>type StreamEvent =</code>：定义一个类型叫 <code>StreamEvent</code>。</li>
+<li>后面四行用 <code>|</code> 连起来，意思是：<strong>一个 StreamEvent 是这四种对象之一</strong>。开头那个 <code>|</code> 只是为了排版整齐，可写可不写。</li>
+<li>每种对象都有一个 <code>type</code> 字段，而且值是<strong>字面量</strong>（<code>"text"</code>、<code>"tool_call"</code>…），这个字段就叫“标签”（discriminant）。四种对象的其他字段各不相同。</li>
+</ul>
+<p>这样的值都是合法的 <code>StreamEvent</code>：</p>
+<div class="hl"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">a</span><span class="o">:</span><span class="w"> </span><span class="kt">StreamEvent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="kr">type</span><span class="o">:</span><span class="w"> </span><span class="s2">"text"</span><span class="p">,</span><span class="w"> </span><span class="nx">delta</span><span class="o">:</span><span class="w"> </span><span class="s2">"你好"</span><span class="w"> </span><span class="p">};</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">b</span><span class="o">:</span><span class="w"> </span><span class="kt">StreamEvent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="kr">type</span><span class="o">:</span><span class="w"> </span><span class="s2">"done"</span><span class="p">,</span><span class="w"> </span><span class="nx">usage</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">input</span><span class="o">:</span><span class="w"> </span><span class="kt">10</span><span class="p">,</span><span class="w"> </span><span class="nx">output</span><span class="o">:</span><span class="w"> </span><span class="kt">20</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">};</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">c</span><span class="o">:</span><span class="w"> </span><span class="kt">StreamEvent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="kr">type</span><span class="o">:</span><span class="w"> </span><span class="s2">"text"</span><span class="p">,</span><span class="w"> </span><span class="nx">message</span><span class="o">:</span><span class="w"> </span><span class="s2">"x"</span><span class="w"> </span><span class="p">};</span><span class="w"> </span><span class="c1">// ❌ text 类型没有 message 字段</span>
+</code></pre></div>
+
+<p>对照 Go，你大概会这么写：</p>
+<div class="hl"><pre><span></span><code><span class="kd">type</span><span class="w"> </span><span class="nx">StreamEvent</span><span class="w"> </span><span class="kd">interface</span><span class="p">{</span><span class="w"> </span><span class="nx">isEvent</span><span class="p">()</span><span class="w"> </span><span class="p">}</span>
+<span class="kd">type</span><span class="w"> </span><span class="nx">TextEvent</span><span class="w"> </span><span class="kd">struct</span><span class="p">{</span><span class="w"> </span><span class="nx">Delta</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="p">}</span>
+<span class="kd">type</span><span class="w"> </span><span class="nx">ToolCallEvent</span><span class="w"> </span><span class="kd">struct</span><span class="p">{</span><span class="w"> </span><span class="nx">ID</span><span class="p">,</span><span class="w"> </span><span class="nx">Name</span><span class="p">,</span><span class="w"> </span><span class="nx">Args</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="p">}</span>
+<span class="c1">// ...每个 struct 实现 isEvent()</span>
+
+<span class="k">switch</span><span class="w"> </span><span class="nx">e</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">ev</span><span class="p">.(</span><span class="kd">type</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="k">case</span><span class="w"> </span><span class="nx">TextEvent</span><span class="p">:</span><span class="w">     </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Print</span><span class="p">(</span><span class="nx">e</span><span class="p">.</span><span class="nx">Delta</span><span class="p">)</span>
+<span class="k">case</span><span class="w"> </span><span class="nx">ToolCallEvent</span><span class="p">:</span><span class="w"> </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">e</span><span class="p">.</span><span class="nx">Name</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>TS 版本的用法：</p>
+<div class="hl"><pre><span></span><code><span class="kd">function</span><span class="w"> </span><span class="nx">handle</span><span class="p">(</span><span class="nx">ev</span><span class="o">:</span><span class="w"> </span><span class="kt">StreamEvent</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="ow">void</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">switch</span><span class="w"> </span><span class="p">(</span><span class="nx">ev</span><span class="p">.</span><span class="kr">type</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="s2">"text"</span><span class="o">:</span>
+<span class="w">      </span><span class="nx">process</span><span class="p">.</span><span class="nx">stdout</span><span class="p">.</span><span class="nx">write</span><span class="p">(</span><span class="nx">ev</span><span class="p">.</span><span class="nx">delta</span><span class="p">);</span>
+<span class="w">      </span><span class="k">break</span><span class="p">;</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="s2">"tool_call"</span><span class="o">:</span>
+<span class="w">      </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">ev</span><span class="p">.</span><span class="nx">name</span><span class="p">,</span><span class="w"> </span><span class="nx">ev</span><span class="p">.</span><span class="nx">args</span><span class="p">);</span>
+<span class="w">      </span><span class="k">break</span><span class="p">;</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="s2">"done"</span><span class="o">:</span>
+<span class="w">      </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">"tokens:"</span><span class="p">,</span><span class="w"> </span><span class="nx">ev</span><span class="p">.</span><span class="nx">usage</span><span class="p">.</span><span class="nx">output</span><span class="p">);</span>
+<span class="w">      </span><span class="k">break</span><span class="p">;</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="s2">"error"</span><span class="o">:</span>
+<span class="w">      </span><span class="k">throw</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="ne">Error</span><span class="p">(</span><span class="nx">ev</span><span class="p">.</span><span class="nx">message</span><span class="p">);</span>
+<span class="w">    </span><span class="nx">default</span><span class="o">:</span>
+<span class="w">      </span><span class="kt">assertNever</span><span class="p">(</span><span class="nx">ev</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">function</span><span class="w"> </span><span class="nx">assertNever</span><span class="p">(</span><span class="nx">x</span><span class="o">:</span><span class="w"> </span><span class="kt">never</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nx">never</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">throw</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="ne">Error</span><span class="p">(</span><span class="sb">`unhandled: </span><span class="si">${</span><span class="nb">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">x</span><span class="p">)</span><span class="si">}</span><span class="sb">`</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="逐行解读_1">逐行解读</h3>
+<ul>
+<li><code>switch (ev.type)</code>：根据标签分支。注意 TS 的 <code>switch</code> 每个 <code>case</code> 结尾要写 <code>break</code>，否则会“掉”到下一个 case（Go 默认不掉，要写 <code>fallthrough</code> 才掉，<strong>这里正好相反</strong>）。</li>
+<li><code>case "text":</code> 之后，编译器知道 <code>ev</code> 一定是 <code>{ type: "text"; delta: string }</code>，所以 <code>ev.delta</code> 能用，而 <code>ev.name</code> 会报错。这叫<strong>类型收窄</strong>，效果等同于 Go 的 <code>e := ev.(type)</code>，但不需要新变量。</li>
+<li><code>process.stdout.write(...)</code>：往标准输出写，不换行。相当于 <code>fmt.Print</code>。<code>console.log</code> 相当于 <code>fmt.Println</code>。</li>
+<li><code>throw new Error(ev.message)</code>：抛错，<code>throw</code> 之后不用 <code>break</code>，因为不会再往下走。</li>
+<li><code>default: assertNever(ev);</code>：四种都处理完了，走到 <code>default</code> 时 <code>ev</code> 的类型被收窄成 <code>never</code>（“不可能有值”）。</li>
+<li><code>function assertNever(x: never): never</code>：参数只接受 <code>never</code>。<strong>如果以后有人往 <code>StreamEvent</code> 里加了第五种 <code>{ type: "thinking" }</code>，却忘了加 <code>case</code></strong>，那 <code>default</code> 里的 <code>ev</code> 就是 <code>{ type: "thinking" }</code> 而不是 <code>never</code>，传给 <code>assertNever</code> 就会<strong>编译报错</strong>。这是 Go 的 type switch 做不到的：Go 漏了一个 case 只会静默跳过。</li>
+<li>返回类型 <code>never</code> 表示“这个函数永远不会正常返回”（总是 throw）。</li>
+<li><code>JSON.stringify(x)</code>：把对象转成 JSON 字符串，相当于 <code>json.Marshal</code>。</li>
+</ul>
+<p>OpenAI Responses、Anthropic Messages 的流式事件本质上都是这种结构，你自己 Agent 内部的事件也应该这么定义。</p>
+<h2 id="3-zod运行时校验-类型推导-json-schema-一次写完">3. Zod：运行时校验 + 类型推导 + JSON Schema 一次写完</h2>
+<h3 id="问题在哪">问题在哪</h3>
+<p>TS 的类型<strong>只在编译期存在</strong>，编译成 JS 后全部消失。而 LLM 的输出<strong>只在运行时出现</strong>。所以：</p>
+<div class="hl"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">args</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">JSON</span><span class="p">.</span><span class="nx">parse</span><span class="p">(</span><span class="nx">modelOutput</span><span class="p">)</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="nx">SearchArgs</span><span class="p">;</span><span class="w">  </span><span class="c1">// 编译器信了你</span>
+<span class="nx">args</span><span class="p">.</span><span class="nx">query</span><span class="p">.</span><span class="nx">trim</span><span class="p">();</span><span class="w">  </span><span class="c1">// 运行时：模型没给 query → 崩溃 "Cannot read properties of undefined"</span>
+</code></pre></div>
+
+<p><code>as</code> 只是让编译器闭嘴，运行时什么也不检查。Go 的 <code>json.Unmarshal</code> 至少会把缺失字段填零值，TS 连这个都没有。</p>
+<p><strong>Zod</strong> 是一个库：你用它的 API 描述数据形状，它同时给你三样东西：
+1. <strong>运行时校验函数</strong>（真的去检查每个字段）
+2. <strong>TS 类型</strong>（自动推导，不用再手写一份 <code>type</code>）
+3. <strong>JSON Schema</strong>（直接发给模型当工具定义）</p>
+<h3 id="定义一个工具参数">定义一个工具参数</h3>
+<div class="hl"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">z</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">"zod"</span><span class="p">;</span><span class="w"> </span><span class="c1">// zod v4</span>
+
+<span class="kd">const</span><span class="w"> </span><span class="nx">SearchArgs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">z</span><span class="p">.</span><span class="nx">object</span><span class="p">({</span>
+<span class="w">  </span><span class="nx">query</span><span class="o">:</span><span class="w"> </span><span class="kt">z.string</span><span class="p">().</span><span class="nx">min</span><span class="p">(</span><span class="mf">1</span><span class="p">).</span><span class="nx">describe</span><span class="p">(</span><span class="s2">"搜索关键词"</span><span class="p">),</span>
+<span class="w">  </span><span class="nx">topK</span><span class="o">:</span><span class="w"> </span><span class="kt">z.number</span><span class="p">().</span><span class="kr">int</span><span class="p">().</span><span class="nx">min</span><span class="p">(</span><span class="mf">1</span><span class="p">).</span><span class="nx">max</span><span class="p">(</span><span class="mf">20</span><span class="p">).</span><span class="k">default</span><span class="p">(</span><span class="mf">5</span><span class="p">),</span>
+<span class="p">});</span>
+
+<span class="kr">type</span><span class="w"> </span><span class="nx">SearchArgs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">z</span><span class="p">.</span><span class="nx">infer</span><span class="o">&lt;</span><span class="ow">typeof</span><span class="w"> </span><span class="nx">SearchArgs</span><span class="o">&gt;</span><span class="p">;</span>
+</code></pre></div>
+
+<p>逐行解读：</p>
+<ul>
+<li><code>import { z } from "zod"</code>：<code>z</code> 是 Zod 的入口对象，所有构造函数都挂在它上面。</li>
+<li><code>z.object({...})</code>：描述“一个对象，有这些字段”。类似 Go 的 struct 定义，但它是一个<strong>运行时的值</strong>（存在变量 <code>SearchArgs</code> 里），不只是类型。</li>
+<li><code>query: z.string().min(1).describe("搜索关键词")</code>：</li>
+<li><code>z.string()</code>：必须是字符串</li>
+<li><code>.min(1)</code>：长度至少 1（不能是空串）</li>
+<li><code>.describe(...)</code>：附一段说明，会出现在生成的 JSON Schema 里，<strong>模型能看到</strong>，相当于工具参数的文档</li>
+<li>这种 <code>.a().b().c()</code> 连着调的写法叫链式调用，每一步返回一个新的 schema</li>
+<li><code>topK: z.number().int().min(1).max(20).default(5)</code>：必须是整数，1 到 20 之间，<strong>没传就默认 5</strong>。</li>
+<li><code>type SearchArgs = z.infer&lt;typeof SearchArgs&gt;;</code>：这行最绕，拆开看：</li>
+<li><code>typeof SearchArgs</code>：取变量 <code>SearchArgs</code>（Zod schema 对象）的类型</li>
+<li><code>z.infer&lt;...&gt;</code>：Zod 提供的泛型工具，从 schema 的类型里“推导出它校验通过后的数据类型”</li>
+<li>结果就是 <code>{ query: string; topK: number }</code></li>
+<li>变量和类型可以同名（都叫 <code>SearchArgs</code>），TS 根据位置区分：写在 <code>:</code> 后面是类型，写在表达式里是变量。</li>
+</ul>
+<p><strong>一份定义，同时得到校验器和类型</strong>，两者永远不会不一致。Go 里你得写一个 struct + 一个 <code>Validate()</code> 方法 + 手写一份 JSON Schema，三处改一处忘一处是常事。</p>
+<h3 id="用它生成工具定义发给模型">用它生成工具定义（发给模型）</h3>
+<div class="hl"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">toolDef</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="s2">"search"</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">description</span><span class="o">:</span><span class="w"> </span><span class="s2">"搜索内部文档"</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">parameters</span><span class="o">:</span><span class="w"> </span><span class="kt">z.toJSONSchema</span><span class="p">(</span><span class="nx">SearchArgs</span><span class="p">),</span>
+<span class="p">};</span>
+</code></pre></div>
+
+<p><code>z.toJSONSchema(SearchArgs)</code> 生成大致这样的对象：</p>
+<div class="hl"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"object"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"properties"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"query"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"string"</span><span class="p">,</span><span class="w"> </span><span class="nt">"minLength"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nt">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"搜索关键词"</span><span class="w"> </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">"topK"</span><span class="p">:</span><span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"integer"</span><span class="p">,</span><span class="w"> </span><span class="nt">"minimum"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nt">"maximum"</span><span class="p">:</span><span class="w"> </span><span class="mi">20</span><span class="p">,</span><span class="w"> </span><span class="nt">"default"</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="w"> </span><span class="p">}</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">"required"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"query"</span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>这正是 OpenAI / Anthropic 工具调用 API 要的 <code>parameters</code> / <code>input_schema</code> 格式。</p>
+<h3 id="校验模型返回的参数">校验模型返回的参数</h3>
+<div class="hl"><pre><span></span><code><span class="kr">type</span><span class="w"> </span><span class="nx">ParseResult</span><span class="w"> </span><span class="o">=</span>
+<span class="w">  </span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">ok</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="p">;</span><span class="w"> </span><span class="nx">data</span><span class="o">:</span><span class="w"> </span><span class="kt">SearchArgs</span><span class="w"> </span><span class="p">}</span>
+<span class="w">  </span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">ok</span><span class="o">:</span><span class="w"> </span><span class="kt">false</span><span class="p">;</span><span class="w"> </span><span class="nx">error</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="p">};</span>
+
+<span class="kd">function</span><span class="w"> </span><span class="nx">parseArgs</span><span class="p">(</span><span class="nx">raw</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nx">ParseResult</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kd">let</span><span class="w"> </span><span class="nx">json</span><span class="o">:</span><span class="w"> </span><span class="kt">unknown</span><span class="p">;</span>
+<span class="w">  </span><span class="k">try</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">json</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">JSON</span><span class="p">.</span><span class="nx">parse</span><span class="p">(</span><span class="nx">raw</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span><span class="w"> </span><span class="k">catch</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">ok</span><span class="o">:</span><span class="w"> </span><span class="kt">false</span><span class="p">,</span><span class="w"> </span><span class="nx">error</span><span class="o">:</span><span class="w"> </span><span class="s2">"参数不是合法 JSON"</span><span class="w"> </span><span class="p">};</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">r</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">SearchArgs</span><span class="p">.</span><span class="nx">safeParse</span><span class="p">(</span><span class="nx">json</span><span class="p">);</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nx">success</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">ok</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="p">,</span><span class="w"> </span><span class="nx">data</span><span class="o">:</span><span class="w"> </span><span class="kt">r.data</span><span class="w"> </span><span class="p">};</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">ok</span><span class="o">:</span><span class="w"> </span><span class="kt">false</span><span class="p">,</span><span class="w"> </span><span class="nx">error</span><span class="o">:</span><span class="w"> </span><span class="kt">z.prettifyError</span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nx">error</span><span class="p">)</span><span class="w"> </span><span class="p">};</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>逐行解读：</p>
+<ul>
+<li><code>type ParseResult = | {ok: true; ...} | {ok: false; ...}</code>：又是一个可辨识联合，标签是 <code>ok</code>。这是 TS 里模仿 Go <code>(value, error)</code> 的常见写法：成功时有 <code>data</code>，失败时有 <code>error</code>，调用方 <code>if (r.ok)</code> 之后就能安全访问 <code>r.data</code>。</li>
+<li><code>let json: unknown;</code>：先声明变量，类型是 <code>unknown</code>。用 <code>let</code> 因为下一行要赋值。</li>
+<li><code>try { json = JSON.parse(raw); } catch { ... }</code>：<code>JSON.parse</code> 遇到非法 JSON 会 throw（Go 的 <code>json.Unmarshal</code> 是返回 err）。<code>catch</code> 后面不写 <code>(err)</code> 表示不关心错误内容。</li>
+<li><code>SearchArgs.safeParse(json)</code>：真正的运行时校验。<strong>不会 throw</strong>，返回一个结果对象 <code>r</code>：</li>
+<li>成功：<code>{ success: true, data: {query: "...", topK: 5} }</code>，注意 <code>default(5)</code> 已经填进去了</li>
+<li>失败：<code>{ success: false, error: ZodError }</code></li>
+<li><code>z.prettifyError(r.error)</code>：把错误转成人能读的文字，比如：
+  <code>✖ Too big: expected number to be &lt;=20
+    → at topK</code></li>
+</ul>
+<p>调用方：</p>
+<div class="hl"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">r</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">parseArgs</span><span class="p">(</span><span class="nx">toolCall</span><span class="p">.</span><span class="nx">args</span><span class="p">);</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="nx">r</span><span class="p">.</span><span class="nx">ok</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// 把错误文本作为工具结果回传给模型，让它修正参数重试</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="kt">toolCall.id</span><span class="p">,</span><span class="w"> </span><span class="nx">output</span><span class="o">:</span><span class="w"> </span><span class="kt">r.error</span><span class="p">,</span><span class="w"> </span><span class="nx">isError</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="w"> </span><span class="p">};</span>
+<span class="p">}</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">search</span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">query</span><span class="p">,</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">topK</span><span class="p">);</span><span class="w"> </span><span class="c1">// 这里 r.data 类型确定，而且真的校验过</span>
+</code></pre></div>
+
+<p><strong>校验失败不抛异常，而是把错误文本回传给模型</strong>，让它下一轮自己修正。这和 Go 课里“工具失败作为观察回传，<code>return nil</code>”是同一个思想。</p>
+<p><code>parse</code> vs <code>safeParse</code>：
+- <code>SearchArgs.parse(x)</code>：失败直接 throw。用于<strong>内部配置</strong>，启动时错了就该崩。
+- <code>SearchArgs.safeParse(x)</code>：失败返回结果对象。用于<strong>信任边界外</strong>的数据（模型、用户、第三方 API）。</p>
+<h2 id="4-asyncgenerator把-sse-变成-for-await">4. AsyncGenerator：把 SSE 变成 <code>for await</code></h2>
+<h3 id="先理解两个概念">先理解两个概念</h3>
+<p><strong>普通生成器（generator）</strong>：一个可以“暂停-继续”的函数，每次产出一个值。</p>
+<div class="hl"><pre><span></span><code><span class="kd">function</span><span class="o">*</span><span class="w"> </span><span class="nx">count</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">     </span><span class="c1">// 注意 function 后面的 *，表示这是生成器</span>
+<span class="w">  </span><span class="k">yield</span><span class="w"> </span><span class="mf">1</span><span class="p">;</span><span class="w">              </span><span class="c1">// 产出 1，然后暂停在这里</span>
+<span class="w">  </span><span class="k">yield</span><span class="w"> </span><span class="mf">2</span><span class="p">;</span><span class="w">              </span><span class="c1">// 下次继续，产出 2，再暂停</span>
+<span class="w">  </span><span class="k">yield</span><span class="w"> </span><span class="mf">3</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kd">const</span><span class="w"> </span><span class="nx">n</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="nx">count</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">n</span><span class="p">);</span><span class="w">       </span><span class="c1">// 1, 2, 3</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>对照 Go：这就像一个 goroutine 往 channel 里发 1、2、3，然后 <code>close</code>；调用方 <code>for n := range ch</code>。区别是：<strong>生成器是“拉”模式</strong>，调用方要下一个值时它才执行到下一个 <code>yield</code>，不会提前跑；没有额外的 goroutine，也就不存在泄漏。</p>
+<p><strong>异步生成器（async generator）</strong>：生成器里面可以 <code>await</code>。</p>
+<div class="hl"><pre><span></span><code><span class="k">async</span><span class="w"> </span><span class="kd">function</span><span class="o">*</span><span class="w"> </span><span class="nx">ticks</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">   </span><span class="c1">// async + function*</span>
+<span class="w">  </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kd">let</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">3</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">await</span><span class="w"> </span><span class="nx">sleep</span><span class="p">(</span><span class="mf">100</span><span class="p">);</span><span class="w">       </span><span class="c1">// 等 100ms</span>
+<span class="w">    </span><span class="k">yield</span><span class="w"> </span><span class="nx">i</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">for</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="p">(</span><span class="kd">const</span><span class="w"> </span><span class="nx">t</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="nx">ticks</span><span class="p">())</span><span class="w"> </span><span class="p">{</span><span class="w">   </span><span class="c1">// for await：每拿一个值都要等</span>
+<span class="w">  </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">t</span><span class="p">);</span><span class="w">                  </span><span class="c1">// 0, 1, 2，每隔 100ms 一个</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>这正好适合流式读取：网络数据一点点到达，读到一条完整事件就 <code>yield</code> 一条。</p>
+<h3 id="解析-sse">解析 SSE</h3>
+<p>先回忆 SSE 格式（0.1 讲过）：</p>
+<div class="hl"><pre><span></span><code>data: {"type":"text","delta":"你"}
+
+data: {"type":"text","delta":"好"}
+
+data: [DONE]
+</code></pre></div>
+
+<p>每条事件是一行 <code>data: ...</code>，事件之间空一行，最后以 <code>[DONE]</code> 结束。</p>
+<div class="hl"><pre><span></span><code><span class="k">async</span><span class="w"> </span><span class="kd">function</span><span class="o">*</span><span class="w"> </span><span class="nx">sseEvents</span><span class="p">(</span><span class="nx">res</span><span class="o">:</span><span class="w"> </span><span class="kt">Response</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nx">AsyncGenerator</span><span class="o">&lt;</span><span class="kt">string</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="nx">res</span><span class="p">.</span><span class="nx">body</span><span class="p">)</span><span class="w"> </span><span class="k">throw</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="ne">Error</span><span class="p">(</span><span class="s2">"no body"</span><span class="p">);</span>
+
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">reader</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">res</span><span class="p">.</span><span class="nx">body</span><span class="p">.</span><span class="nx">pipeThrough</span><span class="p">(</span><span class="ow">new</span><span class="w"> </span><span class="nx">TextDecoderStream</span><span class="p">()).</span><span class="nx">getReader</span><span class="p">();</span>
+<span class="w">  </span><span class="kd">let</span><span class="w"> </span><span class="nx">buf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">""</span><span class="p">;</span>
+
+<span class="w">  </span><span class="k">try</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="kc">true</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="kd">const</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">value</span><span class="p">,</span><span class="w"> </span><span class="nx">done</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">reader</span><span class="p">.</span><span class="nx">read</span><span class="p">();</span>
+<span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">done</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="p">;</span>
+<span class="w">      </span><span class="nx">buf</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="nx">value</span><span class="p">;</span>
+
+<span class="w">      </span><span class="kd">let</span><span class="w"> </span><span class="nx">idx</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span>
+<span class="w">      </span><span class="k">while</span><span class="w"> </span><span class="p">((</span><span class="nx">idx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">buf</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="s2">"\n"</span><span class="p">))</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mf">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kd">const</span><span class="w"> </span><span class="nx">line</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">buf</span><span class="p">.</span><span class="nx">slice</span><span class="p">(</span><span class="mf">0</span><span class="p">,</span><span class="w"> </span><span class="nx">idx</span><span class="p">).</span><span class="nx">trim</span><span class="p">();</span>
+<span class="w">        </span><span class="nx">buf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">buf</span><span class="p">.</span><span class="nx">slice</span><span class="p">(</span><span class="nx">idx</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">1</span><span class="p">);</span>
+
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="nx">line</span><span class="p">.</span><span class="nx">startsWith</span><span class="p">(</span><span class="s2">"data:"</span><span class="p">))</span><span class="w"> </span><span class="k">continue</span><span class="p">;</span>
+<span class="w">        </span><span class="kd">const</span><span class="w"> </span><span class="nx">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">line</span><span class="p">.</span><span class="nx">slice</span><span class="p">(</span><span class="mf">5</span><span class="p">).</span><span class="nx">trim</span><span class="p">();</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">data</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s2">"[DONE]"</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="p">;</span>
+<span class="w">        </span><span class="k">yield</span><span class="w"> </span><span class="nx">data</span><span class="p">;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span><span class="w"> </span><span class="k">finally</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">reader</span><span class="p">.</span><span class="nx">releaseLock</span><span class="p">();</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="逐行解读_2">逐行解读</h3>
+<p><strong>函数签名</strong></p>
+<ul>
+<li><code>async function* sseEvents(res: Response): AsyncGenerator&lt;string&gt;</code>：异步生成器，接收一个 <code>fetch</code> 返回的 <code>Response</code>，每次产出一个 <code>string</code>（<code>data:</code> 后面的内容）。</li>
+</ul>
+<p><strong>拿到读取器</strong></p>
+<ul>
+<li><code>if (!res.body) throw ...</code>：<code>res.body</code> 是响应体流，类型是 <code>ReadableStream | null</code>，可能为空，严格模式逼你先检查。<code>!res.body</code> 意思是“body 为空”。</li>
+<li><code>res.body.pipeThrough(new TextDecoderStream())</code>：</li>
+<li><code>res.body</code> 是<strong>字节流</strong>（类似 Go 的 <code>io.Reader</code> 读出 <code>[]byte</code>）</li>
+<li><code>TextDecoderStream</code> 把字节流转成<strong>字符串流</strong>，按 UTF-8 解码</li>
+<li><code>pipeThrough</code> 就是“接一根管子”，相当于 Go 里 <code>bufio.NewReader(transform.NewReader(body, utf8Decoder))</code></li>
+<li><strong>为什么不能每块单独解码</strong>：网络按字节到达，“你”这个字 UTF-8 是 3 个字节，可能前 2 个字节在第一块、第 3 个在第二块。单独解码就会出现乱码 <code>�</code>。<code>TextDecoderStream</code> 会把不完整的字节留到下一块。</li>
+<li><code>.getReader()</code>：拿到一个读取器，之后用 <code>reader.read()</code> 一块一块读。</li>
+</ul>
+<p><strong>主循环</strong></p>
+<ul>
+<li><code>let buf = "";</code>：缓冲区，攒还没凑成完整一行的文本。</li>
+<li><code>while (true)</code>：等同于 Go 的 <code>for {}</code>。</li>
+<li><code>const { value, done } = await reader.read();</code>：</li>
+<li><code>reader.read()</code> 返回 <code>Promise&lt;{ value, done }&gt;</code>，<code>await</code> 等它</li>
+<li>用解构一次取出两个字段：<code>value</code> 是这次读到的字符串块，<code>done</code> 表示流是否结束</li>
+<li>相当于 Go 的 <code>n, err := r.Read(buf); if err == io.EOF {...}</code></li>
+<li><code>if (done) return;</code>：流结束了，生成器结束（相当于 <code>close(ch)</code>）。</li>
+<li><code>buf += value;</code>：把新数据接到缓冲区末尾。</li>
+</ul>
+<p><strong>按行切</strong></p>
+<ul>
+<li><code>let idx: number;</code>：声明一个变量存“换行符位置”。</li>
+<li><code>while ((idx = buf.indexOf("\n")) &gt;= 0)</code>：这一行做了两件事：
+  1. <code>idx = buf.indexOf("\n")</code>：找第一个换行符的位置，找不到返回 <code>-1</code>（同 Go 的 <code>strings.Index</code>）
+  2. 赋值表达式本身的值就是 <code>idx</code>，判断 <code>&gt;= 0</code></li>
+</ul>
+<p>意思是：<strong>只要缓冲区里还有完整的一行，就一直处理</strong>。一块数据可能包含好几行，也可能只有半行（那就留在 <code>buf</code> 里等下一块）。
+- <code>const line = buf.slice(0, idx).trim();</code>：取出这一行（<code>slice(0, idx)</code> = Go 的 <code>buf[:idx]</code>），<code>trim()</code> 去掉首尾空白（含 <code>\r</code>）。
+- <code>buf = buf.slice(idx + 1);</code>：把这一行连同换行符从缓冲区删掉（= <code>buf[idx+1:]</code>）。
+- <code>if (!line.startsWith("data:")) continue;</code>：不是 <code>data:</code> 开头的（空行、<code>event:</code>、<code>: 注释</code>）跳过。
+- <code>const data = line.slice(5).trim();</code>：去掉前 5 个字符 <code>data:</code>，再去空格。
+- <code>if (data === "[DONE]") return;</code>：结束标记。注意 TS 比较用 <code>===</code>（三个等号），<strong>永远不要用 <code>==</code></strong>，后者会做奇怪的类型转换。
+- <code>yield data;</code>：产出这条数据，<strong>函数在这里暂停</strong>，直到调用方的 <code>for await</code> 要下一条。</p>
+<p><strong>清理</strong></p>
+<ul>
+<li><code>finally { reader.releaseLock(); }</code>：无论是正常结束、调用方 <code>break</code>、还是出错，都会执行。这就是 TS 版的 <code>defer</code>。<code>releaseLock()</code> 释放读取器，流可以被关闭/回收。</li>
+</ul>
+<h3 id="怎么用以及怎么取消">怎么用，以及怎么取消</h3>
+<div class="hl"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">ctrl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">AbortController</span><span class="p">();</span>
+
+<span class="kd">const</span><span class="w"> </span><span class="nx">res</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">fetch</span><span class="p">(</span><span class="s2">"https://api.example.com/chat"</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">method</span><span class="o">:</span><span class="w"> </span><span class="s2">"POST"</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">headers</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="s2">"Content-Type"</span><span class="o">:</span><span class="w"> </span><span class="s2">"application/json"</span><span class="w"> </span><span class="p">},</span>
+<span class="w">  </span><span class="nx">body</span><span class="o">:</span><span class="w"> </span><span class="kt">JSON.stringify</span><span class="p">({</span><span class="w"> </span><span class="nx">stream</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="p">,</span><span class="w"> </span><span class="nx">messages</span><span class="o">:</span><span class="w"> </span><span class="p">[]</span><span class="w"> </span><span class="p">}),</span>
+<span class="w">  </span><span class="nx">signal</span><span class="o">:</span><span class="w"> </span><span class="kt">ctrl.signal</span><span class="p">,</span>
+<span class="p">});</span>
+
+<span class="kd">let</span><span class="w"> </span><span class="nx">count</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0</span><span class="p">;</span>
+<span class="k">for</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="p">(</span><span class="kd">const</span><span class="w"> </span><span class="nx">data</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="nx">sseEvents</span><span class="p">(</span><span class="nx">res</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">json</span><span class="o">:</span><span class="w"> </span><span class="kt">unknown</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">JSON</span><span class="p">.</span><span class="nx">parse</span><span class="p">(</span><span class="nx">data</span><span class="p">);</span>
+<span class="w">  </span><span class="c1">// 下一步交给 Zod 校验成 StreamEvent（见练习 1）</span>
+<span class="w">  </span><span class="nx">count</span><span class="o">++</span><span class="p">;</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">count</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mf">100</span><span class="p">)</span><span class="w"> </span><span class="k">break</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c1">// 别的地方（比如用户点了停止按钮）：</span>
+<span class="nx">ctrl</span><span class="p">.</span><span class="nx">abort</span><span class="p">();</span>
+</code></pre></div>
+
+<p>逐行解读：</p>
+<ul>
+<li><code>new AbortController()</code>：创建一个“取消器”，相当于 Go 的 <code>ctx, cancel := context.WithCancel(...)</code>。<code>ctrl.signal</code> 相当于 <code>ctx</code>，<code>ctrl.abort()</code> 相当于 <code>cancel()</code>。</li>
+<li><code>fetch(url, { ... })</code>：第二个参数是选项对象：</li>
+<li><code>method</code>、<code>headers</code>、<code>body</code>：和 Go 的 <code>http.NewRequest</code> 一样</li>
+<li><code>JSON.stringify(...)</code>：对象转 JSON 字符串，= <code>json.Marshal</code></li>
+<li><code>signal: ctrl.signal</code>：<strong>把取消信号绑定到这次请求</strong>，= <code>http.NewRequestWithContext(ctx, ...)</code></li>
+<li><code>for await (const data of sseEvents(res))</code>：每次循环拿一条 <code>data</code>。</li>
+<li><code>break</code>：提前退出循环。这时 JS 会自动通知生成器“不要了”，生成器里的 <code>finally</code> 执行，<code>releaseLock()</code> 被调用。</li>
+<li><code>ctrl.abort()</code>：取消后，正在等待的 <code>reader.read()</code> 会立刻 reject（抛出 <code>AbortError</code>），这个错误从生成器里冒出来，经过 <code>finally</code>，再从 <code>for await</code> 那一行抛给你；同时底层 TCP 连接被断开，<strong>上游停止生成、停止计费</strong>。</li>
+</ul>
+<h2 id="5-abortcontrollerts-版的-context">5. AbortController：TS 版的 context</h2>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Go</th>
+<th>TS</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ctx, cancel := context.WithCancel(parent)</code></td>
+<td><code>const ctrl = new AbortController()</code></td>
+<td>手动取消</td>
+</tr>
+<tr>
+<td><code>ctx</code></td>
+<td><code>ctrl.signal</code>（类型 <code>AbortSignal</code>）</td>
+<td>往下传的就是它</td>
+</tr>
+<tr>
+<td><code>cancel()</code></td>
+<td><code>ctrl.abort()</code></td>
+<td>触发取消</td>
+</tr>
+<tr>
+<td><code>context.WithTimeout(ctx, 5*time.Second)</code></td>
+<td><code>AbortSignal.timeout(5000)</code></td>
+<td>超时自动取消，单位毫秒</td>
+</tr>
+<tr>
+<td>子 ctx 继承父 ctx</td>
+<td><code>AbortSignal.any([a, b])</code></td>
+<td>任一取消就取消</td>
+</tr>
+<tr>
+<td><code>&lt;-ctx.Done()</code></td>
+<td><code>signal.addEventListener("abort", fn)</code></td>
+<td>取消时回调</td>
+</tr>
+<tr>
+<td><code>ctx.Err() != nil</code></td>
+<td><code>signal.aborted</code></td>
+<td>是否已取消（布尔值）</td>
+</tr>
+<tr>
+<td><code>ctx.Err()</code></td>
+<td><code>signal.reason</code></td>
+<td>取消原因</td>
+</tr>
+</tbody>
+</table></div>
+<p>一个和 Go 的关键不同：Go 的 <code>ctx</code> 是一棵树，子 ctx 自动继承父 ctx。TS 没有父子关系，要用 <code>AbortSignal.any</code> <strong>手动合并</strong>。</p>
+<div class="hl"><pre><span></span><code><span class="k">async</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">runTurn</span><span class="p">(</span><span class="nx">userSignal</span><span class="o">:</span><span class="w"> </span><span class="kt">AbortSignal</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="ow">void</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">signal</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">AbortSignal</span><span class="p">.</span><span class="nx">any</span><span class="p">([</span><span class="nx">userSignal</span><span class="p">,</span><span class="w"> </span><span class="nx">AbortSignal</span><span class="p">.</span><span class="nx">timeout</span><span class="p">(</span><span class="mf">60</span><span class="nx">_000</span><span class="p">)]);</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">res</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">fetch</span><span class="p">(</span><span class="nx">LLM_URL</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">method</span><span class="o">:</span><span class="w"> </span><span class="s2">"POST"</span><span class="p">,</span><span class="w"> </span><span class="nx">body</span><span class="o">:</span><span class="w"> </span><span class="s2">"..."</span><span class="p">,</span><span class="w"> </span><span class="nx">signal</span><span class="w"> </span><span class="p">});</span>
+<span class="w">  </span><span class="c1">// ... 再把 signal 一路往下传给每个工具</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>逐行解读：</p>
+<ul>
+<li><code>userSignal: AbortSignal</code>：调用方传进来的信号，比如用户点“停止”时会触发。</li>
+<li><code>AbortSignal.timeout(60_000)</code>：一个 60 秒后自动触发的信号。</li>
+<li><code>AbortSignal.any([a, b])</code>：合成一个新信号，<code>a</code> 或 <code>b</code> 任一触发它就触发。整体效果等同于 Go：
+  <code>go
+  ctx, cancel := context.WithTimeout(userCtx, 60*time.Second)
+  defer cancel()</code></li>
+<li>TS 这边<strong>不需要 <code>defer cancel()</code></strong>：<code>AbortSignal.timeout</code> 的定时器由运行时自己管理。</li>
+</ul>
+<p>区分“被取消”和“真出错”：</p>
+<div class="hl"><pre><span></span><code><span class="k">try</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">runTurn</span><span class="p">(</span><span class="nx">signal</span><span class="p">);</span>
+<span class="p">}</span><span class="w"> </span><span class="k">catch</span><span class="w"> </span><span class="p">(</span><span class="nx">err</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">err</span><span class="w"> </span><span class="ow">instanceof</span><span class="w"> </span><span class="ne">Error</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">err</span><span class="p">.</span><span class="nx">name</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s2">"AbortError"</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">"用户取消了"</span><span class="p">);</span><span class="w">        </span><span class="c1">// 手动 abort()</span>
+<span class="w">  </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">err</span><span class="w"> </span><span class="ow">instanceof</span><span class="w"> </span><span class="ne">Error</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">err</span><span class="p">.</span><span class="nx">name</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s2">"TimeoutError"</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">"超时了"</span><span class="p">);</span><span class="w">            </span><span class="c1">// AbortSignal.timeout 触发</span>
+<span class="w">  </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">throw</span><span class="w"> </span><span class="nx">err</span><span class="p">;</span><span class="w">                        </span><span class="c1">// 真正的错误，继续往上抛</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<ul>
+<li><code>err instanceof Error</code>：检查 <code>err</code> 是不是 <code>Error</code> 对象（前面说过 <code>catch</code> 里的 <code>err</code> 是 <code>unknown</code>，要先检查才能访问 <code>.name</code>）。等价于 Go 的 <code>errors.As</code>。</li>
+<li><code>err.name === "AbortError"</code>：等价于 Go 的 <code>errors.Is(err, context.Canceled)</code>。</li>
+</ul>
+<p>规范（和 Go 一致）：
+- <code>signal</code> 作为参数显式往下传。
+- 自己写的长循环里要检查：<code>signal.throwIfAborted();</code>，已取消就立刻抛错（= Go 里 <code>if ctx.Err() != nil { return ctx.Err() }</code>）。</p>
+<h2 id="6-并行工具调用带并发上限-单工具超时">6. 并行工具调用：带并发上限 + 单工具超时</h2>
+<p>这是 0.1 里 <code>runTools</code>（errgroup 版）的 TS 翻译。先看完整代码，再逐行拆。</p>
+<div class="hl"><pre><span></span><code><span class="kr">type</span><span class="w"> </span><span class="nx">ToolCall</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w"> </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w"> </span><span class="nx">args</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="p">};</span>
+<span class="kr">type</span><span class="w"> </span><span class="nx">ToolResult</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w"> </span><span class="nx">output</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w"> </span><span class="nx">isError</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="p">};</span>
+<span class="kr">type</span><span class="w"> </span><span class="nx">Tool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="nx">args</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">signal</span><span class="o">:</span><span class="w"> </span><span class="kt">AbortSignal</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="kt">string</span><span class="o">&gt;</span><span class="p">;</span>
+
+<span class="kr">type</span><span class="w"> </span><span class="nx">RunOptions</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">signal</span><span class="o">:</span><span class="w"> </span><span class="kt">AbortSignal</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">limit?</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">perToolMs?</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="k">async</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">runTools</span><span class="p">(</span>
+<span class="w">  </span><span class="nx">calls</span><span class="o">:</span><span class="w"> </span><span class="kt">ToolCall</span><span class="p">[],</span>
+<span class="w">  </span><span class="nx">tools</span><span class="o">:</span><span class="w"> </span><span class="kt">Record</span><span class="o">&lt;</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">Tool</span><span class="o">&gt;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">opts</span><span class="o">:</span><span class="w"> </span><span class="kt">RunOptions</span><span class="p">,</span>
+<span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">ToolResult</span><span class="p">[]</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">signal</span><span class="p">,</span><span class="w"> </span><span class="nx">limit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">4</span><span class="p">,</span><span class="w"> </span><span class="nx">perToolMs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">20</span><span class="nx">_000</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">opts</span><span class="p">;</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">results</span><span class="o">:</span><span class="w"> </span><span class="kt">ToolResult</span><span class="p">[]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nb">Array</span><span class="p">(</span><span class="nx">calls</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
+<span class="w">  </span><span class="kd">let</span><span class="w"> </span><span class="nx">next</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0</span><span class="p">;</span>
+
+<span class="w">  </span><span class="k">async</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">worker</span><span class="p">()</span><span class="o">:</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="ow">void</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="kc">true</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="kd">const</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">next</span><span class="o">++</span><span class="p">;</span>
+<span class="w">      </span><span class="kd">const</span><span class="w"> </span><span class="nx">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">calls</span><span class="p">[</span><span class="nx">i</span><span class="p">];</span>
+<span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="nx">c</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="p">;</span>
+
+<span class="w">      </span><span class="kd">const</span><span class="w"> </span><span class="nx">tool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">tools</span><span class="p">[</span><span class="nx">c</span><span class="p">.</span><span class="nx">name</span><span class="p">];</span>
+<span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="nx">tool</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">results</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="kt">c.id</span><span class="p">,</span><span class="w"> </span><span class="nx">output</span><span class="o">:</span><span class="w"> </span><span class="sb">`未知工具 </span><span class="si">${</span><span class="nx">c</span><span class="p">.</span><span class="nx">name</span><span class="si">}</span><span class="sb">`</span><span class="p">,</span><span class="w"> </span><span class="nx">isError</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="w"> </span><span class="p">};</span>
+<span class="w">        </span><span class="k">continue</span><span class="p">;</span>
+<span class="w">      </span><span class="p">}</span>
+
+<span class="w">      </span><span class="k">try</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kd">const</span><span class="w"> </span><span class="nx">s</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">AbortSignal</span><span class="p">.</span><span class="nx">any</span><span class="p">([</span><span class="nx">signal</span><span class="p">,</span><span class="w"> </span><span class="nx">AbortSignal</span><span class="p">.</span><span class="nx">timeout</span><span class="p">(</span><span class="nx">perToolMs</span><span class="p">)]);</span>
+<span class="w">        </span><span class="kd">const</span><span class="w"> </span><span class="nx">output</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">tool</span><span class="p">(</span><span class="nx">c</span><span class="p">.</span><span class="nx">args</span><span class="p">,</span><span class="w"> </span><span class="nx">s</span><span class="p">);</span>
+<span class="w">        </span><span class="nx">results</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="kt">c.id</span><span class="p">,</span><span class="w"> </span><span class="nx">output</span><span class="p">,</span><span class="w"> </span><span class="nx">isError</span><span class="o">:</span><span class="w"> </span><span class="kt">false</span><span class="w"> </span><span class="p">};</span>
+<span class="w">      </span><span class="p">}</span><span class="w"> </span><span class="k">catch</span><span class="w"> </span><span class="p">(</span><span class="nx">err</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">signal</span><span class="p">.</span><span class="nx">aborted</span><span class="p">)</span><span class="w"> </span><span class="k">throw</span><span class="w"> </span><span class="nx">err</span><span class="p">;</span>
+<span class="w">        </span><span class="nx">results</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="kt">c.id</span><span class="p">,</span><span class="w"> </span><span class="nx">output</span><span class="o">:</span><span class="w"> </span><span class="kt">String</span><span class="p">(</span><span class="nx">err</span><span class="p">),</span><span class="w"> </span><span class="nx">isError</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="w"> </span><span class="p">};</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">n</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">Math</span><span class="p">.</span><span class="nx">min</span><span class="p">(</span><span class="nx">limit</span><span class="p">,</span><span class="w"> </span><span class="nx">calls</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">workers</span><span class="o">:</span><span class="w"> </span><span class="kt">Promise</span><span class="o">&lt;</span><span class="ow">void</span><span class="o">&gt;</span><span class="p">[]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[];</span>
+<span class="w">  </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kd">let</span><span class="w"> </span><span class="nx">k</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0</span><span class="p">;</span><span class="w"> </span><span class="nx">k</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="nx">n</span><span class="p">;</span><span class="w"> </span><span class="nx">k</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">workers</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">worker</span><span class="p">());</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nb">Promise</span><span class="p">.</span><span class="nx">all</span><span class="p">(</span><span class="nx">workers</span><span class="p">);</span>
+
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="nx">results</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="逐行解读_3">逐行解读</h3>
+<p><strong>类型定义</strong></p>
+<ul>
+<li><code>ToolCall</code>：模型要求调用的工具，<code>args</code> 是原始 JSON 字符串。</li>
+<li><code>ToolResult</code>：执行结果，<code>isError</code> 标记是否失败（失败的结果也要回传给模型）。</li>
+<li><code>Tool</code>：一个工具就是一个异步函数：收参数和取消信号，返回 <code>Promise&lt;string&gt;</code>。对应 Go 的 <code>func(ctx, args) (string, error)</code>，错误走 throw。</li>
+<li><code>RunOptions</code>：选项对象，<code>limit</code> 和 <code>perToolMs</code> 带 <code>?</code>，可以不传。TS 没有 Go 那种 functional options，通常就用一个选项对象。</li>
+</ul>
+<p><strong>函数签名</strong></p>
+<ul>
+<li><code>tools: Record&lt;string, Tool&gt;</code>：工具注册表，= Go 的 <code>map[string]Tool</code>。</li>
+<li>返回 <code>Promise&lt;ToolResult[]&gt;</code>：因为是 <code>async</code> 函数，返回值自动包一层 Promise。</li>
+</ul>
+<p><strong>准备</strong></p>
+<ul>
+<li><code>const { signal, limit = 4, perToolMs = 20_000 } = opts;</code>：解构 + 默认值（见 0.9）。</li>
+<li><code>const results: ToolResult[] = new Array(calls.length);</code>：预先开一个长度为 N 的数组，= Go 的 <code>make([]ToolResult, len(calls))</code>。</li>
+<li><code>let next = 0;</code>：下一个待执行任务的下标。<strong>所有 worker 共享这个变量</strong>。</li>
+</ul>
+<p><strong>worker：一个“工人”，不停领任务直到领完</strong></p>
+<ul>
+<li><code>async function worker()</code>：在 <code>runTools</code> 里面定义一个函数。它能直接访问外层的 <code>calls</code>、<code>next</code>、<code>results</code>（闭包，和 Go 的匿名函数捕获外部变量一样）。</li>
+<li><code>const i = next++;</code>：领一个任务号。<code>next++</code> 的意思是“先取 next 的当前值给 i，再把 next 加 1”。</li>
+<li><strong>为什么不用加锁</strong>：JS 只有一个线程，这一行是同步执行的，不可能两个 worker 同时执行它。worker 之间只会在 <code>await</code> 那一行切换。</li>
+<li>在 Go 里这样写是数据竞争，<code>go test -race</code> 会报错，必须用 <code>atomic.AddInt64</code> 或 mutex。</li>
+<li><code>const c = calls[i]; if (!c) return;</code>：开了 <code>noUncheckedIndexedAccess</code>，<code>calls[i]</code> 类型是 <code>ToolCall | undefined</code>。<code>i</code> 超出范围时得到 <code>undefined</code>，说明任务领完了，这个 worker 结束。</li>
+<li><code>const tool = tools[c.name]; if (!tool) {...}</code>：按名字查工具；查不到（模型编了一个不存在的工具名）就记一条错误结果，<code>continue</code> 领下一个任务。</li>
+</ul>
+<p><strong>执行一个工具</strong></p>
+<ul>
+<li><code>const s = AbortSignal.any([signal, AbortSignal.timeout(perToolMs)]);</code>：这个工具的取消信号 = 整体取消 <strong>或</strong> 单工具超时。= Go 的 <code>tctx, cancel := context.WithTimeout(ctx, perTool)</code>。</li>
+<li><code>const output = await tool(c.args, s);</code>：调用工具并等待结果。<strong>这里是让出点</strong>：这个 worker 暂停，其他 worker 可以继续执行。</li>
+<li><code>results[i] = { id: c.id, output, isError: false };</code>：<code>output</code> 是 <code>output: output</code> 的简写（字段名和变量名相同时可省略）。</li>
+</ul>
+<p><strong>失败处理：分两种</strong></p>
+<ul>
+<li><code>catch (err)</code>：工具抛错了，原因可能是工具本身出错、单工具超时、或者整体被取消。</li>
+<li><code>if (signal.aborted) throw err;</code>：<strong>整体被取消</strong>（用户点了停止 / 整轮超时），没必要继续了，往上抛，整个 <code>runTools</code> 失败。= Go 里的 <code>return err</code>。</li>
+<li>否则：<strong>只是这个工具失败</strong>，把错误转成文字记进结果，回传给模型。<code>String(err)</code> 把任意值转成字符串。= Go 里的 <code>results[i].Err = err; return nil</code>。</li>
+</ul>
+<p><strong>启动 worker 并等待</strong></p>
+<ul>
+<li><code>const n = Math.min(limit, calls.length);</code>：worker 数量 = 并发上限和任务数取小。3 个任务就没必要开 4 个 worker。</li>
+<li><code>workers.push(worker());</code>：<strong>调用 <code>worker()</code> 但不 <code>await</code></strong>，它立刻开始执行，直到第一个 <code>await</code> 让出，然后返回一个 Promise。<code>push</code> 把这个 Promise 放进数组（= Go 的 <code>append</code>）。这一步效果等同于开了 n 个 goroutine。</li>
+<li><code>await Promise.all(workers);</code>：等所有 worker 完成。= Go 的 <code>g.Wait()</code>。任一 worker 抛错（只会是整体取消），<code>Promise.all</code> 立刻 reject。</li>
+</ul>
+<p><strong>和 Go 版对照</strong></p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Go（0.1）</th>
+<th>TS</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>g.SetLimit(4)</code></td>
+<td>开 <code>limit</code> 个 worker</td>
+</tr>
+<tr>
+<td><code>g.Go(func() error {...})</code></td>
+<td><code>workers.push(worker())</code></td>
+</tr>
+<tr>
+<td><code>g.Wait()</code></td>
+<td><code>await Promise.all(workers)</code></td>
+</tr>
+<tr>
+<td>每个 goroutine 写 <code>results[i]</code></td>
+<td>每个 worker 写 <code>results[i]</code></td>
+</tr>
+<tr>
+<td>工具失败 <code>return nil</code></td>
+<td><code>catch</code> 里记结果，不抛</td>
+</tr>
+<tr>
+<td>整体取消 <code>return err</code></td>
+<td><code>if (signal.aborted) throw err</code></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p>你也会看到别人写 <code>Promise.all(Array.from({ length: n }, worker))</code>，意思和上面的 <code>for</code> 循环一样：<code>Array.from({ length: n }, fn)</code> 会调用 <code>fn</code> n 次，把返回值组成数组。本课用 <code>for</code> 循环，更好读。</p>
+</blockquote>
+<p><strong><code>Promise.all</code> vs <code>Promise.allSettled</code></strong>：
+- <code>Promise.all</code>：任一失败就立刻失败。
+- <code>Promise.allSettled</code>：等全部完成，每个结果标记成功/失败，自己永远不会失败。</p>
+<p>这里故意用 <code>all</code>：单个工具失败已经在 <code>try/catch</code> 里变成了结果，只有整体取消才会抛到这一层，这时就应该立刻停。</p>
+<h2 id="7-三个高频坑">7. 三个高频坑</h2>
+<h3 id="坑-1忘了-await">坑 1：忘了 <code>await</code></h3>
+<div class="hl"><pre><span></span><code><span class="k">async</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">handle</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">saveToDb</span><span class="p">(</span><span class="nx">result</span><span class="p">);</span><span class="w">   </span><span class="c1">// ❌ 没 await：函数开始执行，但你没等它</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="s2">"ok"</span><span class="p">;</span><span class="w">        </span><span class="c1">// 立刻返回；如果 saveToDb 后来失败了，没人接这个错误</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>没被接住的 Promise 失败叫 unhandled rejection，Node 默认会<strong>直接退出进程</strong>。类似 Go 里 <code>go saveToDb()</code> 然后 goroutine 里 panic。</p>
+<p>解决：开 ESLint 规则 <code>@typescript-eslint/no-floating-promises</code>，没 await 的 Promise 直接报错。真想“发出去不管”就显式写 <code>void saveToDb(result).catch(log)</code>。</p>
+<h3 id="坑-2用-as-骗编译器">坑 2：用 <code>as</code> 骗编译器</h3>
+<div class="hl"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">call</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">JSON</span><span class="p">.</span><span class="nx">parse</span><span class="p">(</span><span class="nx">raw</span><span class="p">)</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="nx">ToolCall</span><span class="p">;</span><span class="w"> </span><span class="c1">// 编译通过</span>
+<span class="nx">call</span><span class="p">.</span><span class="nx">name</span><span class="p">.</span><span class="nx">toUpperCase</span><span class="p">();</span><span class="w">                  </span><span class="c1">// 运行时：模型没给 name → 崩</span>
+</code></pre></div>
+
+<p><code>as</code> 不做任何检查。<strong>外部数据只能 Zod 校验后再用。</strong> <code>as</code> 只在你比编译器更清楚、而且数据来自你自己的代码时才用（练习 4 里有一个例子）。</p>
+<h3 id="坑-3abort-了但资源没释放">坑 3：abort 了，但资源没释放</h3>
+<div class="hl"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">badTool</span><span class="o">:</span><span class="w"> </span><span class="kt">Tool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="p">(</span><span class="nx">args</span><span class="p">,</span><span class="w"> </span><span class="nx">signal</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nb">Promise</span><span class="p">((</span><span class="nx">r</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">setTimeout</span><span class="p">(</span><span class="nx">r</span><span class="p">,</span><span class="w"> </span><span class="mf">30</span><span class="nx">_000</span><span class="p">));</span><span class="w"> </span><span class="c1">// 完全没理会 signal</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="s2">"done"</span><span class="p">;</span>
+<span class="p">};</span>
+</code></pre></div>
+
+<p><code>runTools</code> 那边 <code>AbortSignal.timeout</code> 到点了，<code>await</code> 因此提前结束吗？<strong>不会</strong>。<code>AbortSignal</code> 只是一个“通知”，<strong>工具自己不检查，就没人能打断它</strong>。这和 Go 一样：goroutine 不读 <code>ctx.Done()</code>，cancel 了也照样跑。</p>
+<p>正确写法见练习 2 的 <code>sleep(ms, signal)</code>：监听 <code>abort</code> 事件，清掉定时器，立刻 reject。<code>fetch</code> 自带这个能力，所以把 <code>signal</code> 传给 <code>fetch</code> 就够了；你自己用 <code>setTimeout</code>、子进程、数据库连接时，要自己处理。</p>
+<hr />
+<h2 id="练习今天做完">练习（今天做完）</h2>
+<h3 id="环境准备">环境准备</h3>
+<div class="hl"><pre><span></span><code>mkdir<span class="w"> </span>-p<span class="w"> </span>projects/01-ts-agent-core/src<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>projects/01-ts-agent-core
+npm<span class="w"> </span>init<span class="w"> </span>-y<span class="w">                       </span><span class="c1"># 生成 package.json，相当于 go mod init</span>
+npm<span class="w"> </span>pkg<span class="w"> </span><span class="nb">set</span><span class="w"> </span><span class="nv">type</span><span class="o">=</span>module<span class="w">           </span><span class="c1"># 用 ES 模块（import/export）</span>
+npm<span class="w"> </span>i<span class="w"> </span>zod<span class="w">                         </span><span class="c1"># 运行时依赖，相当于 go get</span>
+npm<span class="w"> </span>i<span class="w"> </span>-D<span class="w"> </span>typescript<span class="w"> </span>vitest<span class="w"> </span>@types/node<span class="w">   </span><span class="c1"># -D：只在开发时用（编译器、测试框架、Node 类型定义）</span>
+npx<span class="w"> </span>tsc<span class="w"> </span>--init<span class="w">                    </span><span class="c1"># 生成 tsconfig.json，再按第 1 节改</span>
+</code></pre></div>
+
+<ul>
+<li><code>npx xxx</code>：运行项目里安装的命令行工具。</li>
+<li><code>vitest</code> 是测试框架，相当于 <code>go test</code>。测试文件命名为 <code>xxx.test.ts</code>。</li>
+<li>目录建议：<code>src/events.ts</code>、<code>src/sleep.ts</code>、<code>src/runTools.ts</code>、<code>src/sse.ts</code>，测试放 <code>src/*.test.ts</code>。</li>
+</ul>
+<h3 id="题目">题目</h3>
+<ol>
+<li>用 Zod 定义 <code>StreamEvent</code> 可辨识联合（<code>z.discriminatedUnion</code>），写 <code>parseEvent(data: string)</code>，非法输入返回错误而不是抛异常</li>
+<li>写可取消的 <code>sleep(ms, signal)</code>，abort 时立刻 reject 并清掉定时器</li>
+<li>用 <code>runTools</code> 跑三个假工具（50ms / 100ms / 5s），<code>perToolMs = 200</code>，断言前两个成功、第三个 <code>isError: true</code>、总耗时 &lt; 400ms</li>
+<li>用 <code>node:http</code> 起一个假 SSE 服务，客户端读到 3 个事件后 <code>abort()</code>，断言服务端收到 <code>close</code> 事件</li>
+<li><code>npx tsc --noEmit</code> 零错误，<code>npx vitest run</code> 全绿</li>
+</ol>
+<p>建议先自己写，卡住了再看下面的参考实现。</p>
+<h2 id="自测题">自测题</h2>
+<ol>
+<li>为什么 <code>switch</code> 的 <code>default</code> 里要调 <code>assertNever</code>？</li>
+<li>工具参数 Zod 校验失败，为什么不抛异常而是回传给模型？</li>
+<li><code>for await</code> 里 <code>break</code>，generator 里的 <code>finally</code> 会执行吗？为什么？</li>
+<li><code>AbortSignal.any</code> 解决了什么问题？对应 Go 的什么？</li>
+<li>为什么 <code>runTools</code> 里 <code>next++</code> 不需要锁，而 Go 里同样写法会被 <code>-race</code> 报出来？</li>
+</ol>
+<hr />
+<h1 id="参考答案与详解">参考答案与详解</h1>
+<h2 id="自测题答案">自测题答案</h2>
+<h3 id="1-assertnever-的作用">1. <code>assertNever</code> 的作用</h3>
+<p><code>default</code> 分支里 <code>ev</code> 的类型应该是 <code>never</code>，因为所有情况都处理完了。以后有人往 <code>StreamEvent</code> 里加了 <code>{ type: "thinking" }</code> 却忘了加 <code>case</code>，<code>default</code> 里的 <code>ev</code> 就变成了 <code>{ type: "thinking" }</code>，传给只接受 <code>never</code> 的 <code>assertNever</code> 会<strong>编译报错</strong>。这把“漏处理一种事件”从运行时 bug 变成了编译错误。Go 的 type switch 漏写 case 只会静默跳过。</p>
+<h3 id="2-校验失败为什么回传给模型">2. 校验失败为什么回传给模型</h3>
+<p>模型编错参数是<strong>常态</strong>，不是异常。回传类似 <code>topK: Too big, expected &lt;=20</code> 的错误文本，模型下一轮通常能自己修正参数重试。抛异常会让整轮对话失败，用户什么也拿不到。只有“系统坏了”（网络断、配置错、被取消）才应该抛。和 0.1 里“工具失败 <code>return nil</code>，把错误写进结果”是同一个原则。</p>
+<h3 id="3-break-后-finally-会执行吗">3. <code>break</code> 后 <code>finally</code> 会执行吗</h3>
+<p>会。<code>for await...of</code> 提前退出（<code>break</code>、<code>return</code>、循环体里抛错）时，JS 会自动调用生成器的 <code>return()</code> 方法，生成器从暂停的 <code>yield</code> 处“被结束”，执行 <code>finally</code>。所以把 <code>releaseLock()</code>、关连接放在 <code>finally</code> 里是安全的，相当于 Go 的 <code>defer</code>。</p>
+<p>例外：如果你不用 <code>for await</code>，而是手动调用 <code>gen.next()</code>，中途把生成器丢掉不管，<code>finally</code> <strong>不会</strong>执行。所以总是用 <code>for await</code> 消费生成器。</p>
+<h3 id="4-abortsignalany">4. <code>AbortSignal.any</code></h3>
+<p>把多个取消源合成一个：用户停止 OR 整轮超时 OR 单工具超时，任一触发就取消。Go 的 ctx 天然是树形继承的（<code>WithTimeout(parent, d)</code> 自动带上父 ctx 的取消），TS 的 <code>AbortSignal</code> 没有父子关系，<code>AbortSignal.any</code> 就是用来补这个的。</p>
+<h3 id="5-为什么-next-不需要锁">5. 为什么 <code>next++</code> 不需要锁</h3>
+<p>JS 运行在单线程的事件循环上。<code>const i = next++</code> 是一段同步代码，执行过程中不可能被别的 worker 插进来；worker 之间只在 <code>await</code> 处切换。所以不存在两个 worker 同时读写 <code>next</code>。</p>
+<p>Go 的 goroutine 可以跑在多个 CPU 核上<strong>真正同时执行</strong>，两个 goroutine 同时 <code>next++</code>（读、加一、写回三步）就可能都读到同一个值，这就是数据竞争，<code>-race</code> 会报。Go 版要么用 <code>atomic.AddInt64(&amp;next, 1)</code>，要么像 0.1 那样每个 goroutine 预先分到自己的下标 <code>i</code>。</p>
+<h2 id="练习参考实现">练习参考实现</h2>
+<h3 id="练习-1parseeventsrceventsts">练习 1：<code>parseEvent</code>（<code>src/events.ts</code>）</h3>
+<div class="hl"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">z</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">"zod"</span><span class="p">;</span>
+
+<span class="k">export</span><span class="w"> </span><span class="kd">const</span><span class="w"> </span><span class="nx">StreamEventSchema</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">z</span><span class="p">.</span><span class="nx">discriminatedUnion</span><span class="p">(</span><span class="s2">"type"</span><span class="p">,</span><span class="w"> </span><span class="p">[</span>
+<span class="w">  </span><span class="nx">z</span><span class="p">.</span><span class="nx">object</span><span class="p">({</span><span class="w"> </span><span class="kr">type</span><span class="o">:</span><span class="w"> </span><span class="nx">z</span><span class="p">.</span><span class="nx">literal</span><span class="p">(</span><span class="s2">"text"</span><span class="p">),</span><span class="w"> </span><span class="nx">delta</span><span class="o">:</span><span class="w"> </span><span class="kt">z.string</span><span class="p">()</span><span class="w"> </span><span class="p">}),</span>
+<span class="w">  </span><span class="nx">z</span><span class="p">.</span><span class="nx">object</span><span class="p">({</span><span class="w"> </span><span class="kr">type</span><span class="o">:</span><span class="w"> </span><span class="nx">z</span><span class="p">.</span><span class="nx">literal</span><span class="p">(</span><span class="s2">"tool_call"</span><span class="p">),</span><span class="w"> </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="kt">z.string</span><span class="p">(),</span><span class="w"> </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="kt">z.string</span><span class="p">(),</span><span class="w"> </span><span class="nx">args</span><span class="o">:</span><span class="w"> </span><span class="kt">z.string</span><span class="p">()</span><span class="w"> </span><span class="p">}),</span>
+<span class="w">  </span><span class="nx">z</span><span class="p">.</span><span class="nx">object</span><span class="p">({</span><span class="w"> </span><span class="kr">type</span><span class="o">:</span><span class="w"> </span><span class="nx">z</span><span class="p">.</span><span class="nx">literal</span><span class="p">(</span><span class="s2">"done"</span><span class="p">),</span><span class="w"> </span><span class="nx">usage</span><span class="o">:</span><span class="w"> </span><span class="kt">z.object</span><span class="p">({</span><span class="w"> </span><span class="nx">input</span><span class="o">:</span><span class="w"> </span><span class="kt">z.number</span><span class="p">(),</span><span class="w"> </span><span class="nx">output</span><span class="o">:</span><span class="w"> </span><span class="kt">z.number</span><span class="p">()</span><span class="w"> </span><span class="p">})</span><span class="w"> </span><span class="p">}),</span>
+<span class="w">  </span><span class="nx">z</span><span class="p">.</span><span class="nx">object</span><span class="p">({</span><span class="w"> </span><span class="kr">type</span><span class="o">:</span><span class="w"> </span><span class="nx">z</span><span class="p">.</span><span class="nx">literal</span><span class="p">(</span><span class="s2">"error"</span><span class="p">),</span><span class="w"> </span><span class="nx">message</span><span class="o">:</span><span class="w"> </span><span class="kt">z.string</span><span class="p">()</span><span class="w"> </span><span class="p">}),</span>
+<span class="p">]);</span>
+
+<span class="k">export</span><span class="w"> </span><span class="kr">type</span><span class="w"> </span><span class="nx">StreamEvent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">z</span><span class="p">.</span><span class="nx">infer</span><span class="o">&lt;</span><span class="ow">typeof</span><span class="w"> </span><span class="nx">StreamEventSchema</span><span class="o">&gt;</span><span class="p">;</span>
+
+<span class="k">export</span><span class="w"> </span><span class="kr">type</span><span class="w"> </span><span class="nx">ParseEventResult</span><span class="w"> </span><span class="o">=</span>
+<span class="w">  </span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">ok</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="p">;</span><span class="w"> </span><span class="nx">event</span><span class="o">:</span><span class="w"> </span><span class="kt">StreamEvent</span><span class="w"> </span><span class="p">}</span>
+<span class="w">  </span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">ok</span><span class="o">:</span><span class="w"> </span><span class="kt">false</span><span class="p">;</span><span class="w"> </span><span class="nx">error</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="p">};</span>
+
+<span class="k">export</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">parseEvent</span><span class="p">(</span><span class="nx">data</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nx">ParseEventResult</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kd">let</span><span class="w"> </span><span class="nx">json</span><span class="o">:</span><span class="w"> </span><span class="kt">unknown</span><span class="p">;</span>
+<span class="w">  </span><span class="k">try</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">json</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">JSON</span><span class="p">.</span><span class="nx">parse</span><span class="p">(</span><span class="nx">data</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span><span class="w"> </span><span class="k">catch</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">ok</span><span class="o">:</span><span class="w"> </span><span class="kt">false</span><span class="p">,</span><span class="w"> </span><span class="nx">error</span><span class="o">:</span><span class="w"> </span><span class="s2">"invalid json"</span><span class="w"> </span><span class="p">};</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">r</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">StreamEventSchema</span><span class="p">.</span><span class="nx">safeParse</span><span class="p">(</span><span class="nx">json</span><span class="p">);</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nx">success</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">ok</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="p">,</span><span class="w"> </span><span class="nx">event</span><span class="o">:</span><span class="w"> </span><span class="kt">r.data</span><span class="w"> </span><span class="p">};</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">ok</span><span class="o">:</span><span class="w"> </span><span class="kt">false</span><span class="p">,</span><span class="w"> </span><span class="nx">error</span><span class="o">:</span><span class="w"> </span><span class="kt">z.prettifyError</span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nx">error</span><span class="p">)</span><span class="w"> </span><span class="p">};</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>逐行解读：</p>
+<ul>
+<li><code>z.discriminatedUnion("type", [...])</code>：告诉 Zod “这是一个可辨识联合，标签字段叫 <code>type</code>”。Zod 会先看 <code>type</code> 的值，再用对应的那个 schema 校验，报错信息也更精确（“type 是 text 但缺 delta”，而不是“四种都不匹配”）。</li>
+<li><code>z.literal("text")</code>：值必须正好是字符串 <code>"text"</code>，对应第 2 节的字面量类型。</li>
+<li><code>export type StreamEvent = z.infer&lt;typeof StreamEventSchema&gt;;</code>：推导出的类型和第 2 节手写的那个 <code>StreamEvent</code> <strong>完全一样</strong>。以后就用这个，不再手写。</li>
+<li>其余和第 3 节的 <code>parseArgs</code> 相同。</li>
+</ul>
+<p>测试（<code>src/events.test.ts</code>）：</p>
+<div class="hl"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">test</span><span class="p">,</span><span class="w"> </span><span class="nx">expect</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">"vitest"</span><span class="p">;</span>
+<span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">parseEvent</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">"./events.js"</span><span class="p">;</span>
+
+<span class="nx">test</span><span class="p">(</span><span class="s2">"合法事件"</span><span class="p">,</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">r</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">parseEvent</span><span class="p">(</span><span class="s1">'{"type":"text","delta":"你好"}'</span><span class="p">);</span>
+<span class="w">  </span><span class="nx">expect</span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nx">ok</span><span class="p">).</span><span class="nx">toBe</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nx">ok</span><span class="p">)</span><span class="w"> </span><span class="nx">expect</span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nx">event</span><span class="p">).</span><span class="nx">toEqual</span><span class="p">({</span><span class="w"> </span><span class="kr">type</span><span class="o">:</span><span class="w"> </span><span class="s2">"text"</span><span class="p">,</span><span class="w"> </span><span class="nx">delta</span><span class="o">:</span><span class="w"> </span><span class="s2">"你好"</span><span class="w"> </span><span class="p">});</span>
+<span class="p">});</span>
+
+<span class="nx">test</span><span class="p">(</span><span class="s2">"非法事件都返回 ok: false"</span><span class="p">,</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">expect</span><span class="p">(</span><span class="nx">parseEvent</span><span class="p">(</span><span class="s1">'{"type":"text"}'</span><span class="p">).</span><span class="nx">ok</span><span class="p">).</span><span class="nx">toBe</span><span class="p">(</span><span class="kc">false</span><span class="p">);</span><span class="w">    </span><span class="c1">// 缺 delta</span>
+<span class="w">  </span><span class="nx">expect</span><span class="p">(</span><span class="nx">parseEvent</span><span class="p">(</span><span class="s1">'{"type":"unknown"}'</span><span class="p">).</span><span class="nx">ok</span><span class="p">).</span><span class="nx">toBe</span><span class="p">(</span><span class="kc">false</span><span class="p">);</span><span class="w"> </span><span class="c1">// 未知类型</span>
+<span class="w">  </span><span class="nx">expect</span><span class="p">(</span><span class="nx">parseEvent</span><span class="p">(</span><span class="s2">"not json"</span><span class="p">).</span><span class="nx">ok</span><span class="p">).</span><span class="nx">toBe</span><span class="p">(</span><span class="kc">false</span><span class="p">);</span><span class="w">           </span><span class="c1">// 不是 JSON</span>
+<span class="p">});</span>
+</code></pre></div>
+
+<ul>
+<li><code>test("名字", () =&gt; {...})</code>：定义一个测试用例，= Go 的 <code>func TestXxx(t *testing.T)</code>。第二个参数是箭头函数，测试体写在里面。</li>
+<li><code>expect(a).toBe(b)</code>：断言 <code>a === b</code>，= <code>if a != b { t.Fatal() }</code>。</li>
+<li><code>expect(a).toEqual(b)</code>：断言两个对象<strong>内容相同</strong>（深比较），= <code>reflect.DeepEqual</code>。</li>
+<li><code>import ... from "./events.js"</code>：注意写 <code>.js</code> 而不是 <code>.ts</code>，这是 <code>NodeNext</code> 模块规则的要求（编译后文件是 <code>.js</code>）。新手最常踩的坑之一。</li>
+<li><code>if (r.ok) expect(r.event)...</code>：必须先判断 <code>r.ok</code>，否则编译器不让你访问 <code>r.event</code>。</li>
+</ul>
+<h3 id="练习-2可取消的-sleepsrcsleepts">练习 2：可取消的 <code>sleep</code>（<code>src/sleep.ts</code>）</h3>
+<div class="hl"><pre><span></span><code><span class="k">export</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">sleep</span><span class="p">(</span><span class="nx">ms</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">,</span><span class="w"> </span><span class="nx">signal?</span><span class="o">:</span><span class="w"> </span><span class="kt">AbortSignal</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="ow">void</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="ow">void</span><span class="o">&gt;</span><span class="p">((</span><span class="nx">resolve</span><span class="p">,</span><span class="w"> </span><span class="nx">reject</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">signal</span><span class="o">?</span><span class="p">.</span><span class="nx">aborted</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nx">reject</span><span class="p">(</span><span class="nx">signal</span><span class="p">.</span><span class="nx">reason</span><span class="p">);</span>
+<span class="w">      </span><span class="k">return</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">onAbort</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nx">clearTimeout</span><span class="p">(</span><span class="nx">timer</span><span class="p">);</span>
+<span class="w">      </span><span class="nx">reject</span><span class="p">(</span><span class="nx">signal</span><span class="o">!</span><span class="p">.</span><span class="nx">reason</span><span class="p">);</span>
+<span class="w">    </span><span class="p">};</span>
+
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">timer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">setTimeout</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nx">signal</span><span class="o">?</span><span class="p">.</span><span class="nx">removeEventListener</span><span class="p">(</span><span class="s2">"abort"</span><span class="p">,</span><span class="w"> </span><span class="nx">onAbort</span><span class="p">);</span>
+<span class="w">      </span><span class="nx">resolve</span><span class="p">();</span>
+<span class="w">    </span><span class="p">},</span><span class="w"> </span><span class="nx">ms</span><span class="p">);</span>
+
+<span class="w">    </span><span class="nx">signal</span><span class="o">?</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="s2">"abort"</span><span class="p">,</span><span class="w"> </span><span class="nx">onAbort</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">once</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="w"> </span><span class="p">});</span>
+<span class="w">  </span><span class="p">});</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>逐行解读：</p>
+<ul>
+<li><code>signal?: AbortSignal</code>：参数后面带 <code>?</code>，可以不传。</li>
+<li><code>new Promise&lt;void&gt;((resolve, reject) =&gt; {...})</code>：<strong>手动创建一个 Promise</strong>。你传进去一个函数，它会立即执行，并拿到两个“开关”：</li>
+<li><code>resolve()</code>：调用它 = Promise 成功（<code>await</code> 那边拿到结果，继续往下走）</li>
+<li><code>reject(err)</code>：调用它 = Promise 失败（<code>await</code> 那边抛出 <code>err</code>）</li>
+</ul>
+<p>当你要把“回调风格”的 API（比如 <code>setTimeout</code>）包装成可以 <code>await</code> 的东西时，就用这个写法。Go 里大致相当于：
+  <code>go
+  done := make(chan error, 1)
+  // ... 在某处 done &lt;- nil 或 done &lt;- err
+  return &lt;-done</code>
+- <code>if (signal?.aborted) { reject(...); return; }</code>：如果传进来时已经取消了，立刻失败，不开定时器。
+- <code>const onAbort = () =&gt; {...}</code>：取消时要执行的函数：清掉定时器（不然它到点还会触发）、让 Promise 失败。
+  - <code>signal!.reason</code>：这里用 <code>!</code>，因为 <code>onAbort</code> 只会在 signal 存在时被注册，我们比编译器更清楚它不为空。
+- <code>const timer = setTimeout(fn, ms)</code>：<code>ms</code> 毫秒后执行 <code>fn</code>，返回一个定时器句柄。= Go 的 <code>time.AfterFunc(d, fn)</code>。
+  - 定时器到点：先移除 abort 监听器（不再需要了，避免泄漏），再 <code>resolve()</code>。
+- <code>signal?.addEventListener("abort", onAbort, { once: true })</code>：signal 被取消时调用 <code>onAbort</code>。<code>{ once: true }</code> 表示触发一次后自动移除。
+- <code>onAbort</code> 里引用了 <code>timer</code>，但 <code>timer</code> 定义在 <code>onAbort</code> 后面。这没问题：<code>onAbort</code> 只会在之后被调用，那时 <code>timer</code> 已经赋值了。</p>
+<p>测试：</p>
+<div class="hl"><pre><span></span><code><span class="nx">test</span><span class="p">(</span><span class="s2">"abort 立刻打断 sleep"</span><span class="p">,</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">ctrl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">AbortController</span><span class="p">();</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">start</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">Date</span><span class="p">.</span><span class="nx">now</span><span class="p">();</span>
+<span class="w">  </span><span class="nx">setTimeout</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">ctrl</span><span class="p">.</span><span class="nx">abort</span><span class="p">(),</span><span class="w"> </span><span class="mf">20</span><span class="p">);</span><span class="w">              </span><span class="c1">// 20ms 后取消</span>
+<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">expect</span><span class="p">(</span><span class="nx">sleep</span><span class="p">(</span><span class="mf">1000</span><span class="p">,</span><span class="w"> </span><span class="nx">ctrl</span><span class="p">.</span><span class="nx">signal</span><span class="p">)).</span><span class="nx">rejects</span><span class="p">.</span><span class="nx">toThrow</span><span class="p">();</span>
+<span class="w">  </span><span class="nx">expect</span><span class="p">(</span><span class="nb">Date</span><span class="p">.</span><span class="nx">now</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nx">start</span><span class="p">).</span><span class="nx">toBeLessThan</span><span class="p">(</span><span class="mf">100</span><span class="p">);</span><span class="w">    </span><span class="c1">// 远小于 1000ms</span>
+<span class="p">});</span>
+</code></pre></div>
+
+<ul>
+<li><code>async () =&gt; {...}</code>：测试函数里要 <code>await</code>，所以写成 async 箭头函数。</li>
+<li><code>Date.now()</code>：当前毫秒时间戳，= <code>time.Now().UnixMilli()</code>。</li>
+<li><code>expect(promise).rejects.toThrow()</code>：断言这个 Promise 会失败。前面要加 <code>await</code>。</li>
+</ul>
+<h3 id="练习-3并行工具与超时srcruntoolstestts">练习 3：并行工具与超时（<code>src/runTools.test.ts</code>）</h3>
+<div class="hl"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">test</span><span class="p">,</span><span class="w"> </span><span class="nx">expect</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">"vitest"</span><span class="p">;</span>
+<span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">runTools</span><span class="p">,</span><span class="w"> </span><span class="kr">type</span><span class="w"> </span><span class="nx">Tool</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">"./runTools.js"</span><span class="p">;</span>
+<span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">sleep</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">"./sleep.js"</span><span class="p">;</span>
+
+<span class="kd">const</span><span class="w"> </span><span class="nx">fakeTool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="nx">ms</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nx">Tool</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="p">(</span><span class="nx">_args</span><span class="p">,</span><span class="w"> </span><span class="nx">signal</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">await</span><span class="w"> </span><span class="nx">sleep</span><span class="p">(</span><span class="nx">ms</span><span class="p">,</span><span class="w"> </span><span class="nx">signal</span><span class="p">);</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="sb">`done </span><span class="si">${</span><span class="nx">ms</span><span class="si">}</span><span class="sb">`</span><span class="p">;</span>
+<span class="w">  </span><span class="p">};</span>
+<span class="p">};</span>
+
+<span class="nx">test</span><span class="p">(</span><span class="s2">"慢工具超时，其他成功"</span><span class="p">,</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">start</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">Date</span><span class="p">.</span><span class="nx">now</span><span class="p">();</span>
+
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">res</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">runTools</span><span class="p">(</span>
+<span class="w">    </span><span class="p">[</span>
+<span class="w">      </span><span class="p">{</span><span class="w"> </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="s2">"a"</span><span class="p">,</span><span class="w"> </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="s2">"fast"</span><span class="p">,</span><span class="w"> </span><span class="nx">args</span><span class="o">:</span><span class="w"> </span><span class="s2">"{}"</span><span class="w"> </span><span class="p">},</span>
+<span class="w">      </span><span class="p">{</span><span class="w"> </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="s2">"b"</span><span class="p">,</span><span class="w"> </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="s2">"mid"</span><span class="p">,</span><span class="w"> </span><span class="nx">args</span><span class="o">:</span><span class="w"> </span><span class="s2">"{}"</span><span class="w"> </span><span class="p">},</span>
+<span class="w">      </span><span class="p">{</span><span class="w"> </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="s2">"c"</span><span class="p">,</span><span class="w"> </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="s2">"slow"</span><span class="p">,</span><span class="w"> </span><span class="nx">args</span><span class="o">:</span><span class="w"> </span><span class="s2">"{}"</span><span class="w"> </span><span class="p">},</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nx">fast</span><span class="o">:</span><span class="w"> </span><span class="kt">fakeTool</span><span class="p">(</span><span class="mf">50</span><span class="p">),</span><span class="w"> </span><span class="nx">mid</span><span class="o">:</span><span class="w"> </span><span class="kt">fakeTool</span><span class="p">(</span><span class="mf">100</span><span class="p">),</span><span class="w"> </span><span class="nx">slow</span><span class="o">:</span><span class="w"> </span><span class="kt">fakeTool</span><span class="p">(</span><span class="mf">5000</span><span class="p">)</span><span class="w"> </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nx">signal</span><span class="o">:</span><span class="w"> </span><span class="kt">new</span><span class="w"> </span><span class="nx">AbortController</span><span class="p">().</span><span class="nx">signal</span><span class="p">,</span><span class="w"> </span><span class="nx">perToolMs</span><span class="o">:</span><span class="w"> </span><span class="kt">200</span><span class="w"> </span><span class="p">},</span>
+<span class="w">  </span><span class="p">);</span>
+
+<span class="w">  </span><span class="nx">expect</span><span class="p">(</span><span class="nx">res</span><span class="p">.</span><span class="nx">map</span><span class="p">((</span><span class="nx">r</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">isError</span><span class="p">)).</span><span class="nx">toEqual</span><span class="p">([</span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="kc">true</span><span class="p">]);</span>
+<span class="w">  </span><span class="nx">expect</span><span class="p">(</span><span class="nb">Date</span><span class="p">.</span><span class="nx">now</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nx">start</span><span class="p">).</span><span class="nx">toBeLessThan</span><span class="p">(</span><span class="mf">400</span><span class="p">);</span>
+<span class="p">});</span>
+</code></pre></div>
+
+<p>逐行解读：</p>
+<ul>
+<li><code>import { runTools, type Tool }</code>：<code>type Tool</code> 表示只导入类型（<code>verbatimModuleSyntax</code> 要求的写法）。<code>runTools.ts</code> 里要写 <code>export type Tool = ...</code> 和 <code>export async function runTools</code>。</li>
+<li><code>const fakeTool = (ms: number): Tool =&gt; { return async (_args, signal) =&gt; {...} }</code>：<strong>一个返回函数的函数</strong>（工厂）。<code>fakeTool(50)</code> 返回一个“睡 50ms 的工具”。</li>
+<li>内层函数的参数没写类型，因为返回类型标了 <code>Tool</code>，TS 会自动推导出 <code>_args: string, signal: AbortSignal</code>。</li>
+<li><code>_args</code> 前面的下划线是约定：这个参数用不到（= Go 里的 <code>_</code>）。</li>
+<li><code>runTools([...], {...}, {...})</code>：三个参数分别是调用列表、工具表、选项。</li>
+<li><code>res.map((r) =&gt; r.isError)</code>：把结果数组的每一项映射成 <code>isError</code>，得到 <code>[false, false, true]</code>。<code>map</code> 相当于 Go 里写一个 for 循环构造新切片。</li>
+<li>为什么能在约 200ms 结束：<code>slow</code> 工具 200ms 时被 <code>AbortSignal.timeout</code> 取消，因为 <code>sleep</code> 正确响应了 signal，<code>await</code> 立刻抛错，被 <code>runTools</code> 的 <code>catch</code> 记成 <code>isError: true</code>。<strong>如果工具不理 signal（坑 3），这个测试会等 5 秒。</strong></li>
+</ul>
+<h3 id="练习-4服务端感知断开srcssetestts">练习 4：服务端感知断开（<code>src/sse.test.ts</code>）</h3>
+<div class="hl"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">test</span><span class="p">,</span><span class="w"> </span><span class="nx">expect</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">"vitest"</span><span class="p">;</span>
+<span class="k">import</span><span class="w"> </span><span class="nx">http</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">"node:http"</span><span class="p">;</span>
+<span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">once</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">"node:events"</span><span class="p">;</span>
+<span class="k">import</span><span class="w"> </span><span class="kr">type</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">AddressInfo</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">"node:net"</span><span class="p">;</span>
+<span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">sseEvents</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">"./sse.js"</span><span class="p">;</span>
+
+<span class="nx">test</span><span class="p">(</span><span class="s2">"客户端 abort 后服务端收到 close"</span><span class="p">,</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// 1. 准备一个“等服务端关闭”的 Promise</span>
+<span class="w">  </span><span class="kd">let</span><span class="w"> </span><span class="nx">markClosed</span><span class="o">!:</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="ow">void</span><span class="p">;</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">closed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="ow">void</span><span class="o">&gt;</span><span class="p">((</span><span class="nx">resolve</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">markClosed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">resolve</span><span class="p">;</span>
+<span class="w">  </span><span class="p">});</span>
+
+<span class="w">  </span><span class="c1">// 2. 起一个假 SSE 服务：每 20ms 发一条</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">server</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">http</span><span class="p">.</span><span class="nx">createServer</span><span class="p">((</span><span class="nx">req</span><span class="p">,</span><span class="w"> </span><span class="nx">res</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">res</span><span class="p">.</span><span class="nx">writeHead</span><span class="p">(</span><span class="mf">200</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="s2">"Content-Type"</span><span class="o">:</span><span class="w"> </span><span class="s2">"text/event-stream"</span><span class="w"> </span><span class="p">});</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nx">n</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0</span><span class="p">;</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">timer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">setInterval</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nx">res</span><span class="p">.</span><span class="nx">write</span><span class="p">(</span><span class="sb">`data: {"type":"text","delta":"t</span><span class="si">${</span><span class="nx">n</span><span class="o">++</span><span class="si">}</span><span class="sb">"}\n\n`</span><span class="p">);</span>
+<span class="w">    </span><span class="p">},</span><span class="w"> </span><span class="mf">20</span><span class="p">);</span>
+<span class="w">    </span><span class="nx">res</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">"close"</span><span class="p">,</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nx">clearInterval</span><span class="p">(</span><span class="nx">timer</span><span class="p">);</span>
+<span class="w">      </span><span class="nx">markClosed</span><span class="p">();</span>
+<span class="w">    </span><span class="p">});</span>
+<span class="w">  </span><span class="p">});</span>
+<span class="w">  </span><span class="nx">server</span><span class="p">.</span><span class="nx">listen</span><span class="p">(</span><span class="mf">0</span><span class="p">);</span>
+<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">once</span><span class="p">(</span><span class="nx">server</span><span class="p">,</span><span class="w"> </span><span class="s2">"listening"</span><span class="p">);</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">port</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">server</span><span class="p">.</span><span class="nx">address</span><span class="p">()</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="nx">AddressInfo</span><span class="p">;</span>
+
+<span class="w">  </span><span class="c1">// 3. 客户端读 3 条后取消</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">ctrl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">AbortController</span><span class="p">();</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">res</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">fetch</span><span class="p">(</span><span class="sb">`http://127.0.0.1:</span><span class="si">${</span><span class="nx">port</span><span class="si">}</span><span class="sb">`</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">signal</span><span class="o">:</span><span class="w"> </span><span class="kt">ctrl.signal</span><span class="w"> </span><span class="p">});</span>
+<span class="w">  </span><span class="kd">let</span><span class="w"> </span><span class="nx">count</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0</span><span class="p">;</span>
+<span class="w">  </span><span class="k">try</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="p">(</span><span class="kd">const</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="nx">sseEvents</span><span class="p">(</span><span class="nx">res</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nx">count</span><span class="o">++</span><span class="p">;</span>
+<span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">count</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="mf">3</span><span class="p">)</span><span class="w"> </span><span class="nx">ctrl</span><span class="p">.</span><span class="nx">abort</span><span class="p">();</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span><span class="w"> </span><span class="k">catch</span><span class="w"> </span><span class="p">(</span><span class="nx">err</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">expect</span><span class="p">((</span><span class="nx">err</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="ne">Error</span><span class="p">).</span><span class="nx">name</span><span class="p">).</span><span class="nx">toBe</span><span class="p">(</span><span class="s2">"AbortError"</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="c1">// 4. 断言服务端真的感知到了断开</span>
+<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">closed</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">expect</span><span class="p">(</span><span class="nx">count</span><span class="p">).</span><span class="nx">toBe</span><span class="p">(</span><span class="mf">3</span><span class="p">);</span>
+<span class="w">  </span><span class="nx">server</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+<span class="p">});</span>
+</code></pre></div>
+
+<p>逐行解读：</p>
+<p><strong>第 1 步：把 <code>resolve</code> 拿到外面</strong></p>
+<ul>
+<li><code>let markClosed!: () =&gt; void;</code>：声明一个变量，类型是“无参无返回的函数”。<code>!</code> 告诉编译器“我保证用之前会赋值”。</li>
+<li><code>new Promise&lt;void&gt;((resolve) =&gt; { markClosed = resolve; })</code>：创建 Promise 时把它的 <code>resolve</code> 开关存到外面。之后任何地方调用 <code>markClosed()</code>，<code>await closed</code> 就会继续。</li>
+<li>这是 TS 里“一次性信号”的常用写法，= Go 的：
+  <code>go
+  closed := make(chan struct{})
+  // ... 某处 close(closed)
+  &lt;-closed</code></li>
+</ul>
+<p><strong>第 2 步：假服务端</strong></p>
+<ul>
+<li><code>http.createServer((req, res) =&gt; {...})</code>：= Go 的 <code>httptest.NewServer(http.HandlerFunc(func(w, r) {...}))</code>。<code>res</code> 相当于 <code>w</code>。</li>
+<li><code>res.writeHead(200, {...})</code>：写状态码和响应头。</li>
+<li><code>setInterval(fn, 20)</code>：每 20ms 执行一次 <code>fn</code>，= Go 的 <code>time.NewTicker</code>。</li>
+<li><code>res.write(...)</code>：写一条 SSE 事件，注意结尾两个 <code>\n</code>。</li>
+<li><code>res.on("close", () =&gt; {...})</code>：<strong>连接关闭时</strong>的回调，= Go 里 <code>&lt;-r.Context().Done()</code>。客户端 abort 后这里会被触发：停掉定时器，并调用 <code>markClosed()</code>。</li>
+<li><code>server.listen(0)</code>：端口 0 表示让系统随机分配一个空闲端口。</li>
+<li><code>await once(server, "listening")</code>：等服务器真正开始监听。<code>once</code> 把“等某个事件触发一次”包装成 Promise。</li>
+<li><code>server.address() as AddressInfo</code>：拿到实际端口。<code>address()</code> 的返回类型比较宽（可能是 string 或 null），我们知道 TCP 服务一定返回 <code>AddressInfo</code>，所以用 <code>as</code>。<strong>这是 <code>as</code> 的合理用法</strong>：数据来自 Node 自己，不是外部输入。</li>
+</ul>
+<p><strong>第 3 步：客户端</strong></p>
+<ul>
+<li><code>for await (const _ of sseEvents(res))</code>：用不到每条的内容，变量名写 <code>_</code>。</li>
+<li><code>if (count === 3) ctrl.abort();</code>：读到第 3 条时取消。之后生成器里的 <code>reader.read()</code> 抛出 <code>AbortError</code>，经过 <code>finally</code>，从 <code>for await</code> 抛出来。</li>
+<li><code>catch (err) { expect((err as Error).name).toBe("AbortError"); }</code>：确认抛出来的确实是取消错误。<code>(err as Error)</code> 是因为 <code>err</code> 是 <code>unknown</code>。</li>
+</ul>
+<p><strong>第 4 步：断言</strong></p>
+<ul>
+<li><code>await closed;</code>：等服务端的 <code>close</code> 回调触发。如果取消链断了（连接没真正关闭），这里会一直等，最后被 vitest 的默认 5 秒超时判失败。<strong>这正是我们要验证的：用户取消 → 上游连接真的断了 → 不再计费。</strong></li>
+<li><code>server.close()</code>：关掉服务器，= <code>defer srv.Close()</code>。</li>
+</ul>
+<h3 id="练习-5类型检查与测试">练习 5：类型检查与测试</h3>
+<div class="hl"><pre><span></span><code>npx<span class="w"> </span>tsc<span class="w"> </span>--noEmit<span class="w">   </span><span class="c1"># 只做类型检查，不输出文件，= go vet + go build 的类型检查部分</span>
+npx<span class="w"> </span>vitest<span class="w"> </span>run<span class="w">     </span><span class="c1"># 跑一遍所有测试后退出，= go test ./...</span>
+</code></pre></div>
+
+<p>两条都通过，这一课就算完成，可以在 ROADMAP 里勾上 TypeScript。</p>
+    <nav class="pager"><a class="prev" href="00-01-go.html"><span>← 上一课 0.1</span>Go 基础与并发</a><a class="next" href="00-03-python.html"><span>下一课 0.3 →</span>Python（够用即可）</a></nav>
+    <p class="foot">© 2026 duang777 · 课件源文件：<a href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/notes/00-foundations/02-typescript.md">notes/00-foundations/02-typescript.md</a></p>
+  </article>
+</div>
+<script>
+document.querySelectorAll('article pre').forEach(function(pre){
+  var b=document.createElement('button');b.className='code__copy';b.textContent='复制';
+  b.onclick=function(){navigator.clipboard.writeText(pre.innerText).then(function(){b.textContent='已复制';setTimeout(function(){b.textContent='复制'},1200)})};
+  pre.parentNode.insertBefore(b,pre);
+});
+var links=[].slice.call(document.querySelectorAll('.toc a')),map={};
+links.forEach(function(a){map[decodeURIComponent(a.getAttribute('href').slice(1))]=a});
+var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting&&map[e.target.id]){links.forEach(function(l){l.classList.remove('on')});map[e.target.id].classList.add('on')}})},{rootMargin:'-80px 0px -70% 0px'});
+document.querySelectorAll('article h1[id],article h2[id]').forEach(function(h){io.observe(h)});
+</script>
+</body>
+</html>

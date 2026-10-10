@@ -1,0 +1,1423 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>0.1 Go：从基础语法到并发，Agent 运行时的地基 · AI Agent 全栈</title>
+<meta name="description" content="0.1 Go：从基础语法到并发，Agent 运行时的地基。duang777 的 AI Agent 全栈公开学习课件。" />
+<style>
+:root{
+  --bg:#0a0a0a;--surface:#111;--text:#ededed;--text-2:#a1a1a1;--text-3:rgb(255 255 255/.4);
+  --line:rgb(255 255 255/.1);--line-2:rgb(255 255 255/.06);
+  --sans:Inter,-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei","Helvetica Neue",sans-serif;
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:80px}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;line-height:1.8;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+.nav{position:sticky;top:0;z-index:10;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;border-bottom:1px solid var(--line);background:rgb(10 10 10/.8);backdrop-filter:blur(12px)}
+.nav__brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-size:14px;font-weight:500}
+.nav__dot{width:10px;height:10px;border-radius:3px;background:var(--text)}
+.nav__links{display:flex;gap:20px;font-size:14px;color:var(--text-2)}
+.nav__links a{text-decoration:none}.nav__links a:hover{color:var(--text)}
+.wrap{max-width:1200px;margin:0 auto;padding:0 24px;display:grid;grid-template-columns:220px minmax(0,1fr);gap:56px}
+.toc{position:sticky;top:80px;align-self:start;max-height:calc(100vh - 100px);overflow:auto;padding:40px 0 40px;font-size:13px;line-height:1.6}
+.toc__label{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--text-3);text-transform:uppercase;margin-bottom:12px}
+.toc ul{list-style:none;margin:0;padding:0}
+.toc li{margin:0}
+.toc a{display:block;padding:4px 0 4px 12px;border-left:1px solid var(--line);color:var(--text-2);text-decoration:none}
+.toc a:hover,.toc a.on{color:var(--text);border-left-color:var(--text)}
+.toc ul ul a{padding-left:24px;font-size:12.5px;color:var(--text-3)}
+.toc ul ul a:hover,.toc ul ul a.on{color:var(--text)}
+article{min-width:0;max-width:760px;padding:48px 0 96px}
+.meta{font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--text-3);margin-bottom:16px}
+article h1.title{font-size:40px;line-height:1.2;letter-spacing:-.02em;font-weight:600;margin:0 0 24px}
+article h1{font-size:28px;line-height:1.3;letter-spacing:-.01em;font-weight:600;margin:72px 0 20px;padding-top:32px;border-top:1px solid var(--line)}
+article h2{font-size:22px;line-height:1.4;font-weight:600;margin:48px 0 16px}
+article h3{font-size:18px;font-weight:600;margin:36px 0 12px}
+article h4{font-size:16px;font-weight:600;margin:28px 0 8px}
+article p{margin:0 0 18px;color:#d4d4d4}
+article strong{color:var(--text);font-weight:600}
+article ul,article ol{padding-left:22px;margin:0 0 18px;color:#d4d4d4}
+article li{margin:4px 0}
+article a{text-decoration:underline;text-decoration-color:var(--text-3);text-underline-offset:3px}
+article a:hover{text-decoration-color:var(--text)}
+article hr{border:0;border-top:1px solid var(--line);margin:48px 0}
+article blockquote{margin:0 0 20px;padding:12px 18px;border-left:2px solid var(--text-2);background:var(--surface);border-radius:0 8px 8px 0;color:var(--text-2)}
+article blockquote p{margin:6px 0;color:var(--text-2)}
+article code{font-family:var(--mono);font-size:.88em;background:#1a1a1a;border:1px solid var(--line-2);border-radius:5px;padding:1px 6px}
+article pre{position:relative;margin:0 0 22px;padding:16px 18px;background:#0f0f0f;border:1px solid var(--line);border-radius:10px;overflow:auto;font-size:13.5px;line-height:1.65}
+article pre code{background:none;border:0;padding:0;font-size:inherit}
+.code{position:relative}
+.code__lang{position:absolute;top:8px;right:46px;font-family:var(--mono);font-size:11px;color:var(--text-3);z-index:1}
+.code__copy{position:absolute;top:6px;right:8px;z-index:1;font:11px var(--mono);color:var(--text-2);background:#1a1a1a;border:1px solid var(--line);border-radius:6px;padding:2px 7px;cursor:pointer}
+.code__copy:hover{color:var(--text)}
+.tbl{overflow-x:auto;margin:0 0 22px;border:1px solid var(--line);border-radius:10px}
+article table{border-collapse:collapse;width:100%;font-size:14px}
+article th,article td{padding:10px 14px;border-bottom:1px solid var(--line-2);text-align:left;vertical-align:top}
+article th{font-weight:600;background:var(--surface);color:var(--text)}
+article tr:last-child td{border-bottom:0}
+article details{margin:0 0 18px;border:1px solid var(--line);border-radius:10px;padding:10px 16px;background:var(--surface)}
+article summary{cursor:pointer;font-weight:500}
+.pager{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:72px;padding-top:32px;border-top:1px solid var(--line)}
+.pager a{display:block;padding:16px 18px;border:1px solid var(--line);border-radius:10px;text-decoration:none}
+.pager a:hover{border-color:var(--text-2)}
+.pager span{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--text-3)}
+.pager .next{text-align:right;grid-column:2}
+.foot{margin-top:40px;font-size:13px;color:var(--text-3)}
+/* 代码高亮：黑白灰为主 */
+.hl .c,.hl .c1,.hl .cm,.hl .ch,.hl .cs,.hl .cp,.hl .cpf{color:#6b6b6b;font-style:italic}
+.hl .k,.hl .kd,.hl .kn,.hl .kr,.hl .kt,.hl .kc,.hl .kp,.hl .ow{color:#ffffff;font-weight:600}
+.hl .s,.hl .s1,.hl .s2,.hl .sb,.hl .sc,.hl .sd,.hl .se,.hl .sh,.hl .si,.hl .sx,.hl .sr,.hl .ss,.hl .dl,.hl .sa{color:#86efac}
+.hl .m,.hl .mi,.hl .mf,.hl .mh,.hl .mo,.hl .il{color:#fcd34d}
+.hl .nf,.hl .fm,.hl .nc,.hl .nn{color:#e5e5e5;font-weight:500}
+.hl .nb,.hl .bp,.hl .nd,.hl .na,.hl .nt{color:#bdbdbd}
+.hl .o,.hl .p{color:#9a9a9a}
+.hl .gd{color:#fca5a5}.hl .gi{color:#86efac}
+.hl{color:#d4d4d4}
+@media (max-width:960px){.wrap{grid-template-columns:1fr;gap:0}.toc{display:none}article h1.title{font-size:30px}.nav__links a.hide-sm{display:none}}
+</style>
+</head>
+<body>
+<header class="nav">
+  <a class="nav__brand" href="../index.html"><span class="nav__dot"></span>AI Agent 全栈</a>
+  <nav class="nav__links">
+    <a href="../index.html#progress">课件</a>
+    <a class="hide-sm" href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/ROADMAP.md">路线图</a>
+    <a href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/notes/00-foundations/01-go.md">在 GitHub 上查看</a>
+  </nav>
+</header>
+<div class="wrap">
+  <aside class="toc"><div class="toc__label">本课目录</div><ul>
+<li><a href="#读前说明">读前说明</a></li>
+<li><a href="#为什么-agent-后端用-go">为什么 Agent 后端用 Go</a></li>
+<li><a href="#第一部分go-基础">第一部分：Go 基础</a><ul>
+<li><a href="#b1-环境与项目结构">B1. 环境与项目结构</a></li>
+<li><a href="#b2-包与可见性大写就是-public">B2. 包与可见性：大写就是 public</a></li>
+<li><a href="#b3-变量常量与基本类型">B3. 变量、常量与基本类型</a></li>
+<li><a href="#b4-函数多返回值">B4. 函数：多返回值</a></li>
+<li><a href="#b5-错误处理包装判断自定义">B5. 错误处理：包装、判断、自定义</a></li>
+<li><a href="#b6-struct-与方法">B6. struct 与方法</a></li>
+<li><a href="#b7-slice-与-map">B7. slice 与 map</a></li>
+<li><a href="#b8-接口go-的多态">B8. 接口：Go 的多态</a></li>
+<li><a href="#b9-json和模型-api-打交道的核心">B9. JSON：和模型 API 打交道的核心</a></li>
+<li><a href="#b10-defer函数退出时一定执行">B10. defer：函数退出时一定执行</a></li>
+<li><a href="#b11-泛型了解即可">B11. 泛型（了解即可）</a></li>
+<li><a href="#b12-测试表驱动">B12. 测试：表驱动</a></li>
+<li><a href="#第一部分小练习20-分钟">第一部分小练习（20 分钟）</a></li>
+</ul>
+</li>
+<li><a href="#第二部分go-并发">第二部分：Go 并发</a><ul>
+<li><a href="#0-并发语法速查看代码前必读">0. 并发语法速查（看代码前必读）</a></li>
+<li><a href="#1-goroutine-与-channel三条规则">1. goroutine 与 channel：三条规则</a></li>
+<li><a href="#2-select同时等多件事">2. select：同时等多件事</a></li>
+<li><a href="#3-context取消信号的传播链">3. context：取消信号的传播链</a></li>
+<li><a href="#4-并行工具调用errgroup">4. 并行工具调用：errgroup</a></li>
+<li><a href="#5-可取消的流式读取解析-sse">5. 可取消的流式读取：解析 SSE</a></li>
+<li><a href="#6-三个高频坑">6. 三个高频坑</a></li>
+<li><a href="#本课小结">本课小结</a></li>
+<li><a href="#练习今天做完">练习（今天做完）</a></li>
+<li><a href="#自测题">自测题</a></li>
+</ul>
+</li>
+<li><a href="#参考答案与详解">参考答案与详解</a><ul>
+<li><a href="#自测题答案">自测题答案</a></li>
+<li><a href="#练习参考实现">练习参考实现</a></li>
+</ul>
+</li>
+</ul>
+</aside>
+  <article>
+    <div class="meta">模块 00 · 基础功底 · 第 0.1 课</div>
+    <h1 class="title">0.1 Go：从基础语法到并发，Agent 运行时的地基</h1>
+    <blockquote>
+<p>第 0 部分 · 第 1 课 ｜ 预计 5–6 小时（基础 2 小时 + 并发 3–4 小时）｜ 前置：会任意一门编程语言</p>
+<p>本课并发部分的代码都对应仓库里能跑的实现：<code>projects/00-stream-proxy/</code>（<code>go test -race -count=1 ./...</code> 通过）。</p>
+</blockquote>
+<h2 id="读前说明">读前说明</h2>
+<p>这一课分两部分：</p>
+<ul>
+<li><strong>第一部分：Go 基础</strong>。只讲写 Agent 后端真正会用到的那部分语法：模块、类型、函数、错误处理、struct、接口、JSON、测试。学过其他语言的话，大约 2 小时。已经会 Go 的可以直接跳到第二部分。</li>
+<li><strong>第二部分：Go 并发</strong>。Agent 运行时的核心：goroutine、channel、select、context、errgroup、流式读取。</li>
+</ul>
+<p>每段代码都按三步讲：<strong>它要解决什么问题 → 代码（关键行带注释）→ 逐行解读 + 容易错的地方</strong>。第一次读时如果某段看不懂，先看它下面的解读和时间线，再回头看代码。</p>
+<hr />
+<h2 id="为什么-agent-后端用-go">为什么 Agent 后端用 Go</h2>
+<p>一个生产级 Agent 每一轮大致在做：</p>
+<div class="hl"><pre><span></span><code>调用 LLM（流式）→ 解析出 N 个 tool_call → 并行执行工具 → 汇总结果 → 下一轮
+                     ↑ 任一环节都要：超时、取消、限流、不泄漏
+</code></pre></div>
+
+<p>翻成大白话：</p>
+<ul>
+<li><strong>流式</strong>：模型不是一次性回一整段话，而是一个字一个字往外吐，你要边收边显示。</li>
+<li><strong>并行</strong>：模型说“帮我同时查天气、查日历、搜网页”，三件事要一起做，不能一个个排队。</li>
+<li><strong>超时</strong>：某个工具卡住了，不能让整轮对话陪它一起等。</li>
+<li><strong>取消</strong>：用户关了页面，后台所有活都要立刻停，不然还在花钱调模型。</li>
+<li><strong>不泄漏</strong>：每个后台任务都必须有结束的那一刻，不能越积越多把内存吃光。</li>
+</ul>
+<p>这就是一个“带预算的并发调度器”。Go 的优势：编译成单个二进制、部署简单；内置并发原语；标准库自带 HTTP 服务端和 JSON；类型系统够用但不复杂。本课结束时，你能写出 Agent Loop 里最核心的两段代码：<strong>并行工具执行</strong> 和 <strong>可取消的流式读取</strong>。</p>
+<hr />
+<h1 id="第一部分go-基础">第一部分：Go 基础</h1>
+<h2 id="b1-环境与项目结构">B1. 环境与项目结构</h2>
+<p><strong>要解决的问题</strong>：怎么建一个 Go 项目、怎么跑起来、怎么引第三方库。</p>
+<div class="hl"><pre><span></span><code>go<span class="w"> </span>version<span class="w">                 </span><span class="c1"># 确认安装，本仓库用 1.23+</span>
+mkdir<span class="w"> </span>hello-agent<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>hello-agent
+go<span class="w"> </span>mod<span class="w"> </span>init<span class="w"> </span>github.com/duang777/hello-agent<span class="w">   </span><span class="c1"># 初始化模块，生成 go.mod</span>
+</code></pre></div>
+
+<p>新建 <code>main.go</code>：</p>
+<div class="hl"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nx">main</span><span class="w"> </span><span class="c1">// 可执行程序的入口包必须叫 main</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="s">"fmt"</span><span class="w"> </span><span class="c1">// 引入标准库的 fmt 包（格式化输出）</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="nx">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1">// 程序从 main 函数开始执行</span>
+<span class="w">    </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"hello, agent"</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<div class="hl"><pre><span></span><code>go<span class="w"> </span>run<span class="w"> </span>.<span class="w">          </span><span class="c1"># 编译并运行当前目录</span>
+go<span class="w"> </span>build<span class="w"> </span>-o<span class="w"> </span>app<span class="w"> </span>.<span class="w"> </span><span class="c1"># 编译出二进制文件 app，可以直接拷到服务器上跑</span>
+go<span class="w"> </span>get<span class="w"> </span>golang.org/x/sync@latest<span class="w">   </span><span class="c1"># 引入第三方库，自动写进 go.mod / go.sum</span>
+go<span class="w"> </span>mod<span class="w"> </span>tidy<span class="w">       </span><span class="c1"># 清理没用到的依赖、补上缺的</span>
+</code></pre></div>
+
+<p><strong>逐行解读</strong></p>
+<ul>
+<li><strong>module（模块）</strong>：一个项目就是一个模块，<code>go.mod</code> 里记着模块名和依赖版本。模块名习惯写成代码仓库地址，但不强制。</li>
+<li><strong>package（包）</strong>：一个目录就是一个包，目录里所有 <code>.go</code> 文件第一行的 <code>package xxx</code> 必须一致。<code>main</code> 包是特殊的，代表“可执行程序”。</li>
+<li><code>go.sum</code> 记录依赖的校验和，要一起提交到 git，不要手改。</li>
+</ul>
+<p><strong>一个典型的 Agent 服务目录</strong>（先有个印象，后面课程会逐步填满）：</p>
+<div class="hl"><pre><span></span><code>hello-agent/
+├── go.mod
+├── main.go            # 入口：读配置、启动 HTTP 服务
+├── agent/             # package agent：Agent Loop
+│   ├── loop.go
+│   └── loop_test.go   # 测试文件以 _test.go 结尾
+└── tools/             # package tools：各种工具实现
+    └── search.go
+</code></pre></div>
+
+<h2 id="b2-包与可见性大写就是-public">B2. 包与可见性：大写就是 public</h2>
+<div class="hl"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nx">tools</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="nx">Search</span><span class="p">(</span><span class="nx">q</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="s">"..."</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="c1">// 大写开头：其他包能用 tools.Search</span>
+<span class="kd">func</span><span class="w"> </span><span class="nx">buildURL</span><span class="p">(</span><span class="nx">q</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="s">"..."</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="c1">// 小写开头：只有 tools 包内部能用</span>
+</code></pre></div>
+
+<p>Go 没有 <code>public</code> / <code>private</code> 关键字，<strong>首字母大小写就是访问控制</strong>。函数、类型、struct 字段、常量都适用。这一点会影响 JSON（见 B9）：小写字段 JSON 包看不见，不会被编码。</p>
+<h2 id="b3-变量常量与基本类型">B3. 变量、常量与基本类型</h2>
+<div class="hl"><pre><span></span><code><span class="kd">var</span><span class="w"> </span><span class="nx">name</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"search"</span><span class="w">   </span><span class="c1">// 完整写法：var 变量名 类型 = 值</span>
+<span class="kd">var</span><span class="w"> </span><span class="nx">count</span><span class="w"> </span><span class="kt">int</span><span class="w">                </span><span class="c1">// 不赋值也行，自动是“零值”：int 是 0，string 是 ""，bool 是 false</span>
+<span class="nx">model</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="s">"glm-4"</span><span class="w">             </span><span class="c1">// 短声明：类型自动推断，只能在函数内部用（最常用）</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">maxTurns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="w">          </span><span class="c1">// 常量，编译期确定，不能改</span>
+
+<span class="nx">timeout</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">20</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="w">  </span><span class="c1">// time.Duration 类型，常用于超时</span>
+</code></pre></div>
+
+<p>常用类型速查：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>类型</th>
+<th>例子</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>string</code></td>
+<td><code>"你好"</code></td>
+<td>不可变，UTF-8 编码</td>
+</tr>
+<tr>
+<td><code>int</code> / <code>int64</code></td>
+<td><code>42</code></td>
+<td>一般用 <code>int</code> 就行</td>
+</tr>
+<tr>
+<td><code>float64</code></td>
+<td><code>0.7</code></td>
+<td>比如 temperature</td>
+</tr>
+<tr>
+<td><code>bool</code></td>
+<td><code>true</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>[]byte</code></td>
+<td><code>[]byte("hi")</code></td>
+<td>字节切片，读网络、读文件、JSON 都用它</td>
+</tr>
+<tr>
+<td><code>time.Duration</code></td>
+<td><code>3 * time.Second</code></td>
+<td>时间长度</td>
+</tr>
+<tr>
+<td><code>error</code></td>
+<td><code>errors.New("x")</code></td>
+<td>错误，是个接口，见 B5</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>零值很重要</strong>：Go 里任何变量声明了就有值，不存在“未初始化”。指针、slice、map、channel、接口的零值都是 <code>nil</code>。</p>
+<h2 id="b4-函数多返回值">B4. 函数：多返回值</h2>
+<p><strong>要解决的问题</strong>：函数既要返回结果，又要告诉调用方“有没有出错”。</p>
+<div class="hl"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nx">divide</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span><span class="w"> </span><span class="nx">b</span><span class="w"> </span><span class="kt">float64</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="kt">float64</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1">// 返回两个值：结果和错误</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">b</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="nx">errors</span><span class="p">.</span><span class="nx">New</span><span class="p">(</span><span class="s">"除数不能为 0"</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">a</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="nx">b</span><span class="p">,</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="c1">// nil 表示“没有错误”</span>
+<span class="p">}</span>
+
+<span class="nx">result</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">divide</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="c1">// 同时接收两个返回值</span>
+<span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span><span class="w">              </span><span class="c1">// Go 里最常见的三行</span>
+<span class="w">    </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"出错了："</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="p">)</span>
+<span class="w">    </span><span class="k">return</span>
+<span class="p">}</span>
+<span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">result</span><span class="p">)</span><span class="w"> </span><span class="c1">// 5</span>
+
+<span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">divide</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="c1">// 不需要的返回值用 _ 丢掉</span>
+</code></pre></div>
+
+<p><strong>逐行解读</strong></p>
+<ul>
+<li>参数类型写在名字后面：<code>a, b float64</code> 表示 a 和 b 都是 float64。</li>
+<li>返回值类型写在参数列表后面，多个返回值用括号括起来。</li>
+<li>Go <strong>没有 try/catch</strong>。约定是：最后一个返回值是 <code>error</code>，调用方马上检查 <code>if err != nil</code>。看起来啰嗦，但每个出错点都一目了然。</li>
+<li><code>:=</code> 是“声明并赋值”，<code>=</code> 是“给已有变量赋值”。上面第二次用 <code>=</code> 是因为 <code>err</code> 已经声明过了。</li>
+</ul>
+<h2 id="b5-错误处理包装判断自定义">B5. 错误处理：包装、判断、自定义</h2>
+<p><strong>要解决的问题</strong>：错误一层层往上传，既要保留原始原因，又要加上“在哪一步出的错”。</p>
+<div class="hl"><pre><span></span><code><span class="kd">var</span><span class="w"> </span><span class="nx">ErrToolNotFound</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">errors</span><span class="p">.</span><span class="nx">New</span><span class="p">(</span><span class="s">"tool not found"</span><span class="p">)</span><span class="w"> </span><span class="c1">// “哨兵错误”：包级变量，用来做比较</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="nx">findTool</span><span class="p">(</span><span class="nx">name</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="kt">error</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">name</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="s">"search"</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">ErrToolNotFound</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span>
+<span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="nx">runTool</span><span class="p">(</span><span class="nx">name</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="kt">error</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">findTool</span><span class="p">(</span><span class="nx">name</span><span class="p">);</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Errorf</span><span class="p">(</span><span class="s">"run %q: %w"</span><span class="p">,</span><span class="w"> </span><span class="nx">name</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="p">)</span><span class="w"> </span><span class="c1">// %w：把原错误“包”进新错误</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span>
+<span class="p">}</span>
+
+<span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">runTool</span><span class="p">(</span><span class="s">"weather"</span><span class="p">)</span>
+<span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span><span class="w">                              </span><span class="c1">// run "weather": tool not found</span>
+<span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">errors</span><span class="p">.</span><span class="nx">Is</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span><span class="w"> </span><span class="nx">ErrToolNotFound</span><span class="p">))</span><span class="w">  </span><span class="c1">// true：能穿透包装，找到里面的原错误</span>
+</code></pre></div>
+
+<p><strong>逐行解读</strong></p>
+<ul>
+<li><code>if err := f(); err != nil { ... }</code>：if 的“带初始化”写法，<code>err</code> 只在这个 if 里有效，避免变量到处飘。</li>
+<li><code>fmt.Errorf("...%w", err)</code>：生成一个新错误，消息里带上下文，同时<strong>保留</strong>原错误。<code>%q</code> 是带引号打印字符串。</li>
+<li><code>errors.Is(err, 目标)</code>：沿着包装链一层层找，有没有等于目标的错误。<strong>不要</strong>用 <code>err == ErrToolNotFound</code> 直接比，包装过就不相等了。</li>
+<li>第二部分会大量出现 <code>errors.Is(err, context.Canceled)</code>、<code>errors.Is(err, context.DeadlineExceeded)</code>，就是这个用法。</li>
+</ul>
+<p><strong>自定义错误类型</strong>（需要带额外信息时）：</p>
+<div class="hl"><pre><span></span><code><span class="kd">type</span><span class="w"> </span><span class="nx">ToolError</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">Tool</span><span class="w"> </span><span class="kt">string</span>
+<span class="w">    </span><span class="nx">Code</span><span class="w"> </span><span class="kt">int</span>
+<span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">e</span><span class="w"> </span><span class="o">*</span><span class="nx">ToolError</span><span class="p">)</span><span class="w"> </span><span class="nx">Error</span><span class="p">()</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1">// 只要有 Error() string 方法，就是 error</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Sprintf</span><span class="p">(</span><span class="s">"tool %s failed with code %d"</span><span class="p">,</span><span class="w"> </span><span class="nx">e</span><span class="p">.</span><span class="nx">Tool</span><span class="p">,</span><span class="w"> </span><span class="nx">e</span><span class="p">.</span><span class="nx">Code</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">var</span><span class="w"> </span><span class="nx">te</span><span class="w"> </span><span class="o">*</span><span class="nx">ToolError</span>
+<span class="k">if</span><span class="w"> </span><span class="nx">errors</span><span class="p">.</span><span class="nx">As</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">te</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1">// errors.As：沿包装链找“这种类型”的错误，找到就赋值给 te</span>
+<span class="w">    </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">te</span><span class="p">.</span><span class="nx">Code</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h2 id="b6-struct-与方法">B6. struct 与方法</h2>
+<p><strong>要解决的问题</strong>：把相关的数据打包成一个类型，并给它定义行为。</p>
+<div class="hl"><pre><span></span><code><span class="kd">type</span><span class="w"> </span><span class="nx">Message</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span><span class="w">   </span><span class="c1">// 定义一个新类型 Message</span>
+<span class="w">    </span><span class="nx">Role</span><span class="w">    </span><span class="kt">string</span><span class="w">      </span><span class="c1">// "user" / "assistant" / "tool"</span>
+<span class="w">    </span><span class="nx">Content</span><span class="w"> </span><span class="kt">string</span>
+<span class="p">}</span>
+
+<span class="kd">type</span><span class="w"> </span><span class="nx">Conversation</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">ID</span><span class="w">       </span><span class="kt">string</span>
+<span class="w">    </span><span class="nx">Messages</span><span class="w"> </span><span class="p">[]</span><span class="nx">Message</span><span class="w">  </span><span class="c1">// 字段可以是 slice</span>
+<span class="p">}</span>
+
+<span class="c1">// 方法：在 func 和名字之间写“接收者”(c *Conversation)</span>
+<span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">c</span><span class="w"> </span><span class="o">*</span><span class="nx">Conversation</span><span class="p">)</span><span class="w"> </span><span class="nx">Add</span><span class="p">(</span><span class="nx">role</span><span class="p">,</span><span class="w"> </span><span class="nx">content</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">c</span><span class="p">.</span><span class="nx">Messages</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">c</span><span class="p">.</span><span class="nx">Messages</span><span class="p">,</span><span class="w"> </span><span class="nx">Message</span><span class="p">{</span><span class="nx">Role</span><span class="p">:</span><span class="w"> </span><span class="nx">role</span><span class="p">,</span><span class="w"> </span><span class="nx">Content</span><span class="p">:</span><span class="w"> </span><span class="nx">content</span><span class="p">})</span>
+<span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">c</span><span class="w"> </span><span class="nx">Conversation</span><span class="p">)</span><span class="w"> </span><span class="nx">Len</span><span class="p">()</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1">// 值接收者：只读，不修改</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">c</span><span class="p">.</span><span class="nx">Messages</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="nx">conv</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">Conversation</span><span class="p">{</span><span class="nx">ID</span><span class="p">:</span><span class="w"> </span><span class="s">"c1"</span><span class="p">}</span><span class="w"> </span><span class="c1">// &amp; 取地址，得到 *Conversation（指针）</span>
+<span class="nx">conv</span><span class="p">.</span><span class="nx">Add</span><span class="p">(</span><span class="s">"user"</span><span class="p">,</span><span class="w"> </span><span class="s">"你好"</span><span class="p">)</span>
+<span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">conv</span><span class="p">.</span><span class="nx">Len</span><span class="p">())</span><span class="w"> </span><span class="c1">// 1</span>
+</code></pre></div>
+
+<p><strong>逐行解读</strong></p>
+<ul>
+<li><code>Message{Role: role, Content: content}</code>：struct 字面量，按字段名赋值，没写的字段是零值。</li>
+<li><strong>指针接收者 <code>(c *Conversation)</code></strong>：方法里能修改原对象。<strong>值接收者 <code>(c Conversation)</code></strong>：方法拿到的是一份拷贝，改了也不影响原对象。</li>
+<li>经验法则：<strong>只要有一个方法需要修改对象，这个类型的所有方法都用指针接收者</strong>，保持一致。</li>
+<li><code>&amp;Conversation{...}</code>：直接创建并取地址。Go 会自动处理 <code>conv.Add</code> 和 <code>(*conv).Add</code> 的转换，不用手写。</li>
+</ul>
+<p><strong>指针速查</strong>：</p>
+<div class="hl"><pre><span></span><code><span class="nx">x</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">1</span>
+<span class="nx">p</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">x</span><span class="w">   </span><span class="c1">// p 是指向 x 的指针，类型 *int</span>
+<span class="o">*</span><span class="nx">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="w">    </span><span class="c1">// 通过指针改 x</span>
+<span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">x</span><span class="p">)</span><span class="w"> </span><span class="c1">// 2</span>
+</code></pre></div>
+
+<p>什么时候用指针：要在函数里修改对象；对象很大不想拷贝；需要表示“没有”（nil）。</p>
+<h2 id="b7-slice-与-map">B7. slice 与 map</h2>
+<div class="hl"><pre><span></span><code><span class="c1">// slice：可变长度的数组</span>
+<span class="nx">tools</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="p">[]</span><span class="kt">string</span><span class="p">{</span><span class="s">"search"</span><span class="p">,</span><span class="w"> </span><span class="s">"calc"</span><span class="p">}</span>
+<span class="nx">tools</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">tools</span><span class="p">,</span><span class="w"> </span><span class="s">"weather"</span><span class="p">)</span><span class="w">       </span><span class="c1">// 追加，必须接收返回值</span>
+<span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nx">tools</span><span class="p">),</span><span class="w"> </span><span class="nx">tools</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="w">      </span><span class="c1">// 3 search</span>
+
+<span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="p">,</span><span class="w"> </span><span class="nx">name</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">tools</span><span class="w"> </span><span class="p">{</span><span class="w">           </span><span class="c1">// 遍历：下标 + 值</span>
+<span class="w">    </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span><span class="w"> </span><span class="nx">name</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="nx">results</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">make</span><span class="p">([]</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="w">           </span><span class="c1">// 提前开好长度为 3 的 slice，元素是零值 ""</span>
+
+<span class="c1">// map：键值对</span>
+<span class="nx">registry</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="kt">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">int</span><span class="p">{</span><span class="s">"search"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">}</span>
+<span class="nx">registry</span><span class="p">[</span><span class="s">"calc"</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="w">                   </span><span class="c1">// 写</span>
+<span class="nx">v</span><span class="p">,</span><span class="w"> </span><span class="nx">ok</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">registry</span><span class="p">[</span><span class="s">"weather"</span><span class="p">]</span><span class="w">           </span><span class="c1">// 读：ok 表示键是否存在</span>
+<span class="k">if</span><span class="w"> </span><span class="o">!</span><span class="nx">ok</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"没有这个工具"</span><span class="p">,</span><span class="w"> </span><span class="nx">v</span><span class="p">)</span><span class="w">     </span><span class="c1">// v 是零值 0</span>
+<span class="p">}</span>
+<span class="nb">delete</span><span class="p">(</span><span class="nx">registry</span><span class="p">,</span><span class="w"> </span><span class="s">"calc"</span><span class="p">)</span><span class="w">               </span><span class="c1">// 删</span>
+</code></pre></div>
+
+<p><strong>容易错的地方</strong></p>
+<ul>
+<li><code>append</code> 可能分配新的底层数组，<strong>一定要写 <code>s = append(s, x)</code></strong>。</li>
+<li>只声明不初始化的 map 是 nil，<strong>往 nil map 写会 panic</strong>：<code>var m map[string]int; m["a"] = 1</code> 直接崩。用 <code>make(map[string]int)</code> 或字面量初始化。</li>
+<li>map 遍历顺序是随机的，需要顺序就先把 key 排序。</li>
+<li>map <strong>不能并发写</strong>（第二部分 6 节会讲）；slice 按不同下标并发写是安全的。</li>
+</ul>
+<h2 id="b8-接口go-的多态">B8. 接口：Go 的多态</h2>
+<p><strong>要解决的问题</strong>：Agent 有很多工具，Loop 不想关心每个工具的具体实现，只想“调用它”。</p>
+<div class="hl"><pre><span></span><code><span class="kd">type</span><span class="w"> </span><span class="nx">Tool</span><span class="w"> </span><span class="kd">interface</span><span class="w"> </span><span class="p">{</span><span class="w">          </span><span class="c1">// 接口：只规定“有哪些方法”</span>
+<span class="w">    </span><span class="nx">Name</span><span class="p">()</span><span class="w"> </span><span class="kt">string</span>
+<span class="w">    </span><span class="nx">Run</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">args</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">type</span><span class="w"> </span><span class="nx">Calculator</span><span class="w"> </span><span class="kd">struct</span><span class="p">{}</span><span class="w">       </span><span class="c1">// 一个具体工具</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">Calculator</span><span class="p">)</span><span class="w"> </span><span class="nx">Name</span><span class="p">()</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="s">"calc"</span><span class="w"> </span><span class="p">}</span>
+<span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">Calculator</span><span class="p">)</span><span class="w"> </span><span class="nx">Run</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">args</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="s">"42"</span><span class="p">,</span><span class="w"> </span><span class="kc">nil</span>
+<span class="p">}</span>
+
+<span class="c1">// Calculator 没有写任何 "implements Tool"，但它有 Tool 要求的全部方法，所以它就是 Tool</span>
+<span class="kd">var</span><span class="w"> </span><span class="nx">t</span><span class="w"> </span><span class="nx">Tool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Calculator</span><span class="p">{}</span>
+
+<span class="nx">tools</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="kt">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="nx">Tool</span><span class="p">{}</span><span class="w">     </span><span class="c1">// 工具注册表：名字 → 工具</span>
+<span class="nx">tools</span><span class="p">[</span><span class="nx">t</span><span class="p">.</span><span class="nx">Name</span><span class="p">()]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">t</span>
+<span class="nx">out</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">tools</span><span class="p">[</span><span class="s">"calc"</span><span class="p">].</span><span class="nx">Run</span><span class="p">(</span><span class="nx">context</span><span class="p">.</span><span class="nx">Background</span><span class="p">(),</span><span class="w"> </span><span class="s">`{"expr":"6*7"}`</span><span class="p">)</span>
+</code></pre></div>
+
+<p><strong>逐行解读</strong></p>
+<ul>
+<li><strong>隐式实现</strong>：Go 不需要声明“我实现了某接口”。只要方法签名对得上，就自动满足。好处是接口可以由“使用方”定义，具体实现完全不用知道它。</li>
+<li>接口变量里装的是“具体类型 + 具体值”，调用方法时会自动调到具体实现上。</li>
+<li><code>error</code> 本身就是个接口：<code>type error interface { Error() string }</code>，这就是 B5 里自定义错误能用的原因。</li>
+<li>测试时可以写一个假的 <code>Tool</code> 塞进注册表，不用调真接口。这是 Go 里做依赖替换最常见的方式。</li>
+</ul>
+<h2 id="b9-json和模型-api-打交道的核心">B9. JSON：和模型 API 打交道的核心</h2>
+<p><strong>要解决的问题</strong>：模型 API 收发的都是 JSON，要在 Go 的 struct 和 JSON 文本之间互转。</p>
+<div class="hl"><pre><span></span><code><span class="c1">// 给 B6 的 Message 加上 JSON 标签后，就能直接用来调模型 API</span>
+<span class="kd">type</span><span class="w"> </span><span class="nx">ChatRequest</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">Model</span><span class="w">       </span><span class="kt">string</span><span class="w">    </span><span class="s">`json:"model"`</span><span class="w">                 </span><span class="c1">// 标签：JSON 里叫 model</span>
+<span class="w">    </span><span class="nx">Messages</span><span class="w">    </span><span class="p">[]</span><span class="nx">Message</span><span class="w"> </span><span class="s">`json:"messages"`</span>
+<span class="w">    </span><span class="nx">Temperature</span><span class="w"> </span><span class="kt">float64</span><span class="w">   </span><span class="s">`json:"temperature,omitempty"`</span><span class="w"> </span><span class="c1">// omitempty：零值时不输出</span>
+<span class="w">    </span><span class="nx">Stream</span><span class="w">      </span><span class="kt">bool</span><span class="w">      </span><span class="s">`json:"stream"`</span>
+<span class="p">}</span>
+
+<span class="kd">type</span><span class="w"> </span><span class="nx">Message</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">Role</span><span class="w">    </span><span class="kt">string</span><span class="w"> </span><span class="s">`json:"role"`</span>
+<span class="w">    </span><span class="nx">Content</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="s">`json:"content"`</span>
+<span class="p">}</span>
+
+<span class="c1">// struct → JSON（编码）</span>
+<span class="nx">req</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">ChatRequest</span><span class="p">{</span><span class="nx">Model</span><span class="p">:</span><span class="w"> </span><span class="s">"glm-4"</span><span class="p">,</span><span class="w"> </span><span class="nx">Messages</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="nx">Message</span><span class="p">{{</span><span class="nx">Role</span><span class="p">:</span><span class="w"> </span><span class="s">"user"</span><span class="p">,</span><span class="w"> </span><span class="nx">Content</span><span class="p">:</span><span class="w"> </span><span class="s">"你好"</span><span class="p">}},</span><span class="w"> </span><span class="nx">Stream</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">}</span>
+<span class="nx">b</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">json</span><span class="p">.</span><span class="nx">Marshal</span><span class="p">(</span><span class="nx">req</span><span class="p">)</span><span class="w"> </span><span class="c1">// b 是 []byte</span>
+<span class="c1">// {"model":"glm-4","messages":[{"role":"user","content":"你好"}],"stream":true}</span>
+
+<span class="c1">// JSON → struct（解码）</span>
+<span class="kd">var</span><span class="w"> </span><span class="nx">resp</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span><span class="w">           </span><span class="c1">// 匿名 struct：只用一次，不用起名字</span>
+<span class="w">    </span><span class="nx">Choices</span><span class="w"> </span><span class="p">[]</span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">Message</span><span class="w"> </span><span class="nx">Message</span><span class="w"> </span><span class="s">`json:"message"`</span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="s">`json:"choices"`</span>
+<span class="p">}</span>
+<span class="nx">err</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">json</span><span class="p">.</span><span class="nx">Unmarshal</span><span class="p">([]</span><span class="kt">byte</span><span class="p">(</span><span class="s">`{"id":"x","choices":[{"message":{"role":"assistant","content":"hi"}}]}`</span><span class="p">),</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">resp</span><span class="p">)</span>
+<span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">resp</span><span class="p">.</span><span class="nx">Choices</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">Message</span><span class="p">.</span><span class="nx">Content</span><span class="p">)</span><span class="w"> </span><span class="c1">// hi</span>
+</code></pre></div>
+
+<p><strong>逐行解读</strong></p>
+<ul>
+<li>反引号里的 <code>json:"..."</code> 是<strong>结构体标签</strong>，告诉 JSON 包字段在 JSON 里的名字。Go 字段要大写才能被 JSON 包访问（B2），而 API 字段一般是小写，所以靠标签映射。</li>
+<li><code>omitempty</code>：值为零值（0、""、false、nil）时这个字段不输出。注意 <code>Stream bool</code> 没加，所以 <code>false</code> 也会输出。</li>
+<li><code>json.Unmarshal(数据, &amp;目标)</code>：第二个参数必须传<strong>指针</strong>，不然改不到你的变量。</li>
+<li>JSON 里有、struct 里没声明的字段（比如上面的 <code>id</code>）会被<strong>自动忽略</strong>。所以解析模型响应时只声明你需要的字段就行。</li>
+<li><strong><code>json.RawMessage</code></strong>：类型是 <code>[]byte</code>，告诉 JSON 包“这段先别解析，原样留着”。第二部分 4 节的工具参数 <code>Args</code> 就是这么处理的：Loop 不关心参数长什么样，交给具体工具自己解析。</li>
+</ul>
+<h2 id="b10-defer函数退出时一定执行">B10. defer：函数退出时一定执行</h2>
+<div class="hl"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nx">readConfig</span><span class="p">(</span><span class="nx">path</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="p">([]</span><span class="kt">byte</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">f</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">os</span><span class="p">.</span><span class="nx">Open</span><span class="p">(</span><span class="nx">path</span><span class="p">)</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">defer</span><span class="w"> </span><span class="nx">f</span><span class="p">.</span><span class="nx">Close</span><span class="p">()</span><span class="w"> </span><span class="c1">// 登记：函数返回时关闭文件，不管从哪个 return 出去</span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">io</span><span class="p">.</span><span class="nx">ReadAll</span><span class="p">(</span><span class="nx">f</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<div class="hl"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nx">f</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">defer</span><span class="w"> </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"3"</span><span class="p">)</span><span class="w">  </span><span class="c1">// 先登记，最后才执行</span>
+<span class="w">    </span><span class="k">defer</span><span class="w"> </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"2"</span><span class="p">)</span>
+<span class="w">    </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"1"</span><span class="p">)</span>
+<span class="p">}</span>
+<span class="c1">// 输出：1 2 3  —— 多个 defer 按“后登记先执行”</span>
+</code></pre></div>
+
+<p><strong>固定搭配</strong>：打开资源的下一行就写 <code>defer 关闭</code>。关文件、关 HTTP 响应体、解锁、取消 context，全是这个模式。第二部分的代码里到处都是。</p>
+<h2 id="b11-泛型了解即可">B11. 泛型（了解即可）</h2>
+<div class="hl"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nx">Map</span><span class="p">[</span><span class="nx">T</span><span class="p">,</span><span class="w"> </span><span class="nx">R</span><span class="w"> </span><span class="kt">any</span><span class="p">](</span><span class="nx">xs</span><span class="w"> </span><span class="p">[]</span><span class="nx">T</span><span class="p">,</span><span class="w"> </span><span class="nx">f</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">T</span><span class="p">)</span><span class="w"> </span><span class="nx">R</span><span class="p">)</span><span class="w"> </span><span class="p">[]</span><span class="nx">R</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1">// [T, R any]：类型参数</span>
+<span class="w">    </span><span class="nx">out</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">make</span><span class="p">([]</span><span class="nx">R</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">xs</span><span class="p">))</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">x</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">xs</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">out</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">out</span><span class="p">,</span><span class="w"> </span><span class="nx">f</span><span class="p">(</span><span class="nx">x</span><span class="p">))</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">out</span>
+<span class="p">}</span>
+
+<span class="nx">list</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="p">[]</span><span class="nx">Tool</span><span class="p">{</span><span class="nx">Calculator</span><span class="p">{}}</span>
+<span class="nx">names</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">Map</span><span class="p">(</span><span class="nx">list</span><span class="p">,</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">t</span><span class="w"> </span><span class="nx">Tool</span><span class="p">)</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nx">t</span><span class="p">.</span><span class="nx">Name</span><span class="p">()</span><span class="w"> </span><span class="p">})</span><span class="w"> </span><span class="c1">// 自动推断 T=Tool, R=string，结果 ["calc"]</span>
+</code></pre></div>
+
+<p>Go 1.18 起支持泛型。日常业务代码用得不多，主要用在通用工具函数和容器上。看得懂就行。</p>
+<h2 id="b12-测试表驱动">B12. 测试：表驱动</h2>
+<p><strong>要解决的问题</strong>：每课的练习都要“测试跑通才算完成”，所以先会写测试。</p>
+<div class="hl"><pre><span></span><code><span class="c1">// divide_test.go，和 divide.go 放在同一目录、同一个包</span>
+<span class="kn">package</span><span class="w"> </span><span class="nx">calc</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="s">"testing"</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="nx">TestDivide</span><span class="p">(</span><span class="nx">t</span><span class="w"> </span><span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">T</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1">// 测试函数：Test 开头，参数是 *testing.T</span>
+<span class="w">    </span><span class="nx">cases</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="p">[]</span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span><span class="w">         </span><span class="c1">// 表驱动：把输入和期望写成一张表</span>
+<span class="w">        </span><span class="nx">name</span><span class="w">    </span><span class="kt">string</span>
+<span class="w">        </span><span class="nx">a</span><span class="p">,</span><span class="w"> </span><span class="nx">b</span><span class="w">    </span><span class="kt">float64</span>
+<span class="w">        </span><span class="nx">want</span><span class="w">    </span><span class="kt">float64</span>
+<span class="w">        </span><span class="nx">wantErr</span><span class="w"> </span><span class="kt">bool</span>
+<span class="w">    </span><span class="p">}{</span>
+<span class="w">        </span><span class="p">{</span><span class="s">"正常"</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="kc">false</span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span><span class="s">"除零"</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="kc">true</span><span class="p">},</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">tc</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">cases</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">t</span><span class="p">.</span><span class="nx">Run</span><span class="p">(</span><span class="nx">tc</span><span class="p">.</span><span class="nx">name</span><span class="p">,</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">t</span><span class="w"> </span><span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">T</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1">// 每行一个子测试，失败时能看到是哪一行</span>
+<span class="w">            </span><span class="nx">got</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">divide</span><span class="p">(</span><span class="nx">tc</span><span class="p">.</span><span class="nx">a</span><span class="p">,</span><span class="w"> </span><span class="nx">tc</span><span class="p">.</span><span class="nx">b</span><span class="p">)</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="p">)</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="nx">tc</span><span class="p">.</span><span class="nx">wantErr</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="nx">t</span><span class="p">.</span><span class="nx">Fatalf</span><span class="p">(</span><span class="s">"err = %v, wantErr %v"</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="p">,</span><span class="w"> </span><span class="nx">tc</span><span class="p">.</span><span class="nx">wantErr</span><span class="p">)</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="nx">got</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="nx">tc</span><span class="p">.</span><span class="nx">want</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="nx">t</span><span class="p">.</span><span class="nx">Errorf</span><span class="p">(</span><span class="s">"got %v, want %v"</span><span class="p">,</span><span class="w"> </span><span class="nx">got</span><span class="p">,</span><span class="w"> </span><span class="nx">tc</span><span class="p">.</span><span class="nx">want</span><span class="p">)</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">})</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<div class="hl"><pre><span></span><code>go<span class="w"> </span><span class="nb">test</span><span class="w"> </span>./...<span class="w">            </span><span class="c1"># 跑所有测试</span>
+go<span class="w"> </span><span class="nb">test</span><span class="w"> </span>-run<span class="w"> </span>TestDivide<span class="w">  </span><span class="c1"># 只跑名字匹配的</span>
+go<span class="w"> </span><span class="nb">test</span><span class="w"> </span>-v<span class="w"> </span>./...<span class="w">         </span><span class="c1"># 打印每个子测试</span>
+go<span class="w"> </span><span class="nb">test</span><span class="w"> </span>-race<span class="w"> </span>./...<span class="w">      </span><span class="c1"># 检测数据竞争（并发部分必用）</span>
+</code></pre></div>
+
+<p><strong>逐行解读</strong></p>
+<ul>
+<li><code>t.Errorf</code>：记录失败，继续跑后面的检查。<code>t.Fatalf</code>：记录失败并<strong>立刻结束</strong>这个测试。</li>
+<li>表驱动的好处：加用例只需要加一行，不用复制粘贴整段测试。</li>
+<li><code>(err != nil) != tc.wantErr</code>：一行判断“该出错的没出错”和“不该出错的出错了”两种情况。</li>
+</ul>
+<h2 id="第一部分小练习20-分钟">第一部分小练习（20 分钟）</h2>
+<p>写一个工具注册表 <code>Registry</code>：</p>
+<ol>
+<li>有方法 <code>Register(t Tool)</code> 和 <code>Call(ctx context.Context, name, args string) (string, error)</code>。</li>
+<li>调用不存在的工具时，返回包装过的 <code>ErrToolNotFound</code>，调用方能用 <code>errors.Is</code> 判断出来。</li>
+<li>用表驱动测试覆盖：调用存在的工具、调用不存在的工具。</li>
+</ol>
+<details>
+<summary>参考实现</summary>
+
+
+<div class="hl"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nx">tools</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="p">(</span>
+<span class="w">    </span><span class="s">"context"</span>
+<span class="w">    </span><span class="s">"errors"</span>
+<span class="w">    </span><span class="s">"fmt"</span>
+<span class="p">)</span>
+
+<span class="kd">var</span><span class="w"> </span><span class="nx">ErrToolNotFound</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">errors</span><span class="p">.</span><span class="nx">New</span><span class="p">(</span><span class="s">"tool not found"</span><span class="p">)</span>
+
+<span class="kd">type</span><span class="w"> </span><span class="nx">Tool</span><span class="w"> </span><span class="kd">interface</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">Name</span><span class="p">()</span><span class="w"> </span><span class="kt">string</span>
+<span class="w">    </span><span class="nx">Run</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">args</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">type</span><span class="w"> </span><span class="nx">Registry</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">tools</span><span class="w"> </span><span class="kt">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="nx">Tool</span>
+<span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="nx">NewRegistry</span><span class="p">()</span><span class="w"> </span><span class="o">*</span><span class="nx">Registry</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">Registry</span><span class="p">{</span><span class="nx">tools</span><span class="p">:</span><span class="w"> </span><span class="nb">make</span><span class="p">(</span><span class="kt">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="nx">Tool</span><span class="p">)}</span><span class="w"> </span><span class="c1">// map 必须初始化</span>
+<span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">r</span><span class="w"> </span><span class="o">*</span><span class="nx">Registry</span><span class="p">)</span><span class="w"> </span><span class="nx">Register</span><span class="p">(</span><span class="nx">t</span><span class="w"> </span><span class="nx">Tool</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">r</span><span class="p">.</span><span class="nx">tools</span><span class="p">[</span><span class="nx">t</span><span class="p">.</span><span class="nx">Name</span><span class="p">()]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">t</span>
+<span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">r</span><span class="w"> </span><span class="o">*</span><span class="nx">Registry</span><span class="p">)</span><span class="w"> </span><span class="nx">Call</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">name</span><span class="p">,</span><span class="w"> </span><span class="nx">args</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">t</span><span class="p">,</span><span class="w"> </span><span class="nx">ok</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">tools</span><span class="p">[</span><span class="nx">name</span><span class="p">]</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="o">!</span><span class="nx">ok</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="s">""</span><span class="p">,</span><span class="w"> </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Errorf</span><span class="p">(</span><span class="s">"call %q: %w"</span><span class="p">,</span><span class="w"> </span><span class="nx">name</span><span class="p">,</span><span class="w"> </span><span class="nx">ErrToolNotFound</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">t</span><span class="p">.</span><span class="nx">Run</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">args</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div>
+
+
+
+
+<div class="hl"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nx">tools</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="p">(</span>
+<span class="w">    </span><span class="s">"context"</span>
+<span class="w">    </span><span class="s">"errors"</span>
+<span class="w">    </span><span class="s">"testing"</span>
+<span class="p">)</span>
+
+<span class="kd">type</span><span class="w"> </span><span class="nx">echo</span><span class="w"> </span><span class="kd">struct</span><span class="p">{}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">echo</span><span class="p">)</span><span class="w"> </span><span class="nx">Name</span><span class="p">()</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="s">"echo"</span><span class="w"> </span><span class="p">}</span>
+<span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">echo</span><span class="p">)</span><span class="w"> </span><span class="nx">Run</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">args</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nx">args</span><span class="p">,</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="nx">TestRegistryCall</span><span class="p">(</span><span class="nx">t</span><span class="w"> </span><span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">T</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">r</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">NewRegistry</span><span class="p">()</span>
+<span class="w">    </span><span class="nx">r</span><span class="p">.</span><span class="nx">Register</span><span class="p">(</span><span class="nx">echo</span><span class="p">{})</span>
+
+<span class="w">    </span><span class="nx">cases</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="p">[]</span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">name</span><span class="w">    </span><span class="kt">string</span>
+<span class="w">        </span><span class="nx">tool</span><span class="w">    </span><span class="kt">string</span>
+<span class="w">        </span><span class="nx">want</span><span class="w">    </span><span class="kt">string</span>
+<span class="w">        </span><span class="nx">wantErr</span><span class="w"> </span><span class="kt">error</span>
+<span class="w">    </span><span class="p">}{</span>
+<span class="w">        </span><span class="p">{</span><span class="s">"存在"</span><span class="p">,</span><span class="w"> </span><span class="s">"echo"</span><span class="p">,</span><span class="w"> </span><span class="s">"hi"</span><span class="p">,</span><span class="w"> </span><span class="kc">nil</span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span><span class="s">"不存在"</span><span class="p">,</span><span class="w"> </span><span class="s">"nope"</span><span class="p">,</span><span class="w"> </span><span class="s">""</span><span class="p">,</span><span class="w"> </span><span class="nx">ErrToolNotFound</span><span class="p">},</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">tc</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">cases</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">t</span><span class="p">.</span><span class="nx">Run</span><span class="p">(</span><span class="nx">tc</span><span class="p">.</span><span class="nx">name</span><span class="p">,</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">t</span><span class="w"> </span><span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">T</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nx">got</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">Call</span><span class="p">(</span><span class="nx">context</span><span class="p">.</span><span class="nx">Background</span><span class="p">(),</span><span class="w"> </span><span class="nx">tc</span><span class="p">.</span><span class="nx">tool</span><span class="p">,</span><span class="w"> </span><span class="s">"hi"</span><span class="p">)</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="o">!</span><span class="nx">errors</span><span class="p">.</span><span class="nx">Is</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span><span class="w"> </span><span class="nx">tc</span><span class="p">.</span><span class="nx">wantErr</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="nx">t</span><span class="p">.</span><span class="nx">Fatalf</span><span class="p">(</span><span class="s">"err = %v, want %v"</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="p">,</span><span class="w"> </span><span class="nx">tc</span><span class="p">.</span><span class="nx">wantErr</span><span class="p">)</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="nx">got</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="nx">tc</span><span class="p">.</span><span class="nx">want</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="nx">t</span><span class="p">.</span><span class="nx">Errorf</span><span class="p">(</span><span class="s">"got %q, want %q"</span><span class="p">,</span><span class="w"> </span><span class="nx">got</span><span class="p">,</span><span class="w"> </span><span class="nx">tc</span><span class="p">.</span><span class="nx">want</span><span class="p">)</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">})</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+
+
+`errors.Is(nil, nil)` 返回 true，所以“存在”那一行也能用同一个判断。
+</details>
+
+<hr />
+<h1 id="第二部分go-并发">第二部分：Go 并发</h1>
+<h2 id="0-并发语法速查看代码前必读">0. 并发语法速查（看代码前必读）</h2>
+<p>后面的代码会反复用到下面这些写法。<code>defer</code>、匿名 struct 和 JSON 标签在第一部分 B9、B10 已经讲过。</p>
+<h3 id="01-go-关键字开一个后台任务">0.1 <code>go</code> 关键字：开一个后台任务</h3>
+<div class="hl"><pre><span></span><code><span class="k">go</span><span class="w"> </span><span class="nx">doSomething</span><span class="p">()</span><span class="w">        </span><span class="c1">// 在后台执行 doSomething，当前代码不等它，继续往下走</span>
+
+<span class="k">go</span><span class="w"> </span><span class="kd">func</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">             </span><span class="c1">// 也可以直接写一个匿名函数丢到后台</span>
+<span class="w">    </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"我在后台跑"</span><span class="p">)</span>
+<span class="p">}()</span><span class="w">                     </span><span class="c1">// 注意最后的 ()：定义完立刻调用</span>
+</code></pre></div>
+
+<p><code>go</code> 启动的东西叫 <strong>goroutine</strong>，可以理解成“非常便宜的线程”，开几万个都没问题。但它有个特点：<strong>启动它的函数返回了，它也不会自动停</strong>。所以后面会一直强调“每个 goroutine 怎么结束”。</p>
+<h3 id="02-channelgoroutine-之间传数据的管道">0.2 channel：goroutine 之间传数据的管道</h3>
+<div class="hl"><pre><span></span><code><span class="nx">ch</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">make</span><span class="p">(</span><span class="kt">chan</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w">     </span><span class="c1">// 造一根能传 string 的管道（无缓冲）</span>
+<span class="nx">ch2</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">make</span><span class="p">(</span><span class="kt">chan</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="w"> </span><span class="c1">// 带缓冲：管道里最多能“存” 3 个值</span>
+
+<span class="nx">ch</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s">"hello"</span><span class="w">   </span><span class="c1">// 往管道里放（发送）</span>
+<span class="nx">v</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="o">&lt;-</span><span class="nx">ch</span><span class="w">       </span><span class="c1">// 从管道里取（接收）</span>
+<span class="nb">close</span><span class="p">(</span><span class="nx">ch</span><span class="p">)</span><span class="w">       </span><span class="c1">// 关闭管道：告诉接收方“不会再有数据了”</span>
+</code></pre></div>
+
+<p><strong>箭头方向就是数据流向</strong>：<code>ch &lt;- x</code> 是 x 流进 ch，<code>&lt;-ch</code> 是从 ch 流出来。</p>
+<h3 id="03-只读-只写-channel-类型">0.3 只读 / 只写 channel 类型</h3>
+<div class="hl"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nx">produce</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;-</span><span class="kt">chan</span><span class="w"> </span><span class="kt">int</span><span class="w">   </span><span class="c1">// 返回值类型 &lt;-chan int：调用方只能从里面读</span>
+<span class="kd">func</span><span class="w"> </span><span class="nx">consume</span><span class="p">(</span><span class="nx">ch</span><span class="w"> </span><span class="kt">chan</span><span class="o">&lt;-</span><span class="w"> </span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="c1">// 参数类型 chan&lt;- int：函数只能往里面写</span>
+</code></pre></div>
+
+<p>这是<strong>给编译器看的约束</strong>：函数返回 <code>&lt;-chan</code>，调用方就不可能误往里写、也不可能误 <code>close</code>。本课的函数都返回 <code>&lt;-chan</code>。</p>
+<h3 id="04-闭包匿名函数能直接用外面的变量">0.4 闭包：匿名函数能直接用外面的变量</h3>
+<div class="hl"><pre><span></span><code><span class="nx">results</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">make</span><span class="p">([]</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span>
+<span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="o">++</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">go</span><span class="w"> </span><span class="kd">func</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">results</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"done"</span><span class="w"> </span><span class="c1">// 直接用外面的 results 和 i</span>
+<span class="w">    </span><span class="p">}()</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>Go 1.22 起</strong>，<code>for</code> 循环每一轮的 <code>i</code> 都是新变量，所以上面每个 goroutine 拿到的 <code>i</code> 是自己那一轮的。（老版本里所有 goroutine 共享同一个 <code>i</code>，是经典 bug。本仓库用 Go 1.23。）</p>
+<hr />
+<h2 id="1-goroutine-与-channel三条规则">1. goroutine 与 channel：三条规则</h2>
+<p><strong>要解决的问题</strong>：后台任务干完活，怎么把结果交回来？</p>
+<div class="hl"><pre><span></span><code><span class="nx">results</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">make</span><span class="p">(</span><span class="kt">chan</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w">      </span><span class="c1">// 无缓冲 channel</span>
+<span class="k">go</span><span class="w"> </span><span class="kd">func</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">results</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s">"tool A done"</span><span class="w">      </span><span class="c1">// 后台：把结果放进管道</span>
+<span class="p">}()</span>
+<span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="o">&lt;-</span><span class="nx">results</span><span class="p">)</span><span class="w">            </span><span class="c1">// 前台：在这里等，直到拿到结果</span>
+</code></pre></div>
+
+<p><strong>时间线</strong>：</p>
+<div class="hl"><pre><span></span><code>主 goroutine:  创建 channel → 启动后台 → 执行 &lt;-results（卡住等）……………… 拿到值，打印
+后台 goroutine:                          执行 results &lt;- "..."（等有人接）→ 交接完成，结束
+</code></pre></div>
+
+<p>无缓冲 channel 像“当面交接”：发送方和接收方<strong>必须同时到场</strong>，任何一方先到都要等另一方。</p>
+<p>记住三条规则，能避开 80% 的 bug：</p>
+<ol>
+<li><strong>谁发送，谁关闭。</strong> 接收方永远不要 <code>close</code>。关闭后再发送会 panic（程序直接崩）。</li>
+<li><strong>每启动一个 goroutine，都要想清楚它怎么结束。</strong> 想不清楚 = 泄漏。</li>
+<li><strong>无缓冲 channel 是同步点，有缓冲 channel 是队列。</strong> 缓冲大小 = 允许“发了还没人收”的数量。</li>
+</ol>
+<h3 id="生产者模式返回一个-channel">生产者模式：返回一个 channel</h3>
+<p><strong>要解决的问题</strong>：函数要“源源不断”产出数据，调用方边收边处理。</p>
+<div class="hl"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nx">produce</span><span class="p">(</span><span class="nx">n</span><span class="w"> </span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;-</span><span class="kt">chan</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">ch</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">make</span><span class="p">(</span><span class="kt">chan</span><span class="w"> </span><span class="kt">int</span><span class="p">)</span>
+<span class="w">    </span><span class="k">go</span><span class="w"> </span><span class="kd">func</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">defer</span><span class="w"> </span><span class="nb">close</span><span class="p">(</span><span class="nx">ch</span><span class="p">)</span><span class="w"> </span><span class="c1">// 规则 1：发送方负责关闭</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="nx">n</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="o">++</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nx">ch</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nx">i</span><span class="w">     </span><span class="c1">// 每放一个，都要等调用方取走</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}()</span><span class="w">                 </span><span class="c1">// 后台开始生产</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">ch</span><span class="w">           </span><span class="c1">// 立刻返回管道，不等生产完</span>
+<span class="p">}</span>
+
+<span class="k">for</span><span class="w"> </span><span class="nx">v</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">produce</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">v</span><span class="p">)</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="c1">// 0 1 2</span>
+</code></pre></div>
+
+<p><strong>逐行解读</strong></p>
+<ul>
+<li><code>produce</code> 本身几乎瞬间返回，它只是“造管道 + 启动工人”。真正的生产在后台 goroutine 里。</li>
+<li><code>for v := range ch</code>：反复从 ch 取值，<strong>直到 ch 被关闭且取空</strong>才退出循环。</li>
+<li>如果忘了 <code>close(ch)</code>：生产完 3 个后，调用方的 <code>range</code> 还在等第 4 个，永远等不到 → 程序卡死。这就是为什么 <code>defer close(ch)</code> 是固定搭配。</li>
+<li>后台 goroutine 怎么结束？循环跑完 → defer 关闭 → 函数返回。<strong>结束路径清清楚楚</strong>，符合规则 2。</li>
+</ul>
+<blockquote>
+<p>这个“函数立刻返回一个 channel，后台 goroutine 往里写，写完关闭”的模式，第 5 节的 <code>streamTokens</code> 和练习 1 的 <code>fanIn</code> 都是它的升级版。先把它看懂。</p>
+</blockquote>
+<hr />
+<h2 id="2-select同时等多件事">2. select：同时等多件事</h2>
+<p><strong>要解决的问题</strong>：等模型吐字的时候，还要同时盯着“超时了没”“用户走了没”。</p>
+<div class="hl"><pre><span></span><code><span class="k">select</span><span class="w"> </span><span class="p">{</span>
+<span class="k">case</span><span class="w"> </span><span class="nx">tok</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="o">&lt;-</span><span class="nx">tokens</span><span class="p">:</span><span class="w">                       </span><span class="c1">// 情况 A：等到一个 token</span>
+<span class="w">    </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Print</span><span class="p">(</span><span class="nx">tok</span><span class="p">)</span>
+<span class="k">case</span><span class="w"> </span><span class="o">&lt;-</span><span class="nx">time</span><span class="p">.</span><span class="nx">After</span><span class="p">(</span><span class="mi">30</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="p">):</span><span class="w">        </span><span class="c1">// 情况 B：30 秒都没等到</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">errors</span><span class="p">.</span><span class="nx">New</span><span class="p">(</span><span class="s">"LLM 30 秒没吐 token"</span><span class="p">)</span>
+<span class="k">case</span><span class="w"> </span><span class="o">&lt;-</span><span class="nx">ctx</span><span class="p">.</span><span class="nx">Done</span><span class="p">():</span><span class="w">                          </span><span class="c1">// 情况 C：被取消了</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">ctx</span><span class="p">.</span><span class="nx">Err</span><span class="p">()</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>逐行解读</strong></p>
+<ul>
+<li><code>select</code> 会<strong>同时</strong>挂在所有 case 上，哪个先就绪就执行哪个，其余的放弃。像同时等三个人的电话，谁先打来接谁。</li>
+<li><code>time.After(30 * time.Second)</code> 返回一个 channel，30 秒后会自动往里放一个值。所以它可以当“闹钟”用。</li>
+<li><code>ctx.Done()</code> 也是一个 channel，ctx 被取消时它会被关闭（关闭的 channel 一读就能读到，所以 case 立刻就绪）。下一节详细讲 ctx。</li>
+<li>多个 case 同时就绪时，Go <strong>随机</strong>挑一个，不保证顺序。</li>
+</ul>
+<p>Agent 里最常见的写法就是“<strong>等数据 OR 等取消</strong>”，后面几乎每段代码都有。</p>
+<hr />
+<h2 id="3-context取消信号的传播链">3. context：取消信号的传播链</h2>
+<p><strong>要解决的问题</strong>：用户关掉网页后，怎么让后台所有正在跑的工作都停下来？</p>
+<p>先看链条：</p>
+<div class="hl"><pre><span></span><code>用户关掉网页
+  → HTTP 服务端发现连接断了，r.Context() 被取消
+    → 你传给 LLM 调用的 ctx 被取消 → 到模型供应商的连接断开，停止计费
+    → 你传给每个工具的 ctx 被取消 → 工具停止执行
+</code></pre></div>
+
+<p><code>context.Context</code>（简称 ctx）就是这根“取消信号线”。它是树状的：父 ctx 被取消，所有从它派生出来的子 ctx 都会被取消。<strong>这条链断了，就是在烧钱。</strong></p>
+<div class="hl"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nx">handleChat</span><span class="p">(</span><span class="nx">w</span><span class="w"> </span><span class="nx">http</span><span class="p">.</span><span class="nx">ResponseWriter</span><span class="p">,</span><span class="w"> </span><span class="nx">r</span><span class="w"> </span><span class="o">*</span><span class="nx">http</span><span class="p">.</span><span class="nx">Request</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// 从请求的 ctx 派生一个子 ctx，并加上“最多 60 秒”的限制</span>
+<span class="w">    </span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">cancel</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">WithTimeout</span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nx">Context</span><span class="p">(),</span><span class="w"> </span><span class="mi">60</span><span class="o">*</span><span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="p">)</span>
+<span class="w">    </span><span class="k">defer</span><span class="w"> </span><span class="nx">cancel</span><span class="p">()</span><span class="w"> </span><span class="c1">// 必写：函数结束时主动释放计时器</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">runAgent</span><span class="p">(</span><span class="nx">ctx</span><span class="p">);</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span><span class="w">   </span><span class="c1">// 把 ctx 一路往下传</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">errors</span><span class="p">.</span><span class="nx">Is</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Canceled</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nx">slog</span><span class="p">.</span><span class="nx">Info</span><span class="p">(</span><span class="s">"client gone, stopped"</span><span class="p">)</span><span class="w"> </span><span class="c1">// 用户自己走了，不算错误</span>
+<span class="w">            </span><span class="k">return</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="nx">http</span><span class="p">.</span><span class="nx">Error</span><span class="p">(</span><span class="nx">w</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="p">.</span><span class="nx">Error</span><span class="p">(),</span><span class="w"> </span><span class="mi">500</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>逐行解读</strong></p>
+<ul>
+<li><code>r.Context()</code>：Go 的 HTTP 服务端给每个请求自带一个 ctx，客户端断开时它会自动被取消。</li>
+<li><code>context.WithTimeout(父, 60s)</code> 返回两样东西：</li>
+<li><code>ctx</code>：新的子 ctx。父 ctx 取消、或者 60 秒到了，它都会被取消（两个条件谁先到算谁）。</li>
+<li><code>cancel</code>：一个函数，调用它可以<strong>手动</strong>取消这个子 ctx。</li>
+<li><code>defer cancel()</code>：活提前干完了也要调一下，告诉系统“这个计时器不用了”。不调的后果见文末自测题 4。</li>
+<li><code>errors.Is(err, context.Canceled)</code>：判断错误是不是“被取消”造成的。用户主动离开不该报 500。</li>
+</ul>
+<p><strong>ctx 被取消后会发生什么？</strong> 只做一件事：<code>ctx.Done()</code> 这个 channel 被关闭，<code>ctx.Err()</code> 开始返回非 nil。<strong>它不会强行杀掉任何代码</strong>。下游代码必须自己去 <code>select</code> 监听 <code>ctx.Done()</code>，才会真的停。这一点后面会反复体现。</p>
+<p>规范（照着写就行）：</p>
+<ul>
+<li>ctx 永远是函数的<strong>第一个参数</strong>：<code>func runAgent(ctx context.Context, ...)</code>，不要塞进 struct。</li>
+<li>下层函数只负责<strong>监听</strong> <code>ctx.Done()</code>，不负责 <code>cancel</code>；谁创建谁 cancel。</li>
+<li>发 HTTP 请求用 <code>http.NewRequestWithContext(ctx, ...)</code>，ctx 取消时连接会自动断开，不用你自己管。</li>
+</ul>
+<hr />
+<h2 id="4-并行工具调用errgroup">4. 并行工具调用：errgroup</h2>
+<p><strong>要解决的问题</strong>：模型一次要求调用 3 个工具，怎么同时跑、每个有超时、最多同时跑几个、一个失败不影响其他？</p>
+<p>串行要 3 × 延迟，并行只要最慢那个：</p>
+<div class="hl"><pre><span></span><code>串行：[ 工具A 1s ][ 工具B 2s ][ 工具C 3s ]          = 6s
+并行：[ 工具A 1s ]
+      [ 工具B 2s     ]
+      [ 工具C 3s          ]                        = 3s
+</code></pre></div>
+
+<p><code>errgroup</code> 是 Go 官方扩展库里的工具，可以理解成“<strong>一组 goroutine + 等它们全部结束 + 收集错误 + 限制并发数</strong>”的打包方案。</p>
+<div class="hl"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="s">"golang.org/x/sync/errgroup"</span>
+
+<span class="c1">// 模型返回的一次工具调用请求</span>
+<span class="kd">type</span><span class="w"> </span><span class="nx">ToolCall</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">ID</span><span class="w">   </span><span class="kt">string</span><span class="w">          </span><span class="c1">// 模型给的调用 ID，回传结果时要带上，模型靠它对号入座</span>
+<span class="w">    </span><span class="nx">Name</span><span class="w"> </span><span class="kt">string</span><span class="w">          </span><span class="c1">// 工具名，比如 "search"</span>
+<span class="w">    </span><span class="nx">Args</span><span class="w"> </span><span class="nx">json</span><span class="p">.</span><span class="nx">RawMessage</span><span class="w"> </span><span class="c1">// 参数原文（一段 JSON），先不解析，交给具体工具</span>
+<span class="p">}</span>
+
+<span class="c1">// 工具执行完的结果</span>
+<span class="kd">type</span><span class="w"> </span><span class="nx">ToolResult</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">ID</span><span class="w">     </span><span class="kt">string</span>
+<span class="w">    </span><span class="nx">Output</span><span class="w"> </span><span class="kt">string</span>
+<span class="w">    </span><span class="nx">Err</span><span class="w">    </span><span class="kt">error</span>
+<span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="nx">runTools</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">calls</span><span class="w"> </span><span class="p">[]</span><span class="nx">ToolCall</span><span class="p">)</span><span class="w"> </span><span class="p">([]</span><span class="nx">ToolResult</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">g</span><span class="p">,</span><span class="w"> </span><span class="nx">ctx</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">errgroup</span><span class="p">.</span><span class="nx">WithContext</span><span class="p">(</span><span class="nx">ctx</span><span class="p">)</span><span class="w">           </span><span class="c1">// ① 建一个任务组</span>
+<span class="w">    </span><span class="nx">g</span><span class="p">.</span><span class="nx">SetLimit</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="w">                                 </span><span class="c1">// ② 最多同时跑 4 个</span>
+<span class="w">    </span><span class="nx">results</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">make</span><span class="p">([]</span><span class="nx">ToolResult</span><span class="p">,</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">calls</span><span class="p">))</span><span class="w">     </span><span class="c1">// ③ 提前开好结果数组</span>
+
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="p">,</span><span class="w"> </span><span class="nx">c</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">calls</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">g</span><span class="p">.</span><span class="nx">Go</span><span class="p">(</span><span class="kd">func</span><span class="p">()</span><span class="w"> </span><span class="kt">error</span><span class="w"> </span><span class="p">{</span><span class="w">                       </span><span class="c1">// ④ 每个工具一个 goroutine</span>
+<span class="w">            </span><span class="nx">tctx</span><span class="p">,</span><span class="w"> </span><span class="nx">cancel</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">WithTimeout</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="mi">20</span><span class="o">*</span><span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="p">)</span><span class="w"> </span><span class="c1">// ⑤ 单工具超时</span>
+<span class="w">            </span><span class="k">defer</span><span class="w"> </span><span class="nx">cancel</span><span class="p">()</span>
+<span class="w">            </span><span class="nx">out</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">execTool</span><span class="p">(</span><span class="nx">tctx</span><span class="p">,</span><span class="w"> </span><span class="nx">c</span><span class="p">)</span><span class="w">         </span><span class="c1">// ⑥ 真正执行工具</span>
+<span class="w">            </span><span class="nx">results</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">ToolResult</span><span class="p">{</span><span class="nx">ID</span><span class="p">:</span><span class="w"> </span><span class="nx">c</span><span class="p">.</span><span class="nx">ID</span><span class="p">,</span><span class="w"> </span><span class="nx">Output</span><span class="p">:</span><span class="w"> </span><span class="nx">out</span><span class="p">,</span><span class="w"> </span><span class="nx">Err</span><span class="p">:</span><span class="w"> </span><span class="nx">err</span><span class="p">}</span><span class="w"> </span><span class="c1">// ⑦ 写自己的格子</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span><span class="w">                            </span><span class="c1">// ⑧ 失败也返回 nil</span>
+<span class="w">        </span><span class="p">})</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">g</span><span class="p">.</span><span class="nx">Wait</span><span class="p">();</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span><span class="w">              </span><span class="c1">// ⑨ 等所有工具结束</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">results</span><span class="p">,</span><span class="w"> </span><span class="kc">nil</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>逐行解读</strong></p>
+<ul>
+<li><strong>①</strong> <code>errgroup.WithContext(ctx)</code> 返回任务组 <code>g</code> 和一个<strong>新的</strong> ctx。注意这里把外面的 <code>ctx</code> 变量覆盖了，下面用的都是这个新 ctx。它的特点：组里任何一个任务返回了错误，它就会被取消，其他任务就能感知到“该停了”。</li>
+<li><strong>②</strong> <code>SetLimit(4)</code>：同时最多 4 个在跑。第 5 个调用 <code>g.Go</code> 时会<strong>等</strong>，直到前面有一个结束空出位置。防止模型一次要 50 个工具把下游打爆。</li>
+<li><strong>③</strong> 结果用<strong>提前开好长度的 slice</strong>，每个 goroutine 只写 <code>results[i]</code> 自己那一格。不同下标互不干扰，所以<strong>不需要加锁</strong>。如果换成 map 一起写，会直接崩（见第 6 节）。</li>
+<li><strong>④</strong> <code>g.Go(func() error {...})</code>：相当于 <code>go func(){...}()</code>，但 errgroup 会帮你记账，<code>Wait</code> 时知道还有几个没完。闭包里直接用 <code>i</code> 和 <code>c</code> 是安全的（Go 1.22+，见 0.4）。</li>
+<li><strong>⑤</strong> 从组 ctx 再派生一个 20 秒超时的 <code>tctx</code>，只给这一个工具用。于是这个工具会在三种情况下被要求停：自己超过 20 秒、组里别人报错、最外层用户取消。</li>
+<li><strong>⑥</strong> <code>execTool</code> 是你实现的具体工具（查天气、跑代码……）。它<strong>必须</strong>监听 <code>tctx</code>，否则超时没用，见练习 2 的解读。</li>
+<li><strong>⑦</strong> 结果按下标写，顺序和 <code>calls</code> 一一对应。回传给模型时 <code>ID</code> 不会错位。</li>
+<li><strong>⑧</strong> 关键设计：工具失败了<strong>不返回 err</strong>，而是把错误塞进 <code>ToolResult.Err</code>。</li>
+<li><strong>⑨</strong> <code>g.Wait()</code> 阻塞到组里所有 goroutine 都结束，返回其中第一个非 nil 错误（这里永远是 nil，因为 ⑧）。</li>
+</ul>
+<p><strong>设计取舍（面试常问）</strong>：为什么工具失败返回 <code>nil</code>？因为对 Agent 来说，“工具报错”是一条<strong>有用的信息</strong>，比如“文件不存在”“参数格式不对”。把它作为 <code>tool_result</code> 回传给模型，模型通常会换个参数重试。如果 <code>return err</code>，errgroup 会取消其他正在跑的工具，整轮白做。只有“基础设施故障”（比如用户已经走了）才应该中断整轮，做法见自测题 3。</p>
+<hr />
+<h2 id="5-可取消的流式读取解析-sse">5. 可取消的流式读取：解析 SSE</h2>
+<p><strong>要解决的问题</strong>：模型的流式接口一行一行推数据过来，怎么边读边把文字交给前端，同时在用户取消时立刻停下、不留后台垃圾？</p>
+<h3 id="51-sse-长什么样">5.1 SSE 长什么样</h3>
+<p>LLM 流式接口返回的是 SSE（Server-Sent Events），本质就是一段<strong>不断变长的纯文本</strong>：</p>
+<div class="hl"><pre><span></span><code>data: {"choices":[{"delta":{"content":"你"}}]}
+
+data: {"choices":[{"delta":{"content":"好"}}]}
+
+data: [DONE]
+</code></pre></div>
+
+<ul>
+<li>每个事件一行，以 <code>data:</code> 开头，事件之间空一行。</li>
+<li><code>delta.content</code> 是“这次<strong>新增</strong>的文字”，不是全文。把所有 delta 拼起来才是完整回答。</li>
+<li><code>[DONE]</code> 是 OpenAI 格式约定的结束标记。</li>
+</ul>
+<h3 id="52-整体设计">5.2 整体设计</h3>
+<div class="hl"><pre><span></span><code>              ┌──────────── 后台 goroutine ────────────┐
+HTTP body ──▶ │ 一行行读 → 过滤 data: → 解析 JSON → 取字 │ ──▶ tokens  （正常数据，一个个字）
+              │            出错 / 被取消 / 读完        │ ──▶ errc    （为什么结束，最多一个值）
+              └────────────────────────────────────────┘
+</code></pre></div>
+
+<p>函数<strong>立刻返回两根管道</strong>：<code>tokens</code> 送文字，<code>errc</code> 送“结束原因”。分开的好处：调用方先 <code>for range tokens</code> 专心收文字，收完再看一眼 <code>errc</code> 知道是正常结束还是出错。</p>
+<h3 id="53-代码">5.3 代码</h3>
+<div class="hl"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nx">streamTokens</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">body</span><span class="w"> </span><span class="nx">io</span><span class="p">.</span><span class="nx">ReadCloser</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="o">&lt;-</span><span class="kt">chan</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="o">&lt;-</span><span class="kt">chan</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">tokens</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">make</span><span class="p">(</span><span class="kt">chan</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w">     </span><span class="c1">// 无缓冲：调用方读一个，这边才发下一个</span>
+<span class="w">    </span><span class="nx">errc</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">make</span><span class="p">(</span><span class="kt">chan</span><span class="w"> </span><span class="kt">error</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w">     </span><span class="c1">// 缓冲 1：放错误时不用等人来取</span>
+
+<span class="w">    </span><span class="k">go</span><span class="w"> </span><span class="kd">func</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">defer</span><span class="w"> </span><span class="nb">close</span><span class="p">(</span><span class="nx">errc</span><span class="p">)</span><span class="w">   </span><span class="c1">// 第三个执行</span>
+<span class="w">        </span><span class="k">defer</span><span class="w"> </span><span class="nb">close</span><span class="p">(</span><span class="nx">tokens</span><span class="p">)</span><span class="w"> </span><span class="c1">// 第二个执行</span>
+<span class="w">        </span><span class="k">defer</span><span class="w"> </span><span class="nx">body</span><span class="p">.</span><span class="nx">Close</span><span class="p">()</span><span class="w">  </span><span class="c1">// 第一个执行（defer 后登记先执行）</span>
+
+<span class="w">        </span><span class="nx">sc</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">bufio</span><span class="p">.</span><span class="nx">NewScanner</span><span class="p">(</span><span class="nx">body</span><span class="p">)</span><span class="w">                     </span><span class="c1">// 按行读</span>
+<span class="w">        </span><span class="nx">sc</span><span class="p">.</span><span class="nx">Buffer</span><span class="p">(</span><span class="nb">make</span><span class="p">([]</span><span class="kt">byte</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">64</span><span class="o">*</span><span class="mi">1024</span><span class="p">),</span><span class="w"> </span><span class="mi">1024</span><span class="o">*</span><span class="mi">1024</span><span class="p">)</span><span class="w">  </span><span class="c1">// 单行上限放宽到 1MB</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="nx">sc</span><span class="p">.</span><span class="nx">Scan</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">                                  </span><span class="c1">// 每次读一行，读不到就结束循环</span>
+<span class="w">            </span><span class="nx">line</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">sc</span><span class="p">.</span><span class="nx">Text</span><span class="p">()</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="o">!</span><span class="nx">strings</span><span class="p">.</span><span class="nx">HasPrefix</span><span class="p">(</span><span class="nx">line</span><span class="p">,</span><span class="w"> </span><span class="s">"data: "</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="k">continue</span><span class="w"> </span><span class="c1">// 跳过空行、注释、event: 行</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">            </span><span class="nx">data</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">strings</span><span class="p">.</span><span class="nx">TrimPrefix</span><span class="p">(</span><span class="nx">line</span><span class="p">,</span><span class="w"> </span><span class="s">"data: "</span><span class="p">)</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="nx">data</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s">"[DONE]"</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="c1">// 正常结束：errc 里什么都不放</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">            </span><span class="kd">var</span><span class="w"> </span><span class="nx">chunk</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="nx">Choices</span><span class="w"> </span><span class="p">[]</span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                    </span><span class="nx">Delta</span><span class="w"> </span><span class="kd">struct</span><span class="p">{</span><span class="w"> </span><span class="nx">Content</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="s">`json:"delta"`</span>
+<span class="w">                </span><span class="p">}</span><span class="w"> </span><span class="s">`json:"choices"`</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">json</span><span class="p">.</span><span class="nx">Unmarshal</span><span class="p">([]</span><span class="kt">byte</span><span class="p">(</span><span class="nx">data</span><span class="p">),</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">chunk</span><span class="p">);</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="nx">errc</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Errorf</span><span class="p">(</span><span class="s">"bad chunk: %w"</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="p">)</span><span class="w"> </span><span class="c1">// JSON 坏了：报错并退出</span>
+<span class="w">                </span><span class="k">return</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">chunk</span><span class="p">.</span><span class="nx">Choices</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="k">continue</span><span class="w"> </span><span class="c1">// 有的 chunk 没有 choices（比如只带用量统计），跳过</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">            </span><span class="k">select</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">case</span><span class="w"> </span><span class="nx">tokens</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nx">chunk</span><span class="p">.</span><span class="nx">Choices</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">Delta</span><span class="p">.</span><span class="nx">Content</span><span class="p">:</span><span class="w"> </span><span class="c1">// 把字交出去</span>
+<span class="w">            </span><span class="k">case</span><span class="w"> </span><span class="o">&lt;-</span><span class="nx">ctx</span><span class="p">.</span><span class="nx">Done</span><span class="p">():</span><span class="w">                              </span><span class="c1">// 或者：调用方不要了</span>
+<span class="w">                </span><span class="nx">errc</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nx">ctx</span><span class="p">.</span><span class="nx">Err</span><span class="p">()</span>
+<span class="w">                </span><span class="k">return</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">sc</span><span class="p">.</span><span class="nx">Err</span><span class="p">();</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1">// 循环结束不是因为读完，而是读出错（比如断网）</span>
+<span class="w">            </span><span class="nx">errc</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nx">err</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}()</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">tokens</span><span class="p">,</span><span class="w"> </span><span class="nx">errc</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>调用方这样用：</p>
+<div class="hl"><pre><span></span><code><span class="nx">tokens</span><span class="p">,</span><span class="w"> </span><span class="nx">errc</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">streamTokens</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">resp</span><span class="p">.</span><span class="nx">Body</span><span class="p">)</span>
+<span class="k">for</span><span class="w"> </span><span class="nx">tok</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">tokens</span><span class="w"> </span><span class="p">{</span><span class="w">          </span><span class="c1">// 一直读到 tokens 被关闭</span>
+<span class="w">    </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Print</span><span class="p">(</span><span class="nx">tok</span><span class="p">)</span>
+<span class="p">}</span>
+<span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="o">&lt;-</span><span class="nx">errc</span><span class="p">;</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span><span class="w">     </span><span class="c1">// 正常结束时 errc 里没值且已关闭，读到 nil</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">err</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="54-逐段解读">5.4 逐段解读</h3>
+<p><strong>函数签名</strong></p>
+<ul>
+<li>参数 <code>body io.ReadCloser</code>：就是 HTTP 响应体 <code>resp.Body</code>，能读、也能关。</li>
+<li>返回 <code>(&lt;-chan string, &lt;-chan error)</code>：两根<strong>只读</strong>管道，调用方没法误写误关（见 0.3）。</li>
+</ul>
+<p><strong>三个 defer（顺序很重要）</strong></p>
+<p>后台 goroutine 不管从哪个 <code>return</code> 退出，都会按这个顺序收尾：</p>
+<ol>
+<li><code>body.Close()</code>：关闭 HTTP 响应体，释放网络连接，让它能被下一个请求复用。</li>
+<li><code>close(tokens)</code>：通知调用方“没有更多字了”，调用方的 <code>for range tokens</code> 因此退出。</li>
+<li><code>close(errc)</code>：如果前面没放错误，调用方 <code>&lt;-errc</code> 读到的就是 nil，不会永远卡住。</li>
+</ol>
+<p><strong>按行读：<code>bufio.Scanner</code></strong></p>
+<ul>
+<li><code>sc.Scan()</code> 每调用一次读一行，返回 true；读到末尾或出错返回 false，循环结束。</li>
+<li><code>sc.Text()</code> 拿到这一行的内容（不含换行符）。</li>
+<li><code>sc.Buffer(初始, 上限)</code>：Scanner 默认一行最多 64KB。如果模型一次推了一大段工具参数，单行可能超过，会直接报 <code>token too long</code>。这里放宽到 1MB。</li>
+</ul>
+<p><strong>过滤和解析</strong></p>
+<ul>
+<li>不以 <code>data:</code> 开头的行（空行、<code>event:</code>、<code>: keep-alive</code> 注释）都跳过。</li>
+<li>匿名 struct 只声明了 <code>choices[].delta.content</code> 这一条路径，JSON 里其他字段（id、model、role……）自动忽略（见 B9）。<code>Content</code> 没写标签也能匹配 <code>content</code>，因为 Go 的 JSON 字段名匹配不区分大小写。</li>
+</ul>
+<p><strong>最关键的 select</strong></p>
+<div class="hl"><pre><span></span><code><span class="k">select</span><span class="w"> </span><span class="p">{</span>
+<span class="k">case</span><span class="w"> </span><span class="nx">tokens</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nx">字</span><span class="p">:</span><span class="w">     </span><span class="c1">// 尝试把字交给调用方</span>
+<span class="k">case</span><span class="w"> </span><span class="o">&lt;-</span><span class="nx">ctx</span><span class="p">.</span><span class="nx">Done</span><span class="p">():</span><span class="w">     </span><span class="c1">// 同时盯着取消</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>为什么不直接写 <code>tokens &lt;- 字</code>？因为 <code>tokens</code> 是无缓冲的，<strong>调用方不来取，这行就会永远卡住</strong>。如果调用方已经不读了（用户关了页面），这个 goroutine 就永远停在这里，连接也永远不关 → 泄漏。和 <code>ctx.Done()</code> 放进同一个 select，取消时就能跳出来退出。</p>
+<blockquote>
+<p><strong>一句话规则：每一次 channel 发送，都要和 <code>ctx.Done()</code> 放进同一个 select。</strong></p>
+</blockquote>
+<p><strong>为什么 errc 要缓冲 1</strong>（最容易卡住的地方，画个时间线）：</p>
+<p>假设 JSON 解析出错，errc <strong>无缓冲</strong>：</p>
+<div class="hl"><pre><span></span><code>后台:   errc &lt;- err   ← 卡住：无缓冲，要等有人来取
+调用方: for range tokens  ← 卡住：在等 tokens 被关闭
+        （tokens 要等后台 return 后的 defer 才关闭，而后台卡在上一行）
+结果:   两边互相等 → 死锁
+</code></pre></div>
+
+<p>errc <strong>缓冲 1</strong>：</p>
+<div class="hl"><pre><span></span><code>后台:   errc &lt;- err   ← 立刻完成，错误存进缓冲
+        return → defer 关 body、关 tokens、关 errc
+调用方: for range tokens 发现 tokens 关了，退出循环
+        &lt;-errc 拿到刚才那个错误
+</code></pre></div>
+
+<p>规律：<strong>最多只发一次的“结果/错误” channel，给缓冲 1</strong>，发送方永远不会因为没人读而卡住。</p>
+<h3 id="55-四种结束方式汇总">5.5 四种结束方式汇总</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>怎么结束的</th>
+<th>errc 里有什么</th>
+<th>调用方看到</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>读到 <code>[DONE]</code></td>
+<td>空</td>
+<td><code>err == nil</code>，正常结束</td>
+</tr>
+<tr>
+<td>JSON 解析失败</td>
+<td><code>bad chunk: ...</code></td>
+<td>报错</td>
+</tr>
+<tr>
+<td>ctx 被取消</td>
+<td><code>context.Canceled</code> 或 <code>DeadlineExceeded</code></td>
+<td>报错</td>
+</tr>
+<tr>
+<td>网络断了 / body 读失败</td>
+<td><code>sc.Err()</code> 的错误</td>
+<td>报错</td>
+</tr>
+</tbody>
+</table></div>
+<p>四条路都会走到 defer，所以<strong>连接一定关、两根管道一定关、goroutine 一定退出</strong>。这就是“不泄漏”的完整含义。</p>
+<hr />
+<h2 id="6-三个高频坑">6. 三个高频坑</h2>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>坑</th>
+<th>症状</th>
+<th>修法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>goroutine 泄漏</td>
+<td>内存、goroutine 数只涨不跌</td>
+<td>所有阻塞的发送都配 <code>ctx.Done()</code>；测试里检查 <code>runtime.NumGoroutine()</code> 或用 goleak</td>
+</tr>
+<tr>
+<td>response body 没关</td>
+<td>连接耗尽、请求越来越慢</td>
+<td><code>defer resp.Body.Close()</code>，必要时 <code>io.Copy(io.Discard, body)</code> 先读干净再关</td>
+</tr>
+<tr>
+<td>map 并发写</td>
+<td><code>fatal error: concurrent map writes</code>，程序直接退出</td>
+<td>按下标写 slice，或用 <code>sync.Mutex</code> 加锁；跑测试加 <code>-race</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>泄漏的最小例子</strong>，对照着看就明白了：</p>
+<div class="hl"><pre><span></span><code><span class="c1">// ❌ 泄漏：调用方只读一个就走了，后台卡在第二次发送，永远不退出</span>
+<span class="kd">func</span><span class="w"> </span><span class="nx">leaky</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;-</span><span class="kt">chan</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">ch</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">make</span><span class="p">(</span><span class="kt">chan</span><span class="w"> </span><span class="kt">int</span><span class="p">)</span>
+<span class="w">    </span><span class="k">go</span><span class="w"> </span><span class="kd">func</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="o">++</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nx">ch</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nx">i</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}()</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">ch</span>
+<span class="p">}</span>
+
+<span class="c1">// ✅ 不泄漏：发送时同时监听 ctx，调用方 cancel 后后台立刻退出</span>
+<span class="kd">func</span><span class="w"> </span><span class="nx">safe</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;-</span><span class="kt">chan</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">ch</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">make</span><span class="p">(</span><span class="kt">chan</span><span class="w"> </span><span class="kt">int</span><span class="p">)</span>
+<span class="w">    </span><span class="k">go</span><span class="w"> </span><span class="kd">func</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">defer</span><span class="w"> </span><span class="nb">close</span><span class="p">(</span><span class="nx">ch</span><span class="p">)</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="o">++</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">select</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">case</span><span class="w"> </span><span class="nx">ch</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nx">i</span><span class="p">:</span>
+<span class="w">            </span><span class="k">case</span><span class="w"> </span><span class="o">&lt;-</span><span class="nx">ctx</span><span class="p">.</span><span class="nx">Done</span><span class="p">():</span>
+<span class="w">                </span><span class="k">return</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}()</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">ch</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<hr />
+<h2 id="本课小结">本课小结</h2>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>概念</th>
+<th>一句话</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>error 与 <code>%w</code></td>
+<td>错误层层包装，用 <code>errors.Is</code> 穿透判断</td>
+</tr>
+<tr>
+<td>接口</td>
+<td>隐式实现，工具注册表、测试替身都靠它</td>
+</tr>
+<tr>
+<td>JSON 标签</td>
+<td>大写字段 + <code>json:"name"</code> 映射 API 字段</td>
+</tr>
+<tr>
+<td>goroutine</td>
+<td>后台任务，便宜，但必须想清楚怎么结束</td>
+</tr>
+<tr>
+<td>channel</td>
+<td>goroutine 之间传数据；发送方负责关闭</td>
+</tr>
+<tr>
+<td>select</td>
+<td>同时等多件事，谁先来处理谁；“等数据 OR 等取消”是标配</td>
+</tr>
+<tr>
+<td>context</td>
+<td>取消信号线，父取消子全取消；只发信号，不强杀，下游要自己监听</td>
+</tr>
+<tr>
+<td>errgroup</td>
+<td>并行一组任务 + 限并发 + 等全部结束</td>
+</tr>
+<tr>
+<td>缓冲 1 的 errc</td>
+<td>只发一次的结果用缓冲 1，避免互相等待</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="练习今天做完">练习（今天做完）</h2>
+<ol>
+<li><strong>基础</strong>：写 <code>fanIn(ctx, chs ...&lt;-chan string) &lt;-chan string</code>，把多个 channel 合并成一个；ctx 取消后所有 goroutine 退出。
+   - 提示：参考第 1 节生产者模式；每路输入一个 goroutine；用 <code>sync.WaitGroup</code> 等它们都结束后再关闭输出。</li>
+<li><strong>核心</strong>：用第 4 节的 <code>runTools</code>，写三个假工具（分别 sleep 1s / 2s / 25s），验证：总耗时约 20s（第三个超时）、超时工具的错误被写进 <code>ToolResult.Err</code>。
+   - 提示：假工具里不要用 <code>time.Sleep</code>，要用 <code>select</code> 同时等 <code>time.After</code> 和 <code>ctx.Done()</code>。</li>
+<li><strong>进阶</strong>：用 <code>httptest.NewServer</code> 写一个假 SSE 服务端，每 100ms 吐一个 token；客户端读 5 个后 cancel，断言服务端检测到连接断开（handler 里 <code>&lt;-r.Context().Done()</code>）。</li>
+<li>所有测试用 <code>go test -race</code> 跑通。</li>
+</ol>
+<h2 id="自测题">自测题</h2>
+<ol>
+<li>为什么 <code>errc</code> 要用缓冲 1 的 channel？换成无缓冲会发生什么？</li>
+<li><code>errgroup.WithContext</code> 返回的 ctx，在什么情况下会被取消？</li>
+<li>工具执行失败时，为什么本课选择 <code>return nil</code>？什么情况下应该 <code>return err</code>？</li>
+<li><code>context.WithTimeout</code> 之后不调用 <code>cancel()</code>，会有什么后果？</li>
+</ol>
+<blockquote>
+<p>做完练习后，把代码放到 <code>projects/00-stream-proxy/</code>，<code>go test -race -count=1 ./...</code> 全部通过，这一课就算完成。</p>
+</blockquote>
+<hr />
+<h1 id="参考答案与详解">参考答案与详解</h1>
+<blockquote>
+<p>先自己做，卡住超过 20 分钟再看。</p>
+</blockquote>
+<h2 id="自测题答案">自测题答案</h2>
+<h3 id="1-errc-为什么要缓冲-1换成无缓冲会怎样">1. <code>errc</code> 为什么要缓冲 1？换成无缓冲会怎样？</h3>
+<p>出错时，后台 goroutine 的顺序是：<code>errc &lt;- err</code> → <code>return</code> → 执行 defer（关闭 tokens）。</p>
+<ul>
+<li><strong>无缓冲</strong>：发送必须等到有人接收才完成。但此时调用方正卡在 <code>for tok := range tokens</code>，在等 tokens 被关闭；而 tokens 要等 goroutine 退出才关闭。两边互相等待 → <strong>死锁</strong>（或 goroutine 永久泄漏）。</li>
+<li><strong>缓冲 1</strong>：错误直接放进缓冲区，发送立即完成，goroutine 退出，tokens 关闭，调用方跳出循环后再从 errc 读到错误。</li>
+</ul>
+<p>时间线图见第 5.4 节。规律：<strong>“报告最终结果”的 channel，如果最多只发一次，就给缓冲 1。</strong></p>
+<h3 id="2-errgroupwithcontext-返回的-ctx-什么时候会被取消">2. <code>errgroup.WithContext</code> 返回的 ctx 什么时候会被取消？</h3>
+<p>三种情况，任一发生即取消：</p>
+<ol>
+<li>某个 <code>g.Go</code> 里的函数<strong>第一次返回非 nil 错误</strong>（其余 goroutine 通过这个 ctx 感知到，应尽快退出）；</li>
+<li><code>g.Wait()</code> 返回时（所有任务都结束了，ctx 随之取消）；</li>
+<li>传进来的<strong>父 ctx 被取消</strong>（比如客户端断开、整轮超时）。</li>
+</ol>
+<p>所以第 4 节里每个工具都要用这个派生 ctx，而不是外层的 ctx，才能做到“一个失败、全体停”。</p>
+<h3 id="3-工具失败为什么-return-nil什么时候该-return-err">3. 工具失败为什么 <code>return nil</code>？什么时候该 <code>return err</code>？</h3>
+<ul>
+<li><strong><code>return nil</code></strong>：工具报错（文件不存在、命令退出码非 0、单个工具超时）对模型来说是一条<strong>有用的观察</strong>。把错误写进 <code>ToolResult.Err</code>，作为 <code>tool_result</code> 发回给模型，它往往能自己换参数重试。如果 <code>return err</code>，errgroup 会取消其他正在跑的工具，整轮白做。</li>
+<li><strong><code>return err</code></strong>：当错误说明<strong>这一轮已经没意义</strong>时：</li>
+<li>父 ctx 被取消（用户走了、整轮超时）；</li>
+<li>基础设施故障，比如沙箱进程崩溃、鉴权失效，所有工具都会失败；</li>
+<li>安全违规，比如工具试图越权访问，应立即中止。</li>
+</ul>
+<p>怎么区分“单个工具超时”和“用户走了”？看是哪个 ctx 出的问题：</p>
+<div class="hl"><pre><span></span><code><span class="nx">out</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">execTool</span><span class="p">(</span><span class="nx">tctx</span><span class="p">,</span><span class="w"> </span><span class="nx">c</span><span class="p">)</span>
+<span class="k">if</span><span class="w"> </span><span class="nx">ctx</span><span class="p">.</span><span class="nx">Err</span><span class="p">()</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span><span class="w">          </span><span class="c1">// 组 ctx（上一层）被取消：整轮中止</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">ctx</span><span class="p">.</span><span class="nx">Err</span><span class="p">()</span>
+<span class="p">}</span>
+<span class="c1">// 走到这里说明只是这个工具自己的 tctx 超时或工具本身出错：记下来，继续</span>
+<span class="nx">results</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">ToolResult</span><span class="p">{</span><span class="nx">ID</span><span class="p">:</span><span class="w"> </span><span class="nx">c</span><span class="p">.</span><span class="nx">ID</span><span class="p">,</span><span class="w"> </span><span class="nx">Output</span><span class="p">:</span><span class="w"> </span><span class="nx">out</span><span class="p">,</span><span class="w"> </span><span class="nx">Err</span><span class="p">:</span><span class="w"> </span><span class="nx">err</span><span class="p">}</span>
+<span class="k">return</span><span class="w"> </span><span class="kc">nil</span>
+</code></pre></div>
+
+<p><code>tctx</code> 是 <code>ctx</code> 的子节点：<code>tctx</code> 超时不影响 <code>ctx</code>；但 <code>ctx</code> 取消一定会连带 <code>tctx</code>。所以检查 <code>ctx.Err()</code> 就能区分。</p>
+<h3 id="4-contextwithtimeout-之后不调-cancel-会怎样">4. <code>context.WithTimeout</code> 之后不调 <code>cancel()</code> 会怎样？</h3>
+<ul>
+<li>派生出的 ctx 会一直挂在父 ctx 的子节点列表上，<strong>直到超时触发才释放</strong>。如果父 ctx 生命周期很长（比如服务级的 ctx），高 QPS 下这些对象会堆积，表现为内存缓慢上涨。</li>
+<li>依赖这个 ctx 的下游资源（HTTP 连接、子 goroutine）也不会被提前释放。</li>
+<li><code>go vet</code> 会报 <code>lostcancel</code> 警告。</li>
+</ul>
+<p>结论：<strong><code>ctx, cancel := context.WithXxx(...)</code> 的下一行永远是 <code>defer cancel()</code></strong>。提前完成时它会立刻释放资源；多调一次 cancel 也是安全的。</p>
+<hr />
+<h2 id="练习参考实现">练习参考实现</h2>
+<h3 id="练习-1fanin">练习 1：<code>fanIn</code></h3>
+<p><strong>要做的事</strong>：有好几根输入管道（比如几个工具同时在吐日志），合并成一根输出管道给调用方读。</p>
+<div class="hl"><pre><span></span><code>ch1 ──▶ worker1 ──┐
+ch2 ──▶ worker2 ──┼──▶ out ──▶ 调用方
+ch3 ──▶ worker3 ──┘
+          全部 worker 结束后，由一个“收尾 goroutine”关闭 out
+</code></pre></div>
+
+<div class="hl"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nx">fanIn</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">chs</span><span class="w"> </span><span class="p">...</span><span class="o">&lt;-</span><span class="kt">chan</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;-</span><span class="kt">chan</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">out</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">make</span><span class="p">(</span><span class="kt">chan</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nx">wg</span><span class="w"> </span><span class="nx">sync</span><span class="p">.</span><span class="nx">WaitGroup</span>
+<span class="w">    </span><span class="nx">wg</span><span class="p">.</span><span class="nx">Add</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nx">chs</span><span class="p">))</span><span class="w">            </span><span class="c1">// 计数器：有几路输入就记几</span>
+
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">ch</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">chs</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">go</span><span class="w"> </span><span class="kd">func</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">             </span><span class="c1">// 每路输入一个 worker</span>
+<span class="w">            </span><span class="k">defer</span><span class="w"> </span><span class="nx">wg</span><span class="p">.</span><span class="nx">Done</span><span class="p">()</span><span class="w">     </span><span class="c1">// worker 退出时计数 -1</span>
+<span class="w">            </span><span class="k">for</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="k">select</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="k">case</span><span class="w"> </span><span class="nx">v</span><span class="p">,</span><span class="w"> </span><span class="nx">ok</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="o">&lt;-</span><span class="nx">ch</span><span class="p">:</span><span class="w">          </span><span class="c1">// 外层：等输入</span>
+<span class="w">                    </span><span class="k">if</span><span class="w"> </span><span class="o">!</span><span class="nx">ok</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                        </span><span class="k">return</span><span class="w">               </span><span class="c1">// 这一路输入已关闭，worker 结束</span>
+<span class="w">                    </span><span class="p">}</span>
+<span class="w">                    </span><span class="k">select</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                    </span><span class="k">case</span><span class="w"> </span><span class="nx">out</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nx">v</span><span class="p">:</span><span class="w">           </span><span class="c1">// 内层：把值转发出去</span>
+<span class="w">                    </span><span class="k">case</span><span class="w"> </span><span class="o">&lt;-</span><span class="nx">ctx</span><span class="p">.</span><span class="nx">Done</span><span class="p">():</span><span class="w">       </span><span class="c1">// 转发时也能被取消</span>
+<span class="w">                        </span><span class="k">return</span>
+<span class="w">                    </span><span class="p">}</span>
+<span class="w">                </span><span class="k">case</span><span class="w"> </span><span class="o">&lt;-</span><span class="nx">ctx</span><span class="p">.</span><span class="nx">Done</span><span class="p">():</span><span class="w">           </span><span class="c1">// 外层：等输入时也能被取消</span>
+<span class="w">                    </span><span class="k">return</span>
+<span class="w">                </span><span class="p">}</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}()</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="k">go</span><span class="w"> </span><span class="kd">func</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">                 </span><span class="c1">// 收尾 goroutine</span>
+<span class="w">        </span><span class="nx">wg</span><span class="p">.</span><span class="nx">Wait</span><span class="p">()</span><span class="w">               </span><span class="c1">// 等计数归零 = 所有 worker 都退出了</span>
+<span class="w">        </span><span class="nb">close</span><span class="p">(</span><span class="nx">out</span><span class="p">)</span><span class="w">              </span><span class="c1">// 这时才安全地关闭 out</span>
+<span class="w">    </span><span class="p">}()</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">out</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>逐行解读</strong></p>
+<ul>
+<li><code>chs ...&lt;-chan string</code>：可变参数，调用时可以传任意多根管道，函数里 <code>chs</code> 就是一个 slice。</li>
+<li><code>sync.WaitGroup</code>：一个计数器。<code>Add(n)</code> 加 n，<code>Done()</code> 减 1，<code>Wait()</code> 阻塞到归零。</li>
+<li><code>v, ok := &lt;-ch</code>：从关闭的 channel 读，会立刻拿到零值且 <code>ok == false</code>。这是判断“输入结束了”的标准写法。</li>
+<li><strong>为什么要两层 select</strong>：外层解决“等输入时被取消”，内层解决“发给 out 时被取消”。只写外层的话，如果调用方不读 out 了，worker 会卡在 <code>out &lt;- v</code> 上永远出不来。这正是第 5 节那条规则：<strong>每次发送都配 <code>ctx.Done()</code></strong>。</li>
+<li><strong>为什么不让 worker 自己 <code>close(out)</code></strong>：out 有好几个发送方。第一个 worker 结束时如果关了 out，别的 worker 还在往里发 → panic。所以单独开一个收尾 goroutine，等<strong>所有</strong>发送方都结束再关。这是规则 1 在“多个发送方”时的写法。</li>
+</ul>
+<p><strong>它在三种情况下都能正确结束</strong>：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>情况</th>
+<th>发生了什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>所有输入正常关闭</td>
+<td>每个 worker 读到 <code>ok == false</code> 退出 → 计数归零 → out 关闭 → 调用方的 <code>range</code> 结束</td>
+</tr>
+<tr>
+<td>ctx 取消</td>
+<td>每个 worker 不管卡在外层还是内层 select 都会命中 <code>ctx.Done()</code> 退出 → out 关闭</td>
+</tr>
+<tr>
+<td>调用方不读了但 cancel 了</td>
+<td>卡在 <code>out &lt;- v</code> 的 worker 被内层 select 救出来</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="练习-2并行工具与超时">练习 2：并行工具与超时</h3>
+<p><strong>要验证的事</strong>：三个工具并行跑，最慢的那个被超时截断，总时间 ≈ 超时时间，而不是三者相加。</p>
+<p>为了不让测试真跑 20 秒，把超时提成包级变量，测试里调成 2 秒：</p>
+<div class="hl"><pre><span></span><code><span class="kd">var</span><span class="w"> </span><span class="nx">toolTimeout</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">20</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="w"> </span><span class="c1">// runTools 里用它替换写死的 20*time.Second</span>
+
+<span class="kd">var</span><span class="w"> </span><span class="nx">fakeDelay</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="nx">time</span><span class="p">.</span><span class="nx">Duration</span><span class="p">{}</span><span class="w"> </span><span class="c1">// 每个假工具要“干”多久</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="nx">execTool</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">c</span><span class="w"> </span><span class="nx">ToolCall</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">select</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="o">&lt;-</span><span class="nx">time</span><span class="p">.</span><span class="nx">After</span><span class="p">(</span><span class="nx">fakeDelay</span><span class="p">[</span><span class="nx">c</span><span class="p">.</span><span class="nx">Name</span><span class="p">]):</span><span class="w">   </span><span class="c1">// 假装干活这么久</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">c</span><span class="p">.</span><span class="nx">Name</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">" ok"</span><span class="p">,</span><span class="w"> </span><span class="kc">nil</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="o">&lt;-</span><span class="nx">ctx</span><span class="p">.</span><span class="nx">Done</span><span class="p">():</span><span class="w">                       </span><span class="c1">// 被超时或取消打断</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="s">""</span><span class="p">,</span><span class="w"> </span><span class="nx">ctx</span><span class="p">.</span><span class="nx">Err</span><span class="p">()</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="nx">TestRunTools</span><span class="p">(</span><span class="nx">t</span><span class="w"> </span><span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">T</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">toolTimeout</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Second</span>
+<span class="w">    </span><span class="nx">fakeDelay</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="nx">time</span><span class="p">.</span><span class="nx">Duration</span><span class="p">{</span>
+<span class="w">        </span><span class="s">"a"</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Millisecond</span><span class="p">,</span>
+<span class="w">        </span><span class="s">"b"</span><span class="p">:</span><span class="w"> </span><span class="mi">200</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Millisecond</span><span class="p">,</span>
+<span class="w">        </span><span class="s">"c"</span><span class="p">:</span><span class="w"> </span><span class="mi">2500</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Millisecond</span><span class="p">,</span><span class="w"> </span><span class="c1">// 比超时长，会被打断</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="nx">calls</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="p">[]</span><span class="nx">ToolCall</span><span class="p">{{</span><span class="nx">ID</span><span class="p">:</span><span class="w"> </span><span class="s">"1"</span><span class="p">,</span><span class="w"> </span><span class="nx">Name</span><span class="p">:</span><span class="w"> </span><span class="s">"a"</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="nx">ID</span><span class="p">:</span><span class="w"> </span><span class="s">"2"</span><span class="p">,</span><span class="w"> </span><span class="nx">Name</span><span class="p">:</span><span class="w"> </span><span class="s">"b"</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="nx">ID</span><span class="p">:</span><span class="w"> </span><span class="s">"3"</span><span class="p">,</span><span class="w"> </span><span class="nx">Name</span><span class="p">:</span><span class="w"> </span><span class="s">"c"</span><span class="p">}}</span>
+
+<span class="w">    </span><span class="nx">start</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Now</span><span class="p">()</span>
+<span class="w">    </span><span class="nx">res</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">runTools</span><span class="p">(</span><span class="nx">context</span><span class="p">.</span><span class="nx">Background</span><span class="p">(),</span><span class="w"> </span><span class="nx">calls</span><span class="p">)</span>
+<span class="w">    </span><span class="nx">elapsed</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Since</span><span class="p">(</span><span class="nx">start</span><span class="p">)</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">t</span><span class="p">.</span><span class="nx">Fatalf</span><span class="p">(</span><span class="s">"unexpected err: %v"</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">elapsed</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">1900</span><span class="o">*</span><span class="nx">time</span><span class="p">.</span><span class="nx">Millisecond</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nx">elapsed</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">2300</span><span class="o">*</span><span class="nx">time</span><span class="p">.</span><span class="nx">Millisecond</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">t</span><span class="p">.</span><span class="nx">Fatalf</span><span class="p">(</span><span class="s">"elapsed = %v, want ~2s (并行，受最慢的超时限制)"</span><span class="p">,</span><span class="w"> </span><span class="nx">elapsed</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">res</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">Err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nx">res</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="nx">Err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">t</span><span class="p">.</span><span class="nx">Fatalf</span><span class="p">(</span><span class="s">"a/b should succeed: %+v"</span><span class="p">,</span><span class="w"> </span><span class="nx">res</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="o">!</span><span class="nx">errors</span><span class="p">.</span><span class="nx">Is</span><span class="p">(</span><span class="nx">res</span><span class="p">[</span><span class="mi">2</span><span class="p">].</span><span class="nx">Err</span><span class="p">,</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">DeadlineExceeded</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">t</span><span class="p">.</span><span class="nx">Fatalf</span><span class="p">(</span><span class="s">"c should time out, got %v"</span><span class="p">,</span><span class="w"> </span><span class="nx">res</span><span class="p">[</span><span class="mi">2</span><span class="p">].</span><span class="nx">Err</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>逐行解读</strong></p>
+<ul>
+<li><code>context.Background()</code>：最顶层的空 ctx，永远不会被取消。测试和 <code>main</code> 里用它当根。</li>
+<li>假工具用 <code>select</code> 同时等“活干完”和“被打断”，哪个先到算哪个。工具 c 要 2.5 秒，但 2 秒时 <code>tctx</code> 超时，<code>ctx.Done()</code> 先就绪，返回 <code>context.DeadlineExceeded</code>。</li>
+<li>时间断言给了一个范围（1.9s ~ 2.3s），因为调度有误差，不能写死等于 2 秒。</li>
+<li><code>errors.Is(err, context.DeadlineExceeded)</code>：判断错误是不是“超时”。超时和取消是两种不同的错误：超时是 <code>DeadlineExceeded</code>，手动取消是 <code>Canceled</code>。</li>
+<li><code>t.Fatalf</code>：测试失败并立刻停止这个测试，打印格式化信息。</li>
+</ul>
+<p><strong>最重要的认识：超时只是发信号，工具自己必须监听。</strong> 如果假工具里写的是 <code>time.Sleep(2500 * time.Millisecond)</code>，ctx 超时了它也照样睡满 2.5 秒，测试会失败。真实工具里用 <code>exec.CommandContext</code>（跑命令）、<code>http.NewRequestWithContext</code>（发请求），它们内部已经帮你监听了 ctx。</p>
+<blockquote>
+<p>仓库实现里 <code>execTool</code> 写成了 <code>var execTool = func(...)</code>（变量），测试里直接替换成假实现，效果一样。</p>
+</blockquote>
+<h3 id="练习-3取消流式读取服务端感知断开">练习 3：取消流式读取，服务端感知断开</h3>
+<p><strong>要验证的事</strong>：客户端 cancel 之后，服务端那边真的知道连接断了。在生产里就是“用户关页面 → 到模型供应商的连接也断开 → 停止计费”。</p>
+<div class="hl"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nx">TestStreamCancel</span><span class="p">(</span><span class="nx">t</span><span class="w"> </span><span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">T</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">disconnected</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">make</span><span class="p">(</span><span class="kt">chan</span><span class="w"> </span><span class="kd">struct</span><span class="p">{})</span><span class="w"> </span><span class="c1">// 服务端发现断开时关闭它，当“信号灯”用</span>
+
+<span class="w">    </span><span class="c1">// 1. 起一个假 SSE 服务端</span>
+<span class="w">    </span><span class="nx">srv</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">httptest</span><span class="p">.</span><span class="nx">NewServer</span><span class="p">(</span><span class="nx">http</span><span class="p">.</span><span class="nx">HandlerFunc</span><span class="p">(</span><span class="kd">func</span><span class="p">(</span><span class="nx">w</span><span class="w"> </span><span class="nx">http</span><span class="p">.</span><span class="nx">ResponseWriter</span><span class="p">,</span><span class="w"> </span><span class="nx">r</span><span class="w"> </span><span class="o">*</span><span class="nx">http</span><span class="p">.</span><span class="nx">Request</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">w</span><span class="p">.</span><span class="nx">Header</span><span class="p">().</span><span class="nx">Set</span><span class="p">(</span><span class="s">"Content-Type"</span><span class="p">,</span><span class="w"> </span><span class="s">"text/event-stream"</span><span class="p">)</span>
+<span class="w">        </span><span class="nx">flusher</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">w</span><span class="p">.(</span><span class="nx">http</span><span class="p">.</span><span class="nx">Flusher</span><span class="p">)</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="o">++</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">select</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">case</span><span class="w"> </span><span class="o">&lt;-</span><span class="nx">r</span><span class="p">.</span><span class="nx">Context</span><span class="p">().</span><span class="nx">Done</span><span class="p">():</span><span class="w"> </span><span class="c1">// 客户端断开时触发</span>
+<span class="w">                </span><span class="nb">close</span><span class="p">(</span><span class="nx">disconnected</span><span class="p">)</span>
+<span class="w">                </span><span class="k">return</span>
+<span class="w">            </span><span class="k">case</span><span class="w"> </span><span class="o">&lt;-</span><span class="nx">time</span><span class="p">.</span><span class="nx">After</span><span class="p">(</span><span class="mi">100</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Millisecond</span><span class="p">):</span>
+<span class="w">                </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Fprintf</span><span class="p">(</span><span class="nx">w</span><span class="p">,</span><span class="w"> </span><span class="s">"data: {\"choices\":[{\"delta\":{\"content\":\"t%d\"}}]}\n\n"</span><span class="p">,</span><span class="w"> </span><span class="nx">i</span><span class="p">)</span>
+<span class="w">                </span><span class="nx">flusher</span><span class="p">.</span><span class="nx">Flush</span><span class="p">()</span><span class="w"> </span><span class="c1">// 立刻推给客户端，不然会攒在缓冲区里</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}))</span>
+<span class="w">    </span><span class="k">defer</span><span class="w"> </span><span class="nx">srv</span><span class="p">.</span><span class="nx">Close</span><span class="p">()</span>
+
+<span class="w">    </span><span class="c1">// 2. 客户端发请求，请求绑定一个可取消的 ctx</span>
+<span class="w">    </span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">cancel</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">WithCancel</span><span class="p">(</span><span class="nx">context</span><span class="p">.</span><span class="nx">Background</span><span class="p">())</span>
+<span class="w">    </span><span class="nx">req</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">http</span><span class="p">.</span><span class="nx">NewRequestWithContext</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">http</span><span class="p">.</span><span class="nx">MethodGet</span><span class="p">,</span><span class="w"> </span><span class="nx">srv</span><span class="p">.</span><span class="nx">URL</span><span class="p">,</span><span class="w"> </span><span class="kc">nil</span><span class="p">)</span>
+<span class="w">    </span><span class="nx">resp</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">http</span><span class="p">.</span><span class="nx">DefaultClient</span><span class="p">.</span><span class="nx">Do</span><span class="p">(</span><span class="nx">req</span><span class="p">)</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">t</span><span class="p">.</span><span class="nx">Fatal</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="c1">// 3. 读 5 个 token 后取消</span>
+<span class="w">    </span><span class="nx">tokens</span><span class="p">,</span><span class="w"> </span><span class="nx">errc</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">streamTokens</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">resp</span><span class="p">.</span><span class="nx">Body</span><span class="p">)</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">5</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="o">++</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="o">&lt;-</span><span class="nx">tokens</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="nx">cancel</span><span class="p">()</span>
+
+<span class="w">    </span><span class="c1">// 4. 排空 tokens，确认后台 goroutine 退出，并拿到一个错误</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">tokens</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="o">&lt;-</span><span class="nx">errc</span><span class="p">;</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">t</span><span class="p">.</span><span class="nx">Fatal</span><span class="p">(</span><span class="s">"want a cancellation error, got nil"</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="c1">// 5. 断言服务端在 2 秒内感知到断开</span>
+<span class="w">    </span><span class="k">select</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="o">&lt;-</span><span class="nx">disconnected</span><span class="p">:</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="o">&lt;-</span><span class="nx">time</span><span class="p">.</span><span class="nx">After</span><span class="p">(</span><span class="mi">2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="p">):</span>
+<span class="w">        </span><span class="nx">t</span><span class="p">.</span><span class="nx">Fatal</span><span class="p">(</span><span class="s">"server never saw the disconnect: 上游连接没断，还在烧钱"</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>分步解读</strong></p>
+<ol>
+<li><strong>假服务端</strong>：<code>httptest.NewServer</code> 在本机随便找个端口起一个真的 HTTP 服务，<code>srv.URL</code> 就是它的地址。handler 每 100ms 推一行 SSE，同时监听 <code>r.Context().Done()</code>：客户端一断开，就关闭 <code>disconnected</code> 通知测试。
+   - <code>w.(http.Flusher)</code>：类型断言，拿到“能立刻推送”的能力。不调 <code>Flush()</code>，写的内容会攒在缓冲区里，客户端一个字都收不到。
+   - <code>chan struct{}</code>：不传数据、只当信号用的 channel，关闭它就等于“亮灯”。</li>
+<li><strong>客户端</strong>：用 <code>NewRequestWithContext</code> 把请求和 ctx 绑在一起。这是能“取消请求”的前提。</li>
+<li><strong>读 5 个后 cancel</strong>：<code>cancel()</code> 触发两件事：
+   - HTTP 客户端发现 ctx 取消，<strong>关闭底层 TCP 连接</strong>，服务端的 <code>r.Context()</code> 随之被取消；
+   - <code>streamTokens</code> 里，要么 <code>sc.Scan()</code> 读 body 失败，要么 select 命中 <code>ctx.Done()</code>，后台 goroutine 退出。</li>
+<li><strong>排空</strong>：<code>for range tokens {}</code> 把剩下可能还在路上的值读掉，直到 tokens 被关闭，确保后台 goroutine 真的退出了，再去读 errc。这里只断言 <code>err != nil</code>，而不是 <code>errors.Is(err, context.Canceled)</code>：取决于后台当时卡在哪一步，你可能拿到 <code>ctx.Err()</code>，也可能拿到“读 body 失败”的错误，两种都对。</li>
+<li><strong>断言服务端感知</strong>：用 select 给 2 秒期限。2 秒内 <code>disconnected</code> 被关闭就通过；否则说明连接没断，测试失败。</li>
+</ol>
+<h3 id="练习-4go-test--race">练习 4：<code>go test -race</code></h3>
+<div class="hl"><pre><span></span><code>go<span class="w"> </span><span class="nb">test</span><span class="w"> </span>-race<span class="w"> </span>-count<span class="o">=</span><span class="m">1</span><span class="w"> </span>./...
+</code></pre></div>
+
+<ul>
+<li><code>./...</code>：当前目录及所有子目录下的包都测。</li>
+<li><code>-race</code>：开启数据竞争检测。如果第 4 节把 <code>results</code> 换成 <code>map[string]ToolResult</code> 并发写而不加锁，这里会直接报 <code>DATA RACE</code> 并指出是哪两行代码在抢。</li>
+<li><code>-count=1</code>：关闭测试缓存。Go 默认会缓存“没改过代码的测试结果”，并发测试建议每次都真跑。</li>
+<li>想自动检查 goroutine 泄漏，可以引入 <code>go.uber.org/goleak</code>，在 <code>TestMain</code> 里加 <code>goleak.VerifyTestMain(m)</code>：测试结束时还有多余 goroutine 活着，就判失败。</li>
+</ul>
+    <nav class="pager"><a class="next" href="00-02-typescript.html"><span>下一课 0.2 →</span>TypeScript</a></nav>
+    <p class="foot">© 2026 duang777 · 课件源文件：<a href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/notes/00-foundations/01-go.md">notes/00-foundations/01-go.md</a></p>
+  </article>
+</div>
+<script>
+document.querySelectorAll('article pre').forEach(function(pre){
+  var b=document.createElement('button');b.className='code__copy';b.textContent='复制';
+  b.onclick=function(){navigator.clipboard.writeText(pre.innerText).then(function(){b.textContent='已复制';setTimeout(function(){b.textContent='复制'},1200)})};
+  pre.parentNode.insertBefore(b,pre);
+});
+var links=[].slice.call(document.querySelectorAll('.toc a')),map={};
+links.forEach(function(a){map[decodeURIComponent(a.getAttribute('href').slice(1))]=a});
+var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting&&map[e.target.id]){links.forEach(function(l){l.classList.remove('on')});map[e.target.id].classList.add('on')}})},{rootMargin:'-80px 0px -70% 0px'});
+document.querySelectorAll('article h1[id],article h2[id]').forEach(function(h){io.observe(h)});
+</script>
+</body>
+</html>

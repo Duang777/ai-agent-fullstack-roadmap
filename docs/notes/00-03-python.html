@@ -1,0 +1,1176 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>0.3 Python（够用即可）：读懂 ML 生态的那一半 · AI Agent 全栈</title>
+<meta name="description" content="0.3 Python（够用即可）：读懂 ML 生态的那一半。duang777 的 AI Agent 全栈公开学习课件。" />
+<style>
+:root{
+  --bg:#0a0a0a;--surface:#111;--text:#ededed;--text-2:#a1a1a1;--text-3:rgb(255 255 255/.4);
+  --line:rgb(255 255 255/.1);--line-2:rgb(255 255 255/.06);
+  --sans:Inter,-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei","Helvetica Neue",sans-serif;
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:80px}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;line-height:1.8;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+.nav{position:sticky;top:0;z-index:10;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;border-bottom:1px solid var(--line);background:rgb(10 10 10/.8);backdrop-filter:blur(12px)}
+.nav__brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-size:14px;font-weight:500}
+.nav__dot{width:10px;height:10px;border-radius:3px;background:var(--text)}
+.nav__links{display:flex;gap:20px;font-size:14px;color:var(--text-2)}
+.nav__links a{text-decoration:none}.nav__links a:hover{color:var(--text)}
+.wrap{max-width:1200px;margin:0 auto;padding:0 24px;display:grid;grid-template-columns:220px minmax(0,1fr);gap:56px}
+.toc{position:sticky;top:80px;align-self:start;max-height:calc(100vh - 100px);overflow:auto;padding:40px 0 40px;font-size:13px;line-height:1.6}
+.toc__label{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--text-3);text-transform:uppercase;margin-bottom:12px}
+.toc ul{list-style:none;margin:0;padding:0}
+.toc li{margin:0}
+.toc a{display:block;padding:4px 0 4px 12px;border-left:1px solid var(--line);color:var(--text-2);text-decoration:none}
+.toc a:hover,.toc a.on{color:var(--text);border-left-color:var(--text)}
+.toc ul ul a{padding-left:24px;font-size:12.5px;color:var(--text-3)}
+.toc ul ul a:hover,.toc ul ul a.on{color:var(--text)}
+article{min-width:0;max-width:760px;padding:48px 0 96px}
+.meta{font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--text-3);margin-bottom:16px}
+article h1.title{font-size:40px;line-height:1.2;letter-spacing:-.02em;font-weight:600;margin:0 0 24px}
+article h1{font-size:28px;line-height:1.3;letter-spacing:-.01em;font-weight:600;margin:72px 0 20px;padding-top:32px;border-top:1px solid var(--line)}
+article h2{font-size:22px;line-height:1.4;font-weight:600;margin:48px 0 16px}
+article h3{font-size:18px;font-weight:600;margin:36px 0 12px}
+article h4{font-size:16px;font-weight:600;margin:28px 0 8px}
+article p{margin:0 0 18px;color:#d4d4d4}
+article strong{color:var(--text);font-weight:600}
+article ul,article ol{padding-left:22px;margin:0 0 18px;color:#d4d4d4}
+article li{margin:4px 0}
+article a{text-decoration:underline;text-decoration-color:var(--text-3);text-underline-offset:3px}
+article a:hover{text-decoration-color:var(--text)}
+article hr{border:0;border-top:1px solid var(--line);margin:48px 0}
+article blockquote{margin:0 0 20px;padding:12px 18px;border-left:2px solid var(--text-2);background:var(--surface);border-radius:0 8px 8px 0;color:var(--text-2)}
+article blockquote p{margin:6px 0;color:var(--text-2)}
+article code{font-family:var(--mono);font-size:.88em;background:#1a1a1a;border:1px solid var(--line-2);border-radius:5px;padding:1px 6px}
+article pre{position:relative;margin:0 0 22px;padding:16px 18px;background:#0f0f0f;border:1px solid var(--line);border-radius:10px;overflow:auto;font-size:13.5px;line-height:1.65}
+article pre code{background:none;border:0;padding:0;font-size:inherit}
+.code{position:relative}
+.code__lang{position:absolute;top:8px;right:46px;font-family:var(--mono);font-size:11px;color:var(--text-3);z-index:1}
+.code__copy{position:absolute;top:6px;right:8px;z-index:1;font:11px var(--mono);color:var(--text-2);background:#1a1a1a;border:1px solid var(--line);border-radius:6px;padding:2px 7px;cursor:pointer}
+.code__copy:hover{color:var(--text)}
+.tbl{overflow-x:auto;margin:0 0 22px;border:1px solid var(--line);border-radius:10px}
+article table{border-collapse:collapse;width:100%;font-size:14px}
+article th,article td{padding:10px 14px;border-bottom:1px solid var(--line-2);text-align:left;vertical-align:top}
+article th{font-weight:600;background:var(--surface);color:var(--text)}
+article tr:last-child td{border-bottom:0}
+article details{margin:0 0 18px;border:1px solid var(--line);border-radius:10px;padding:10px 16px;background:var(--surface)}
+article summary{cursor:pointer;font-weight:500}
+.pager{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:72px;padding-top:32px;border-top:1px solid var(--line)}
+.pager a{display:block;padding:16px 18px;border:1px solid var(--line);border-radius:10px;text-decoration:none}
+.pager a:hover{border-color:var(--text-2)}
+.pager span{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--text-3)}
+.pager .next{text-align:right;grid-column:2}
+.foot{margin-top:40px;font-size:13px;color:var(--text-3)}
+/* 代码高亮：黑白灰为主 */
+.hl .c,.hl .c1,.hl .cm,.hl .ch,.hl .cs,.hl .cp,.hl .cpf{color:#6b6b6b;font-style:italic}
+.hl .k,.hl .kd,.hl .kn,.hl .kr,.hl .kt,.hl .kc,.hl .kp,.hl .ow{color:#ffffff;font-weight:600}
+.hl .s,.hl .s1,.hl .s2,.hl .sb,.hl .sc,.hl .sd,.hl .se,.hl .sh,.hl .si,.hl .sx,.hl .sr,.hl .ss,.hl .dl,.hl .sa{color:#86efac}
+.hl .m,.hl .mi,.hl .mf,.hl .mh,.hl .mo,.hl .il{color:#fcd34d}
+.hl .nf,.hl .fm,.hl .nc,.hl .nn{color:#e5e5e5;font-weight:500}
+.hl .nb,.hl .bp,.hl .nd,.hl .na,.hl .nt{color:#bdbdbd}
+.hl .o,.hl .p{color:#9a9a9a}
+.hl .gd{color:#fca5a5}.hl .gi{color:#86efac}
+.hl{color:#d4d4d4}
+@media (max-width:960px){.wrap{grid-template-columns:1fr;gap:0}.toc{display:none}article h1.title{font-size:30px}.nav__links a.hide-sm{display:none}}
+</style>
+</head>
+<body>
+<header class="nav">
+  <a class="nav__brand" href="../index.html"><span class="nav__dot"></span>AI Agent 全栈</a>
+  <nav class="nav__links">
+    <a href="../index.html#progress">课件</a>
+    <a class="hide-sm" href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/ROADMAP.md">路线图</a>
+    <a href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/notes/00-foundations/03-python.md">在 GitHub 上查看</a>
+  </nav>
+</header>
+<div class="wrap">
+  <aside class="toc"><div class="toc__label">本课目录</div><ul>
+<li><a href="#为什么学这个">为什么学这个</a></li>
+<li><a href="#0-go-ts-程序员的-python-语法速成">0. Go / TS 程序员的 Python 语法速成</a></li>
+<li><a href="#1-uvpython-的-go-mod">1. uv：Python 的 go mod</a></li>
+<li><a href="#2-pydanticpython-的-zod">2. Pydantic：Python 的 Zod</a></li>
+<li><a href="#3-asyncio和-js-一样的事件循环">3. asyncio：和 JS 一样的事件循环</a></li>
+<li><a href="#4-并行工具调用taskgroup-semaphore-timeout">4. 并行工具调用：TaskGroup + Semaphore + timeout</a></li>
+<li><a href="#5-异步生成器流式读取-sse">5. 异步生成器：流式读取 SSE</a></li>
+<li><a href="#6-四个高频坑">6. 四个高频坑</a></li>
+<li><a href="#练习今天做完">练习（今天做完）</a></li>
+<li><a href="#自测题">自测题</a></li>
+<li><a href="#参考答案与详解">参考答案与详解</a><ul>
+<li><a href="#自测题答案">自测题答案</a></li>
+<li><a href="#练习参考实现">练习参考实现</a></li>
+</ul>
+</li>
+</ul>
+</aside>
+  <article>
+    <div class="meta">模块 00 · 基础功底 · 第 0.3 课</div>
+    <h1 class="title">0.3 Python（够用即可）：读懂 ML 生态的那一半</h1>
+    <blockquote>
+<p>第 0 部分 · 第 3 课 ｜ 预计 3 小时 ｜ 前置：学完 0.1 Go、0.2 TypeScript，Python 3.12+</p>
+<p>目标不是成为 Python 专家，而是<strong>读得懂、改得动</strong>：模型 SDK、评测脚本、LangGraph、vLLM、训练代码，几乎都是 Python。本课每个语法都对照 Go 和 TS 讲，每段代码后面有逐行解读。</p>
+</blockquote>
+<h2 id="为什么学这个">为什么学这个</h2>
+<p>你的主力是 Go / TS，但 Agent 生态里这些东西基本只有 Python 版或 Python 版最好：</p>
+<div class="hl"><pre><span></span><code>评测：SWE-bench、τ-bench、Inspect、各种 LLM-as-Judge 脚本
+框架：LangGraph、OpenAI Agents SDK、Claude Agent SDK 的 Python 版最先更新
+模型侧：vLLM、SGLang、transformers、TRL（DPO / GRPO）
+</code></pre></div>
+
+<p>本课只学写 Agent 用得到的三件事，和前两课一一对应：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>问题</th>
+<th>Go（0.1）</th>
+<th>TS（0.2）</th>
+<th>Python（本课）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>项目与依赖</td>
+<td><code>go mod</code></td>
+<td><code>npm</code></td>
+<td><strong>uv</strong></td>
+</tr>
+<tr>
+<td>校验外部 JSON</td>
+<td><code>json.Unmarshal</code> + 手写校验</td>
+<td>Zod</td>
+<td><strong>Pydantic</strong></td>
+</tr>
+<tr>
+<td>并发模型</td>
+<td>goroutine（多线程真并行）</td>
+<td>事件循环（单线程）</td>
+<td><strong>asyncio</strong>（单线程事件循环，和 JS 一样）</td>
+</tr>
+<tr>
+<td>并行工具</td>
+<td><code>errgroup</code></td>
+<td><code>Promise.all</code> + worker</td>
+<td><strong><code>asyncio.TaskGroup</code> + <code>Semaphore</code></strong></td>
+</tr>
+<tr>
+<td>超时 / 取消</td>
+<td><code>context.WithTimeout</code></td>
+<td><code>AbortSignal.timeout</code></td>
+<td><strong><code>asyncio.timeout</code></strong> + 任务取消</td>
+</tr>
+<tr>
+<td>流式读取</td>
+<td>goroutine + channel</td>
+<td>AsyncGenerator</td>
+<td><strong>async generator</strong>（几乎和 TS 一样）</td>
+</tr>
+</tbody>
+</table></div>
+<p>一句话：<strong>Python 的 asyncio 心智模型和 TS 几乎一样</strong>，你学 0.2 时建立的直觉可以直接搬过来。</p>
+<hr />
+<h2 id="0-go-ts-程序员的-python-语法速成">0. Go / TS 程序员的 Python 语法速成</h2>
+<h3 id="01-缩进就是代码块">0.1 缩进就是代码块</h3>
+<div class="hl"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">add</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">a</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span>
+    <span class="k">return</span> <span class="n">b</span>
+</code></pre></div>
+
+<ul>
+<li>没有 <code>{}</code>，<strong>冒号 + 缩进</strong>表示代码块。缩进统一用 4 个空格，混用 tab 会报错。</li>
+<li>没有分号。</li>
+<li><code>def</code> = Go 的 <code>func</code> = TS 的 <code>function</code>。</li>
+<li><code>a: int</code> 是<strong>类型注解</strong>，<code>-&gt; int</code> 是返回类型。和 TS 一样写在名字后面。</li>
+</ul>
+<p><strong>关键区别：Python 的类型注解运行时不检查。</strong> <code>add("x", "y")</code> 照样能跑（结果是 <code>"xy"</code>）。类型注解只给编辑器和类型检查工具（<code>mypy</code> / <code>pyright</code>）看，这一点和 TS 一样：类型只在“编译期”有用，运行时要靠 Pydantic 校验。</p>
+<h3 id="02-变量和基本类型">0.2 变量和基本类型</h3>
+<div class="hl"><pre><span></span><code><span class="n">name</span> <span class="o">=</span> <span class="s2">"search"</span>          <span class="c1"># 没有 const / let / var，直接赋值</span>
+<span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span>           <span class="c1"># 可以加类型注解</span>
+<span class="n">MAX_RETRY</span> <span class="o">=</span> <span class="mi">3</span>            <span class="c1"># 全大写只是约定“这是常量”，语言不阻止你改</span>
+</code></pre></div>
+
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Python</th>
+<th>Go</th>
+<th>TS</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>str</code></td>
+<td><code>string</code></td>
+<td><code>string</code></td>
+</tr>
+<tr>
+<td><code>int</code> / <code>float</code></td>
+<td><code>int</code> / <code>float64</code></td>
+<td><code>number</code></td>
+</tr>
+<tr>
+<td><code>bool</code>（<code>True</code> / <code>False</code>，首字母大写）</td>
+<td><code>bool</code></td>
+<td><code>boolean</code></td>
+</tr>
+<tr>
+<td><code>None</code></td>
+<td><code>nil</code></td>
+<td><code>null</code> / <code>undefined</code></td>
+</tr>
+<tr>
+<td><code>list[str]</code></td>
+<td><code>[]string</code></td>
+<td><code>string[]</code></td>
+</tr>
+<tr>
+<td><code>dict[str, int]</code></td>
+<td><code>map[string]int</code></td>
+<td><code>Record&lt;string, number&gt;</code></td>
+</tr>
+<tr>
+<td><code>tuple[str, int]</code></td>
+<td>多返回值 <code>(string, int)</code></td>
+<td><code>[string, number]</code></td>
+</tr>
+<tr>
+<td><code>str \| None</code></td>
+<td><code>*string</code></td>
+<td><code>string \| undefined</code></td>
+</tr>
+<tr>
+<td><code>Any</code></td>
+<td><code>any</code></td>
+<td><code>any</code></td>
+</tr>
+</tbody>
+</table></div>
+<div class="hl"><pre><span></span><code><span class="n">nums</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>                  <span class="c1"># list</span>
+<span class="n">nums</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>                    <span class="c1"># Go: nums = append(nums, 4)</span>
+<span class="n">first</span> <span class="o">=</span> <span class="n">nums</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>                   <span class="c1"># 越界会抛 IndexError（类似 Go 的 panic）</span>
+<span class="n">last</span> <span class="o">=</span> <span class="n">nums</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>                   <span class="c1"># 负下标从末尾数，Go/TS 都没有</span>
+<span class="n">part</span> <span class="o">=</span> <span class="n">nums</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>                  <span class="c1"># 切片 [2, 3]，和 Go 一样左闭右开</span>
+
+<span class="n">cfg</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"model"</span><span class="p">:</span> <span class="s2">"gpt"</span><span class="p">,</span> <span class="s2">"temp"</span><span class="p">:</span> <span class="mf">0.7</span><span class="p">}</span>   <span class="c1"># dict，= Go map / TS 对象</span>
+<span class="n">cfg</span><span class="p">[</span><span class="s2">"temp"</span><span class="p">]</span>                       <span class="c1"># 0.7；键不存在会抛 KeyError</span>
+<span class="n">cfg</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"top_p"</span><span class="p">)</span>                  <span class="c1"># 键不存在返回 None，不抛错</span>
+<span class="n">cfg</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"top_p"</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>             <span class="c1"># 带默认值</span>
+<span class="s2">"model"</span> <span class="ow">in</span> <span class="n">cfg</span>                    <span class="c1"># True，= Go 的 _, ok := cfg["model"]</span>
+</code></pre></div>
+
+<h3 id="03-字符串">0.3 字符串</h3>
+<div class="hl"><pre><span></span><code><span class="n">name</span> <span class="o">=</span> <span class="s2">"search"</span>
+<span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"未知工具 </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span>           <span class="c1"># f-string，= TS 模板字符串 `未知工具 ${name}`</span>
+<span class="n">line</span> <span class="o">=</span> <span class="s2">"  data: hi </span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>    <span class="c1"># 去首尾空白，= strings.TrimSpace / trim()</span>
+<span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"data:"</span><span class="p">)</span>          <span class="c1"># = strings.HasPrefix / startsWith</span>
+<span class="n">line</span><span class="p">[</span><span class="mi">5</span><span class="p">:]</span>                          <span class="c1"># 去掉前 5 个字符，= line[5:] (Go) / slice(5) (TS)</span>
+</code></pre></div>
+
+<h3 id="04-函数默认参数关键字参数多返回值">0.4 函数：默认参数、关键字参数、多返回值</h3>
+<div class="hl"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="n">calls</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span> <span class="n">timeout_s</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">20.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="o">...</span>
+
+<span class="n">run</span><span class="p">([</span><span class="s2">"a"</span><span class="p">])</span>                         <span class="c1"># limit=4, timeout_s=20.0</span>
+<span class="n">run</span><span class="p">([</span><span class="s2">"a"</span><span class="p">],</span> <span class="n">timeout_s</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>          <span class="c1"># 关键字参数：按名字传，跳过 limit</span>
+</code></pre></div>
+
+<ul>
+<li><code>limit: int = 4</code>：带默认值的参数。Go 没有默认参数；TS 有，写法一样。</li>
+<li><code>run(["a"], timeout_s=0.2)</code>：<strong>关键字参数</strong>，调用时按名字传。这在 Python 里非常常见，相当于 TS 里传一个选项对象 <code>{ timeoutS: 0.2 }</code>，但更轻。</li>
+<li><code>...</code>：Python 的“这里先空着”，合法的语法，相当于 Go 里写个 <code>panic("TODO")</code>。</li>
+</ul>
+<p>多返回值用 tuple：</p>
+<div class="hl"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">parse</span><span class="p">(</span><span class="n">raw</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">raw</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">"empty"</span>       <span class="c1"># 相当于 Go 的 return nil, errors.New("empty")</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">"ok"</span><span class="p">:</span> <span class="kc">True</span><span class="p">},</span> <span class="kc">None</span>
+
+<span class="n">data</span><span class="p">,</span> <span class="n">err</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="s2">"x"</span><span class="p">)</span>             <span class="c1"># 解包，= Go 的 data, err := parse("x")</span>
+<span class="k">if</span> <span class="n">err</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>                <span class="c1"># 判断 None 用 is / is not，不要用 ==</span>
+    <span class="o">...</span>
+</code></pre></div>
+
+<h3 id="05-异常try-except-finally-raise">0.5 异常：try / except / finally / raise</h3>
+<div class="hl"><pre><span></span><code><span class="k">try</span><span class="p">:</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="s2">"abc"</span><span class="p">)</span>                 <span class="c1"># 抛 ValueError</span>
+<span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>            <span class="c1"># = TS 的 catch (e)，但可以按类型分别捕获</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"不是数字："</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+<span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">IndexError</span><span class="p">):</span>     <span class="c1"># 一次捕获多种</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"下标或键错误"</span><span class="p">)</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"总会执行"</span><span class="p">)</span>               <span class="c1"># = defer / finally</span>
+
+<span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">"出错了"</span><span class="p">)</span>        <span class="c1"># = TS 的 throw new Error(...)</span>
+</code></pre></div>
+
+<p>和 TS 的区别：<strong><code>except</code> 可以按异常类型分别处理</strong>，不需要在 <code>catch</code> 里 <code>if (err instanceof ...)</code>。这一点更像 Go 的 <code>errors.As</code>。</p>
+<h3 id="06-with自动清理python-版-defer">0.6 <code>with</code>：自动清理（Python 版 defer）</h3>
+<div class="hl"><pre><span></span><code><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">"a.txt"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>           <span class="c1"># 进入时打开文件</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+<span class="c1"># 离开 with 块时自动 f.close()，不管是正常结束还是抛异常</span>
+</code></pre></div>
+
+<p>对照 Go：</p>
+<div class="hl"><pre><span></span><code><span class="nx">f</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">os</span><span class="p">.</span><span class="nx">Open</span><span class="p">(</span><span class="s">"a.txt"</span><span class="p">)</span>
+<span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="p">}</span>
+<span class="k">defer</span><span class="w"> </span><span class="nx">f</span><span class="p">.</span><span class="nx">Close</span><span class="p">()</span>
+</code></pre></div>
+
+<p><code>with</code> 后面的对象叫<strong>上下文管理器</strong>（context manager，和 Go 的 context 不是一个东西）。HTTP 客户端、锁、超时、文件……凡是“用完要清理”的，Python 都用 <code>with</code>。异步版本是 <code>async with</code>，后面大量出现。</p>
+<h3 id="07-类和-dataclass">0.7 类和 dataclass</h3>
+<div class="hl"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ToolCall</span><span class="p">:</span>
+    <span class="nb">id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">args</span><span class="p">:</span> <span class="nb">str</span>
+
+<span class="n">c</span> <span class="o">=</span> <span class="n">ToolCall</span><span class="p">(</span><span class="s2">"1"</span><span class="p">,</span> <span class="s2">"search"</span><span class="p">,</span> <span class="s2">"</span><span class="si">{}</span><span class="s2">"</span><span class="p">)</span>         <span class="c1"># 按顺序传</span>
+<span class="n">c</span> <span class="o">=</span> <span class="n">ToolCall</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"1"</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"search"</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="s2">"</span><span class="si">{}</span><span class="s2">"</span><span class="p">)</span>  <span class="c1"># 或按名字传</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>                              <span class="c1"># "search"</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>                                   <span class="c1"># ToolCall(id='1', name='search', args='{}')</span>
+</code></pre></div>
+
+<ul>
+<li><code>@dataclass</code> 是<strong>装饰器</strong>：写在类上面，自动生成构造函数、打印、比较等方法。效果约等于 Go 的 struct：只放数据。</li>
+<li><code>from dataclasses import dataclass</code>：从标准库模块 <code>dataclasses</code> 导入名字 <code>dataclass</code>，= TS 的 <code>import { dataclass } from "dataclasses"</code>。</li>
+</ul>
+<blockquote>
+<p><code>@xxx</code> 这种写法统称装饰器，就是“把下面的函数/类交给 xxx 加工一下”。看到 <code>@app.get("/")</code>、<code>@pytest.fixture</code> 都是同一回事。</p>
+</blockquote>
+<h3 id="08-列表推导式">0.8 列表推导式</h3>
+<div class="hl"><pre><span></span><code><span class="n">results</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span><span class="o">.</span><span class="n">is_error</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">res</span><span class="p">]</span>              <span class="c1"># = res.map(r =&gt; r.isError)</span>
+<span class="n">ok</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">res</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">r</span><span class="o">.</span><span class="n">is_error</span><span class="p">]</span>          <span class="c1"># = res.filter(r =&gt; !r.isError)</span>
+</code></pre></div>
+
+<p>Go 里你会写一个 for 循环 append。读 Python 代码时这个写法到处都是，看懂就行。</p>
+<h3 id="09-模块和包">0.9 模块和包</h3>
+<div class="hl"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>                         <span class="c1"># 导入整个模块，用 asyncio.sleep(...)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">Field</span>  <span class="c1"># 只导入几个名字</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">py_agent_core.tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">run_tools</span>  <span class="c1"># 导入自己项目里的模块（目录 = 包）</span>
+</code></pre></div>
+
+<ul>
+<li>一个 <code>.py</code> 文件就是一个模块，一个目录就是一个包（相当于 Go 的 package）。</li>
+<li>没有 export 关键字：所有顶层名字都能被导入。<strong>以下划线开头的名字（<code>_adapter</code>）约定为私有</strong>，相当于 Go 的小写开头。</li>
+</ul>
+<hr />
+<h2 id="1-uvpython-的-go-mod">1. uv：Python 的 go mod</h2>
+<p>Python 的老问题是“环境地狱”：系统 Python、pip、venv、requirements.txt、poetry……<strong>uv</strong> 是 2024 年后的事实标准，一个工具全包，而且很快。</p>
+<div class="hl"><pre><span></span><code>uv<span class="w"> </span>init<span class="w"> </span>--lib<span class="w"> </span>my-agent<span class="w">        </span><span class="c1"># 新建项目，= go mod init / npm init</span>
+<span class="nb">cd</span><span class="w"> </span>my-agent
+uv<span class="w"> </span>add<span class="w"> </span>pydantic<span class="w"> </span>httpx<span class="w">         </span><span class="c1"># 加依赖，= go get / npm i</span>
+uv<span class="w"> </span>add<span class="w"> </span>--dev<span class="w"> </span>pytest<span class="w"> </span>pytest-asyncio<span class="w">   </span><span class="c1"># 开发依赖，= npm i -D</span>
+uv<span class="w"> </span>run<span class="w"> </span>pytest<span class="w">                 </span><span class="c1"># 在项目的虚拟环境里运行命令，= npx</span>
+uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>-m<span class="w"> </span>my_agent<span class="w">     </span><span class="c1"># 运行你的代码</span>
+uv<span class="w"> </span>sync<span class="w">                       </span><span class="c1"># 按锁文件装依赖，= go mod download / npm ci</span>
+uv<span class="w"> </span>python<span class="w"> </span>install<span class="w"> </span><span class="m">3</span>.12<span class="w">        </span><span class="c1"># 连 Python 本身都能装</span>
+</code></pre></div>
+
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>uv 生成的文件</th>
+<th>对应</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>pyproject.toml</code></td>
+<td><code>go.mod</code> / <code>package.json</code></td>
+<td>项目名、Python 版本、依赖列表</td>
+</tr>
+<tr>
+<td><code>uv.lock</code></td>
+<td><code>go.sum</code> / <code>package-lock.json</code></td>
+<td>锁定每个依赖的精确版本，<strong>要提交到 git</strong></td>
+</tr>
+<tr>
+<td><code>.venv/</code></td>
+<td><code>node_modules/</code></td>
+<td>虚拟环境，项目独立的 Python + 依赖，<strong>不提交</strong></td>
+</tr>
+<tr>
+<td><code>.python-version</code></td>
+<td><code>go</code> 指令那一行</td>
+<td>项目用哪个 Python 版本</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>虚拟环境（venv）是什么</strong>：Python 默认把包装到全局，A 项目要 pydantic 1、B 项目要 pydantic 2 就打架。venv 给每个项目一个独立目录放依赖，Go 和 Node 天生就是按项目隔离的，Python 要靠 venv。uv 自动帮你建、自动激活，你只要记住<strong>所有命令前面加 <code>uv run</code></strong>。</p>
+<p><code>--lib</code> 生成的目录结构：</p>
+<div class="hl"><pre><span></span><code>my-agent/
+├── pyproject.toml
+├── uv.lock
+├── src/
+│   └── my_agent/          # 包名：目录名里用下划线
+│       └── __init__.py    # 有这个文件，目录才是一个包（可以是空的）
+└── tests/
+    └── test_xxx.py        # pytest 自动找 test_ 开头的文件和函数
+</code></pre></div>
+
+<h2 id="2-pydanticpython-的-zod">2. Pydantic：Python 的 Zod</h2>
+<p>和 TS 一样，Python 的类型注解运行时不检查，模型返回的 JSON 必须真校验。<strong>Pydantic v2</strong> 就是 Python 的 Zod，而且几乎是所有 AI SDK 的底座：OpenAI SDK、Anthropic SDK、LangChain、FastAPI 的数据类型全是 Pydantic。</p>
+<h3 id="定义工具参数">定义工具参数</h3>
+<div class="hl"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">Field</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">SearchArgs</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="n">query</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">min_length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">"搜索关键词"</span><span class="p">)</span>
+    <span class="n">top_k</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+</code></pre></div>
+
+<p>逐行解读：</p>
+<ul>
+<li><code>class SearchArgs(BaseModel):</code>：定义一个类，<strong>继承</strong> <code>BaseModel</code>。括号里是父类，相当于“这个 struct 自带校验能力”。</li>
+<li><code>query: str = Field(min_length=1, description="搜索关键词")</code>：</li>
+<li><code>query: str</code>：字段名和类型，Pydantic 会<strong>真的在运行时检查</strong>它是字符串</li>
+<li><code>Field(...)</code>：附加约束，<code>min_length=1</code> = Zod 的 <code>.min(1)</code>，<code>description</code> = <code>.describe()</code>，会进 JSON Schema 给模型看</li>
+<li><code>top_k: int = Field(default=5, ge=1, le=20)</code>：整数，默认 5，<code>ge</code> = greater or equal（≥1），<code>le</code> = less or equal（≤20）。</li>
+</ul>
+<p>和 Zod 对照：</p>
+<div class="hl"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">SearchArgs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">z</span><span class="p">.</span><span class="nx">object</span><span class="p">({</span>
+<span class="w">  </span><span class="nx">query</span><span class="o">:</span><span class="w"> </span><span class="kt">z.string</span><span class="p">().</span><span class="nx">min</span><span class="p">(</span><span class="mf">1</span><span class="p">).</span><span class="nx">describe</span><span class="p">(</span><span class="s2">"搜索关键词"</span><span class="p">),</span>
+<span class="w">  </span><span class="nx">topK</span><span class="o">:</span><span class="w"> </span><span class="kt">z.number</span><span class="p">().</span><span class="kr">int</span><span class="p">().</span><span class="nx">min</span><span class="p">(</span><span class="mf">1</span><span class="p">).</span><span class="nx">max</span><span class="p">(</span><span class="mf">20</span><span class="p">).</span><span class="k">default</span><span class="p">(</span><span class="mf">5</span><span class="p">),</span>
+<span class="p">});</span>
+<span class="kr">type</span><span class="w"> </span><span class="nx">SearchArgs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">z</span><span class="p">.</span><span class="nx">infer</span><span class="o">&lt;</span><span class="ow">typeof</span><span class="w"> </span><span class="nx">SearchArgs</span><span class="o">&gt;</span><span class="p">;</span>
+</code></pre></div>
+
+<p>Pydantic 更省一步：<strong>类本身既是校验器，又是类型</strong>，不需要 <code>z.infer</code>。</p>
+<h3 id="生成-json-schema发给模型">生成 JSON Schema（发给模型）</h3>
+<div class="hl"><pre><span></span><code><span class="n">schema</span> <span class="o">=</span> <span class="n">SearchArgs</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()</span>
+</code></pre></div>
+
+<p>得到：</p>
+<div class="hl"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">"properties"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"query"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"搜索关键词"</span><span class="p">,</span><span class="w"> </span><span class="nt">"minLength"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Query"</span><span class="p">,</span><span class="w"> </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"string"</span><span class="p">},</span>
+<span class="w">    </span><span class="nt">"top_k"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"default"</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="nt">"maximum"</span><span class="p">:</span><span class="w"> </span><span class="mi">20</span><span class="p">,</span><span class="w"> </span><span class="nt">"minimum"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Top K"</span><span class="p">,</span><span class="w"> </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"integer"</span><span class="p">}</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">"required"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"query"</span><span class="p">],</span>
+<span class="w">  </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"SearchArgs"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"object"</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>= <code>z.toJSONSchema(SearchArgs)</code>。OpenAI / Anthropic 的 Python SDK 里，你经常直接把 Pydantic 类传给 <code>response_format</code> 或工具定义，SDK 内部就是调用这个方法。</p>
+<h3 id="校验模型返回的参数">校验模型返回的参数</h3>
+<div class="hl"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">ValidationError</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">parse_args</span><span class="p">(</span><span class="n">raw</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">SearchArgs</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]:</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">SearchArgs</span><span class="o">.</span><span class="n">model_validate_json</span><span class="p">(</span><span class="n">raw</span><span class="p">),</span> <span class="kc">None</span>
+    <span class="k">except</span> <span class="n">ValidationError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+</code></pre></div>
+
+<p>逐行解读：</p>
+<ul>
+<li><code>SearchArgs.model_validate_json(raw)</code>：<strong>一步完成</strong> JSON 解析 + 校验，返回一个 <code>SearchArgs</code> 实例。TS 里要先 <code>JSON.parse</code> 再 <code>safeParse</code> 两步；Pydantic 一步，而且非法 JSON 也会变成 <code>ValidationError</code>，不用单独 <code>try json.loads</code>。</li>
+<li>校验失败抛 <code>ValidationError</code>，我们捕获它，转成文字返回。Pydantic 没有 <code>safeParse</code>，Python 的习惯就是“抛异常 + 在边界处捕获”。</li>
+<li>返回 <code>(结果, 错误)</code> 的 tuple，模仿 Go 风格，调用方：</li>
+</ul>
+<div class="hl"><pre><span></span><code><span class="n">args</span><span class="p">,</span> <span class="n">err</span> <span class="o">=</span> <span class="n">parse_args</span><span class="p">(</span><span class="n">tool_call</span><span class="o">.</span><span class="n">args</span><span class="p">)</span>
+<span class="k">if</span> <span class="n">err</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">ToolResult</span><span class="p">(</span><span class="n">tool_call</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">err</span><span class="p">,</span> <span class="n">is_error</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>   <span class="c1"># 错误文本回传给模型</span>
+<span class="k">await</span> <span class="n">search</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">query</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">top_k</span><span class="p">)</span>
+</code></pre></div>
+
+<p><code>str(e)</code> 的内容大致是：</p>
+<div class="hl"><pre><span></span><code>1 validation error for SearchArgs
+top_k
+  Input should be less than or equal to 20 [type=less_than_equal, input_value=50, input_type=int]
+</code></pre></div>
+
+<p>模型看到这段很容易自己改对。和前两课同一个原则：<strong>参数错误是给模型的观察，不是让程序崩的异常。</strong></p>
+<p>另外两个常用方法：</p>
+<div class="hl"><pre><span></span><code><span class="n">SearchArgs</span><span class="o">.</span><span class="n">model_validate</span><span class="p">({</span><span class="s2">"query"</span><span class="p">:</span> <span class="s2">"x"</span><span class="p">})</span>   <span class="c1"># 校验一个 dict（已经 json.loads 过的数据）</span>
+<span class="n">args</span><span class="o">.</span><span class="n">model_dump</span><span class="p">()</span>                           <span class="c1"># 实例 → dict，= Go 的 struct 转 map</span>
+<span class="n">args</span><span class="o">.</span><span class="n">model_dump_json</span><span class="p">()</span>                      <span class="c1"># 实例 → JSON 字符串，= json.Marshal</span>
+</code></pre></div>
+
+<h3 id="可辨识联合">可辨识联合</h3>
+<div class="hl"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Annotated</span><span class="p">,</span> <span class="n">Literal</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">Field</span><span class="p">,</span> <span class="n">TypeAdapter</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TextEvent</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="nb">type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"text"</span><span class="p">]</span>
+    <span class="n">delta</span><span class="p">:</span> <span class="nb">str</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">ToolCallEvent</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="nb">type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"tool_call"</span><span class="p">]</span>
+    <span class="nb">id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">args</span><span class="p">:</span> <span class="nb">str</span>
+
+
+<span class="n">StreamEvent</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span>
+    <span class="n">TextEvent</span> <span class="o">|</span> <span class="n">ToolCallEvent</span><span class="p">,</span>
+    <span class="n">Field</span><span class="p">(</span><span class="n">discriminator</span><span class="o">=</span><span class="s2">"type"</span><span class="p">),</span>
+<span class="p">]</span>
+
+<span class="n">adapter</span> <span class="o">=</span> <span class="n">TypeAdapter</span><span class="p">(</span><span class="n">StreamEvent</span><span class="p">)</span>
+<span class="n">ev</span> <span class="o">=</span> <span class="n">adapter</span><span class="o">.</span><span class="n">validate_json</span><span class="p">(</span><span class="s1">'{"type":"text","delta":"你"}'</span><span class="p">)</span>   <span class="c1"># → TextEvent(type='text', delta='你')</span>
+</code></pre></div>
+
+<p>逐行解读：</p>
+<ul>
+<li><code>Literal["text"]</code>：字面量类型，这个字段只能是 <code>"text"</code>。= TS 的 <code>type: "text"</code> / Zod 的 <code>z.literal("text")</code>。</li>
+<li><code>TextEvent | ToolCallEvent</code>：联合类型，和 TS 写法一样。</li>
+<li><code>Annotated[类型, Field(discriminator="type")]</code>：<code>Annotated</code> 是“给类型附加额外信息”的标准写法，这里附加的信息是“按 <code>type</code> 字段区分”。= <code>z.discriminatedUnion("type", [...])</code>。</li>
+<li><code>TypeAdapter(StreamEvent)</code>：<code>StreamEvent</code> 不是一个 <code>BaseModel</code> 类，没有 <code>model_validate_json</code> 方法。<code>TypeAdapter</code> 把任意类型包装成一个校验器。记住：<strong>单个 model 用类方法，联合类型 / list / dict 用 <code>TypeAdapter</code></strong>。</li>
+</ul>
+<p>用的时候用 <code>match</code>（Python 3.10+ 的模式匹配，= <code>switch</code>）：</p>
+<div class="hl"><pre><span></span><code><span class="k">match</span> <span class="n">ev</span><span class="p">:</span>
+    <span class="k">case</span> <span class="n">TextEvent</span><span class="p">():</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">ev</span><span class="o">.</span><span class="n">delta</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">""</span><span class="p">)</span>
+    <span class="k">case</span> <span class="n">ToolCallEvent</span><span class="p">():</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">ev</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">ev</span><span class="o">.</span><span class="n">args</span><span class="p">)</span>
+</code></pre></div>
+
+<ul>
+<li><code>case TextEvent():</code> 意思是“如果 ev 是 TextEvent 实例”，和 Go 的 <code>case TextEvent:</code>（type switch）几乎一样。</li>
+<li><code>print(x, end="")</code>：不换行打印，= <code>fmt.Print</code>。</li>
+<li>Python 的 <code>match</code> <strong>不会</strong>像 TS <code>assertNever</code> 那样在漏写 case 时报错（除非用 pyright 的严格模式）。这是 Python 类型系统比 TS 弱的地方。</li>
+</ul>
+<h2 id="3-asyncio和-js-一样的事件循环">3. asyncio：和 JS 一样的事件循环</h2>
+<h3 id="心智模型">心智模型</h3>
+<p>Python 有两种并发方式：线程（<code>threading</code>）和 asyncio。<strong>写 Agent 用 asyncio</strong>：调模型、调工具几乎全是网络 I/O，asyncio 正是为此设计的。</p>
+<p>asyncio 和 JS 的模型<strong>几乎完全一样</strong>：</p>
+<ul>
+<li>一个线程，一个事件循环。</li>
+<li><code>async def</code> 定义的函数叫<strong>协程函数</strong>，调用它得到一个<strong>协程对象</strong>（= JS 的 Promise，但有一个关键区别，见下面）。</li>
+<li><code>await</code> 暂停当前协程，让事件循环去跑别的；I/O 完成后再回来。</li>
+<li>同一时刻只有一段 Python 代码在执行，<strong>普通变量读写不需要锁</strong>（和 0.2 里 <code>next++</code> 的结论一样）。</li>
+</ul>
+<div class="hl"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_weather</span><span class="p">(</span><span class="n">city</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>        <span class="c1"># 模拟网络请求；= TS 的 await sleep(1000)</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">city</span><span class="si">}</span><span class="s2">: 晴"</span>
+
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="k">await</span> <span class="n">get_weather</span><span class="p">(</span><span class="s2">"北京"</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
+
+
+<span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">main</span><span class="p">())</span>               <span class="c1"># 启动事件循环，跑 main，跑完退出</span>
+</code></pre></div>
+
+<p>逐行解读：</p>
+<ul>
+<li><code>async def get_weather(...)</code>：协程函数，= TS 的 <code>async function</code>。</li>
+<li><code>await asyncio.sleep(1)</code>：异步睡 1 <strong>秒</strong>（注意单位是秒，TS 是毫秒）。</li>
+<li><code>asyncio.run(main())</code>：程序入口。JS 的事件循环是自动的，Python 要你<strong>显式启动</strong>。整个程序通常只调用一次，= Go 的 <code>func main()</code>。</li>
+</ul>
+<h3 id="和-js-的关键区别协程不-await-就不会运行">和 JS 的关键区别：协程不 await 就不会运行</h3>
+<div class="hl"><pre><span></span><code><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+    <span class="n">get_weather</span><span class="p">(</span><span class="s2">"北京"</span><span class="p">)</span>             <span class="c1"># ❌ 什么也不会发生！只是创建了一个协程对象</span>
+    <span class="k">await</span> <span class="n">get_weather</span><span class="p">(</span><span class="s2">"北京"</span><span class="p">)</span>       <span class="c1"># ✅ 运行并等待</span>
+</code></pre></div>
+
+<ul>
+<li><strong>TS</strong>：<code>doWork()</code> 不 await，它也会立刻开始执行（Promise 是“热”的）。</li>
+<li><strong>Python</strong>：<code>get_weather("北京")</code> 只创建协程对象，<strong>不 await 也不交给事件循环，就永远不执行</strong>（协程是“冷”的）。Python 会打一行警告 <code>RuntimeWarning: coroutine 'get_weather' was never awaited</code>。</li>
+</ul>
+<p>想“开始运行但先不等”（= Go 的 <code>go f()</code>），要显式创建任务：</p>
+<div class="hl"><pre><span></span><code><span class="n">task</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="n">get_weather</span><span class="p">(</span><span class="s2">"北京"</span><span class="p">))</span>   <span class="c1"># 交给事件循环，开始跑</span>
+<span class="c1"># ... 做别的事</span>
+<span class="n">w</span> <span class="o">=</span> <span class="k">await</span> <span class="n">task</span>                                    <span class="c1"># 需要结果时再等</span>
+</code></pre></div>
+
+<h3 id="并发跑多个gather-与-taskgroup">并发跑多个：<code>gather</code> 与 <code>TaskGroup</code></h3>
+<div class="hl"><pre><span></span><code><span class="c1"># 方式 1：gather，= Promise.all</span>
+<span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="n">get_weather</span><span class="p">(</span><span class="s2">"北京"</span><span class="p">),</span> <span class="n">get_weather</span><span class="p">(</span><span class="s2">"上海"</span><span class="p">))</span>   <span class="c1"># 总共约 1 秒</span>
+
+<span class="c1"># 方式 2：TaskGroup（Python 3.11+），= errgroup</span>
+<span class="k">async</span> <span class="k">with</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">TaskGroup</span><span class="p">()</span> <span class="k">as</span> <span class="n">tg</span><span class="p">:</span>
+    <span class="n">t1</span> <span class="o">=</span> <span class="n">tg</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="n">get_weather</span><span class="p">(</span><span class="s2">"北京"</span><span class="p">))</span>
+    <span class="n">t2</span> <span class="o">=</span> <span class="n">tg</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="n">get_weather</span><span class="p">(</span><span class="s2">"上海"</span><span class="p">))</span>
+<span class="c1"># 离开 async with 时，所有任务都已完成</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">t1</span><span class="o">.</span><span class="n">result</span><span class="p">(),</span> <span class="n">t2</span><span class="o">.</span><span class="n">result</span><span class="p">())</span>
+</code></pre></div>
+
+<p>逐行解读 TaskGroup：</p>
+<ul>
+<li><code>async with asyncio.TaskGroup() as tg:</code>：开一个任务组。<code>async with</code> 是 <code>with</code> 的异步版：进入时创建，<strong>离开时等待组内所有任务完成</strong>。= <code>g, ctx := errgroup.WithContext(ctx)</code> + 块结束时自动 <code>g.Wait()</code>。</li>
+<li><code>tg.create_task(coro)</code>：在组里启动一个任务，= <code>g.Go(func() error {...})</code>。</li>
+<li><strong>任一任务抛异常，TaskGroup 会取消组内其他所有任务</strong>，然后把异常抛出来（包在 <code>ExceptionGroup</code> 里）。这和 <code>errgroup.WithContext</code> 一模一样：一个失败，ctx 取消，其他全停。</li>
+<li><code>t1.result()</code>：拿任务的返回值。</li>
+</ul>
+<p><strong>新代码优先用 <code>TaskGroup</code></strong>：它保证“块结束时没有任务在后台乱跑”，相当于语言层面帮你防 goroutine 泄漏。<code>gather</code> 在一个任务失败时不会自动取消其他任务。</p>
+<h3 id="限流semaphore">限流：Semaphore</h3>
+<div class="hl"><pre><span></span><code><span class="n">sem</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">Semaphore</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>        <span class="c1"># 最多 4 个同时进入</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">limited</span><span class="p">(</span><span class="n">city</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">async</span> <span class="k">with</span> <span class="n">sem</span><span class="p">:</span>               <span class="c1"># 进入时占一个名额，满了就在这里等</span>
+        <span class="k">return</span> <span class="k">await</span> <span class="n">get_weather</span><span class="p">(</span><span class="n">city</span><span class="p">)</span>
+    <span class="c1"># 离开 with 自动释放名额</span>
+</code></pre></div>
+
+<p>= Go 的 <code>g.SetLimit(4)</code>，或者用带缓冲 channel 当信号量 <code>sem := make(chan struct{}, 4)</code>。</p>
+<h3 id="超时asynciotimeout">超时：<code>asyncio.timeout</code></h3>
+<div class="hl"><pre><span></span><code><span class="k">try</span><span class="p">:</span>
+    <span class="k">async</span> <span class="k">with</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">timeout</span><span class="p">(</span><span class="mi">2</span><span class="p">):</span>         <span class="c1"># 2 秒</span>
+        <span class="n">w</span> <span class="o">=</span> <span class="k">await</span> <span class="n">get_weather</span><span class="p">(</span><span class="s2">"北京"</span><span class="p">)</span>
+<span class="k">except</span> <span class="ne">TimeoutError</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"超时了"</span><span class="p">)</span>
+</code></pre></div>
+
+<ul>
+<li><code>async with asyncio.timeout(2):</code> 里面的代码超过 2 秒，就会被<strong>取消</strong>，然后在块的出口抛出 <code>TimeoutError</code>。= <code>ctx, cancel := context.WithTimeout(ctx, 2*time.Second); defer cancel()</code>。</li>
+<li>超时可以嵌套：外层 60 秒整轮超时，内层 20 秒单工具超时，各管各的。</li>
+</ul>
+<h3 id="取消python-的取消是注入异常">取消：Python 的取消是“注入异常”</h3>
+<p>这是和 Go / TS 最不同的地方，务必理解：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th></th>
+<th>怎么取消</th>
+<th>被取消的代码怎么知道</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Go</td>
+<td><code>cancel()</code></td>
+<td>自己检查 <code>&lt;-ctx.Done()</code>，<strong>不检查就不会停</strong></td>
+</tr>
+<tr>
+<td>TS</td>
+<td><code>ctrl.abort()</code></td>
+<td>自己监听 <code>signal</code>，<strong>不监听就不会停</strong></td>
+</tr>
+<tr>
+<td>Python</td>
+<td><code>task.cancel()</code> / 超时</td>
+<td><strong>在它下一个 <code>await</code> 处自动抛出 <code>CancelledError</code></strong></td>
+</tr>
+</tbody>
+</table></div>
+<p>也就是说，Python 里你<strong>不需要把 ctx / signal 一路往下传</strong>。任务被取消时，它正卡在哪个 <code>await</code> 上，那里就会抛出 <code>asyncio.CancelledError</code>，异常一路往上冒，沿途的 <code>finally</code> / <code>with</code> 都会执行清理。这让代码简洁很多。</p>
+<p>但有两个代价：</p>
+<ol>
+<li><strong>不 <code>await</code> 的代码取消不了</strong>。一个死循环纯计算、或者调用了阻塞函数（<code>time.sleep</code>、<code>requests.get</code>），中间没有 <code>await</code>，取消信号就进不去。和 Go 里不读 <code>ctx.Done()</code> 是一个道理。</li>
+<li><strong>不要吞掉 <code>CancelledError</code></strong>。<code>CancelledError</code> 继承自 <code>BaseException</code> 而不是 <code>Exception</code>，所以 <code>except Exception:</code> 不会误抓它，这是故意设计的。但如果你写了 <code>except BaseException:</code> 或裸 <code>except:</code> 而且不重新抛出，取消就失效了。</li>
+</ol>
+<h2 id="4-并行工具调用taskgroup-semaphore-timeout">4. 并行工具调用：TaskGroup + Semaphore + timeout</h2>
+<p>0.1 <code>runTools</code>（Go）和 0.2 <code>runTools</code>（TS）的 Python 版：</p>
+<div class="hl"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Awaitable</span><span class="p">,</span> <span class="n">Callable</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ToolCall</span><span class="p">:</span>
+    <span class="nb">id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">args</span><span class="p">:</span> <span class="nb">str</span>
+
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ToolResult</span><span class="p">:</span>
+    <span class="nb">id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">output</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">is_error</span><span class="p">:</span> <span class="nb">bool</span>
+
+
+<span class="n">Tool</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">],</span> <span class="n">Awaitable</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span>
+
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">run_tools</span><span class="p">(</span>
+    <span class="n">calls</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">ToolCall</span><span class="p">],</span>
+    <span class="n">tools</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tool</span><span class="p">],</span>
+    <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
+    <span class="n">per_tool_s</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">20.0</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">ToolResult</span><span class="p">]:</span>
+    <span class="n">results</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">ToolResult</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">calls</span><span class="p">)</span>
+    <span class="n">sem</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">Semaphore</span><span class="p">(</span><span class="n">limit</span><span class="p">)</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">run_one</span><span class="p">(</span><span class="n">i</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">c</span><span class="p">:</span> <span class="n">ToolCall</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">tool</span> <span class="o">=</span> <span class="n">tools</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">tool</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">results</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">ToolResult</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"未知工具 </span><span class="si">{</span><span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="k">async</span> <span class="k">with</span> <span class="n">sem</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">async</span> <span class="k">with</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">timeout</span><span class="p">(</span><span class="n">per_tool_s</span><span class="p">):</span>
+                    <span class="n">output</span> <span class="o">=</span> <span class="k">await</span> <span class="n">tool</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">args</span><span class="p">)</span>
+                <span class="n">results</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">ToolResult</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">output</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">TimeoutError</span><span class="p">:</span>
+                <span class="n">results</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">ToolResult</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"超时（</span><span class="si">{</span><span class="n">per_tool_s</span><span class="si">}</span><span class="s2">s）"</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">results</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">ToolResult</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">async</span> <span class="k">with</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">TaskGroup</span><span class="p">()</span> <span class="k">as</span> <span class="n">tg</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">calls</span><span class="p">):</span>
+            <span class="n">tg</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="n">run_one</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">c</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="p">[</span><span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">results</span> <span class="k">if</span> <span class="n">r</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">]</span>
+</code></pre></div>
+
+<h3 id="逐行解读">逐行解读</h3>
+<p><strong>类型定义</strong></p>
+<ul>
+<li><code>from collections.abc import Awaitable, Callable</code>：标准库里描述“函数类型”的工具。</li>
+<li><code>Tool = Callable[[str], Awaitable[str]]</code>：<strong>类型别名</strong>。读作：Tool 是一个可调用对象，参数列表是 <code>[str]</code>，返回一个可 await 的、最终给出 <code>str</code> 的东西。= TS 的 <code>type Tool = (args: string) =&gt; Promise&lt;string&gt;</code>。</li>
+<li>注意：<strong>没有 signal / ctx 参数</strong>。Python 靠异常注入取消，工具签名更干净。</li>
+</ul>
+<p><strong>准备</strong></p>
+<ul>
+<li><code>results: list[ToolResult | None] = [None] * len(calls)</code>：建一个长度为 N、全是 <code>None</code> 的列表。<code>[None] * 3</code> 得到 <code>[None, None, None]</code>。= Go 的 <code>make([]ToolResult, len(calls))</code>。</li>
+<li><code>sem = asyncio.Semaphore(limit)</code>：并发上限。</li>
+</ul>
+<p><strong>内部函数 <code>run_one</code>：处理一个工具调用</strong></p>
+<ul>
+<li><code>async def run_one(i, c)</code> 定义在 <code>run_tools</code> 里面，能直接读写外层的 <code>results</code>、<code>sem</code>、<code>tools</code>（闭包，和 Go/TS 一样）。</li>
+<li><code>tool = tools.get(c.name)</code>：查工具，查不到得到 <code>None</code>（不抛 KeyError）。</li>
+<li><code>if tool is None: ... return</code>：未知工具直接记错误结果。放在 <code>async with sem</code> 之前，不占并发名额。</li>
+<li><code>async with sem:</code>：领一个并发名额，最多 <code>limit</code> 个任务同时到达这里之后。</li>
+<li><code>async with asyncio.timeout(per_tool_s):</code>：单工具超时。</li>
+<li><code>output = await tool(c.args)</code>：真正调用工具。这里是让出点。</li>
+<li><code>results[i] = ToolResult(c.id, output, False)</code>：按下标写结果，结果顺序和 <code>calls</code> 一致。和 Go/TS 一样，每个任务写自己的下标；又因为单线程，本来也不会有竞争。</li>
+</ul>
+<p><strong>两种失败，分开处理</strong></p>
+<ul>
+<li><code>except TimeoutError:</code>：<strong>这个工具</strong>超时了，记成错误结果回传给模型。</li>
+<li><code>except Exception as e:</code>：工具自己抛了任何普通异常，同样记成结果。<code>type(e).__name__</code> 取异常类名（如 <code>ValueError</code>），让模型知道错在哪。</li>
+<li><strong>整体取消时会怎样？</strong> 外层（比如整轮 60 秒超时）取消了任务，<code>await tool(...)</code> 处抛出的是 <code>CancelledError</code>。它<strong>不是</strong> <code>Exception</code> 的子类，所以上面两个 <code>except</code> 都不会接住它，它直接冒出 <code>run_one</code>，TaskGroup 取消其他任务并向上抛出。这就是 Go 版里的 <code>return err</code>、TS 版里的 <code>if (signal.aborted) throw err</code>，<strong>Python 什么都不用写</strong>。</li>
+</ul>
+<p><strong>启动所有任务</strong></p>
+<ul>
+<li><code>async with asyncio.TaskGroup() as tg:</code>：开任务组。</li>
+<li><code>for i, c in enumerate(calls):</code>：<code>enumerate</code> 同时给出下标和元素，= Go 的 <code>for i, c := range calls</code>。</li>
+<li><code>tg.create_task(run_one(i, c))</code>：每个调用一个任务。<strong>一次性全部创建</strong>，由 Semaphore 控制同时运行的数量。（TS 版是开 <code>limit</code> 个 worker 抢任务；两种写法都对，Python 里 Semaphore 更常见。）</li>
+<li>离开 <code>async with</code> 时所有任务都结束了。</li>
+</ul>
+<p><strong>返回</strong></p>
+<ul>
+<li><code>return [r for r in results if r is not None]</code>：列表推导式过滤掉 <code>None</code>。走到这里时每个位置都已经填了，这一步主要是让类型从 <code>list[ToolResult | None]</code> 变成 <code>list[ToolResult]</code>。</li>
+</ul>
+<h3 id="三个版本对照">三个版本对照</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th></th>
+<th>Go</th>
+<th>TS</th>
+<th>Python</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>并发上限</td>
+<td><code>g.SetLimit(4)</code></td>
+<td>开 4 个 worker</td>
+<td><code>Semaphore(4)</code></td>
+</tr>
+<tr>
+<td>启动</td>
+<td><code>g.Go(...)</code></td>
+<td><code>workers.push(worker())</code></td>
+<td><code>tg.create_task(...)</code></td>
+</tr>
+<tr>
+<td>等待</td>
+<td><code>g.Wait()</code></td>
+<td><code>await Promise.all(...)</code></td>
+<td>离开 <code>async with TaskGroup</code></td>
+</tr>
+<tr>
+<td>单工具超时</td>
+<td><code>context.WithTimeout</code></td>
+<td><code>AbortSignal.timeout</code></td>
+<td><code>asyncio.timeout</code></td>
+</tr>
+<tr>
+<td>工具怎么感知取消</td>
+<td>读 <code>ctx.Done()</code></td>
+<td>监听 <code>signal</code></td>
+<td>自动：<code>await</code> 处抛 <code>CancelledError</code></td>
+</tr>
+<tr>
+<td>单个失败</td>
+<td><code>return nil</code> + 写 <code>Err</code></td>
+<td><code>catch</code> 里写结果</td>
+<td><code>except Exception</code> 里写结果</td>
+</tr>
+<tr>
+<td>整体取消</td>
+<td><code>return err</code></td>
+<td><code>throw err</code></td>
+<td>不用写，<code>CancelledError</code> 自动冒出</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="5-异步生成器流式读取-sse">5. 异步生成器：流式读取 SSE</h2>
+<p>Python 的异步生成器和 TS 的几乎一模一样。HTTP 客户端用 <strong>httpx</strong>（OpenAI / Anthropic 官方 Python SDK 底层都是它）。</p>
+<div class="hl"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">AsyncIterator</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">httpx</span>
+
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">sse_events</span><span class="p">(</span><span class="n">client</span><span class="p">:</span> <span class="n">httpx</span><span class="o">.</span><span class="n">AsyncClient</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AsyncIterator</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="k">async</span> <span class="k">with</span> <span class="n">client</span><span class="o">.</span><span class="n">stream</span><span class="p">(</span><span class="s2">"GET"</span><span class="p">,</span> <span class="n">url</span><span class="p">)</span> <span class="k">as</span> <span class="n">resp</span><span class="p">:</span>
+        <span class="n">resp</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
+        <span class="k">async</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">resp</span><span class="o">.</span><span class="n">aiter_lines</span><span class="p">():</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"data:"</span><span class="p">):</span>
+                <span class="k">continue</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">5</span><span class="p">:]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">data</span> <span class="o">==</span> <span class="s2">"[DONE]"</span><span class="p">:</span>
+                <span class="k">return</span>
+            <span class="k">yield</span> <span class="n">data</span>
+</code></pre></div>
+
+<h3 id="逐行解读_1">逐行解读</h3>
+<ul>
+<li><code>async def ... -&gt; AsyncIterator[str]</code>：函数体里有 <code>yield</code>，所以它是<strong>异步生成器</strong>。= TS 的 <code>async function*(): AsyncGenerator&lt;string&gt;</code>。Python 不需要 <code>*</code> 标记，有 <code>yield</code> 就自动是生成器。</li>
+<li><code>client: httpx.AsyncClient</code>：传入一个复用的 HTTP 客户端（内部有连接池），= Go 的 <code>*http.Client</code>。</li>
+<li><code>async with client.stream("GET", url) as resp:</code>：发起<strong>流式</strong>请求。用 <code>stream</code> 而不是 <code>get</code>，响应体才不会一次性读进内存。<code>async with</code> 保证离开时<strong>关闭响应、释放连接</strong>，= Go 的 <code>defer resp.Body.Close()</code>。</li>
+<li><code>resp.raise_for_status()</code>：状态码 4xx / 5xx 时抛异常，= Go 里 <code>if resp.StatusCode &gt;= 400 { return err }</code>。</li>
+<li><code>async for line in resp.aiter_lines():</code>：<strong>逐行</strong>异步读取。httpx 已经帮你做了 UTF-8 解码和按行切分，所以不需要 TS 版的 <code>TextDecoderStream</code> + <code>buf</code> + <code>indexOf("\n")</code>。= Go 的 <code>bufio.Scanner</code>。</li>
+<li><code>line[5:]</code>：去掉前 5 个字符 <code>data:</code>。</li>
+<li><code>return</code>：生成器结束（遇到 <code>[DONE]</code>）。</li>
+<li><code>yield data</code>：产出一条，暂停，等调用方要下一条。</li>
+</ul>
+<h3 id="用法以及一个和-js-不同的坑">用法，以及一个和 JS 不同的坑</h3>
+<div class="hl"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">contextlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">aclosing</span>
+
+<span class="k">async</span> <span class="k">with</span> <span class="n">httpx</span><span class="o">.</span><span class="n">AsyncClient</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+    <span class="k">async</span> <span class="k">with</span> <span class="n">aclosing</span><span class="p">(</span><span class="n">sse_events</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">URL</span><span class="p">))</span> <span class="k">as</span> <span class="n">events</span><span class="p">:</span>
+        <span class="k">async</span> <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">events</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">should_stop</span><span class="p">:</span>
+                <span class="k">break</span>
+</code></pre></div>
+
+<ul>
+<li><code>async with httpx.AsyncClient() as client:</code>：创建客户端，离开时关闭连接池。</li>
+<li><code>aclosing(...)</code>：<strong>为什么要多包这一层？</strong> 在 TS 里，<code>for await</code> 里 <code>break</code> 会立刻调用生成器的 <code>return()</code>，<code>finally</code> 马上执行。<strong>Python 的 <code>async for</code> 里 <code>break</code> 不会立刻关闭异步生成器</strong>，生成器只是被挂起，要等垃圾回收或事件循环关闭时才清理。于是生成器里的 <code>async with client.stream(...)</code> 迟迟不退出，<strong>连接一直开着，上游可能还在生成、还在计费</strong>。</li>
+<li><code>aclosing</code> 保证离开这个 <code>async with</code> 时调用生成器的 <code>aclose()</code>，生成器在暂停的 <code>yield</code> 处收到 <code>GeneratorExit</code>，里面的 <code>async with</code> 正常退出，连接关闭。= TS 里 <code>break</code> 自动做的事。</li>
+<li>规则：<strong><code>break</code> 可能提前退出的异步生成器，一律用 <code>aclosing</code> 包起来。</strong></li>
+</ul>
+<p>取消整个流式读取，不需要 AbortController：</p>
+<div class="hl"><pre><span></span><code><span class="k">async</span> <span class="k">with</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">timeout</span><span class="p">(</span><span class="mi">60</span><span class="p">):</span>       <span class="c1"># 60 秒后自动取消</span>
+    <span class="k">async</span> <span class="k">with</span> <span class="n">aclosing</span><span class="p">(</span><span class="n">sse_events</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">URL</span><span class="p">))</span> <span class="k">as</span> <span class="n">events</span><span class="p">:</span>
+        <span class="k">async</span> <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">events</span><span class="p">:</span>
+            <span class="o">...</span>
+</code></pre></div>
+
+<p>超时时，正在 <code>await</code> 下一行数据的地方抛 <code>CancelledError</code>，生成器里的 <code>async with client.stream</code> 退出、关闭连接，最后在外层变成 <code>TimeoutError</code>。</p>
+<h2 id="6-四个高频坑">6. 四个高频坑</h2>
+<h3 id="坑-1在协程里调用阻塞函数">坑 1：在协程里调用阻塞函数</h3>
+<div class="hl"><pre><span></span><code><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">bad_tool</span><span class="p">(</span><span class="n">args</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>                      <span class="c1"># ❌ 阻塞整个线程，事件循环卡死 5 秒，所有任务都停</span>
+    <span class="k">return</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">URL</span><span class="p">)</span><span class="o">.</span><span class="n">text</span>      <span class="c1"># ❌ requests 是同步库，同样阻塞</span>
+</code></pre></div>
+
+<p>asyncio 只有一个线程，一个协程不 <code>await</code> 就霸占它，其他所有任务（包括超时计时）都动不了。Go 没有这个问题（goroutine 会被调度器抢占），JS 有同样的问题。</p>
+<p>修正：用异步版本 <code>await asyncio.sleep(5)</code>、<code>httpx.AsyncClient</code>；实在要调同步库，丢到线程里：<code>await asyncio.to_thread(requests.get, URL)</code>。</p>
+<h3 id="坑-2忘了-await">坑 2：忘了 <code>await</code></h3>
+<div class="hl"><pre><span></span><code><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+    <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>     <span class="c1"># ❌ 协程对象被创建又丢掉，什么也没发生</span>
+</code></pre></div>
+
+<p>比 TS 更隐蔽：TS 里没 await 至少还会执行，Python 里<strong>根本不执行</strong>。看到 <code>coroutine ... was never awaited</code> 警告就是它。</p>
+<h3 id="坑-3create_task-后不保存引用">坑 3：<code>create_task</code> 后不保存引用</h3>
+<div class="hl"><pre><span></span><code><span class="n">asyncio</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="n">send_metrics</span><span class="p">())</span>   <span class="c1"># ❌ 返回值被丢弃</span>
+</code></pre></div>
+
+<p>事件循环只对任务持有弱引用，你不保存它，任务可能执行到一半被垃圾回收。要么保存到变量 / 集合里，要么直接用 <code>TaskGroup</code>（推荐）。</p>
+<h3 id="坑-4异步生成器-break-不关闭">坑 4：异步生成器 <code>break</code> 不关闭</h3>
+<p>见第 5 节：用 <code>aclosing</code>。</p>
+<hr />
+<h2 id="练习今天做完">练习（今天做完）</h2>
+<h3 id="环境准备">环境准备</h3>
+<div class="hl"><pre><span></span><code>mkdir<span class="w"> </span>-p<span class="w"> </span>projects<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>projects
+uv<span class="w"> </span>init<span class="w"> </span>--lib<span class="w"> </span>--name<span class="w"> </span>py-agent-core<span class="w"> </span>--python<span class="w"> </span><span class="m">3</span>.12<span class="w"> </span><span class="m">02</span>-py-agent-core
+<span class="nb">cd</span><span class="w"> </span><span class="m">02</span>-py-agent-core
+uv<span class="w"> </span>add<span class="w"> </span>pydantic<span class="w"> </span>httpx
+uv<span class="w"> </span>add<span class="w"> </span>--dev<span class="w"> </span>pytest<span class="w"> </span>pytest-asyncio
+</code></pre></div>
+
+<p>在 <code>pyproject.toml</code> 末尾加上：</p>
+<div class="hl"><pre><span></span><code><span class="k">[tool.pytest.ini_options]</span>
+<span class="n">asyncio_mode</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"auto"</span>
+</code></pre></div>
+
+<p><code>asyncio_mode = "auto"</code> 让 pytest 自动用事件循环运行 <code>async def test_...</code> 测试函数。</p>
+<p>文件放在 <code>src/py_agent_core/</code> 下：<code>events.py</code>、<code>tools.py</code>、<code>sse.py</code>；测试放 <code>tests/</code> 下。</p>
+<h3 id="题目">题目</h3>
+<ol>
+<li>用 Pydantic 定义 <code>StreamEvent</code> 可辨识联合（text / tool_call / done / error 四种），写 <code>parse_event(data: str)</code>，返回 <code>(event, None)</code> 或 <code>(None, 错误文本)</code>，永远不抛异常</li>
+<li>用 <code>run_tools</code> 跑三个假工具（0.05s / 0.1s / 5s），<code>per_tool_s=0.2</code>，断言前两个成功、第三个 <code>is_error=True</code>、总耗时 &lt; 0.4s</li>
+<li>写一个测试：外层套 <code>asyncio.timeout(0.05)</code> 调用 <code>run_tools</code>，断言抛出 <code>TimeoutError</code>（整体取消能穿透，没有被 <code>except Exception</code> 吞掉）</li>
+<li>用 <code>asyncio.start_server</code> 起一个假 SSE 服务，客户端读 3 条后 <code>break</code>，断言服务端感知到断开</li>
+<li><code>uv run pytest</code> 全绿</li>
+</ol>
+<h2 id="自测题">自测题</h2>
+<ol>
+<li>Python 的协程和 JS 的 Promise 有什么关键区别？</li>
+<li>为什么 Python 版 <code>run_tools</code> 不需要像 Go / TS 那样把 ctx / signal 传给每个工具？代价是什么？</li>
+<li><code>except Exception</code> 为什么不会把整体取消吞掉？</li>
+<li><code>TaskGroup</code> 和 <code>gather</code> 有什么区别？为什么新代码优先用 <code>TaskGroup</code>？</li>
+<li>为什么异步生成器要用 <code>aclosing</code> 包起来？TS 里为什么不需要？</li>
+</ol>
+<hr />
+<h1 id="参考答案与详解">参考答案与详解</h1>
+<h2 id="自测题答案">自测题答案</h2>
+<h3 id="1-协程-vs-promise">1. 协程 vs Promise</h3>
+<p>JS 的 Promise 是“热”的：<code>doWork()</code> 一调用就开始执行，<code>await</code> 只是等结果。Python 的协程是“冷”的：<code>do_work()</code> 只创建一个协程对象，必须 <code>await</code> 它，或者用 <code>create_task</code> / <code>TaskGroup</code> 交给事件循环，才会开始执行。所以 Python 里忘了 <code>await</code> 的后果更严重：代码根本没跑。</p>
+<h3 id="2-为什么不用传-ctx-signal">2. 为什么不用传 ctx / signal</h3>
+<p>Python 的取消是“注入异常”：任务被取消（<code>task.cancel()</code>、<code>asyncio.timeout</code> 到期、TaskGroup 里别的任务失败）时，它正卡在哪个 <code>await</code> 上，那里就抛出 <code>CancelledError</code>。工具代码只要是正常的异步代码（<code>await httpx...</code>、<code>await asyncio.sleep</code>），天然就能被取消，不需要显式检查信号。</p>
+<p>代价：没有 <code>await</code> 的代码取消不了，比如阻塞调用 <code>time.sleep</code>、同步库 <code>requests</code>、长时间纯计算循环。这和 Go 里 goroutine 不读 <code>ctx.Done()</code>、TS 里工具不监听 <code>signal</code> 是同一类问题，只是形式不同。</p>
+<h3 id="3-为什么-except-exception-不吞取消">3. 为什么 <code>except Exception</code> 不吞取消</h3>
+<p>从 Python 3.8 起，<code>asyncio.CancelledError</code> 继承自 <code>BaseException</code>，不是 <code>Exception</code>。<code>except Exception</code> 只接普通错误，取消信号会直接穿过去，一路冒到 TaskGroup 和外层。练习 3 就是在验证这一点。反过来，写 <code>except BaseException:</code> 或裸 <code>except:</code> 却不重新 <code>raise</code>，就会把取消吞掉：这个任务收到了取消，却当成普通错误处理后继续往下执行。</p>
+<h3 id="4-taskgroup-vs-gather">4. <code>TaskGroup</code> vs <code>gather</code></h3>
+<ul>
+<li><code>TaskGroup</code>：一个任务失败，<strong>自动取消组内其他任务</strong>，等它们都结束后抛出 <code>ExceptionGroup</code>。离开 <code>async with</code> 时保证没有任务还在后台跑。= <code>errgroup.WithContext</code>。</li>
+<li><code>gather</code>（默认参数）：一个任务失败，异常立刻抛给你，但<strong>其他任务继续在后台跑</strong>，没人等它们，容易泄漏。</li>
+</ul>
+<p>新代码优先用 <code>TaskGroup</code>，它把“每个任务怎么结束”这件事交给语言保证，和 0.1 里“每启动一个 goroutine，都要想清楚它怎么结束”是同一条原则。</p>
+<h3 id="5-为什么要-aclosing">5. 为什么要 <code>aclosing</code></h3>
+<p>TS 的 <code>for await</code> 里 <code>break</code>，会立刻调用生成器的 <code>return()</code>，<code>finally</code> 马上执行。Python 的 <code>async for</code> 里 <code>break</code> 不会立刻关闭异步生成器，它只是被挂起，等垃圾回收或事件循环关闭时才清理。在这之前，生成器里的 <code>async with client.stream(...)</code> 不会退出，HTTP 连接一直占着。<code>aclosing</code> 在离开 <code>async with</code> 时显式调用 <code>aclose()</code>，保证立刻清理。</p>
+<h2 id="练习参考实现">练习参考实现</h2>
+<p>以下代码均已在 Python 3.12、pydantic 2.14、httpx 0.28 下运行通过：<code>uv run pytest</code> → <code>6 passed</code>。</p>
+<h3 id="练习-1parse_eventsrcpy_agent_coreeventspy">练习 1：<code>parse_event</code>（<code>src/py_agent_core/events.py</code>）</h3>
+<div class="hl"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Annotated</span><span class="p">,</span> <span class="n">Literal</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">Field</span><span class="p">,</span> <span class="n">TypeAdapter</span><span class="p">,</span> <span class="n">ValidationError</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TextEvent</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="nb">type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"text"</span><span class="p">]</span>
+    <span class="n">delta</span><span class="p">:</span> <span class="nb">str</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">ToolCallEvent</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="nb">type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"tool_call"</span><span class="p">]</span>
+    <span class="nb">id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">args</span><span class="p">:</span> <span class="nb">str</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Usage</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="nb">input</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">output</span><span class="p">:</span> <span class="nb">int</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">DoneEvent</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="nb">type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"done"</span><span class="p">]</span>
+    <span class="n">usage</span><span class="p">:</span> <span class="n">Usage</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">ErrorEvent</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="nb">type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"error"</span><span class="p">]</span>
+    <span class="n">message</span><span class="p">:</span> <span class="nb">str</span>
+
+
+<span class="n">StreamEvent</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span>
+    <span class="n">TextEvent</span> <span class="o">|</span> <span class="n">ToolCallEvent</span> <span class="o">|</span> <span class="n">DoneEvent</span> <span class="o">|</span> <span class="n">ErrorEvent</span><span class="p">,</span>
+    <span class="n">Field</span><span class="p">(</span><span class="n">discriminator</span><span class="o">=</span><span class="s2">"type"</span><span class="p">),</span>
+<span class="p">]</span>
+
+<span class="n">_adapter</span> <span class="o">=</span> <span class="n">TypeAdapter</span><span class="p">(</span><span class="n">StreamEvent</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">parse_event</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">StreamEvent</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""返回 (event, None) 或 (None, 错误文本)，永远不抛异常。"""</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_adapter</span><span class="o">.</span><span class="n">validate_json</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="kc">None</span>
+    <span class="k">except</span> <span class="n">ValidationError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+</code></pre></div>
+
+<p>逐行解读：</p>
+<ul>
+<li>四个 <code>BaseModel</code> 类，每个都有 <code>type: Literal[...]</code> 作为标签，和 TS 版 <code>z.object({ type: z.literal("text"), ... })</code> 一一对应。</li>
+<li><code>Usage</code> 单独定义成一个 model，再作为 <code>DoneEvent.usage</code> 的类型：Pydantic 会递归校验嵌套对象。</li>
+<li><code>StreamEvent = Annotated[A | B | C | D, Field(discriminator="type")]</code>：可辨识联合，= <code>z.discriminatedUnion("type", [...])</code>。</li>
+<li><code>_adapter = TypeAdapter(StreamEvent)</code>：联合类型不是 <code>BaseModel</code>，要用 <code>TypeAdapter</code> 包一层才能校验。放在模块顶层只建一次，因为构建校验器有开销。下划线开头表示模块私有。</li>
+<li><code>-&gt; tuple[StreamEvent | None, str | None]</code>：返回 <code>(事件, 错误)</code>，Go 风格。</li>
+<li><code>_adapter.validate_json(data)</code>：解析 + 校验一步完成，非法 JSON 也会变成 <code>ValidationError</code>。</li>
+<li><code>"""..."""</code>：三引号字符串，放在函数第一行就是<strong>文档字符串</strong>（docstring），= Go 函数上方的注释。</li>
+</ul>
+<p>测试（<code>tests/test_events.py</code>）：</p>
+<div class="hl"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">py_agent_core.events</span><span class="w"> </span><span class="kn">import</span> <span class="n">TextEvent</span><span class="p">,</span> <span class="n">parse_event</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_valid</span><span class="p">():</span>
+    <span class="n">ev</span><span class="p">,</span> <span class="n">err</span> <span class="o">=</span> <span class="n">parse_event</span><span class="p">(</span><span class="s1">'{"type":"text","delta":"你好"}'</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">err</span> <span class="ow">is</span> <span class="kc">None</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ev</span><span class="p">,</span> <span class="n">TextEvent</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">ev</span><span class="o">.</span><span class="n">delta</span> <span class="o">==</span> <span class="s2">"你好"</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_invalid</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">bad</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">'{"type":"text"}'</span><span class="p">,</span> <span class="s1">'{"type":"unknown"}'</span><span class="p">,</span> <span class="s2">"not json"</span><span class="p">]:</span>
+        <span class="n">ev</span><span class="p">,</span> <span class="n">err</span> <span class="o">=</span> <span class="n">parse_event</span><span class="p">(</span><span class="n">bad</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">ev</span> <span class="ow">is</span> <span class="kc">None</span>
+        <span class="k">assert</span> <span class="n">err</span>
+</code></pre></div>
+
+<ul>
+<li>pytest 会自动收集 <code>tests/</code> 下 <code>test_</code> 开头的文件里 <code>test_</code> 开头的函数，= Go 的 <code>TestXxx</code>。</li>
+<li><code>assert 条件</code>：条件为假则测试失败，= <code>if !cond { t.Fatal() }</code>。pytest 会把失败时两边的值都打印出来，不需要写 <code>expect(...).toBe(...)</code>。</li>
+<li><code>isinstance(ev, TextEvent)</code>：检查类型，= Go 的类型断言 <code>_, ok := ev.(TextEvent)</code>。</li>
+<li><code>assert err</code>：空字符串和 <code>None</code> 都算假，这里断言“有错误文本”。</li>
+</ul>
+<h3 id="练习-23并行工具srcpy_agent_coretoolspy-见第-4-节测试-teststest_toolspy">练习 2、3：并行工具（<code>src/py_agent_core/tools.py</code> 见第 4 节，测试 <code>tests/test_tools.py</code>）</h3>
+<div class="hl"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">pytest</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">py_agent_core.tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">ToolCall</span><span class="p">,</span> <span class="n">run_tools</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">fake_tool</span><span class="p">(</span><span class="n">seconds</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">tool</span><span class="p">(</span><span class="n">_args</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">seconds</span><span class="p">)</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">"done </span><span class="si">{</span><span class="n">seconds</span><span class="si">}</span><span class="s2">"</span>
+
+    <span class="k">return</span> <span class="n">tool</span>
+
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">test_slow_tool_times_out</span><span class="p">():</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="k">await</span> <span class="n">run_tools</span><span class="p">(</span>
+        <span class="p">[</span><span class="n">ToolCall</span><span class="p">(</span><span class="s2">"a"</span><span class="p">,</span> <span class="s2">"fast"</span><span class="p">,</span> <span class="s2">"</span><span class="si">{}</span><span class="s2">"</span><span class="p">),</span> <span class="n">ToolCall</span><span class="p">(</span><span class="s2">"b"</span><span class="p">,</span> <span class="s2">"mid"</span><span class="p">,</span> <span class="s2">"</span><span class="si">{}</span><span class="s2">"</span><span class="p">),</span> <span class="n">ToolCall</span><span class="p">(</span><span class="s2">"c"</span><span class="p">,</span> <span class="s2">"slow"</span><span class="p">,</span> <span class="s2">"</span><span class="si">{}</span><span class="s2">"</span><span class="p">)],</span>
+        <span class="p">{</span><span class="s2">"fast"</span><span class="p">:</span> <span class="n">fake_tool</span><span class="p">(</span><span class="mf">0.05</span><span class="p">),</span> <span class="s2">"mid"</span><span class="p">:</span> <span class="n">fake_tool</span><span class="p">(</span><span class="mf">0.1</span><span class="p">),</span> <span class="s2">"slow"</span><span class="p">:</span> <span class="n">fake_tool</span><span class="p">(</span><span class="mi">5</span><span class="p">)},</span>
+        <span class="n">per_tool_s</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">assert</span> <span class="p">[</span><span class="n">r</span><span class="o">.</span><span class="n">is_error</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">res</span><span class="p">]</span> <span class="o">==</span> <span class="p">[</span><span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span> <span class="o">&lt;</span> <span class="mf">0.4</span>
+
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">test_unknown_tool</span><span class="p">():</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="k">await</span> <span class="n">run_tools</span><span class="p">([</span><span class="n">ToolCall</span><span class="p">(</span><span class="s2">"x"</span><span class="p">,</span> <span class="s2">"nope"</span><span class="p">,</span> <span class="s2">"</span><span class="si">{}</span><span class="s2">"</span><span class="p">)],</span> <span class="p">{})</span>
+    <span class="k">assert</span> <span class="n">res</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">is_error</span>
+
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">test_outer_cancel_propagates</span><span class="p">():</span>
+    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">TimeoutError</span><span class="p">):</span>
+        <span class="k">async</span> <span class="k">with</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">timeout</span><span class="p">(</span><span class="mf">0.05</span><span class="p">):</span>
+            <span class="k">await</span> <span class="n">run_tools</span><span class="p">([</span><span class="n">ToolCall</span><span class="p">(</span><span class="s2">"a"</span><span class="p">,</span> <span class="s2">"slow"</span><span class="p">,</span> <span class="s2">"</span><span class="si">{}</span><span class="s2">"</span><span class="p">)],</span> <span class="p">{</span><span class="s2">"slow"</span><span class="p">:</span> <span class="n">fake_tool</span><span class="p">(</span><span class="mi">5</span><span class="p">)})</span>
+</code></pre></div>
+
+<p>逐行解读：</p>
+<ul>
+<li><code>def fake_tool(seconds)</code>：普通函数，<strong>返回一个协程函数</strong>（工厂），和 TS 版 <code>fakeTool(ms)</code> 一样。内层 <code>async def tool(...)</code> 定义后直接 <code>return tool</code>。</li>
+<li><code>time.monotonic()</code>：单调时钟，专门用来测耗时，不受系统改时间影响，= Go 的 <code>time.Since</code> 底层用的单调时钟。</li>
+<li><code>ToolCall("a", "fast", "{}")</code>：dataclass 按位置传参。</li>
+<li><code>per_tool_s=0.2</code>：关键字参数，跳过 <code>limit</code> 用默认值。</li>
+<li>为什么约 0.2 秒就结束：<code>slow</code> 在 <code>asyncio.timeout(0.2)</code> 到期时，正卡在 <code>await asyncio.sleep(5)</code>，那里被注入取消，<code>timeout</code> 把它转成 <code>TimeoutError</code>，被 <code>except TimeoutError</code> 记成错误结果。<strong>工具里什么取消逻辑都没写。</strong> 对比 TS 版，<code>sleep</code> 要自己监听 <code>signal</code> 才能做到。</li>
+<li><code>test_outer_cancel_propagates</code>：</li>
+<li><code>with pytest.raises(TimeoutError):</code>：断言块里会抛出 <code>TimeoutError</code>，= <code>expect(...).rejects.toThrow()</code>。</li>
+<li>外层 <code>asyncio.timeout(0.05)</code> 到期 → 取消 <code>run_tools</code> → TaskGroup 里的任务在 <code>await</code> 处收到 <code>CancelledError</code> → 它不是 <code>Exception</code>，<code>run_one</code> 里两个 <code>except</code> 都不接 → TaskGroup 取消其他任务并向外抛 → 外层 <code>timeout</code> 把它转成 <code>TimeoutError</code>。</li>
+<li>注意：这里外层被取消的是 <code>run_tools</code> 所在的任务本身，TaskGroup 退出时会把这个取消继续往外抛，所以即使子任务吞了 <code>CancelledError</code>，这个测试也能过。吞取消的真正危害在于<strong>被吞的那个任务会继续往下执行</strong>，比如继续调用下一个工具、继续计费。所以规则不变：不要用 <code>except BaseException</code> 或裸 <code>except</code>。</li>
+</ul>
+<h3 id="练习-4服务端感知断开srcpy_agent_coressepy-见第-5-节测试-teststest_ssepy">练习 4：服务端感知断开（<code>src/py_agent_core/sse.py</code> 见第 5 节，测试 <code>tests/test_sse.py</code>）</h3>
+<div class="hl"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">contextlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">aclosing</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">httpx</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">py_agent_core.sse</span><span class="w"> </span><span class="kn">import</span> <span class="n">sse_events</span>
+
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">test_client_break_closes_server</span><span class="p">():</span>
+    <span class="n">closed</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">Event</span><span class="p">()</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">handle</span><span class="p">(</span><span class="n">reader</span><span class="p">:</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">StreamReader</span><span class="p">,</span> <span class="n">writer</span><span class="p">:</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">StreamWriter</span><span class="p">):</span>
+        <span class="k">await</span> <span class="n">reader</span><span class="o">.</span><span class="n">readuntil</span><span class="p">(</span><span class="sa">b</span><span class="s2">"</span><span class="se">\r\n\r\n</span><span class="s2">"</span><span class="p">)</span>  <span class="c1"># 读掉请求头</span>
+        <span class="n">writer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">b</span><span class="s2">"HTTP/1.1 200 OK</span><span class="se">\r\n</span><span class="s2">Content-Type: text/event-stream</span><span class="se">\r\n\r\n</span><span class="s2">"</span><span class="p">)</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="n">writer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s1">'data: </span><span class="se">{{</span><span class="s1">"type":"text","delta":"t</span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s1">"</span><span class="se">}}\n\n</span><span class="s1">'</span><span class="o">.</span><span class="n">encode</span><span class="p">())</span>
+                <span class="k">await</span> <span class="n">writer</span><span class="o">.</span><span class="n">drain</span><span class="p">()</span>  <span class="c1"># 客户端断开后这里会抛 ConnectionResetError</span>
+                <span class="n">n</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.02</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">ConnectionResetError</span><span class="p">,</span> <span class="ne">BrokenPipeError</span><span class="p">):</span>
+            <span class="n">closed</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="n">writer</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="n">server</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">start_server</span><span class="p">(</span><span class="n">handle</span><span class="p">,</span> <span class="s2">"127.0.0.1"</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">port</span> <span class="o">=</span> <span class="n">server</span><span class="o">.</span><span class="n">sockets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">getsockname</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">async</span> <span class="k">with</span> <span class="n">httpx</span><span class="o">.</span><span class="n">AsyncClient</span><span class="p">(</span><span class="n">trust_env</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+        <span class="k">async</span> <span class="k">with</span> <span class="n">aclosing</span><span class="p">(</span><span class="n">sse_events</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"http://127.0.0.1:</span><span class="si">{</span><span class="n">port</span><span class="si">}</span><span class="s2">"</span><span class="p">))</span> <span class="k">as</span> <span class="n">events</span><span class="p">:</span>
+            <span class="k">async</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">events</span><span class="p">:</span>
+                <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="n">count</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                    <span class="k">break</span>
+
+    <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">wait_for</span><span class="p">(</span><span class="n">closed</span><span class="o">.</span><span class="n">wait</span><span class="p">(),</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">count</span> <span class="o">==</span> <span class="mi">3</span>
+    <span class="n">server</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</code></pre></div>
+
+<p>逐行解读：</p>
+<p><strong>服务端</strong></p>
+<ul>
+<li><code>closed = asyncio.Event()</code>：一次性信号，<code>closed.set()</code> 触发，<code>await closed.wait()</code> 等待。= Go 的 <code>closed := make(chan struct{})</code> + <code>close(closed)</code> + <code>&lt;-closed</code>，也是 TS 版里“把 resolve 拿到外面”的那个写法的标准库版本。</li>
+<li><code>async def handle(reader, writer)</code>：每来一个 TCP 连接，<code>asyncio.start_server</code> 就调用一次它。<code>reader</code> / <code>writer</code> 是这条连接的读写两端，比 HTTP 框架更底层，这里手写 HTTP 响应。</li>
+<li><code>await reader.readuntil(b"\r\n\r\n")</code>：读到请求头结束（HTTP 头以空行结尾）。<code>b"..."</code> 是<strong>字节串</strong>（= Go 的 <code>[]byte("...")</code>），网络读写用字节，不是字符串。</li>
+<li><code>writer.write(b"HTTP/1.1 200 OK\r\n...")</code>：手写响应状态行和头。</li>
+<li><code>f'data: {{"type":"text","delta":"t{n}"}}\n\n'.encode()</code>：f-string 里 <code>{{</code> <code>}}</code> 表示字面量的花括号，<code>{n}</code> 才是插值；<code>.encode()</code> 把字符串转成 UTF-8 字节。</li>
+<li><code>await writer.drain()</code>：等待数据真正发出去。<strong>客户端断开后，这里会抛 <code>ConnectionResetError</code> 或 <code>BrokenPipeError</code></strong>，这就是服务端“感知断开”的方式，= Go 里 <code>r.Context().Done()</code>、Node 里 <code>res.on("close")</code>。</li>
+<li><code>finally: writer.close()</code>：无论怎样都关闭连接。</li>
+<li><code>asyncio.start_server(handle, "127.0.0.1", 0)</code>：端口 0 = 系统随机分配。<code>server.sockets[0].getsockname()[1]</code> 取实际端口。</li>
+</ul>
+<p><strong>客户端</strong></p>
+<ul>
+<li><code>httpx.AsyncClient(trust_env=False)</code>：<code>trust_env=False</code> 表示不读取环境变量里的代理设置。如果你的机器设置了 <code>HTTP_PROXY</code>，访问 <code>127.0.0.1</code> 也可能被转到代理上，测试会莫名其妙 404。测试本地服务时建议总是加上。</li>
+<li><code>async with aclosing(sse_events(...)) as events:</code>：见第 5 节，<code>break</code> 后立刻关闭生成器。</li>
+<li><code>break</code>：读到第 3 条退出。退出 <code>aclosing</code> → 生成器 <code>aclose()</code> → 生成器里 <code>async with client.stream</code> 退出 → 连接关闭 → 服务端 <code>drain()</code> 抛错 → <code>closed.set()</code>。</li>
+</ul>
+<p><strong>断言</strong></p>
+<ul>
+<li><code>await asyncio.wait_for(closed.wait(), timeout=2)</code>：最多等 2 秒，等不到就抛 <code>TimeoutError</code>，测试失败。<code>wait_for</code> 是 <code>asyncio.timeout</code> 的老写法，作用相同。</li>
+<li>和前两课一样，这个测试验证的是最值钱的那条链：<strong>客户端不要了 → 上游连接真的断了 → 停止计费。</strong></li>
+</ul>
+<blockquote>
+<p>说明：这个测试里，即使不用 <code>aclosing</code>，离开外层 <code>async with httpx.AsyncClient()</code> 时连接池关闭，连接也会断，所以测试同样能过。但在真实服务里，<code>AsyncClient</code> 通常是全局复用、不会关闭的，那时没有 <code>aclosing</code> 连接就会一直挂着。养成习惯比通过测试更重要。</p>
+</blockquote>
+<h3 id="练习-5">练习 5</h3>
+<div class="hl"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>-q
+<span class="c1"># ......                                                    [100%]</span>
+<span class="c1"># 6 passed in 0.51s</span>
+</code></pre></div>
+
+<p>全部通过，这一课就算完成，可以在 ROADMAP 里勾上 Python。</p>
+    <nav class="pager"><a class="prev" href="00-02-typescript.html"><span>← 上一课 0.2</span>TypeScript</a><a class="next" href="00-04-streaming.html"><span>下一课 0.4 →</span>HTTP / SSE / WebSocket</a></nav>
+    <p class="foot">© 2026 duang777 · 课件源文件：<a href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/notes/00-foundations/03-python.md">notes/00-foundations/03-python.md</a></p>
+  </article>
+</div>
+<script>
+document.querySelectorAll('article pre').forEach(function(pre){
+  var b=document.createElement('button');b.className='code__copy';b.textContent='复制';
+  b.onclick=function(){navigator.clipboard.writeText(pre.innerText).then(function(){b.textContent='已复制';setTimeout(function(){b.textContent='复制'},1200)})};
+  pre.parentNode.insertBefore(b,pre);
+});
+var links=[].slice.call(document.querySelectorAll('.toc a')),map={};
+links.forEach(function(a){map[decodeURIComponent(a.getAttribute('href').slice(1))]=a});
+var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting&&map[e.target.id]){links.forEach(function(l){l.classList.remove('on')});map[e.target.id].classList.add('on')}})},{rootMargin:'-80px 0px -70% 0px'});
+document.querySelectorAll('article h1[id],article h2[id]').forEach(function(h){io.observe(h)});
+</script>
+</body>
+</html>
