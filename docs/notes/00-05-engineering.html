@@ -1,0 +1,832 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>0.5 工程基础：Git、Docker、Linux，把 Agent 服务送上线 · AI Agent 全栈</title>
+<meta name="description" content="0.5 工程基础：Git、Docker、Linux，把 Agent 服务送上线。duang777 的 AI Agent 全栈公开学习课件。" />
+<style>
+:root{
+  --bg:#0a0a0a;--surface:#111;--text:#ededed;--text-2:#a1a1a1;--text-3:rgb(255 255 255/.4);
+  --line:rgb(255 255 255/.1);--line-2:rgb(255 255 255/.06);
+  --sans:Inter,-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei","Helvetica Neue",sans-serif;
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:80px}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;line-height:1.8;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+.nav{position:sticky;top:0;z-index:10;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;border-bottom:1px solid var(--line);background:rgb(10 10 10/.8);backdrop-filter:blur(12px)}
+.nav__brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-size:14px;font-weight:500}
+.nav__dot{width:10px;height:10px;border-radius:3px;background:var(--text)}
+.nav__links{display:flex;gap:20px;font-size:14px;color:var(--text-2)}
+.nav__links a{text-decoration:none}.nav__links a:hover{color:var(--text)}
+.wrap{max-width:1200px;margin:0 auto;padding:0 24px;display:grid;grid-template-columns:220px minmax(0,1fr);gap:56px}
+.toc{position:sticky;top:80px;align-self:start;max-height:calc(100vh - 100px);overflow:auto;padding:40px 0 40px;font-size:13px;line-height:1.6}
+.toc__label{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--text-3);text-transform:uppercase;margin-bottom:12px}
+.toc ul{list-style:none;margin:0;padding:0}
+.toc li{margin:0}
+.toc a{display:block;padding:4px 0 4px 12px;border-left:1px solid var(--line);color:var(--text-2);text-decoration:none}
+.toc a:hover,.toc a.on{color:var(--text);border-left-color:var(--text)}
+.toc ul ul a{padding-left:24px;font-size:12.5px;color:var(--text-3)}
+.toc ul ul a:hover,.toc ul ul a.on{color:var(--text)}
+article{min-width:0;max-width:760px;padding:48px 0 96px}
+.meta{font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--text-3);margin-bottom:16px}
+article h1.title{font-size:40px;line-height:1.2;letter-spacing:-.02em;font-weight:600;margin:0 0 24px}
+article h1{font-size:28px;line-height:1.3;letter-spacing:-.01em;font-weight:600;margin:72px 0 20px;padding-top:32px;border-top:1px solid var(--line)}
+article h2{font-size:22px;line-height:1.4;font-weight:600;margin:48px 0 16px}
+article h3{font-size:18px;font-weight:600;margin:36px 0 12px}
+article h4{font-size:16px;font-weight:600;margin:28px 0 8px}
+article p{margin:0 0 18px;color:#d4d4d4}
+article strong{color:var(--text);font-weight:600}
+article ul,article ol{padding-left:22px;margin:0 0 18px;color:#d4d4d4}
+article li{margin:4px 0}
+article a{text-decoration:underline;text-decoration-color:var(--text-3);text-underline-offset:3px}
+article a:hover{text-decoration-color:var(--text)}
+article hr{border:0;border-top:1px solid var(--line);margin:48px 0}
+article blockquote{margin:0 0 20px;padding:12px 18px;border-left:2px solid var(--text-2);background:var(--surface);border-radius:0 8px 8px 0;color:var(--text-2)}
+article blockquote p{margin:6px 0;color:var(--text-2)}
+article code{font-family:var(--mono);font-size:.88em;background:#1a1a1a;border:1px solid var(--line-2);border-radius:5px;padding:1px 6px}
+article pre{position:relative;margin:0 0 22px;padding:16px 18px;background:#0f0f0f;border:1px solid var(--line);border-radius:10px;overflow:auto;font-size:13.5px;line-height:1.65}
+article pre code{background:none;border:0;padding:0;font-size:inherit}
+.code{position:relative}
+.code__lang{position:absolute;top:8px;right:46px;font-family:var(--mono);font-size:11px;color:var(--text-3);z-index:1}
+.code__copy{position:absolute;top:6px;right:8px;z-index:1;font:11px var(--mono);color:var(--text-2);background:#1a1a1a;border:1px solid var(--line);border-radius:6px;padding:2px 7px;cursor:pointer}
+.code__copy:hover{color:var(--text)}
+.tbl{overflow-x:auto;margin:0 0 22px;border:1px solid var(--line);border-radius:10px}
+article table{border-collapse:collapse;width:100%;font-size:14px}
+article th,article td{padding:10px 14px;border-bottom:1px solid var(--line-2);text-align:left;vertical-align:top}
+article th{font-weight:600;background:var(--surface);color:var(--text)}
+article tr:last-child td{border-bottom:0}
+article details{margin:0 0 18px;border:1px solid var(--line);border-radius:10px;padding:10px 16px;background:var(--surface)}
+article summary{cursor:pointer;font-weight:500}
+.pager{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:72px;padding-top:32px;border-top:1px solid var(--line)}
+.pager a{display:block;padding:16px 18px;border:1px solid var(--line);border-radius:10px;text-decoration:none}
+.pager a:hover{border-color:var(--text-2)}
+.pager span{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--text-3)}
+.pager .next{text-align:right;grid-column:2}
+.foot{margin-top:40px;font-size:13px;color:var(--text-3)}
+/* 代码高亮：黑白灰为主 */
+.hl .c,.hl .c1,.hl .cm,.hl .ch,.hl .cs,.hl .cp,.hl .cpf{color:#6b6b6b;font-style:italic}
+.hl .k,.hl .kd,.hl .kn,.hl .kr,.hl .kt,.hl .kc,.hl .kp,.hl .ow{color:#ffffff;font-weight:600}
+.hl .s,.hl .s1,.hl .s2,.hl .sb,.hl .sc,.hl .sd,.hl .se,.hl .sh,.hl .si,.hl .sx,.hl .sr,.hl .ss,.hl .dl,.hl .sa{color:#86efac}
+.hl .m,.hl .mi,.hl .mf,.hl .mh,.hl .mo,.hl .il{color:#fcd34d}
+.hl .nf,.hl .fm,.hl .nc,.hl .nn{color:#e5e5e5;font-weight:500}
+.hl .nb,.hl .bp,.hl .nd,.hl .na,.hl .nt{color:#bdbdbd}
+.hl .o,.hl .p{color:#9a9a9a}
+.hl .gd{color:#fca5a5}.hl .gi{color:#86efac}
+.hl{color:#d4d4d4}
+@media (max-width:960px){.wrap{grid-template-columns:1fr;gap:0}.toc{display:none}article h1.title{font-size:30px}.nav__links a.hide-sm{display:none}}
+</style>
+</head>
+<body>
+<header class="nav">
+  <a class="nav__brand" href="../index.html"><span class="nav__dot"></span>AI Agent 全栈</a>
+  <nav class="nav__links">
+    <a href="../index.html#progress">课件</a>
+    <a class="hide-sm" href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/ROADMAP.md">路线图</a>
+    <a href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/notes/00-foundations/05-engineering.md">在 GitHub 上查看</a>
+  </nav>
+</header>
+<div class="wrap">
+  <aside class="toc"><div class="toc__label">本课目录</div><ul>
+<li><a href="#读前说明">读前说明</a></li>
+<li><a href="#第一部分git-工作流">第一部分：Git 工作流</a><ul>
+<li><a href="#1-你真正需要的心智模型">1. 你真正需要的心智模型</a></li>
+<li><a href="#2-日常流程一个功能一个分支">2. 日常流程：一个功能一个分支</a></li>
+<li><a href="#3-提交信息conventional-commits">3. 提交信息：Conventional Commits</a></li>
+<li><a href="#4-出事时救命的几个命令">4. 出事时救命的几个命令</a></li>
+</ul>
+</li>
+<li><a href="#第二部分linux-基础">第二部分：Linux 基础</a><ul>
+<li><a href="#5-进程与信号理解优雅退出的前提">5. 进程与信号：理解“优雅退出”的前提</a></li>
+<li><a href="#6-环境变量标准输出和退出码">6. 环境变量、标准输出和退出码</a></li>
+<li><a href="#7-权限端口与文件描述符">7. 权限、端口与文件描述符</a></li>
+<li><a href="#8-线上排查工具箱">8. 线上排查工具箱</a></li>
+</ul>
+</li>
+<li><a href="#第三部分docker">第三部分：Docker</a><ul>
+<li><a href="#9-为什么要容器">9. 为什么要容器</a></li>
+<li><a href="#10-一个生产级-dockerfile">10. 一个生产级 Dockerfile</a></li>
+<li><a href="#11-运行容器">11. 运行容器</a></li>
+<li><a href="#12-docker-compose本地起一整套依赖">12. docker compose：本地起一整套依赖</a></li>
+</ul>
+</li>
+<li><a href="#第四部分让服务可上线">第四部分：让服务“可上线”</a><ul>
+<li><a href="#13-配置全部来自环境变量">13. 配置：全部来自环境变量</a></li>
+<li><a href="#14-健康检查liveness-和-readiness-是两回事">14. 健康检查：liveness 和 readiness 是两回事</a></li>
+<li><a href="#15-优雅退出发版时不掐断对话">15. 优雅退出：发版时不掐断对话</a></li>
+<li><a href="#16-结构化日志">16. 结构化日志</a></li>
+<li><a href="#17-ci每次推送自动验证">17. CI：每次推送自动验证</a></li>
+<li><a href="#本课小结">本课小结</a></li>
+<li><a href="#练习今天做完">练习（今天做完）</a></li>
+<li><a href="#自测题">自测题</a></li>
+</ul>
+</li>
+<li><a href="#参考答案与详解">参考答案与详解</a><ul>
+<li><a href="#自测题答案">自测题答案</a></li>
+<li><a href="#练习参考答案">练习参考答案</a></li>
+</ul>
+</li>
+</ul>
+</aside>
+  <article>
+    <div class="meta">模块 00 · 基础功底 · 第 0.5 课</div>
+    <h1 class="title">0.5 工程基础：Git、Docker、Linux，把 Agent 服务送上线</h1>
+    <blockquote>
+<p>第 0 部分 · 第 5 课 ｜ 预计 4–5 小时 ｜ 前置：0.1 Go、0.4 流式协议</p>
+<p>配套练习：<code>projects/04-ship/</code>（Go 标准库，6 个测试）+ 仓库根目录 <code>.github/workflows/ci.yml</code>（每次 push 自动跑全部测试、构建镜像并冒烟测试）。</p>
+</blockquote>
+<h2 id="读前说明">读前说明</h2>
+<p>前四课写的代码都在你自己电脑上跑。这一课解决的问题是：<strong>怎么让它变成一个别人能用、挂了能查、改了能安全上线的服务。</strong></p>
+<p>不会讲成 Git / Docker / Linux 大全，只讲做 Agent 后端<strong>每天都会用到</strong>的部分，并且都落在同一个练习上：一个带 SSE 接口的 Go 服务，从提交代码 → CI 测试 → 打镜像 → 运行 → 优雅下线 → 线上排查，走一遍完整链路。</p>
+<p>本课结束时你能：</p>
+<ol>
+<li>用规范的分支和提交工作，出了问题能用 Git 定位是哪次提交引入的；</li>
+<li>写一个多阶段 Dockerfile，镜像约 10 MB、不以 root 运行、密钥不进镜像；</li>
+<li>让服务正确处理 SIGTERM，发版时进行中的流式对话不被掐断；</li>
+<li>写健康检查、结构化日志，配一个 GitHub Actions CI；</li>
+<li>服务器上出问题时，知道先敲哪几条命令。</li>
+</ol>
+<hr />
+<h1 id="第一部分git-工作流">第一部分：Git 工作流</h1>
+<h2 id="1-你真正需要的心智模型">1. 你真正需要的心智模型</h2>
+<p>Git 里只有三个区域，所有命令都是在它们之间搬东西：</p>
+<div class="hl"><pre><span></span><code>工作区（你在改的文件）
+   │ git add
+   ▼
+暂存区（下一次提交的内容）
+   │ git commit
+   ▼
+本地仓库（提交历史）  ──git push──▶  远程仓库（GitHub）
+</code></pre></div>
+
+<p>每次提交是一个<strong>快照</strong>，有一个哈希值（如 <code>5600361</code>）。<strong>分支只是一个指向某次提交的指针</strong>，创建分支几乎零成本。理解了这一点，<code>rebase</code>、<code>reset</code> 这些命令就不神秘了：它们都只是在移动指针。</p>
+<h2 id="2-日常流程一个功能一个分支">2. 日常流程：一个功能一个分支</h2>
+<div class="hl"><pre><span></span><code>git<span class="w"> </span>switch<span class="w"> </span>main<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>pull<span class="w"> </span>--rebase<span class="w">       </span><span class="c1"># ① 先同步最新的 main</span>
+git<span class="w"> </span>switch<span class="w"> </span>-c<span class="w"> </span>feat/sse-heartbeat<span class="w">           </span><span class="c1"># ② 新建功能分支</span>
+
+<span class="c1"># ... 改代码 ...</span>
+git<span class="w"> </span>add<span class="w"> </span>-p<span class="w">                                 </span><span class="c1"># ③ 逐块确认要提交的改动</span>
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">"feat(stream): SSE 增加心跳，防止网关空闲断开"</span>
+
+git<span class="w"> </span>fetch<span class="w"> </span>origin<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>rebase<span class="w"> </span>origin/main<span class="w"> </span><span class="c1"># ④ 推送前再同步一次</span>
+git<span class="w"> </span>push<span class="w"> </span>-u<span class="w"> </span>origin<span class="w"> </span>feat/sse-heartbeat<span class="w">      </span><span class="c1"># ⑤ 推到远程，开 Pull Request</span>
+</code></pre></div>
+
+<p><strong>逐行解读</strong></p>
+<ul>
+<li><strong>① <code>pull --rebase</code></strong>：把你本地的提交“挪到”远程最新提交后面，历史保持一条直线；不加 <code>--rebase</code> 会多出一个无意义的合并提交。</li>
+<li><strong>② 分支命名</strong>：<code>feat/</code>、<code>fix/</code>、<code>chore/</code> 前缀，一眼看出是干什么的。</li>
+<li><strong>③ <code>git add -p</code></strong>：一块一块问你要不要加。能防止把调试用的 <code>fmt.Println</code>、临时改的配置一起提交上去。强烈建议养成习惯。</li>
+<li><strong>④ rebase 到最新 main</strong>：冲突在你自己的分支上解决，不要让合并的人去解决。</li>
+<li><strong>⑤ Pull Request</strong>：哪怕一个人的项目也建议走 PR，CI 会在 PR 上自动跑，测试不过就不合并。</li>
+</ul>
+<h2 id="3-提交信息conventional-commits">3. 提交信息：Conventional Commits</h2>
+<p>本仓库的提交都按这个格式写：</p>
+<div class="hl"><pre><span></span><code>&lt;类型&gt;(&lt;范围&gt;): &lt;一句话说明做了什么&gt;
+
+feat(0.4): 03-streaming 练习
+fix(stream): 空块导致 pendingCR 被重置
+docs: README 加入 0.4 流式协议
+ci: Go / TS 测试 + Docker 构建
+</code></pre></div>
+
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>类型</th>
+<th>用于</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>feat</code></td>
+<td>新功能</td>
+</tr>
+<tr>
+<td><code>fix</code></td>
+<td>修 bug</td>
+</tr>
+<tr>
+<td><code>docs</code></td>
+<td>只改文档</td>
+</tr>
+<tr>
+<td><code>refactor</code></td>
+<td>重构，不改变行为</td>
+</tr>
+<tr>
+<td><code>test</code></td>
+<td>只改测试</td>
+</tr>
+<tr>
+<td><code>chore</code> / <code>ci</code></td>
+<td>构建、依赖、CI 配置</td>
+</tr>
+</tbody>
+</table></div>
+<p>好处不只是整齐：工具可以据此自动生成 CHANGELOG、自动决定版本号（<code>feat</code> 升次版本，<code>fix</code> 升修订号）。</p>
+<h2 id="4-出事时救命的几个命令">4. 出事时救命的几个命令</h2>
+<div class="hl"><pre><span></span><code>git<span class="w"> </span>log<span class="w"> </span>--oneline<span class="w"> </span>--graph<span class="w"> </span>-20<span class="w">         </span><span class="c1"># 看最近的历史</span>
+git<span class="w"> </span>diff<span class="w"> </span>main...HEAD<span class="w">                  </span><span class="c1"># 我这个分支相对 main 改了什么</span>
+git<span class="w"> </span>blame<span class="w"> </span>-L<span class="w"> </span><span class="m">40</span>,60<span class="w"> </span>server.go<span class="w">          </span><span class="c1"># 这几行是谁、哪次提交改的</span>
+git<span class="w"> </span>stash<span class="w"> </span>/<span class="w"> </span>git<span class="w"> </span>stash<span class="w"> </span>pop<span class="w">             </span><span class="c1"># 临时收起手头的改动，先去修别的</span>
+git<span class="w"> </span>commit<span class="w"> </span>--amend<span class="w">                    </span><span class="c1"># 修改最后一次提交（还没 push 时）</span>
+git<span class="w"> </span>restore<span class="w"> </span>--staged<span class="w"> </span>file.go<span class="w">          </span><span class="c1"># 把文件从暂存区撤回（改动保留）</span>
+git<span class="w"> </span>revert<span class="w"> </span>&lt;提交&gt;<span class="w">                      </span><span class="c1"># 生成一个“反向提交”来撤销，已 push 的用这个</span>
+git<span class="w"> </span>reflog<span class="w">                            </span><span class="c1"># 后悔药：HEAD 去过的每个位置都在这里</span>
+</code></pre></div>
+
+<p><strong><code>git bisect</code>：找出是哪次提交引入的 bug</strong></p>
+<p>Agent 服务常见情况：“上周流式还好好的，现在偶尔卡住。”中间有 40 次提交，一个个看不现实。</p>
+<div class="hl"><pre><span></span><code>git<span class="w"> </span>bisect<span class="w"> </span>start
+git<span class="w"> </span>bisect<span class="w"> </span>bad<span class="w">                 </span><span class="c1"># 当前版本有问题</span>
+git<span class="w"> </span>bisect<span class="w"> </span>good<span class="w"> </span>v0.3.0<span class="w">         </span><span class="c1"># 这个版本是好的</span>
+<span class="c1"># Git 自动切到中间的某次提交，你测一下，然后告诉它结果：</span>
+git<span class="w"> </span>bisect<span class="w"> </span>good<span class="w">   </span><span class="c1"># 或 git bisect bad</span>
+<span class="c1"># ... 二分查找，40 次提交最多测 6 次 ...</span>
+git<span class="w"> </span>bisect<span class="w"> </span>reset
+
+<span class="c1"># 如果有能复现问题的测试，可以全自动：</span>
+git<span class="w"> </span>bisect<span class="w"> </span>run<span class="w"> </span>go<span class="w"> </span><span class="nb">test</span><span class="w"> </span>-run<span class="w"> </span>TestGracefulShutdown<span class="w"> </span>./...
+</code></pre></div>
+
+<p><strong>三条红线</strong></p>
+<ol>
+<li><strong>不要 <code>git push --force</code> 到 main</strong>。实在要强推自己的分支，用 <code>--force-with-lease</code>，它会检查远程有没有别人的新提交。</li>
+<li><strong>不要提交密钥</strong>。<code>.env</code> 写进 <code>.gitignore</code>。万一提交了，<strong>删文件没用</strong>，它还在历史里，必须<strong>立刻去平台作废这个 Key</strong>，再考虑清理历史。GitHub 会扫描公开仓库里的密钥，很多模型厂商收到通知后会自动禁用。</li>
+<li><strong>不要提交大文件</strong>：模型权重、数据集、<code>node_modules</code>。用 <code>.gitignore</code> 挡住，真要版本化大文件用 Git LFS 或对象存储。</li>
+</ol>
+<hr />
+<h1 id="第二部分linux-基础">第二部分：Linux 基础</h1>
+<p>服务器、Docker 容器、CI 机器，里面全是 Linux。不用背命令，只要掌握下面这些概念，出问题时知道往哪个方向查。</p>
+<h2 id="5-进程与信号理解优雅退出的前提">5. 进程与信号：理解“优雅退出”的前提</h2>
+<p><strong>进程</strong>就是一个运行中的程序，有一个编号 PID。操作系统通过<strong>信号</strong>通知进程发生了什么事：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>信号</th>
+<th>编号</th>
+<th>谁会发</th>
+<th>进程能处理吗</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>SIGINT</code></td>
+<td>2</td>
+<td>终端里按 Ctrl+C</td>
+<td>能</td>
+</tr>
+<tr>
+<td><code>SIGTERM</code></td>
+<td>15</td>
+<td><code>kill &lt;pid&gt;</code>、<code>docker stop</code>、K8s 删除 Pod</td>
+<td>能，<strong>这是“请你收拾一下然后退出”</strong></td>
+</tr>
+<tr>
+<td><code>SIGKILL</code></td>
+<td>9</td>
+<td><code>kill -9</code>、超时后的 <code>docker stop</code></td>
+<td><strong>不能</strong>，立即被杀</td>
+</tr>
+<tr>
+<td><code>SIGHUP</code></td>
+<td>1</td>
+<td>终端关闭；部分程序约定为“重新加载配置”</td>
+<td>能</td>
+</tr>
+</tbody>
+</table></div>
+<p>关键流程：<code>docker stop</code> 先发 <code>SIGTERM</code>，<strong>等 10 秒</strong>（K8s 默认 30 秒），进程还没退就发 <code>SIGKILL</code>。</p>
+<p>所以如果你的服务<strong>不处理 SIGTERM</strong>，每次发版都会：进程被直接杀掉 → 所有正在进行的 SSE 流瞬间断开 → 用户看到回复写到一半没了。第四部分会解决它。</p>
+<div class="hl"><pre><span></span><code>ps<span class="w"> </span>aux<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>server<span class="w">          </span><span class="c1"># 找进程</span>
+pgrep<span class="w"> </span>-af<span class="w"> </span>server<span class="w">              </span><span class="c1"># 同上，更简洁</span>
+<span class="nb">kill</span><span class="w"> </span>&lt;pid&gt;<span class="w">                    </span><span class="c1"># 发 SIGTERM</span>
+<span class="nb">kill</span><span class="w"> </span>-9<span class="w"> </span>&lt;pid&gt;<span class="w">                 </span><span class="c1"># 发 SIGKILL，最后手段</span>
+</code></pre></div>
+
+<h2 id="6-环境变量标准输出和退出码">6. 环境变量、标准输出和退出码</h2>
+<p>三个“进程和外界沟通”的约定，容器化之后尤其重要：</p>
+<ul>
+<li><strong>环境变量</strong>：进程启动时从父进程继承的一组 <code>键=值</code>。配置和密钥通过它传入，不写死在代码或镜像里。
+  <code>bash
+  export LLM_API_KEY=sk-xxx     # 当前 shell 及其子进程可见
+  LLM_API_KEY=sk-xxx ./server   # 只对这一条命令生效
+  env | grep LLM                # 查看</code></li>
+<li><strong>stdout / stderr</strong>：容器里的服务<strong>日志直接写到标准输出</strong>，不要写文件。Docker、K8s 会自动收集，<code>docker logs</code> 就能看。</li>
+<li><strong>退出码</strong>：<code>0</code> 表示成功，非 <code>0</code> 表示失败。<code>echo $?</code> 看上一条命令的退出码。CI、Docker、K8s 都靠它判断成败；配置错了就 <code>os.Exit(1)</code> 让平台知道启动失败，别吞掉错误继续跑。</li>
+</ul>
+<h2 id="7-权限端口与文件描述符">7. 权限、端口与文件描述符</h2>
+<ul>
+<li><strong>权限</strong>：<code>ls -l</code> 看到的 <code>-rwxr-xr-x</code> 分别是所有者、组、其他人的读写执行权限。<strong>服务不要用 root 跑</strong>：一旦被攻破（比如 Agent 被 Prompt Injection 诱导执行命令），root 意味着整台机器沦陷。</li>
+<li><strong>端口</strong>：1024 以下是特权端口，普通用户不能监听。所以服务监听 <code>8080</code>，再由负载均衡或 Nginx 对外暴露 <code>443</code>。</li>
+<li><strong>文件描述符（fd）</strong>：Linux 里“一切皆文件”，每个 TCP 连接也占一个 fd。默认上限常见是 1024（<code>ulimit -n</code> 查看）。<strong>每个 SSE 连接都长期占着一个 fd</strong>，并发用户一多就会报 <code>too many open files</code>。生产环境要调高这个上限（容器里一般已经够大，自建服务器要注意）。</li>
+</ul>
+<h2 id="8-线上排查工具箱">8. 线上排查工具箱</h2>
+<p>服务出问题，按这个顺序查：</p>
+<div class="hl"><pre><span></span><code><span class="c1"># 1. 服务还活着吗？</span>
+curl<span class="w"> </span>-i<span class="w"> </span>localhost:8080/healthz
+systemctl<span class="w"> </span>status<span class="w"> </span>myagent<span class="w">          </span><span class="c1"># systemd 管理的服务</span>
+docker<span class="w"> </span>ps<span class="w">                         </span><span class="c1"># 容器在不在、重启了几次</span>
+
+<span class="c1"># 2. 日志说了什么？</span>
+docker<span class="w"> </span>logs<span class="w"> </span>--tail<span class="w"> </span><span class="m">100</span><span class="w"> </span>-f<span class="w"> </span>&lt;容器&gt;
+journalctl<span class="w"> </span>-u<span class="w"> </span>myagent<span class="w"> </span>-f<span class="w">          </span><span class="c1"># systemd 的日志</span>
+
+<span class="c1"># 3. 端口在监听吗？谁在用？</span>
+ss<span class="w"> </span>-ltnp<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="m">8080</span>
+
+<span class="c1"># 4. 资源够吗？</span>
+top<span class="w"> </span>/<span class="w"> </span>htop<span class="w">                        </span><span class="c1"># CPU、内存</span>
+free<span class="w"> </span>-h<span class="w">                           </span><span class="c1"># 内存</span>
+df<span class="w"> </span>-h<span class="w">                             </span><span class="c1"># 磁盘：日志写满磁盘是经典事故</span>
+
+<span class="c1"># 5. 网络通吗？</span>
+curl<span class="w"> </span>-v<span class="w"> </span>https://api.openai.com<span class="w">    </span><span class="c1"># 能连上上游模型吗，TLS 握手卡在哪</span>
+dig<span class="w"> </span>api.openai.com<span class="w">                </span><span class="c1"># DNS 解析</span>
+</code></pre></div>
+
+<p>再加两个处理文本的利器，配合 JSON 日志特别好用：</p>
+<div class="hl"><pre><span></span><code>docker<span class="w"> </span>logs<span class="w"> </span>ship<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s1">'"status":500'</span><span class="w">                    </span><span class="c1"># 找出所有 500</span>
+docker<span class="w"> </span>logs<span class="w"> </span>ship<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-r<span class="w"> </span><span class="s1">'select(.dur_ms &gt; 5000) | .path'</span><span class="w">  </span><span class="c1"># 找出超过 5 秒的请求</span>
+</code></pre></div>
+
+<hr />
+<h1 id="第三部分docker">第三部分：Docker</h1>
+<h2 id="9-为什么要容器">9. 为什么要容器</h2>
+<p>“我这能跑”的问题根源是<strong>环境不一致</strong>：Go 版本、系统库、配置文件。容器把<strong>程序 + 它需要的一切</strong>打包成一个<strong>镜像</strong>，在哪运行都一样。</p>
+<p>三个概念：</p>
+<ul>
+<li><strong>镜像（image）</strong>：只读的模板，由 Dockerfile 构建，一层层叠起来。</li>
+<li><strong>容器（container）</strong>：镜像跑起来的实例，有自己的进程空间、文件系统、网络。本质上就是一个被隔离起来的 Linux 进程，不是虚拟机。</li>
+<li><strong>镜像仓库（registry）</strong>：存镜像的地方，如 Docker Hub、GitHub Container Registry、阿里云 ACR。</li>
+</ul>
+<h2 id="10-一个生产级-dockerfile">10. 一个生产级 Dockerfile</h2>
+<p><strong>要解决的问题</strong>：直接 <code>FROM golang</code> 打出来的镜像有 800 MB，带着编译器和 shell，以 root 运行，每次改一行代码都要重新下载依赖。</p>
+<p>练习 <code>projects/04-ship/Dockerfile</code>：</p>
+<div class="hl"><pre><span></span><code><span class="c"># ---------- 第一阶段：编译 ----------</span>
+<span class="k">FROM</span><span class="w"> </span><span class="s">golang:1.23-alpine</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="s">build</span><span class="w">                 </span>#<span class="w"> </span>①
+<span class="k">WORKDIR</span><span class="w"> </span><span class="s">/src</span>
+
+<span class="k">COPY</span><span class="w"> </span>go.mod<span class="w"> </span>./<span class="w">                                   </span>#<span class="w"> </span>②<span class="w"> </span>先只拷依赖清单
+<span class="k">RUN</span><span class="w"> </span>go<span class="w"> </span>mod<span class="w"> </span>download
+
+<span class="k">COPY</span><span class="w"> </span>.<span class="w"> </span>.<span class="w">                                         </span>#<span class="w"> </span>③<span class="w"> </span>再拷源码
+<span class="k">ARG</span><span class="w"> </span><span class="nv">VERSION</span><span class="o">=</span>dev
+<span class="k">RUN</span><span class="w"> </span><span class="nv">CGO_ENABLED</span><span class="o">=</span><span class="m">0</span><span class="w"> </span>go<span class="w"> </span>build<span class="w"> </span>-trimpath<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-ldflags<span class="o">=</span><span class="s2">"-s -w -X main.version=</span><span class="si">${</span><span class="nv">VERSION</span><span class="si">}</span><span class="s2">"</span><span class="w"> </span>-o<span class="w"> </span>/out/server<span class="w"> </span>.<span class="w">   </span>#<span class="w"> </span>④
+
+<span class="c"># ---------- 第二阶段：运行 ----------</span>
+<span class="k">FROM</span><span class="w"> </span><span class="s">gcr.io/distroless/static-debian12:nonroot</span><span class="w">   </span><span class="c"># ⑤</span>
+<span class="k">COPY</span><span class="w"> </span>--from<span class="o">=</span>build<span class="w"> </span>/out/server<span class="w"> </span>/server<span class="w">            </span>#<span class="w"> </span>⑥<span class="w"> </span>只拿编译产物
+<span class="k">EXPOSE</span><span class="w"> </span><span class="s">8080</span>
+<span class="k">USER</span><span class="w"> </span><span class="s">nonroot:nonroot                             # ⑦</span>
+<span class="k">ENTRYPOINT</span><span class="w"> </span><span class="p">[</span><span class="s2">"/server"</span><span class="p">]</span><span class="w">                           </span>#<span class="w"> </span>⑧
+</code></pre></div>
+
+<p><strong>逐行解读</strong></p>
+<ul>
+<li><strong>① 多阶段构建</strong>：第一阶段有完整的 Go 工具链，用来编译；第二阶段从一个几乎空的镜像开始，只放编译好的二进制。最终镜像不含编译器、源码，约 10 MB。</li>
+<li><strong>② 和 ③ 分开拷：利用层缓存。</strong> Docker 每条指令是一层，某层的输入没变就直接用缓存。依赖清单很少改，源码经常改。先拷 <code>go.mod</code> 下载依赖，改代码时只有 ③ 之后的层重新执行，构建从几分钟变成几秒。<strong>顺序反过来，缓存就废了</strong>。Node 项目同理：先拷 <code>package.json</code> 和 <code>package-lock.json</code> 跑 <code>npm ci</code>，再拷源码。</li>
+<li><strong>④ 编译参数</strong>：</li>
+<li><code>CGO_ENABLED=0</code>：生成不依赖 C 库的纯静态二进制，才能放进没有 libc 的镜像；</li>
+<li><code>-trimpath</code>：去掉二进制里你电脑上的绝对路径；</li>
+<li><code>-s -w</code>：去掉调试符号，体积小一半左右；</li>
+<li><code>-X main.version=...</code>：构建时把 Git 提交号写进 <code>version</code> 变量，线上 <code>curl /version</code> 就知道跑的是哪个版本。</li>
+<li><strong>⑤ distroless</strong>：Google 维护的极简镜像，<strong>没有 shell、没有包管理器</strong>。就算服务被攻破，攻击者也没有 <code>sh</code>、<code>curl</code> 可用。代价是你也没法 <code>docker exec</code> 进去调试，需要时用带 <code>:debug</code> 标签的版本。</li>
+<li><strong>⑥ <code>COPY --from=build</code></strong>：从第一阶段拿文件。</li>
+<li><strong>⑦ 非 root 运行</strong>：见第 7 节。</li>
+<li><strong>⑧ exec 形式</strong>：<code>ENTRYPOINT ["/server"]</code>（JSON 数组）让 server 直接成为容器里的 1 号进程，能收到 <code>docker stop</code> 发的 SIGTERM。如果写成 <code>ENTRYPOINT /server</code>（shell 形式），实际是 <code>/bin/sh -c /server</code>，1 号进程是 sh，<strong>sh 默认不转发信号</strong>，你的服务永远收不到 SIGTERM，10 秒后被 SIGKILL。这是非常常见的坑。</li>
+</ul>
+<p><strong><code>.dockerignore</code></strong>：和 <code>.gitignore</code> 一样的语法，决定哪些文件不发给 Docker 构建。至少要排除 <code>.git</code>、<code>.env</code>、<code>node_modules</code>。不排除 <code>.env</code> 的话，<code>COPY . .</code> 会把你的密钥打进镜像，任何拿到镜像的人都能看到。</p>
+<h2 id="11-运行容器">11. 运行容器</h2>
+<div class="hl"><pre><span></span><code>docker<span class="w"> </span>build<span class="w"> </span>--build-arg<span class="w"> </span><span class="nv">VERSION</span><span class="o">=</span><span class="k">$(</span>git<span class="w"> </span>rev-parse<span class="w"> </span>--short<span class="w"> </span>HEAD<span class="k">)</span><span class="w"> </span>-t<span class="w"> </span>agent-ship:dev<span class="w"> </span>.
+
+docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-p<span class="w"> </span><span class="m">8080</span>:8080<span class="w"> </span><span class="se">\ </span><span class="w">               </span><span class="c1"># 宿主机端口:容器端口</span>
+<span class="w">  </span>--env-file<span class="w"> </span>.env<span class="w"> </span><span class="se">\ </span><span class="w">            </span><span class="c1"># 从文件读环境变量，密钥这样传</span>
+<span class="w">  </span>--memory<span class="w"> </span>512m<span class="w"> </span>--cpus<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="se">\ </span><span class="w">     </span><span class="c1"># 资源限制：防止一个服务吃光整台机器</span>
+<span class="w">  </span>--name<span class="w"> </span>ship<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>agent-ship:dev
+
+docker<span class="w"> </span>logs<span class="w"> </span>-f<span class="w"> </span>ship<span class="w">             </span><span class="c1"># 看日志</span>
+docker<span class="w"> </span>stop<span class="w"> </span>ship<span class="w">                </span><span class="c1"># 发 SIGTERM，看日志里的 "shutting down" 和 "bye"</span>
+docker<span class="w"> </span>images<span class="w"> </span>agent-ship<span class="w">        </span><span class="c1"># 看镜像大小</span>
+</code></pre></div>
+
+<p><strong>密钥的正确姿势</strong>：运行时通过环境变量或密钥管理服务注入，<strong>永远不要</strong>写在 Dockerfile 的 <code>ENV</code> 或 <code>ARG</code> 里。<code>docker history</code> 能看到每一层的构建命令，<code>ARG</code> 的值也会留在里面。</p>
+<h2 id="12-docker-compose本地起一整套依赖">12. docker compose：本地起一整套依赖</h2>
+<p>Agent 服务通常还依赖 Redis（会话、限流）、Postgres + pgvector（记忆、RAG）。本地开发用 compose 一条命令拉起：</p>
+<div class="hl"><pre><span></span><code><span class="c1"># compose.yaml</span>
+<span class="nt">services</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">agent</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">build</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">.</span>
+<span class="w">    </span><span class="nt">ports</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">"8080:8080"</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">env_file</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">.env</span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">REDIS_URL</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">redis://redis:6379</span><span class="w">      </span><span class="c1"># 服务名就是主机名</span>
+<span class="w">    </span><span class="nt">depends_on</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">redis</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">condition</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">service_healthy</span><span class="w">       </span><span class="c1"># 等 redis 健康了再启动 agent</span>
+<span class="w">  </span><span class="nt">redis</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">redis:7-alpine</span>
+<span class="w">    </span><span class="nt">healthcheck</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">test</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">"CMD"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"redis-cli"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"ping"</span><span class="p p-Indicator">]</span>
+<span class="w">      </span><span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2s</span>
+</code></pre></div>
+
+<div class="hl"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d<span class="w"> </span>--build
+docker<span class="w"> </span>compose<span class="w"> </span>logs<span class="w"> </span>-f<span class="w"> </span>agent
+docker<span class="w"> </span>compose<span class="w"> </span>down<span class="w">          </span><span class="c1"># 加 -v 连数据卷一起删</span>
+</code></pre></div>
+
+<p>第 05 模块（RAG）和第 08 模块（高可用）会在这个基础上加数据库和队列。</p>
+<hr />
+<h1 id="第四部分让服务可上线">第四部分：让服务“可上线”</h1>
+<p>前三部分是工具，这一部分是用这些工具把服务改造成能在生产环境跑的样子。对应练习的 <code>main.go</code> 和 <code>server.go</code>。</p>
+<h2 id="13-配置全部来自环境变量">13. 配置：全部来自环境变量</h2>
+<div class="hl"><pre><span></span><code><span class="kd">type</span><span class="w"> </span><span class="nx">Config</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">Addr</span><span class="w">            </span><span class="kt">string</span>
+<span class="w">    </span><span class="nx">ShutdownTimeout</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Duration</span>
+<span class="w">    </span><span class="nx">APIKey</span><span class="w">          </span><span class="kt">string</span><span class="w"> </span><span class="c1">// 只从环境变量读</span>
+<span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="nx">LoadConfig</span><span class="p">(</span><span class="nx">getenv</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="nx">Config</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">c</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">Config</span><span class="p">{</span>
+<span class="w">        </span><span class="nx">Addr</span><span class="p">:</span><span class="w">            </span><span class="nx">envOr</span><span class="p">(</span><span class="nx">getenv</span><span class="p">,</span><span class="w"> </span><span class="s">"ADDR"</span><span class="p">,</span><span class="w"> </span><span class="s">":8080"</span><span class="p">),</span>
+<span class="w">        </span><span class="nx">ShutdownTimeout</span><span class="p">:</span><span class="w"> </span><span class="mi">25</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="p">,</span>
+<span class="w">        </span><span class="nx">APIKey</span><span class="p">:</span><span class="w">          </span><span class="nx">getenv</span><span class="p">(</span><span class="s">"LLM_API_KEY"</span><span class="p">),</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">v</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">getenv</span><span class="p">(</span><span class="s">"SHUTDOWN_TIMEOUT"</span><span class="p">);</span><span class="w"> </span><span class="nx">v</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="s">""</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">d</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">ParseDuration</span><span class="p">(</span><span class="nx">v</span><span class="p">)</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="nx">Config</span><span class="p">{},</span><span class="w"> </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Errorf</span><span class="p">(</span><span class="s">"SHUTDOWN_TIMEOUT: %w"</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="p">)</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="nx">c</span><span class="p">.</span><span class="nx">ShutdownTimeout</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">d</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">c</span><span class="p">,</span><span class="w"> </span><span class="kc">nil</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>逐行解读</strong></p>
+<ul>
+<li><strong>同一个镜像跑所有环境</strong>：开发、测试、生产只是环境变量不同。这是 12-Factor App 的原则。</li>
+<li><strong><code>getenv</code> 作为参数传进来</strong>：<code>main</code> 里传 <code>os.Getenv</code>，测试里传一个从 map 读的假函数。这样测试不用真的去改进程的环境变量，也不会互相干扰（0.1 课 B8“依赖接口而不是具体实现”的思路，这里用函数代替接口）。</li>
+<li><strong>配置错了立刻失败</strong>：<code>SHUTDOWN_TIMEOUT=soon</code> 这种值在启动时就报错退出，比跑起来以后出奇怪的行为好查得多。</li>
+<li><strong>默认值 25 秒</strong>：比 K8s 默认的 30 秒宽限期短，确保在被 SIGKILL 之前自己先退出。</li>
+</ul>
+<h2 id="14-健康检查liveness-和-readiness-是两回事">14. 健康检查：liveness 和 readiness 是两回事</h2>
+<div class="hl"><pre><span></span><code><span class="c1">// healthz：进程活着就 200。liveness 探针，失败会重启容器。</span>
+<span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">s</span><span class="w"> </span><span class="o">*</span><span class="nx">Server</span><span class="p">)</span><span class="w"> </span><span class="nx">healthz</span><span class="p">(</span><span class="nx">w</span><span class="w"> </span><span class="nx">http</span><span class="p">.</span><span class="nx">ResponseWriter</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="o">*</span><span class="nx">http</span><span class="p">.</span><span class="nx">Request</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Fprintln</span><span class="p">(</span><span class="nx">w</span><span class="p">,</span><span class="w"> </span><span class="s">"ok"</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="c1">// readyz：能不能接新流量。正在下线时返回 503，负载均衡就不再转新请求过来。</span>
+<span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">s</span><span class="w"> </span><span class="o">*</span><span class="nx">Server</span><span class="p">)</span><span class="w"> </span><span class="nx">readyz</span><span class="p">(</span><span class="nx">w</span><span class="w"> </span><span class="nx">http</span><span class="p">.</span><span class="nx">ResponseWriter</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="o">*</span><span class="nx">http</span><span class="p">.</span><span class="nx">Request</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">s</span><span class="p">.</span><span class="nx">draining</span><span class="p">.</span><span class="nx">Load</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">http</span><span class="p">.</span><span class="nx">Error</span><span class="p">(</span><span class="nx">w</span><span class="p">,</span><span class="w"> </span><span class="s">"draining"</span><span class="p">,</span><span class="w"> </span><span class="nx">http</span><span class="p">.</span><span class="nx">StatusServiceUnavailable</span><span class="p">)</span>
+<span class="w">        </span><span class="k">return</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Fprintln</span><span class="p">(</span><span class="nx">w</span><span class="p">,</span><span class="w"> </span><span class="s">"ready"</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<div class="tbl"><table>
+<thead>
+<tr>
+<th></th>
+<th>liveness（<code>/healthz</code>）</th>
+<th>readiness（<code>/readyz</code>）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>问的问题</td>
+<td>进程是不是卡死了？</td>
+<td>现在能接新请求吗？</td>
+</tr>
+<tr>
+<td>失败后果</td>
+<td><strong>重启容器</strong></td>
+<td>从负载均衡<strong>摘掉</strong>，不重启</td>
+</tr>
+<tr>
+<td>应该检查</td>
+<td>只看进程本身</td>
+<td>是否在下线、关键依赖是否就绪</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>容易错的地方</strong>：在 <code>/healthz</code> 里检查上游模型 API 或数据库。模型 API 抖动一下，所有实例的 liveness 一起失败，K8s 把它们全部重启，<strong>一次上游故障被放大成你自己的全面宕机</strong>。liveness 只检查自己。</p>
+<h2 id="15-优雅退出发版时不掐断对话">15. 优雅退出：发版时不掐断对话</h2>
+<p>这是本课最重要的一段代码。</p>
+<div class="hl"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nx">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">log</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">slog</span><span class="p">.</span><span class="nx">New</span><span class="p">(</span><span class="nx">slog</span><span class="p">.</span><span class="nx">NewJSONHandler</span><span class="p">(</span><span class="nx">os</span><span class="p">.</span><span class="nx">Stdout</span><span class="p">,</span><span class="w"> </span><span class="kc">nil</span><span class="p">))</span>
+<span class="w">    </span><span class="nx">cfg</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">LoadConfig</span><span class="p">(</span><span class="nx">os</span><span class="p">.</span><span class="nx">Getenv</span><span class="p">)</span>
+<span class="w">    </span><span class="c1">// ...</span>
+<span class="w">    </span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">stop</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">signal</span><span class="p">.</span><span class="nx">NotifyContext</span><span class="p">(</span><span class="nx">context</span><span class="p">.</span><span class="nx">Background</span><span class="p">(),</span><span class="w"> </span><span class="nx">syscall</span><span class="p">.</span><span class="nx">SIGTERM</span><span class="p">,</span><span class="w"> </span><span class="nx">os</span><span class="p">.</span><span class="nx">Interrupt</span><span class="p">)</span><span class="w"> </span><span class="c1">// ①</span>
+<span class="w">    </span><span class="k">defer</span><span class="w"> </span><span class="nx">stop</span><span class="p">()</span>
+<span class="w">    </span><span class="nx">ln</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">net</span><span class="p">.</span><span class="nx">Listen</span><span class="p">(</span><span class="s">"tcp"</span><span class="p">,</span><span class="w"> </span><span class="nx">cfg</span><span class="p">.</span><span class="nx">Addr</span><span class="p">)</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">Run</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">ln</span><span class="p">,</span><span class="w"> </span><span class="nx">cfg</span><span class="p">,</span><span class="w"> </span><span class="nx">log</span><span class="p">);</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="cm">/* 退出码 1 */</span><span class="w"> </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="nx">Run</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">ln</span><span class="w"> </span><span class="nx">net</span><span class="p">.</span><span class="nx">Listener</span><span class="p">,</span><span class="w"> </span><span class="nx">cfg</span><span class="w"> </span><span class="nx">Config</span><span class="p">,</span><span class="w"> </span><span class="nx">log</span><span class="w"> </span><span class="o">*</span><span class="nx">slog</span><span class="p">.</span><span class="nx">Logger</span><span class="p">)</span><span class="w"> </span><span class="kt">error</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">s</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">NewServer</span><span class="p">(</span><span class="nx">cfg</span><span class="p">,</span><span class="w"> </span><span class="nx">log</span><span class="p">)</span>
+<span class="w">    </span><span class="nx">srv</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">http</span><span class="p">.</span><span class="nx">Server</span><span class="p">{</span>
+<span class="w">        </span><span class="nx">Handler</span><span class="p">:</span><span class="w">           </span><span class="nx">s</span><span class="p">.</span><span class="nx">Handler</span><span class="p">(),</span>
+<span class="w">        </span><span class="nx">ReadHeaderTimeout</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="p">,</span><span class="w">  </span><span class="c1">// ②</span>
+<span class="w">        </span><span class="nx">IdleTimeout</span><span class="p">:</span><span class="w">       </span><span class="mi">120</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="p">,</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nx">errc</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">make</span><span class="p">(</span><span class="kt">chan</span><span class="w"> </span><span class="kt">error</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span>
+<span class="w">    </span><span class="k">go</span><span class="w"> </span><span class="kd">func</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">errc</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nx">srv</span><span class="p">.</span><span class="nx">Serve</span><span class="p">(</span><span class="nx">ln</span><span class="p">)</span><span class="w"> </span><span class="p">}()</span>
+
+<span class="w">    </span><span class="k">select</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="o">&lt;-</span><span class="nx">errc</span><span class="p">:</span><span class="w">                      </span><span class="c1">// ③ 启动就失败</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">err</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="o">&lt;-</span><span class="nx">ctx</span><span class="p">.</span><span class="nx">Done</span><span class="p">():</span><span class="w">                       </span><span class="c1">//    收到信号</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nx">s</span><span class="p">.</span><span class="nx">draining</span><span class="p">.</span><span class="nx">Store</span><span class="p">(</span><span class="kc">true</span><span class="p">)</span><span class="w">                   </span><span class="c1">// ④ 第一步：标记下线，readyz 返回 503</span>
+
+<span class="w">    </span><span class="nx">sctx</span><span class="p">,</span><span class="w"> </span><span class="nx">cancel</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">WithTimeout</span><span class="p">(</span><span class="nx">context</span><span class="p">.</span><span class="nx">Background</span><span class="p">(),</span><span class="w"> </span><span class="nx">cfg</span><span class="p">.</span><span class="nx">ShutdownTimeout</span><span class="p">)</span><span class="w"> </span><span class="c1">// ⑤</span>
+<span class="w">    </span><span class="k">defer</span><span class="w"> </span><span class="nx">cancel</span><span class="p">()</span>
+<span class="w">    </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">srv</span><span class="p">.</span><span class="nx">Shutdown</span><span class="p">(</span><span class="nx">sctx</span><span class="p">)</span><span class="w">                </span><span class="c1">// ⑥ 第二步：不接新连接，等进行中的请求结束</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">errors</span><span class="p">.</span><span class="nx">Is</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">DeadlineExceeded</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">srv</span><span class="p">.</span><span class="nx">Close</span><span class="p">()</span><span class="w">                      </span><span class="c1">// ⑦ 第三步：超时还没结束的，强制关闭</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">e</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="o">&lt;-</span><span class="nx">errc</span><span class="p">;</span><span class="w"> </span><span class="nx">e</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">!</span><span class="nx">errors</span><span class="p">.</span><span class="nx">Is</span><span class="p">(</span><span class="nx">e</span><span class="p">,</span><span class="w"> </span><span class="nx">http</span><span class="p">.</span><span class="nx">ErrServerClosed</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1">// ⑧</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">e</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">err</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>逐行解读</strong></p>
+<ul>
+<li><strong>① <code>signal.NotifyContext</code></strong>：把“收到 SIGTERM / Ctrl+C”变成一个 context 被取消。和 0.1 课的取消链完全是一套东西，只是取消的源头从“客户端断开”变成了“操作系统通知”。</li>
+<li><strong>② 超时设置</strong>：<code>ReadHeaderTimeout</code> 防止有人连上来却慢慢发请求头，长期占住连接（Slowloris 攻击）。<strong>注意没有设 <code>WriteTimeout</code></strong>：它会限制整个响应的写入时间，一个持续 2 分钟的 SSE 流会被它从中间掐断。流式服务的整体超时应该在业务层用 context 控制。</li>
+<li><strong>③ <code>Serve</code> 放进 goroutine</strong>：<code>Serve</code> 会阻塞直到服务器关闭。主 goroutine 用 select 同时等“服务挂了”和“该退出了”两件事。<code>errc</code> 缓冲为 1，原因和 0.1 课一样：保证发送方不会因为没人接收而永远阻塞。</li>
+<li><strong>④ 先 draining</strong>：K8s 里，Pod 收到 SIGTERM 和它从负载均衡里被摘除<strong>是同时发生、互不等待的</strong>，可能还有几秒新请求会进来。先让 readyz 失败，生产环境里通常还会在这里 <code>sleep</code> 几秒，等负载均衡确认摘除后再关闭监听。</li>
+<li><strong>⑤ 新建 context，不要用 ctx</strong>：<code>ctx</code> 已经被取消了，拿它做 Shutdown 的超时会立即返回。这是写优雅退出时最常见的 bug。</li>
+<li><strong>⑥ <code>srv.Shutdown</code></strong>：关闭监听端口，不再接受新连接；关闭空闲连接；<strong>等待所有活跃请求处理完</strong>。正在吐 token 的 SSE 流会正常写完 <code>[DONE]</code>。</li>
+<li><strong>⑦ 强制关闭</strong>：总有请求很久都结束不了（比如一个跑 5 分钟的 Deep Research 任务）。到了期限就 <code>Close</code> 强行断开，保证在被 SIGKILL 之前自己可控地退出。对这类长任务，真正的解决方案是第 03、08 模块讲的检查点和可恢复执行。</li>
+<li><strong>⑧ <code>ErrServerClosed</code> 不是错误</strong>：Shutdown 后 <code>Serve</code> 一定返回它，表示“按要求关闭了”，要排除掉。</li>
+</ul>
+<p><strong>测试怎么验证的</strong>（<code>main_test.go</code>）：</p>
+<div class="hl"><pre><span></span><code><span class="nx">res</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">http</span><span class="p">.</span><span class="nx">Post</span><span class="p">(</span><span class="nx">url</span><span class="o">+</span><span class="s">"/chat"</span><span class="p">,</span><span class="w"> </span><span class="s">"application/json"</span><span class="p">,</span><span class="w"> </span><span class="nx">strings</span><span class="p">.</span><span class="nx">NewReader</span><span class="p">(</span><span class="s">`{"prompt":"1 2 3 4 5"}`</span><span class="p">))</span>
+<span class="nx">time</span><span class="p">.</span><span class="nx">Sleep</span><span class="p">(</span><span class="mi">60</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Millisecond</span><span class="p">)</span><span class="w"> </span><span class="c1">// 让流先开始</span>
+<span class="nx">cancel</span><span class="p">()</span><span class="w">                          </span><span class="c1">// 相当于收到 SIGTERM</span>
+
+<span class="nx">toks</span><span class="p">,</span><span class="w"> </span><span class="nx">ok</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">readTokens</span><span class="p">(</span><span class="nx">t</span><span class="p">,</span><span class="w"> </span><span class="nx">res</span><span class="p">.</span><span class="nx">Body</span><span class="p">)</span>
+<span class="k">if</span><span class="w"> </span><span class="o">!</span><span class="nx">ok</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">toks</span><span class="p">)</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">6</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1">// 流必须完整结束：6 个 token + [DONE]</span>
+<span class="w">    </span><span class="nx">t</span><span class="p">.</span><span class="nx">Fatalf</span><span class="p">(</span><span class="s">"in-flight stream was cut"</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><code>Run</code> 接收 <code>ctx</code> 和 <code>net.Listener</code> 而不是自己去读信号、自己监听端口，就是为了能在测试里控制它：用 <code>cancel()</code> 模拟信号，用 <code>127.0.0.1:0</code> 让系统分配一个空闲端口。<strong>把“难测的外部依赖”提到函数参数上</strong>，是写可测试 Go 代码的通用技巧。</p>
+<h2 id="16-结构化日志">16. 结构化日志</h2>
+<div class="hl"><pre><span></span><code><span class="nx">log</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">slog</span><span class="p">.</span><span class="nx">New</span><span class="p">(</span><span class="nx">slog</span><span class="p">.</span><span class="nx">NewJSONHandler</span><span class="p">(</span><span class="nx">os</span><span class="p">.</span><span class="nx">Stdout</span><span class="p">,</span><span class="w"> </span><span class="kc">nil</span><span class="p">))</span>
+<span class="nx">log</span><span class="p">.</span><span class="nx">Info</span><span class="p">(</span><span class="s">"request"</span><span class="p">,</span><span class="w"> </span><span class="s">"method"</span><span class="p">,</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">Method</span><span class="p">,</span><span class="w"> </span><span class="s">"path"</span><span class="p">,</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">URL</span><span class="p">.</span><span class="nx">Path</span><span class="p">,</span><span class="w"> </span><span class="s">"status"</span><span class="p">,</span><span class="w"> </span><span class="nx">rec</span><span class="p">.</span><span class="nx">status</span><span class="p">,</span><span class="w"> </span><span class="s">"dur_ms"</span><span class="p">,</span><span class="w"> </span><span class="mi">123</span><span class="p">)</span>
+</code></pre></div>
+
+<p>输出：</p>
+<div class="hl"><pre><span></span><code><span class="p">{</span><span class="nt">"time"</span><span class="p">:</span><span class="s2">"2026-10-10T14:30:00Z"</span><span class="p">,</span><span class="nt">"level"</span><span class="p">:</span><span class="s2">"INFO"</span><span class="p">,</span><span class="nt">"msg"</span><span class="p">:</span><span class="s2">"request"</span><span class="p">,</span><span class="nt">"method"</span><span class="p">:</span><span class="s2">"POST"</span><span class="p">,</span><span class="nt">"path"</span><span class="p">:</span><span class="s2">"/chat"</span><span class="p">,</span><span class="nt">"status"</span><span class="p">:</span><span class="mi">200</span><span class="p">,</span><span class="nt">"dur_ms"</span><span class="p">:</span><span class="mi">123</span><span class="p">}</span>
+</code></pre></div>
+
+<p><strong>为什么用 JSON 而不是 <code>fmt.Printf</code></strong>：日志平台可以按字段检索和聚合，比如“过去一小时 <code>/chat</code> 的 P99 耗时”“所有 <code>status=500</code> 的请求”。纯文本只能靠正则硬抠。</p>
+<p>中间件里记录状态码要包装 ResponseWriter，这里有个和 0.4 课呼应的坑：</p>
+<div class="hl"><pre><span></span><code><span class="kd">type</span><span class="w"> </span><span class="nx">statusRecorder</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">http</span><span class="p">.</span><span class="nx">ResponseWriter</span>
+<span class="w">    </span><span class="nx">status</span><span class="w"> </span><span class="kt">int</span>
+<span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">r</span><span class="w"> </span><span class="o">*</span><span class="nx">statusRecorder</span><span class="p">)</span><span class="w"> </span><span class="nx">Unwrap</span><span class="p">()</span><span class="w"> </span><span class="nx">http</span><span class="p">.</span><span class="nx">ResponseWriter</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">ResponseWriter</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="c1">// 关键</span>
+</code></pre></div>
+
+<p>包装器没有实现 <code>Flush</code>。如果 handler 里用 <code>w.(http.Flusher)</code> 断言，会失败，流式失效。练习里 handler 用的是 <code>http.NewResponseController(w).Flush()</code>，它会调用 <code>Unwrap</code> 一层层找到底层真正的 ResponseWriter。<strong>写任何 ResponseWriter 包装器，都记得实现 <code>Unwrap</code>。</strong></p>
+<p>第 07 模块（可观测性）会在这个基础上加 trace id，把一次 Agent 运行里的每次模型调用和工具调用串起来。</p>
+<h2 id="17-ci每次推送自动验证">17. CI：每次推送自动验证</h2>
+<p>仓库根目录 <code>.github/workflows/ci.yml</code>，核心结构：</p>
+<div class="hl"><pre><span></span><code><span class="nt">on</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">push</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">branches</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">main</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">pull_request</span><span class="p">:</span>
+
+<span class="nt">jobs</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">go</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">runs-on</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ubuntu-latest</span>
+<span class="w">    </span><span class="nt">strategy</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">matrix</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">project</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">00-stream-proxy</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">04-ship</span><span class="p p-Indicator">]</span><span class="w">        </span><span class="c1"># ① 矩阵：每个项目一个并行任务</span>
+<span class="w">    </span><span class="nt">defaults</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">run</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">working-directory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">projects/${{ matrix.project }}</span>
+<span class="w">    </span><span class="nt">steps</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/checkout@v4</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/setup-go@v5</span>
+<span class="w">        </span><span class="nt">with</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> go-version</span><span class="p">:</span><span class="w"> </span><span class="s">"1.23"</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">go vet ./...</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">go test -race -count=1 ./...</span><span class="w">          </span><span class="c1"># ② 一定带 -race</span>
+
+<span class="w">  </span><span class="nt">ts</span><span class="p">:</span><span class="w">  </span><span class="c1"># 同样结构，跑 01-ts-agent-core 和 03-streaming 的 npm ci / typecheck / test</span>
+
+<span class="w">  </span><span class="nt">docker</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">needs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">go</span><span class="w">                                       </span><span class="c1"># ③ Go 测试通过才构建镜像</span>
+<span class="w">    </span><span class="nt">steps</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/checkout@v4</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">docker build -t agent-ship projects/04-ship</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span><span class="w">                                      </span><span class="c1"># ④ 冒烟测试</span>
+<span class="w">          </span><span class="no">docker run -d --name ship -p 8080:8080 agent-ship</span>
+<span class="w">          </span><span class="no">for i in $(seq 1 20); do curl -fs localhost:8080/healthz &amp;&amp; break; sleep 0.5; done</span>
+<span class="w">          </span><span class="no">curl -fsN -X POST localhost:8080/chat -d '{"prompt":"hi"}' | grep -q '\[DONE\]'</span>
+<span class="w">          </span><span class="no">docker stop -t 10 ship</span>
+<span class="w">          </span><span class="no">docker logs ship | grep -q '"msg":"bye"'</span>
+</code></pre></div>
+
+<p><strong>逐行解读</strong></p>
+<ul>
+<li><strong>① matrix</strong>：一份配置跑多个项目，各自并行，互不影响。</li>
+<li><strong>② <code>-race</code></strong>：数据竞争检测器需要 CGO，有些开发环境跑不了，CI 上一定要跑。0.1 课讲过的 map 并发写，只有它能稳定抓到。<code>-count=1</code> 禁用测试缓存。</li>
+<li><strong>③ <code>needs</code></strong>：任务之间的依赖。测试没过，构建镜像也没有意义。</li>
+<li><strong>④ 冒烟测试</strong>：镜像能构建不代表能跑。这几行真的把容器跑起来，打一次健康检查和一次流式请求，再 <code>docker stop</code> 检查日志里有没有 <code>"bye"</code>，<strong>这一步同时验证了 Dockerfile 的 exec 形式写对了</strong>：要是写成 shell 形式，进程收不到 SIGTERM，就没有 <code>bye</code>。</li>
+</ul>
+<p><code>curl</code> 的参数：<code>-f</code> 遇到 4xx/5xx 返回非 0 退出码（让 CI 失败），<code>-s</code> 静默，<code>-N</code> 不缓冲。</p>
+<hr />
+<h2 id="本课小结">本课小结</h2>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>概念</th>
+<th>一句话</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>分支 + PR</td>
+<td>一个功能一个分支，CI 通过才合并</td>
+</tr>
+<tr>
+<td>Conventional Commits</td>
+<td><code>类型(范围): 说明</code>，可自动生成 CHANGELOG</td>
+</tr>
+<tr>
+<td><code>git bisect</code></td>
+<td>二分查找引入 bug 的提交，配合测试可全自动</td>
+</tr>
+<tr>
+<td>密钥</td>
+<td><code>.gitignore</code> + <code>.dockerignore</code> 挡住；泄露了先作废 Key</td>
+</tr>
+<tr>
+<td>SIGTERM / SIGKILL</td>
+<td>前者可处理、是“请退出”；后者不可处理、立即死</td>
+</tr>
+<tr>
+<td>多阶段构建</td>
+<td>编译和运行分开，镜像约 10 MB</td>
+</tr>
+<tr>
+<td>层缓存</td>
+<td>先拷依赖清单再拷源码</td>
+</tr>
+<tr>
+<td>exec 形式 ENTRYPOINT</td>
+<td>服务是 1 号进程，才能收到 SIGTERM</td>
+</tr>
+<tr>
+<td>非 root + distroless</td>
+<td>被攻破时损失最小</td>
+</tr>
+<tr>
+<td>liveness vs readiness</td>
+<td>前者失败重启，后者失败摘流量；liveness 不查外部依赖</td>
+</tr>
+<tr>
+<td>优雅退出</td>
+<td>draining → Shutdown(新 context) → 超时 Close</td>
+</tr>
+<tr>
+<td>不设 WriteTimeout</td>
+<td>否则长 SSE 被掐断</td>
+</tr>
+<tr>
+<td>JSON 日志写 stdout</td>
+<td>平台收集，按字段检索</td>
+</tr>
+<tr>
+<td>ResponseWriter 包装器</td>
+<td>要实现 <code>Unwrap</code>，否则 Flush 失效</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="练习今天做完">练习（今天做完）</h2>
+<p>在 <code>projects/04-ship/</code> 里：</p>
+<ol>
+<li><strong>读懂并跑通测试</strong>：<code>make test</code>。重点读 <code>TestGracefulShutdownWaitsForInflight</code> 和 <code>TestShutdownTimeoutForcesClose</code>，说清楚两者的区别。</li>
+<li><strong>故意弄坏，看测试能不能抓到</strong>（每次改完记得还原）：
+   - 把 <code>context.WithTimeout(context.Background(), cfg.ShutdownTimeout)</code> 里的 <code>context.Background()</code> 换成 <code>ctx</code>；
+   - 删掉 <code>statusRecorder</code> 的 <code>Unwrap</code> 方法；
+   - 给 <code>http.Server</code> 加上 <code>WriteTimeout: 100 * time.Millisecond</code>。</li>
+<li><strong>Docker</strong>（本机有 Docker 的话）：<code>make docker-build docker-run</code>，然后 <code>docker images</code> 看镜像大小，<code>docker stop</code> 看日志。再把 <code>ENTRYPOINT</code> 改成 shell 形式重新构建，对比 <code>docker stop</code> 花了多久、日志里有没有 <code>bye</code>。</li>
+<li><strong>看 CI</strong>：打开仓库的 Actions 页面，找到最新一次 <code>ci</code> 运行，看 4 个 Go / TS 任务和 docker 任务的日志。</li>
+</ol>
+<p><strong>选做</strong>：写一个 <code>compose.yaml</code>，加一个 Redis，给 <code>/readyz</code> 加上“Redis 能 ping 通”的检查。想一想：为什么这个检查能放在 readyz，却不能放在 healthz？</p>
+<h2 id="自测题">自测题</h2>
+<ol>
+<li><code>git revert</code> 和 <code>git reset --hard</code> 都能“撤销提交”，已经推到远程 main 的提交该用哪个？为什么？</li>
+<li>不小心把 <code>.env</code>（含模型 API Key）提交并推送到了公开仓库。第一件事做什么？</li>
+<li>下面这个 Dockerfile 有哪些问题？
+   <code>dockerfile
+   FROM golang:1.23
+   ENV LLM_API_KEY=sk-abc123
+   COPY . .
+   RUN go mod download &amp;&amp; go build -o server .
+   ENTRYPOINT ./server</code></li>
+<li><code>docker stop</code> 一个容器总是要等整整 10 秒才停下，可能是什么原因？</li>
+<li>为什么流式服务不设 <code>http.Server.WriteTimeout</code>？那怎么防止某个请求无限期地跑下去？</li>
+<li>写 Shutdown 时，为什么不能直接用 <code>signal.NotifyContext</code> 返回的那个 ctx 当超时 context？</li>
+<li>有人在 <code>/healthz</code> 里加了“调用一次模型 API，成功才返回 200”。这有什么风险？</li>
+<li>线上用户反馈“偶尔报错”，你登录服务器，按什么顺序排查？</li>
+</ol>
+<hr />
+<h1 id="参考答案与详解">参考答案与详解</h1>
+<h2 id="自测题答案">自测题答案</h2>
+<p><strong>1.</strong> 用 <code>git revert</code>。它新建一个“反向提交”来抵消原提交的改动，历史只增不减，其他人 <code>pull</code> 时不会有任何问题。<code>reset --hard</code> 是把分支指针往回挪，相当于改写了历史，要推上去只能强推，会让所有基于旧历史工作的人出问题。规则：<strong>没推送的随便改，推送了的只用 revert。</strong></p>
+<p><strong>2.</strong> 立刻到模型平台<strong>作废（rotate）这个 Key</strong> 并生成新 Key。删掉文件再提交没有用，旧提交里依然能看到；而且公开仓库会被机器人在几分钟内扫描到。作废之后再考虑用 <code>git filter-repo</code> 清理历史，并检查账单是否有异常调用。</p>
+<p><strong>3.</strong> 至少五个问题：
+- 密钥写在 <code>ENV</code> 里，打进了镜像，<code>docker history</code> / <code>docker inspect</code> 就能看到；
+- 单阶段构建，最终镜像带着完整 Go 工具链，800 MB 左右；
+- <code>COPY . .</code> 在 <code>go mod download</code> 之前，改任何一行代码都会重新下载依赖，缓存失效；没有 <code>.dockerignore</code> 的话还会把 <code>.git</code>、<code>.env</code> 拷进去；
+- 以 root 运行；
+- <code>ENTRYPOINT ./server</code> 是 shell 形式，1 号进程是 <code>sh</code>，服务收不到 SIGTERM，无法优雅退出。</p>
+<p><strong>4.</strong> 进程没有收到或没有处理 SIGTERM，Docker 等满默认的 10 秒后发 SIGKILL。常见原因：ENTRYPOINT 用了 shell 形式，信号发给了 sh 而没有转发；或者程序根本没有监听 SIGTERM；或者处理了但优雅退出本身超过了 10 秒（这时应调小 <code>ShutdownTimeout</code> 或调大 <code>docker stop -t</code>）。</p>
+<p><strong>5.</strong> <code>WriteTimeout</code> 限制的是从读完请求头到写完整个响应的总时间，一个正常的、持续一两分钟的 SSE 流也会被它从中间切断。防止请求无限运行，应该在业务层控制：给每次 Agent 运行设一个 <code>context.WithTimeout</code>，并且在 Agent Loop 里设置最大步数、最大 token 预算（第 03 模块详讲）。</p>
+<p><strong>6.</strong> 因为收到信号的那一刻，这个 ctx 就已经被取消了。拿一个已取消的 context 调 <code>Shutdown</code>，它会立即返回 <code>context.Canceled</code>，根本不等进行中的请求，效果等于直接强关。必须用 <code>context.Background()</code> 新建一个带超时的 context。</p>
+<p><strong>7.</strong> 两个风险。第一，模型 API 抖动或限流时，所有实例的 liveness 同时失败，K8s 会把它们全部重启，<strong>一次上游的小故障被放大成你自己服务的全面宕机</strong>，而且重启解决不了上游问题。第二，探针每几秒调一次模型，白白花钱、消耗配额。liveness 只应检查进程本身；依赖检查如果要做，放在 readiness，并且要考虑“依赖挂了是否真的应该把所有实例都摘掉”。</p>
+<p><strong>8.</strong> 参考顺序：
+1. <code>curl /healthz</code>、<code>docker ps</code> 看服务是否存活、是否在频繁重启；
+2. <code>docker logs</code> / <code>journalctl</code> 看错误日志，用 <code>grep</code> 或 <code>jq</code> 筛出报错请求，看错误类型和时间分布；
+3. <code>curl /version</code> 确认线上版本，对照最近一次发版时间，判断是不是新版本引入的；
+4. <code>top</code>、<code>free -h</code>、<code>df -h</code> 看 CPU、内存、磁盘，<code>ss</code> 看连接数和 fd 是否接近上限；
+5. <code>curl -v</code> 上游模型 API，确认是不是上游的问题（429、5xx、超时）；
+6. 能稳定复现且确认是代码问题，用 <code>git bisect</code> 找到引入问题的提交。</p>
+<h2 id="练习参考答案">练习参考答案</h2>
+<p><strong>练习 1：两个优雅退出测试的区别</strong></p>
+<ul>
+<li><code>TestGracefulShutdownWaitsForInflight</code>：<code>ShutdownTimeout</code> 2 秒，流 0.3 秒就能写完。验证的是<strong>正常发版</strong>：收到信号后，进行中的流完整收到 <code>[DONE]</code>，<code>Run</code> 返回 nil，之后新连接被拒绝。</li>
+<li><code>TestShutdownTimeoutForcesClose</code>：<code>ShutdownTimeout</code> 只有 100 毫秒，流要 1.6 秒。验证的是<strong>兜底</strong>：到期后强制断开，客户端收不到 <code>[DONE]</code>，<code>Run</code> 返回 <code>context.DeadlineExceeded</code>。</li>
+</ul>
+<p>两个测试合在一起，覆盖了“尽量不掐断”和“到期一定退出”两个要求。</p>
+<p><strong>练习 2：弄坏之后</strong></p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>改动</th>
+<th>哪个测试失败</th>
+<th>为什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>超时 context 基于 <code>ctx</code></td>
+<td><code>TestGracefulShutdownWaitsForInflight</code>、<code>TestShutdownTimeoutForcesClose</code></td>
+<td>派生自已取消的 ctx，一创建就是取消状态，Shutdown 立即返回 <code>context.Canceled</code>，根本没等；第二个测试期望的是 <code>DeadlineExceeded</code>，拿到的却是 <code>context canceled</code></td>
+</tr>
+<tr>
+<td>删 <code>Unwrap</code></td>
+<td><code>TestChatStreams</code> 和两个退出测试</td>
+<td><code>NewResponseController</code> 找不到底层的 Flusher，<code>Flush</code> 返回 <code>http.ErrNotSupported</code>，handler 写完第一个 token 就 <code>return</code> 了</td>
+</tr>
+<tr>
+<td>加 <code>WriteTimeout: 100ms</code></td>
+<td><code>TestGracefulShutdownWaitsForInflight</code></td>
+<td>流写到一半就超过 100 毫秒，连接被服务器关闭，收不到 <code>[DONE]</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>第一项是“直接用 ctx”这个 bug 的变体：直接写 <code>srv.Shutdown(ctx)</code> 的话 Go 会因为 <code>sctx</code> 未使用而编译失败，反而救了你；但从 ctx 派生超时 context 能编译通过，bug 就藏住了。第二项说明 <code>NewResponseController</code> 不是魔法，它依赖包装器正确实现 <code>Unwrap</code>。第三项里超时强关的测试仍然通过，因为它本来就期望流被掐断，<strong>一个测试通过不代表行为正确，要看它验证的是什么</strong>。</p>
+<p><strong>练习 3：shell 形式 ENTRYPOINT</strong></p>
+<p>改成 <code>ENTRYPOINT /server</code> 后，<code>docker stop</code> 会稳定地花约 10 秒，日志里只有 <code>listening</code>，没有 <code>shutting down</code> 和 <code>bye</code>。因为 SIGTERM 发给了 1 号进程 <code>sh</code>，<code>sh</code> 不转发也不退出，10 秒后整个容器被 SIGKILL。另外 distroless 镜像里根本没有 <code>/bin/sh</code>，shell 形式在这个镜像里会直接启动失败，这也是 distroless 帮你提前暴露问题的一个例子。</p>
+<p><strong>选做：为什么 Redis 检查能放 readyz 不能放 healthz</strong></p>
+<p>Redis 不可用时，这个实例确实处理不了请求，从负载均衡摘掉是合理的；Redis 恢复后 readyz 自动变回 200，流量回来，<strong>不需要重启</strong>。如果放在 healthz，Redis 一挂所有实例都被重启，重启后 Redis 还是挂的，于是反复重启，问题更大。但也要想到：如果所有实例共用一个 Redis，它挂了所有实例都会被摘掉，服务一样不可用。到底是“摘掉”还是“降级继续服务”（比如没有缓存也能工作），是第 08 模块高可用要讨论的取舍。</p>
+    <nav class="pager"><a class="prev" href="00-04-streaming.html"><span>← 上一课 0.4</span>HTTP / SSE / WebSocket</a></nav>
+    <p class="foot">© 2026 duang777 · 课件源文件：<a href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/notes/00-foundations/05-engineering.md">notes/00-foundations/05-engineering.md</a></p>
+  </article>
+</div>
+<script>
+document.querySelectorAll('article pre').forEach(function(pre){
+  var b=document.createElement('button');b.className='code__copy';b.textContent='复制';
+  b.onclick=function(){navigator.clipboard.writeText(pre.innerText).then(function(){b.textContent='已复制';setTimeout(function(){b.textContent='复制'},1200)})};
+  pre.parentNode.insertBefore(b,pre);
+});
+var links=[].slice.call(document.querySelectorAll('.toc a')),map={};
+links.forEach(function(a){map[decodeURIComponent(a.getAttribute('href').slice(1))]=a});
+var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting&&map[e.target.id]){links.forEach(function(l){l.classList.remove('on')});map[e.target.id].classList.add('on')}})},{rootMargin:'-80px 0px -70% 0px'});
+document.querySelectorAll('article h1[id],article h2[id]').forEach(function(h){io.observe(h)});
+</script>
+</body>
+</html>
