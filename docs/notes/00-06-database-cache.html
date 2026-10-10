@@ -612,16 +612,13 @@ Execution Time: 0.068 ms
 </tr>
 </tbody>
 </table></div>
-<p>两种正确做法：</p>
-<ol>
-<li><strong>用约束表达规则（首选）</strong>：部分唯一索引，“running 状态下，每个会话只能有一行”。</li>
-</ol>
-<p><code>sql
-   CREATE UNIQUE INDEX runs_one_running_per_conv ON runs (conversation_id) WHERE status = 'running';</code></p>
+<p>两种正确做法。</p>
+<p><strong>做法 1：用约束表达规则（首选）。</strong> 部分唯一索引，“running 状态下，每个会话只能有一行”：</p>
+<div class="hl"><pre><span></span><code><span class="k">CREATE</span><span class="w"> </span><span class="k">UNIQUE</span><span class="w"> </span><span class="k">INDEX</span><span class="w"> </span><span class="n">runs_one_running_per_conv</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">runs</span><span class="w"> </span><span class="p">(</span><span class="n">conversation_id</span><span class="p">)</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'running'</span><span class="p">;</span>
+</code></pre></div>
+
 <p>第二个插入直接报唯一冲突。规则写在数据库里，任何代码路径都绕不过去。</p>
-<ol start="2">
-<li><strong>Serializable + 重试</strong>：规则复杂到没法用约束表达时（比如“这个用户今天所有 run 的花费加起来不超过 10 美元”）。</li>
-</ol>
+<p><strong>做法 2：Serializable + 重试。</strong> 规则复杂到没法用约束表达时（比如“这个用户今天所有 run 的花费加起来不超过 10 美元”）。</p>
 <p><strong>经验</strong>：默认用 Read Committed；能用约束和原子 SQL 解决的就用它们解决；剩下的少数复杂规则，单独对那几个事务用 Serializable 并写好重试。</p>
 <h2 id="13-消息序号为什么要-last_seq">13. 消息序号：为什么要 last_seq</h2>
 <p>回到 <code>AppendMessage</code>。最直觉的序号分配方式是：</p>
@@ -1111,10 +1108,7 @@ Execution Time: 0.068 ms
 <h2 id="自测题">自测题</h2>
 <ol>
 <li>为什么 <code>created_at</code> 要用 <code>TIMESTAMPTZ</code> 而不是 <code>TIMESTAMP</code>？主键为什么用 <code>BIGINT</code> 而不是 <code>INT</code>？</li>
-<li>有一个复合索引 <code>(user_id, updated_at DESC, id DESC)</code>。下面三个查询，哪个能用它避免排序，哪个基本用不上？
-   (a) <code>WHERE user_id = ? ORDER BY updated_at DESC LIMIT 20</code>
-   (b) <code>WHERE updated_at &gt; now() - interval '1 day'</code>
-   (c) <code>WHERE user_id = ? AND updated_at &gt; ?</code></li>
+<li>有一个复合索引 <code>(user_id, updated_at DESC, id DESC)</code>。下面三个查询，哪个能用它避免排序，哪个基本用不上？<br>(a) <code>WHERE user_id = ? ORDER BY updated_at DESC LIMIT 20</code><br>(b) <code>WHERE updated_at &gt; now() - interval '1 day'</code><br>(c) <code>WHERE user_id = ? AND updated_at &gt; ?</code></li>
 <li>键集分页的游标为什么必须包含 <code>id</code>，只用 <code>updated_at</code> 会出什么问题？</li>
 <li>在 Read Committed 下，<code>UPDATE runs SET input_tokens = input_tokens + 10 WHERE id = 1</code> 被两个事务并发执行，结果会丢更新吗？为什么？</li>
 <li>同事说：“我把事务改成 Repeatable Read 了，‘每个会话最多一个 running’ 的检查就安全了。”对吗？你会怎么改？</li>

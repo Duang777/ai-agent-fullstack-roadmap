@@ -422,17 +422,17 @@ COMMIT;
 | Repeatable Read | 都提交 | 2 ❌ |
 | Serializable | 第二个提交时报错 `40001 could not serialize access due to read/write dependencies` | 1 ✅ |
 
-两种正确做法：
+两种正确做法。
 
-1. **用约束表达规则（首选）**：部分唯一索引，“running 状态下，每个会话只能有一行”。
+**做法 1：用约束表达规则（首选）。** 部分唯一索引，“running 状态下，每个会话只能有一行”：
 
-   ```sql
-   CREATE UNIQUE INDEX runs_one_running_per_conv ON runs (conversation_id) WHERE status = 'running';
-   ```
+```sql
+CREATE UNIQUE INDEX runs_one_running_per_conv ON runs (conversation_id) WHERE status = 'running';
+```
 
-   第二个插入直接报唯一冲突。规则写在数据库里，任何代码路径都绕不过去。
+第二个插入直接报唯一冲突。规则写在数据库里，任何代码路径都绕不过去。
 
-2. **Serializable + 重试**：规则复杂到没法用约束表达时（比如“这个用户今天所有 run 的花费加起来不超过 10 美元”）。
+**做法 2：Serializable + 重试。** 规则复杂到没法用约束表达时（比如“这个用户今天所有 run 的花费加起来不超过 10 美元”）。
 
 **经验**：默认用 Read Committed；能用约束和原子 SQL 解决的就用它们解决；剩下的少数复杂规则，单独对那几个事务用 Serializable 并写好重试。
 
@@ -839,10 +839,7 @@ ANALYZE conversations;
 ## 自测题
 
 1. 为什么 `created_at` 要用 `TIMESTAMPTZ` 而不是 `TIMESTAMP`？主键为什么用 `BIGINT` 而不是 `INT`？
-2. 有一个复合索引 `(user_id, updated_at DESC, id DESC)`。下面三个查询，哪个能用它避免排序，哪个基本用不上？
-   (a) `WHERE user_id = ? ORDER BY updated_at DESC LIMIT 20`
-   (b) `WHERE updated_at > now() - interval '1 day'`
-   (c) `WHERE user_id = ? AND updated_at > ?`
+2. 有一个复合索引 `(user_id, updated_at DESC, id DESC)`。下面三个查询，哪个能用它避免排序，哪个基本用不上？<br>(a) `WHERE user_id = ? ORDER BY updated_at DESC LIMIT 20`<br>(b) `WHERE updated_at > now() - interval '1 day'`<br>(c) `WHERE user_id = ? AND updated_at > ?`
 3. 键集分页的游标为什么必须包含 `id`，只用 `updated_at` 会出什么问题？
 4. 在 Read Committed 下，`UPDATE runs SET input_tokens = input_tokens + 10 WHERE id = 1` 被两个事务并发执行，结果会丢更新吗？为什么？
 5. 同事说：“我把事务改成 Repeatable Read 了，‘每个会话最多一个 running’ 的检查就安全了。”对吗？你会怎么改？
