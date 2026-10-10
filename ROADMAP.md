@@ -4,7 +4,7 @@
 >
 > 技术栈：主力 Go / TypeScript，Python 作为读懂 ML 生态与评测脚本的辅助语言。
 
-**14 个模块 · 77 个知识点 · 4 个阶段**
+**14 个模块 · 84 个知识点 · 4 个阶段 · 1 条主线项目**
 
 ## 学习阶段
 
@@ -23,6 +23,7 @@
 - [x] Python（够用即可）：asyncio、Pydantic、uv
 - [x] HTTP / SSE / WebSocket 流式协议
 - [x] Git 工作流、Docker、Linux 基础
+- [ ] 数据库与缓存基础：Postgres 建模、索引、事务与隔离级别、迁移；Redis 数据结构
 
 ## 1. LLM 原理与使用
 - [ ] Transformer、Tokenizer、采样参数（temperature/top-p）
@@ -44,6 +45,7 @@
 - [ ] Agent Loop 设计：停止条件、预算、重试
 - [ ] 多智能体：Supervisor、Handoff、Swarm
 - [ ] 长任务 Agent：检查点、可恢复执行、Human-in-the-loop
+- [ ] Agent 状态与数据模型：会话 / 消息 / run / step / 工具调用的存储设计、事件溯源、完整重放
 - [ ] Coding Agent 架构（Claude Code / Codex / SWE-agent 拆解）
 - [ ] Deep Research Agent 架构
 
@@ -63,12 +65,14 @@
 - [ ] 检索质量评测：Recall@k、MRR、上下文相关性、答案忠实度
 
 ## 6. 评测体系（Eval）
+- [ ] Agent 测试工程：假模型与录制回放（VCR）、工具契约测试、轨迹快照；分清确定性单测与概率性 Eval
 - [ ] Eval 设计：从真实失败案例构造任务集、黄金集、数据版本化
 - [ ] 指标：任务成功率、pass@k 与 pass^k（稳定性）、工具调用正确率、轨迹评估
 - [ ] LLM-as-Judge：评分细则（rubric）、位置/长度偏差、与人工标注一致性校准
 - [ ] 公开 Benchmark：SWE-bench Verified、Terminal-Bench、τ²-bench、GAIA、BrowseComp
 - [ ] Eval 框架：Inspect AI、promptfoo、OpenAI Evals、Braintrust
 - [ ] CI 回归门禁：改 prompt / 换模型 / 改工具时自动跑 Eval，分数下降即阻断
+- [ ] 模型版本管理与迁移：锁定模型快照版本、下线前迁移、换模型的回归对比与灰度
 - [ ] 线上评估：A/B 实验、灰度对比、用户反馈回流成新用例
 
 ## 7. 可观测性（Tracing / Metrics / Logs）
@@ -83,6 +87,7 @@
 - [ ] 熔断、限流（令牌桶）、背压、舱壁隔离
 - [ ] 多模型供应商容灾：fallback 链、健康检查、自动降级到小模型
 - [ ] 持久化执行：Temporal / Restate / Inngest，进程崩溃后从断点恢复
+- [ ] 异步与后台 Agent：任务队列、Webhook、定时触发、结果通知，长任务不挂在一条 HTTP 连接上
 - [ ] 无状态服务与水平扩展：状态外置到 Postgres / Redis，流式连接的会话保持
 - [ ] 故障演练：注入超时、429、断流，验证系统按预期降级
 
@@ -95,15 +100,17 @@
 - [ ] 成本治理：按用户 / 租户计量、预算上限、用量看板
 
 ## 10. 安全与治理
-- [ ] Prompt Injection / 间接注入防御
+- [ ] Prompt Injection / 间接注入防御、第三方 MCP Server 审查与工具投毒
 - [ ] 权限与沙箱：最小权限、高风险工具人工审批
+- [ ] 身份、凭证与多租户：用户鉴权、租户隔离、代用户调用第三方的 OAuth 2.1（MCP 授权规范）、密钥管理与轮换
 - [ ] Guardrails、输出校验、可验证完成（Verification）
 - [ ] Reward Hacking 与测试篡改检测
 - [ ] 数据与合规：PII 脱敏、审计日志、多租户隔离
+- [ ] 内容安全与合规（国内）：生成式 AI 服务备案、输入输出内容审核、日志留存、数据出境
 
 ## 11. 工程化与部署
 - [ ] 后端：Go 服务（net/http、gRPC）+ Node 服务、任务队列
-- [ ] 流式前端：React / Next.js、Generative UI
+- [ ] 流式前端：React / Next.js、Generative UI、审批 / 进度 / 中途打断等 Agent 交互
 - [ ] 模型网关：统一接口、鉴权、配额（LiteLLM 或自研）
 - [ ] 容器化与编排：Docker、Kubernetes、HPA 自动扩缩容
 - [ ] CI/CD 与版本管理：prompt、模型、工具定义像代码一样版本化
@@ -115,7 +122,29 @@
 - [ ] 合成数据与轨迹数据构造
 - [ ] 开源模型部署与量化
 
+## 主线项目：agent-platform
+
+每课的练习是独立的小目录，用来把一个知识点讲透。但生产能力来自**同一个系统在不断加需求中活下来**，所以另有一条贯穿全程的主线项目 `projects/agent-platform/`，以 0.5 的 `04-ship` 为起点，每个模块结束时给它加一层：
+
+| 模块 | 给主线项目加什么 |
+|---|---|
+| 00 | 服务骨架：健康检查、优雅退出、Docker、CI；Postgres 与 Redis |
+| 01 | 接入多家模型 API，统一流式接口与结构化输出 |
+| 02 | 工具调用与 MCP 客户端，代码执行沙箱 |
+| 03 | Agent Loop、会话与运行记录持久化、可重放 |
+| 04 | 与一个框架实现对照，决定保留什么 |
+| 05 | 记忆与 RAG |
+| 06 | 测试分层 + Eval 集 + CI 回归门禁 |
+| 07 | OpenTelemetry Tracing、指标看板 |
+| 08 | 重试幂等、多供应商容灾、后台任务、断点恢复 |
+| 09 | 压测报告、缓存、模型路由、成本计量 |
+| 10 | 鉴权与多租户、权限审批、内容审核 |
+| 11 | 前端、K8s 部署、灰度与回滚 |
+| 13 | 真实部署上线，跑出 SLO 数据，写一次事故复盘 |
+
 ## 13. 项目实战（每项一个可运行目录）
+
+> 每个项目开工前先写一页设计文档：目标、容量估算、关键取舍、失败模式。
 - [ ] 带 MCP 工具的个人助理 Agent
 - [ ] 生产级 RAG 问答服务：Eval + Tracing + 缓存
 - [ ] 多智能体 Coding Agent：沙箱执行 + 测试验证 + SWE-bench 子集评测
@@ -133,3 +162,9 @@
 - 有 SLO 和告警，告警有对应的处理手册
 - 高风险工具有权限控制和审批，日志可审计
 - 能灰度发布、能一键回滚
+- 模型版本已锁定，换模型有回归对比报告
+- 任意一次运行都能从存储里完整重放
+- 单元测试不调用真实模型，CI 稳定且不花钱
+- 租户之间数据和凭证隔离，密钥可轮换
+- 有数据保留与删除策略
+- 有单用户 / 单租户的成本告警
