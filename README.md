@@ -53,7 +53,7 @@
 |---|---|---|---|---|---|
 | 0.1 | Go 基础与并发 | 模块、错误处理、接口、JSON、表驱动测试；goroutine、channel、context、errgroup、可取消 SSE | [课件](notes/00-foundations/01-go.md) | [`00-stream-proxy`](projects/00-stream-proxy) | ✅ 完成 |
 | 0.2 | TypeScript | 可辨识联合、Zod、AsyncGenerator、AbortController | [课件](notes/00-foundations/02-typescript.md) | [`01-ts-agent-core`](projects/01-ts-agent-core) | ✅ 完成 |
-| 0.3 | Python | uv、Pydantic、asyncio TaskGroup、异步生成器 | [课件](notes/00-foundations/03-python.md) | 进行中 | 🔄 学习中 |
+| 0.3 | Python | uv、Pydantic、asyncio TaskGroup、异步生成器 | [课件](notes/00-foundations/03-python.md) | [`02-py-agent-core`](projects/02-py-agent-core) | 📖 课件已出 |
 | 0.4 | 流式协议 | HTTP 分块与 Flush、SSE 解析器、断线续传、中间层缓冲、WebSocket 双向打断 | [课件](notes/00-foundations/04-streaming.md) | [`03-streaming`](projects/03-streaming) | 📖 课件已出 |
 | 0.5 | 工程基础 | Git 工作流、Linux 信号与排查、多阶段 Docker、健康检查、优雅退出、CI | [课件](notes/00-foundations/05-engineering.md) | [`04-ship`](projects/04-ship) | 📖 课件已出 |
 
@@ -63,7 +63,7 @@
 
 | 阶段 | 模块 | 内容 | 进度 |
 |---|---|---|---|
-| A | 00 基础功底 | Go / TS / Python、流式协议、工程基础 | `██░░░` 2/5 |
+| A | 00 基础功底 | Go / TS / Python、流式协议、工程基础 | `██░░░` 2/5（课件 5/5） |
 | A | 01 LLM 原理与使用 | Transformer、主流 API、结构化输出、推理模型、Prompt Caching | `░░░░░░` 0/6 |
 | A | 02 工具调用与协议 | Function Calling、MCP、A2A、Computer Use、代码沙箱 | `░░░░░` 0/5 |
 | B | 03 Agent 架构 | ReAct、Agent Loop、多智能体、长任务、Coding / Deep Research Agent | `░░░░░░` 0/6 |
@@ -97,6 +97,7 @@ cd projects/00-stream-proxy && go test -race -count=1 ./...
 cd projects/01-ts-agent-core && npm install && npm run typecheck && npm test
 
 # 0.4 流式协议
+cd projects/02-py-agent-core && uv sync && uv run pytest -q   # 0.3 Python
 cd projects/03-streaming && npm install && npm run typecheck && npm test
 
 # 0.5 工程基础
@@ -120,6 +121,7 @@ cd projects/04-ship && make test        # 有 Docker 的话再 make docker-build
 ├── projects/               # 每课一个可运行的练习目录
 │   ├── 00-stream-proxy/    # Go：fanIn、并行工具、可取消 SSE
 │   ├── 01-ts-agent-core/   # TS：Zod 事件、可取消 sleep、并行工具、SSE
+│   ├── 02-py-agent-core/   # Python：Pydantic 事件、TaskGroup 并行工具、SSE
 │   ├── 03-streaming/       # TS：SSE 解析器、SSE 服务端、续传与断开即停
 │   └── 04-ship/            # Go：健康检查、优雅退出、多阶段 Dockerfile
 ├── .github/workflows/ci.yml # 每次 push：Go -race、TS 测试、镜像构建与冒烟测试
