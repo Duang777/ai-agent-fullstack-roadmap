@@ -1,0 +1,58 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        project: [00-stream-proxy, 04-ship]
+    defaults:
+      run:
+        working-directory: projects/${{ matrix.project }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.23"
+          cache-dependency-path: projects/${{ matrix.project }}/go.mod
+      - run: go vet ./...
+      - run: go test -race -count=1 ./...
+
+  ts:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        project: [01-ts-agent-core, 03-streaming]
+    defaults:
+      run:
+        working-directory: projects/${{ matrix.project }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: projects/${{ matrix.project }}/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+
+  docker:
+    needs: go
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: build image
+        run: docker build --build-arg VERSION=${GITHUB_SHA::7} -t agent-ship projects/04-ship
+      - name: smoke test
+        run: |
+          docker run -d --name ship -p 8080:8080 agent-ship
+          for i in $(seq 1 20); do curl -fs localhost:8080/healthz && break; sleep 0.5; done
+          curl -fsN -X POST localhost:8080/chat -d '{"prompt":"hi"}' | grep -q '\[DONE\]'
+          docker stop -t 10 ship
+          docker logs ship | grep -q '"msg":"bye"'
