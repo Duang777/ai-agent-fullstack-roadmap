@@ -9,7 +9,7 @@
 用 Go / TypeScript 写 Agent 运行时，用 Python 读懂模型生态。<br/>
 每一课都有课件、可运行练习、测试和参考答案。
 
-[![Progress](https://img.shields.io/badge/progress-5%2F77-111111?style=flat-square)](ROADMAP.md)
+[![Progress](https://img.shields.io/badge/progress-5%2F84-111111?style=flat-square)](ROADMAP.md)
 [![CI](https://github.com/Duang777/ai-agent-fullstack-roadmap/actions/workflows/ci.yml/badge.svg)](https://github.com/Duang777/ai-agent-fullstack-roadmap/actions/workflows/ci.yml)
 [![Go](https://img.shields.io/badge/Go-1.23+-111111?style=flat-square&logo=go&logoColor=white)](projects/00-stream-proxy)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-111111?style=flat-square&logo=typescript&logoColor=white)](projects/01-ts-agent-core)
@@ -33,7 +33,7 @@
 - 模型给的 JSON 参数是错的，**程序崩溃还是把错误回传给模型自我修正**？
 - 怎么证明 Agent“做完了”，而不是“说做完了”？
 
-这个仓库按工程师的视角，把这些问题拆成 77 个知识点、14 个模块，**每个知识点都要求有代码、有测试、能跑通**才算完成。
+这个仓库按工程师的视角，把这些问题拆成 84 个知识点、14 个模块，外加一条贯穿全程的主线项目，**每个知识点都要求有代码、有测试、能跑通**才算完成。
 
 ## 特点
 
@@ -56,6 +56,7 @@
 | 0.3 | Python | uv、Pydantic、asyncio TaskGroup、异步生成器 | [课件](notes/00-foundations/03-python.md) | [`02-py-agent-core`](projects/02-py-agent-core) | ✅ 完成 |
 | 0.4 | 流式协议 | HTTP 分块与 Flush、SSE 解析器、断线续传、中间层缓冲、WebSocket 双向打断 | [课件](notes/00-foundations/04-streaming.md) | [`03-streaming`](projects/03-streaming) | ✅ 完成 |
 | 0.5 | 工程基础 | Git 工作流、Linux 信号与排查、多阶段 Docker、健康检查、优雅退出、CI | [课件](notes/00-foundations/05-engineering.md) | [`04-ship`](projects/04-ship) | ✅ 完成 |
+| 0.6 | 数据库与缓存 | Postgres 建模、索引、事务与隔离级别、迁移；Redis | 即将更新 | | ⏳ |
 
 ### 全部模块
 
@@ -63,20 +64,22 @@
 
 | 阶段 | 模块 | 内容 | 进度 |
 |---|---|---|---|
-| A | 00 基础功底 | Go / TS / Python、流式协议、工程基础 | `█████` 5/5 |
+| A | 00 基础功底 | Go / TS / Python、流式协议、工程基础、数据库与缓存 | `█████░` 5/6 |
 | A | 01 LLM 原理与使用 | Transformer、主流 API、结构化输出、推理模型、Prompt Caching | `░░░░░░` 0/6 |
 | A | 02 工具调用与协议 | Function Calling、MCP、A2A、Computer Use、代码沙箱 | `░░░░░` 0/5 |
-| B | 03 Agent 架构 | ReAct、Agent Loop、多智能体、长任务、Coding / Deep Research Agent | `░░░░░░` 0/6 |
+| B | 03 Agent 架构 | ReAct、Agent Loop、多智能体、长任务、状态与数据模型、Coding / Deep Research Agent | `░░░░░░░` 0/7 |
 | B | 04 框架与 SDK | LangGraph、OpenAI / Claude Agent SDK、Eino、Vercel AI SDK、Mastra | `░░░░░░` 0/6 |
 | B | 05 记忆与检索 | 向量库、混合检索、Rerank、GraphRAG、记忆、检索评测 | `░░░░░` 0/5 |
-| C | 06 评测体系 | 任务集构造、pass^k、LLM-as-Judge 校准、SWE-bench / τ²-bench、CI 门禁、A/B | `░░░░░░░` 0/7 |
+| C | 06 评测体系 | 测试工程、任务集构造、pass^k、LLM-as-Judge 校准、SWE-bench / τ²-bench、CI 门禁、模型版本迁移、A/B | `░░░░░░░░░` 0/9 |
 | C | 07 可观测性 | OpenTelemetry GenAI、Langfuse、TTFT / P99 / 成本指标、会话回放、SLO | `░░░░░` 0/5 |
-| C | 08 高可用与可靠性 | 超时重试幂等、熔断限流、多供应商容灾、Temporal 断点恢复、故障演练 | `░░░░░░` 0/6 |
+| C | 08 高可用与可靠性 | 超时重试幂等、熔断限流、多供应商容灾、Temporal 断点恢复、后台任务、故障演练 | `░░░░░░░` 0/7 |
 | C | 09 高性能与成本 | 首 token 延迟、缓存、压测与 pprof、vLLM / SGLang、模型路由、成本治理 | `░░░░░░` 0/6 |
-| C | 10 安全与治理 | Prompt Injection、权限沙箱、Guardrails、Reward Hacking、PII 与审计 | `░░░░░` 0/5 |
+| C | 10 安全与治理 | Prompt Injection、权限沙箱、身份凭证与多租户、Guardrails、Reward Hacking、PII 与审计、内容安全合规 | `░░░░░░░` 0/7 |
 | C | 11 工程化与部署 | Go / Node 服务、流式前端、模型网关、K8s、Prompt 版本化、灰度回滚 | `░░░░░░` 0/6 |
 | D | 12 模型侧前沿 | LoRA、DPO / GRPO、Agentic RL、合成数据、量化部署 | `░░░░` 0/4 |
 | D | 13 项目实战 | MCP 助理、生产级 RAG、Coding Agent、高可用网关、上线运营 | `░░░░░` 0/5 |
+
+**主线项目 `agent-platform`**：以 0.5 的 `04-ship` 为起点，每个模块结束时给同一个系统加一层（模型接入 → 工具 → Agent Loop → RAG → Eval → Tracing → 容灾 → 压测 → 安全 → 上线），最后真实部署并写事故复盘。详见 [ROADMAP](ROADMAP.md#主线项目agent-platform)。
 
 完整清单和**生产就绪检查清单**见 [ROADMAP.md](ROADMAP.md)。
 
@@ -110,7 +113,7 @@ cd projects/04-ship && make test        # 有 Docker 的话再 make docker-build
 
 ```
 .
-├── ROADMAP.md              # 77 个知识点清单 + 生产就绪检查清单
+├── ROADMAP.md              # 84 个知识点 + 主线项目 + 生产就绪检查清单
 ├── notes/                  # 课件，按模块分目录
 │   └── 00-foundations/
 │       ├── 01-go.md
