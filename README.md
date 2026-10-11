@@ -58,6 +58,12 @@
 | 0.5 | 工程基础 | Git 工作流、Linux 信号与排查、多阶段 Docker、健康检查、优雅退出、CI | [课件](notes/00-foundations/05-engineering.md) | [`04-ship`](projects/04-ship) | ✅ 完成 |
 | 0.6 | 数据库与缓存 | Postgres 建模、索引与键集分页、隔离级别与写偏斜、幂等键、SKIP LOCKED 队列、迁移；Redis 缓存与限流 | [课件](notes/00-foundations/06-database-cache.md) | [`05-store`](projects/05-store) | 📖 学习中 |
 
+### 01 · LLM 原理与使用
+
+| # | 主题 | 核心内容 | 课件 | 练习 | 状态 |
+|---|---|---|---|---|---|
+| 1.1 | Transformer、Tokenizer、采样 | 字节级 BPE、流式 UTF-8 解码、注意力与因果掩码、KV Cache、temperature / top-p / min-p / 惩罚、API 采样参数现状 | [课件](notes/01-llm/01-transformer-tokenizer-sampling.md) | [`06-llm-basics`](projects/06-llm-basics) | 📖 学习中 |
+
 ### 全部模块
 
 四个阶段：**A 打地基** → **B 能做出来** → **C 上生产** → **D 深入与实战**。阶段 C 是 Demo 和生产系统的分水岭：Eval 回答“有多准”，Tracing 回答“哪里坏了”，高可用回答“挂了怎么办”，性能与成本回答“为什么慢、为什么贵”。
@@ -108,6 +114,9 @@ cd projects/04-ship && make test        # 有 Docker 的话再 make docker-build
 
 # 0.6 数据库与缓存（需要 Docker 起 Postgres + Redis）
 cd projects/05-store && make up && make test
+
+# 1.1 Transformer、Tokenizer、采样
+cd projects/06-llm-basics && make test   # make tokens 用 tiktoken 对比真实分词器
 ```
 
 推荐学习方式：先读课件 → 关掉参考答案自己写练习 → 跑测试 → 再对照参考实现。

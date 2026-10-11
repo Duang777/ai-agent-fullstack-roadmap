@@ -1,0 +1,18 @@
+An agent is a loop. The model reads the context, decides on the next action, calls a tool, reads the result, and decides again.
+The loop stops when the model says it is done, when the budget runs out, or when the user cancels the request.
+A tool call is just a structured message. The model writes the name of the tool and the arguments as JSON, and the runtime runs the tool.
+The runtime checks the arguments, runs the tool with a timeout, and sends the result back to the model as another message.
+Streaming matters because users want to see the first token quickly. The first token latency is what users feel.
+Tokens are not words. A token can be a whole word, a piece of a word, a space and a word, or a single byte.
+The tokenizer turns text into tokens, the model turns tokens into logits, and the sampler turns logits into the next token.
+Temperature controls how random the sampler is. Top p keeps the smallest set of tokens whose probability adds up to p.
+When the temperature is zero, the sampler always picks the most likely token, and the output is almost always the same.
+The context window is measured in tokens, the price is measured in tokens, and the rate limit is measured in tokens.
+智能体是一个循环。模型读取上下文，决定下一步动作，调用工具，读取结果，然后再次决定。
+当模型说它完成了，或者预算用完了，或者用户取消了请求，循环就会停止。
+工具调用只是一条结构化的消息。模型写出工具的名字和参数，运行时负责执行工具。
+运行时检查参数，带着超时执行工具，再把结果作为另一条消息发回给模型。
+流式输出很重要，因为用户希望尽快看到第一个字。首字延迟是用户真正能感觉到的。
+词元不是词。一个词元可以是一个完整的词，也可以是词的一部分，甚至是一个字节。
+分词器把文本变成词元，模型把词元变成分数，采样器把分数变成下一个词元。
+温度控制采样有多随机。上下文窗口按词元计算，价格按词元计算，限流也按词元计算。

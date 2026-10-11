@@ -1,0 +1,1245 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>1.1 Transformer、Tokenizer 与采样参数：从一段文本到下一个 token · AI Agent 全栈</title>
+<meta name="description" content="1.1 Transformer、Tokenizer 与采样参数：从一段文本到下一个 token。duang777 的 AI Agent 全栈公开学习课件。" />
+<style>
+:root{
+  --bg:#0a0a0a;--surface:#111;--text:#ededed;--text-2:#a1a1a1;--text-3:rgb(255 255 255/.4);
+  --line:rgb(255 255 255/.1);--line-2:rgb(255 255 255/.06);
+  --sans:Inter,-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei","Helvetica Neue",sans-serif;
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+}
+*{box-sizing:border-box}
+html{color-scheme:dark}
+.toc{scrollbar-width:none}.toc::-webkit-scrollbar{display:none}
+html{scrollbar-width:thin;scrollbar-color:#333 transparent}
+::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#2a2a2a;border-radius:8px}::-webkit-scrollbar-thumb:hover{background:#3a3a3a}
+html{scroll-behavior:smooth;scroll-padding-top:80px}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;line-height:1.8;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+.nav{position:sticky;top:0;z-index:10;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;border-bottom:1px solid var(--line);background:rgb(10 10 10/.8);backdrop-filter:blur(12px)}
+.nav__brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-size:14px;font-weight:500}
+.nav__dot{width:10px;height:10px;border-radius:3px;background:var(--text)}
+.nav__links{display:flex;gap:20px;font-size:14px;color:var(--text-2)}
+.nav__links a{text-decoration:none}.nav__links a:hover{color:var(--text)}
+.wrap{max-width:1200px;margin:0 auto;padding:0 24px;display:grid;grid-template-columns:220px minmax(0,1fr);gap:56px}
+.toc{position:sticky;top:80px;align-self:start;max-height:calc(100vh - 100px);overflow:auto;padding:40px 0 40px;font-size:13px;line-height:1.6}
+.toc__label{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--text-3);text-transform:uppercase;margin-bottom:12px}
+.toc ul{list-style:none;margin:0;padding:0}
+.toc li{margin:0}
+.toc a{display:block;padding:4px 0 4px 12px;border-left:1px solid var(--line);color:var(--text-2);text-decoration:none}
+.toc a:hover,.toc a.on{color:var(--text);border-left-color:var(--text)}
+.toc ul ul a{padding-left:24px;font-size:12.5px;color:var(--text-3)}
+.toc ul ul a:hover,.toc ul ul a.on{color:var(--text)}
+article{min-width:0;max-width:760px;padding:48px 0 96px}
+.meta{font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--text-3);margin-bottom:16px}
+article h1.title{font-size:40px;line-height:1.2;letter-spacing:-.02em;font-weight:600;margin:0 0 24px}
+article h1{font-size:28px;line-height:1.3;letter-spacing:-.01em;font-weight:600;margin:72px 0 20px;padding-top:32px;border-top:1px solid var(--line)}
+article h2{font-size:22px;line-height:1.4;font-weight:600;margin:48px 0 16px}
+article h3{font-size:18px;font-weight:600;margin:36px 0 12px}
+article h4{font-size:16px;font-weight:600;margin:28px 0 8px}
+article p{margin:0 0 18px;color:#d4d4d4}
+article strong{color:var(--text);font-weight:600}
+article ul,article ol{padding-left:22px;margin:0 0 18px;color:#d4d4d4}
+article li{margin:4px 0}
+article a{text-decoration:underline;text-decoration-color:var(--text-3);text-underline-offset:3px}
+article a:hover{text-decoration-color:var(--text)}
+article hr{border:0;border-top:1px solid var(--line);margin:48px 0}
+article blockquote{margin:0 0 20px;padding:12px 18px;border-left:2px solid var(--text-2);background:var(--surface);border-radius:0 8px 8px 0;color:var(--text-2)}
+article blockquote p{margin:6px 0;color:var(--text-2)}
+article code{font-family:var(--mono);font-size:.88em;background:#1a1a1a;border:1px solid var(--line-2);border-radius:5px;padding:1px 6px}
+article pre{position:relative;margin:0 0 22px;padding:16px 18px;background:#0f0f0f;border:1px solid var(--line);border-radius:10px;overflow:auto;font-size:13.5px;line-height:1.65}
+article pre code{background:none;border:0;padding:0;font-size:inherit}
+.code{position:relative}
+.code__lang{position:absolute;top:8px;right:46px;font-family:var(--mono);font-size:11px;color:var(--text-3);z-index:1}
+.code__copy{position:absolute;top:6px;right:8px;z-index:1;font:11px var(--mono);color:var(--text-2);background:#1a1a1a;border:1px solid var(--line);border-radius:6px;padding:2px 7px;cursor:pointer}
+.code__copy:hover{color:var(--text)}
+.tbl{overflow-x:auto;margin:0 0 22px;border:1px solid var(--line);border-radius:10px}
+article table{border-collapse:collapse;width:100%;font-size:14px}
+article th,article td{padding:10px 14px;border-bottom:1px solid var(--line-2);text-align:left;vertical-align:top}
+article th{font-weight:600;background:var(--surface);color:var(--text)}
+article tr:last-child td{border-bottom:0}
+article details{margin:0 0 18px;border:1px solid var(--line);border-radius:10px;padding:10px 16px;background:var(--surface)}
+article summary{cursor:pointer;font-weight:500}
+.pager{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:72px;padding-top:32px;border-top:1px solid var(--line)}
+.pager a{display:block;padding:16px 18px;border:1px solid var(--line);border-radius:10px;text-decoration:none}
+.pager a:hover{border-color:var(--text-2)}
+.pager span{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--text-3)}
+.pager .next{text-align:right;grid-column:2}
+.foot{margin-top:40px;font-size:13px;color:var(--text-3)}
+/* 代码高亮：黑白灰为主 */
+.hl .c,.hl .c1,.hl .cm,.hl .ch,.hl .cs,.hl .cp,.hl .cpf{color:#6b6b6b;font-style:italic}
+.hl .k,.hl .kd,.hl .kn,.hl .kr,.hl .kt,.hl .kc,.hl .kp,.hl .ow{color:#ffffff;font-weight:600}
+.hl .s,.hl .s1,.hl .s2,.hl .sb,.hl .sc,.hl .sd,.hl .se,.hl .sh,.hl .si,.hl .sx,.hl .sr,.hl .ss,.hl .dl,.hl .sa{color:#86efac}
+.hl .m,.hl .mi,.hl .mf,.hl .mh,.hl .mo,.hl .il{color:#fcd34d}
+.hl .nf,.hl .fm,.hl .nc,.hl .nn{color:#e5e5e5;font-weight:500}
+.hl .nb,.hl .bp,.hl .nd,.hl .na,.hl .nt{color:#bdbdbd}
+.hl .o,.hl .p{color:#9a9a9a}
+.hl .gd{color:#fca5a5}.hl .gi{color:#86efac}
+.hl{color:#d4d4d4}
+@media (max-width:960px){.wrap{grid-template-columns:1fr;gap:0}.toc{display:none}article h1.title{font-size:30px}.nav__links a.hide-sm{display:none}}
+</style>
+</head>
+<body>
+<header class="nav">
+  <a class="nav__brand" href="../index.html"><span class="nav__dot"></span>AI Agent 全栈</a>
+  <nav class="nav__links">
+    <a href="../index.html#progress">课件</a>
+    <a class="hide-sm" href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/ROADMAP.md">路线图</a>
+    <a href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/notes/01-llm/01-transformer-tokenizer-sampling.md">在 GitHub 上查看</a>
+  </nav>
+</header>
+<div class="wrap">
+  <aside class="toc"><div class="toc__label">本课目录</div><ul>
+<li><a href="#读前说明">读前说明</a></li>
+<li><a href="#第一部分全景">第一部分：全景</a><ul>
+<li><a href="#1-一次调用的完整链路">1. 一次调用的完整链路</a></li>
+<li><a href="#2-自回归为什么输出要一个一个吐">2. 自回归：为什么输出要一个一个吐</a></li>
+</ul>
+</li>
+<li><a href="#第二部分tokenizer">第二部分：Tokenizer</a><ul>
+<li><a href="#3-为什么不按字也不按词切">3. 为什么不按字、也不按词切</a></li>
+<li><a href="#4-bpe-训练手算一遍">4. BPE 训练：手算一遍</a></li>
+<li><a href="#5-字节级永远没有">5. 字节级：永远没有 &lt;unk&gt;</a></li>
+<li><a href="#6-预分词合并不跨空格">6. 预分词：合并不跨空格</a></li>
+<li><a href="#7-编码按学到的顺序合并">7. 编码：按学到的顺序合并</a></li>
+<li><a href="#8-真实分词器实测">8. 真实分词器：实测</a></li>
+<li><a href="#9-对-agent-工程的直接影响">9. 对 Agent 工程的直接影响</a></li>
+</ul>
+</li>
+<li><a href="#第三部分transformer">第三部分：Transformer</a><ul>
+<li><a href="#10-嵌入把-id-变成向量">10. 嵌入：把 id 变成向量</a></li>
+<li><a href="#11-注意力每个位置去前文里查资料">11. 注意力：每个位置去前文里“查资料”</a></li>
+<li><a href="#12-因果掩码只能看过去">12. 因果掩码：只能看过去</a></li>
+<li><a href="#13-一层-transformer-还有什么">13. 一层 Transformer 还有什么</a></li>
+<li><a href="#14-kv-cache用显存换算力">14. KV Cache：用显存换算力</a></li>
+</ul>
+</li>
+<li><a href="#第四部分采样">第四部分：采样</a><ul>
+<li><a href="#15-从-logits-到概率数值稳定的-softmax">15. 从 logits 到概率：数值稳定的 softmax</a></li>
+<li><a href="#16-温度把分布拉尖或压平">16. 温度：把分布拉尖或压平</a></li>
+<li><a href="#17-截断top-ktop-pmin-p">17. 截断：top-k、top-p、min-p</a></li>
+<li><a href="#18-惩罚与-logit-bias">18. 惩罚与 logit bias</a></li>
+<li><a href="#19-处理顺序">19. 处理顺序</a></li>
+<li><a href="#20-贪心的问题重复循环">20. 贪心的问题：重复循环</a></li>
+<li><a href="#21-temperature0-不等于确定">21. temperature=0 不等于确定</a></li>
+<li><a href="#22-2026-年各家-api-的实际情况">22. 2026 年各家 API 的实际情况</a></li>
+<li><a href="#23-回到生成循环停止条件">23. 回到生成循环：停止条件</a></li>
+<li><a href="#本课小结">本课小结</a></li>
+<li><a href="#练习今天做完">练习（今天做完）</a></li>
+<li><a href="#自测题">自测题</a></li>
+</ul>
+</li>
+<li><a href="#参考答案与详解">参考答案与详解</a><ul>
+<li><a href="#自测题答案">自测题答案</a></li>
+<li><a href="#练习参考答案">练习参考答案</a></li>
+<li><a href="#完成标准">完成标准</a></li>
+</ul>
+</li>
+</ul>
+</aside>
+  <article>
+    <div class="meta">模块 00 · 基础功底 · 第 1.1 课</div>
+    <h1 class="title">1.1 Transformer、Tokenizer 与采样参数：从一段文本到下一个 token</h1>
+    <blockquote>
+<p>第 1 部分 · 第 1 课 ｜ 预计 5–6 小时 ｜ 前置：0.1 Go、0.4 流式协议</p>
+<p>配套练习：<code>projects/06-llm-basics/</code>（纯 Go，无第三方依赖，21 个测试）。手写字节级 BPE 分词器、采样器、因果注意力和 KV Cache，再用一个最小的 bigram 模型把它们串成完整的生成循环。</p>
+</blockquote>
+<h2 id="读前说明">读前说明</h2>
+<p>做 Agent 的人不需要会训练大模型，但必须知道一次 API 调用里到底发生了什么。下面这些问题每天都会遇到，答案全在这一课：</p>
+<ul>
+<li>为什么中文比英文贵？为什么同一段话换个模型 token 数就变了？</li>
+<li>为什么流式输出里会偶尔冒出 <code>�</code>？</li>
+<li>为什么输出 token 比输入 token 贵好几倍？为什么上下文越长越慢、越贵？</li>
+<li><code>temperature=0</code> 为什么还是每次不一样？为什么新模型干脆不让设 <code>temperature</code> 了？</li>
+<li>模型为什么会陷入“同一句话无限重复”？</li>
+</ul>
+<p>这一课分四部分：<strong>全景 → 分词器 → Transformer → 采样</strong>。每一部分都对应练习里一段能跑、有测试的 Go 代码。数学只讲到能写代码为止。</p>
+<p>本课结束时你能：</p>
+<ol>
+<li>画出“文本 → token → 向量 → N 层 Transformer → logits → 采样 → 下一个 token”的完整链路，说清楚 prefill 和 decode 的区别；</li>
+<li>手算 BPE 的合并过程，自己实现字节级 BPE 的训练、编码、解码；</li>
+<li>解释 token 对 Agent 工程的影响：计费、上下文预算、中文成本、流式乱码；</li>
+<li>写出缩放点积注意力和因果掩码，解释为什么要除以 √d，为什么 KV Cache 有效，以及它占多少显存；</li>
+<li>实现 temperature、top-k、top-p、min-p、重复惩罚和 logit bias，知道它们的处理顺序；</li>
+<li>知道 2026 年三家主流 API 对采样参数的实际限制，以及“temperature=0 也不确定”的真实原因。</li>
+</ol>
+<hr />
+<h1 id="第一部分全景">第一部分：全景</h1>
+<h2 id="1-一次调用的完整链路">1. 一次调用的完整链路</h2>
+<p>你调用一次 <code>messages.create</code>，服务端做的事情可以压缩成下面这张图：</p>
+<div class="hl"><pre><span></span><code>"智能体调用工具"                          ← 你发的文本（加上 system、历史消息、工具定义）
+   │ ① Tokenizer：文本 → token id
+   ▼
+[101, 2203, 5521, 873]                    ← 整数序列
+   │ ② Embedding：每个 id 查表得到一个向量（比如 4096 维）
+   ▼
+4 × 4096 的矩阵
+   │ ③ N 层 Transformer（每层：注意力 + 前馈网络）
+   ▼
+4 × 4096 的矩阵（每个位置“读过”前文之后的表示）
+   │ ④ 取最后一个位置，乘输出矩阵 → 词表上每个 token 一个分数
+   ▼
+logits：长度 = 词表大小（比如 200k）的一组实数
+   │ ⑤ 采样：temperature / top-p / … → 选出一个 id
+   ▼
+next id = 3317（“，”）
+   │ ⑥ 追加到序列末尾，回到 ③；直到遇到结束 token 或达到 max_tokens
+</code></pre></div>
+
+<p>记住三个关键事实：</p>
+<ul>
+<li><strong>模型只做一件事</strong>：给定前面所有 token，输出“下一个 token”在整个词表上的分数。其他一切（对话、工具调用、JSON 输出、思考）都是在这件事上搭出来的。</li>
+<li><strong>模型看不见文字</strong>，只看见 token id。所以“strawberry 里有几个 r”这种题难，是因为模型看到的是 <code>str</code> <code>aw</code> <code>berry</code> 三个整数，而不是十个字母。</li>
+<li><strong>采样不是模型的一部分</strong>。模型给出分数，怎么从分数里选，是推理引擎根据你的参数决定的。这就是练习里 <code>Model</code> 接口只有一个 <code>Logits</code> 方法的原因。</li>
+</ul>
+<h2 id="2-自回归为什么输出要一个一个吐">2. 自回归：为什么输出要一个一个吐</h2>
+<p>第 ⑥ 步决定了生成是<strong>自回归</strong>的：第 10 个 token 要等第 9 个出来才能算。练习里的生成循环就是这件事的全部：</p>
+<div class="hl"><pre><span></span><code><span class="c1">// projects/06-llm-basics/lm.go</span>
+<span class="kd">func</span><span class="w"> </span><span class="nx">Generate</span><span class="p">(</span><span class="nx">m</span><span class="w"> </span><span class="nx">Model</span><span class="p">,</span><span class="w"> </span><span class="nx">prompt</span><span class="w"> </span><span class="p">[]</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="nx">maxTokens</span><span class="w"> </span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="nx">stop</span><span class="w"> </span><span class="kt">map</span><span class="p">[</span><span class="kt">int</span><span class="p">]</span><span class="kt">bool</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">p</span><span class="w"> </span><span class="nx">SamplingParams</span><span class="p">,</span><span class="w"> </span><span class="nx">rng</span><span class="w"> </span><span class="o">*</span><span class="nx">rand</span><span class="p">.</span><span class="nx">Rand</span><span class="p">)</span><span class="w"> </span><span class="nx">GenerateResult</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">ctx</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">append</span><span class="p">([]</span><span class="kt">int</span><span class="p">(</span><span class="kc">nil</span><span class="p">),</span><span class="w"> </span><span class="nx">prompt</span><span class="p">...)</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nx">out</span><span class="w"> </span><span class="p">[]</span><span class="kt">int</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">maxTokens</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">next</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">Sample</span><span class="p">(</span><span class="nx">m</span><span class="p">.</span><span class="nx">Logits</span><span class="p">(</span><span class="nx">ctx</span><span class="p">),</span><span class="w"> </span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">p</span><span class="p">,</span><span class="w"> </span><span class="nx">rng</span><span class="p">)</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">stop</span><span class="p">[</span><span class="nx">next</span><span class="p">]</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="nx">GenerateResult</span><span class="p">{</span><span class="nx">IDs</span><span class="p">:</span><span class="w"> </span><span class="nx">out</span><span class="p">,</span><span class="w"> </span><span class="nx">FinishReason</span><span class="p">:</span><span class="w"> </span><span class="s">"stop"</span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="nx">out</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">out</span><span class="p">,</span><span class="w"> </span><span class="nx">next</span><span class="p">)</span>
+<span class="w">        </span><span class="nx">ctx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">next</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">GenerateResult</span><span class="p">{</span><span class="nx">IDs</span><span class="p">:</span><span class="w"> </span><span class="nx">out</span><span class="p">,</span><span class="w"> </span><span class="nx">FinishReason</span><span class="p">:</span><span class="w"> </span><span class="s">"length"</span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>逐行看：</p>
+<ul>
+<li><code>ctx := append([]int(nil), prompt...)</code>：复制一份 prompt。直接 <code>ctx := prompt</code> 再 <code>append</code>，可能写进调用方切片的底层数组（0.1 讲过的切片共享坑）。</li>
+<li><code>for range maxTokens</code>：Go 1.22 起可以 <code>range</code> 一个整数。<code>maxTokens</code> 就是 API 里的 <code>max_tokens</code> / <code>max_output_tokens</code>，是<strong>硬上限</strong>，不是期望长度。</li>
+<li><code>m.Logits(ctx)</code>：每一步都把“prompt + 已生成”整段交给模型。真正的推理引擎不会每次重算整段，靠的是第 14 节的 KV Cache。</li>
+<li><code>Sample(..., ctx, ...)</code>：历史也传给采样器，因为重复惩罚要知道哪些 token 出现过。</li>
+<li>两种返回对应 API 里的 <code>finish_reason</code> / <code>stop_reason</code>：<code>"stop"</code> 是模型自己说完了（或碰到停止序列），<code>"length"</code> 是被 <code>max_tokens</code> 截断。<strong>Agent 必须检查这个字段</strong>：被截断的工具调用参数是半截 JSON，直接 <code>json.Unmarshal</code> 会失败。</li>
+</ul>
+<p>这个循环解释了两个工程现象：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>现象</th>
+<th>原因</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>首 token 延迟（TTFT）和输入长度相关</td>
+<td>输入的所有 token 可以<strong>一次并行</strong>算完，这一步叫 <strong>prefill</strong>；输入越长，prefill 越久</td>
+</tr>
+<tr>
+<td>输出速度（tokens/s）基本恒定，输出越长总时间线性增长</td>
+<td>之后每个 token 只能<strong>一步一步</strong>算，这一步叫 <strong>decode</strong></td>
+</tr>
+<tr>
+<td>输出单价通常是输入的数倍</td>
+<td>prefill 一次能喂满 GPU 算力；decode 每步只算一个 token，GPU 大部分时间在等显存读权重，单位 token 的成本高得多</td>
+</tr>
+<tr>
+<td>流式输出是“自然的”</td>
+<td>token 本来就是一个一个出来的，SSE 只是把它们按出生顺序推给你（0.4 课）</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h1 id="第二部分tokenizer">第二部分：Tokenizer</h1>
+<h2 id="3-为什么不按字也不按词切">3. 为什么不按字、也不按词切</h2>
+<p>词表大小是一个权衡：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>方案</th>
+<th>词表</th>
+<th>问题</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>按字节</td>
+<td>256</td>
+<td>序列太长：一个汉字 3 个 token，上下文窗口和算力都浪费在“拼字”上</td>
+</tr>
+<tr>
+<td>按字符</td>
+<td>Unicode 有十几万个字符</td>
+<td>罕见字符训练不到；英文一个单词拆成五六个字母，仍然很长</td>
+</tr>
+<tr>
+<td>按词</td>
+<td>几十万到无穷</td>
+<td>新词、拼写错误、代码标识符永远切不出来，只能变成 <code>&lt;unk&gt;</code></td>
+</tr>
+<tr>
+<td><strong>子词（BPE 等）</strong></td>
+<td>常见 5 万–25 万</td>
+<td>常见词一个 token，罕见词拆成片段，任何输入都能表示</td>
+</tr>
+</tbody>
+</table></div>
+<p>当前主流模型都用子词。OpenAI 的 <code>cl100k_base</code>（GPT-4 时代）词表约 10 万，<code>o200k_base</code>（GPT-4o 之后）约 20 万。</p>
+<h2 id="4-bpe-训练手算一遍">4. BPE 训练：手算一遍</h2>
+<p>BPE（Byte Pair Encoding）的训练只有一句话：<strong>反复把出现次数最多的相邻两个 token 合并成一个新 token，直到词表够大。</strong></p>
+<p>用教科书例子 <code>aaabdaaabac</code> 手算：</p>
+<div class="hl"><pre><span></span><code>初始：a a a b d a a a b a c
+相邻对计数：aa ×4，ab ×2，ba ×1，bd ×1，da ×1，ac ×1
+第 1 次合并：aa → Z          Z a b d Z a b a c
+相邻对计数：Za ×2，ab ×2，… → 并列取第一个
+第 2 次合并：Za → Y          Y b d Y b a c
+第 3 次合并：Yb → X          X d X a c
+</code></pre></div>
+
+<p>学到三条规则：<code>aa→Z</code>、<code>Za→Y</code>、<code>Yb→X</code>，规则的<strong>顺序</strong>就是它们的优先级。练习里有一个测试专门验证第一条：</p>
+<div class="hl"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nx">TestBPEFirstMerge</span><span class="p">(</span><span class="nx">t</span><span class="w"> </span><span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">T</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">tok</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">Train</span><span class="p">(</span><span class="s">"aaabdaaabac"</span><span class="p">,</span><span class="w"> </span><span class="mi">257</span><span class="p">)</span><span class="w"> </span><span class="c1">// 256 个字节 + 1 条合并</span>
+<span class="w">    </span><span class="p">...</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">got</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="kt">string</span><span class="p">(</span><span class="nx">tok</span><span class="p">.</span><span class="nx">TokenBytes</span><span class="p">(</span><span class="mi">256</span><span class="p">));</span><span class="w"> </span><span class="nx">got</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="s">"aa"</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>训练的核心循环：</p>
+<div class="hl"><pre><span></span><code><span class="c1">// projects/06-llm-basics/bpe.go</span>
+<span class="k">for</span><span class="w"> </span><span class="nx">next</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">256</span><span class="p">;</span><span class="w"> </span><span class="nx">next</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="nx">vocabSize</span><span class="p">;</span><span class="w"> </span><span class="nx">next</span><span class="o">++</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">stats</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="kt">map</span><span class="p">[</span><span class="nx">Pair</span><span class="p">]</span><span class="kt">int</span><span class="p">{}</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="p">,</span><span class="w"> </span><span class="nx">s</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">seqs</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="nx">j</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="nx">j</span><span class="o">+</span><span class="mi">1</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">s</span><span class="p">);</span><span class="w"> </span><span class="nx">j</span><span class="o">++</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nx">stats</span><span class="p">[</span><span class="nx">Pair</span><span class="p">{</span><span class="nx">s</span><span class="p">[</span><span class="nx">j</span><span class="p">],</span><span class="w"> </span><span class="nx">s</span><span class="p">[</span><span class="nx">j</span><span class="o">+</span><span class="mi">1</span><span class="p">]}]</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="nx">counts</span><span class="p">[</span><span class="nx">words</span><span class="p">[</span><span class="nx">i</span><span class="p">]]</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="nx">best</span><span class="p">,</span><span class="w"> </span><span class="nx">ok</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">mostFrequent</span><span class="p">(</span><span class="nx">stats</span><span class="p">)</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="o">!</span><span class="nx">ok</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">break</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="nx">t</span><span class="p">.</span><span class="nx">merges</span><span class="p">[</span><span class="nx">best</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">next</span>
+<span class="w">    </span><span class="nx">t</span><span class="p">.</span><span class="nx">vocab</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">t</span><span class="p">.</span><span class="nx">vocab</span><span class="p">,</span><span class="w"> </span><span class="nx">concat</span><span class="p">(</span><span class="nx">t</span><span class="p">.</span><span class="nx">vocab</span><span class="p">[</span><span class="nx">best</span><span class="p">.</span><span class="nx">A</span><span class="p">],</span><span class="w"> </span><span class="nx">t</span><span class="p">.</span><span class="nx">vocab</span><span class="p">[</span><span class="nx">best</span><span class="p">.</span><span class="nx">B</span><span class="p">]))</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">seqs</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">seqs</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">merge</span><span class="p">(</span><span class="nx">seqs</span><span class="p">[</span><span class="nx">i</span><span class="p">],</span><span class="w"> </span><span class="nx">best</span><span class="p">,</span><span class="w"> </span><span class="nx">next</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<ul>
+<li><code>next := 256</code>：0–255 留给单个字节，新 token 的 id 从 256 开始递增。<strong>id 越小，学得越早，优先级越高</strong>，编码时会用到这一点。</li>
+<li><code>stats[...] += counts[words[i]]</code>：语料先被切成片段（第 6 节），相同片段只存一份，计数乘上出现次数。真实分词器在几百 GB 语料上训练，这个优化必不可少。</li>
+<li><code>mostFrequent</code>：次数并列时选 <code>(A,B)</code> 最小的。Go 的 map 遍历顺序是随机的，不做这一步，同一份语料每次会学出不同的词表。<code>TestBPETrainDeterministic</code> 验证的就是这个。</li>
+<li><code>t.vocab = append(..., concat(...))</code>：新 token 的字节串就是两个旧 token 字节串的拼接。解码只需要查这张表。</li>
+<li>每学一条规则就把所有序列重新合并一遍。这是 O(合并数 × 语料长度) 的朴素实现，练习够用；生产实现（如 Hugging Face <code>tokenizers</code>）用优先队列和增量更新。</li>
+</ul>
+<h2 id="5-字节级永远没有">5. 字节级：永远没有 <code>&lt;unk&gt;</code></h2>
+<p>练习的初始词表是 256 个<strong>字节</strong>，不是字符。好处是任何输入都能编码：中文、emoji、二进制垃圾，最坏情况也就是每个字节一个 token。</p>
+<div class="hl"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nx">TestBPERoundTrip</span><span class="p">(</span><span class="nx">t</span><span class="w"> </span><span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">T</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">cases</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="p">[]</span><span class="kt">string</span><span class="p">{</span>
+<span class="w">        </span><span class="s">"智能体调用工具，然后读取结果。"</span><span class="p">,</span>
+<span class="w">        </span><span class="s">"emoji 也行 🤖🚀"</span><span class="p">,</span>
+<span class="w">        </span><span class="kt">string</span><span class="p">([]</span><span class="kt">byte</span><span class="p">{</span><span class="mh">0xff</span><span class="p">,</span><span class="w"> </span><span class="mh">0xfe</span><span class="p">,</span><span class="w"> </span><span class="mh">0x00</span><span class="p">}),</span><span class="w"> </span><span class="c1">// 非法 UTF-8 也要原样还原</span>
+<span class="w">        </span><span class="p">...</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">s</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">cases</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">got</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">tok</span><span class="p">.</span><span class="nx">Decode</span><span class="p">(</span><span class="nx">tok</span><span class="p">.</span><span class="nx">Encode</span><span class="p">(</span><span class="nx">s</span><span class="p">));</span><span class="w"> </span><span class="nx">got</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="nx">s</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>代价也来自这里：<strong>一个 token 不一定是完整的字符</strong>。第 9 节会看到，这会直接导致流式输出出现乱码。</p>
+<h2 id="6-预分词合并不跨空格">6. 预分词：合并不跨空格</h2>
+<p>如果直接在整段文本上跑 BPE，会学出 <code>"dog. The"</code> 这种横跨标点和空格的怪 token，而 <code>"dog."</code> 和 <code>"dog!"</code> 里的 <code>dog</code> 反而学不成同一个。所以训练前先用正则把文本切成片段，<strong>合并只在片段内部发生</strong>：</p>
+<div class="hl"><pre><span></span><code><span class="kd">var</span><span class="w"> </span><span class="nx">pretokenRe</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">regexp</span><span class="p">.</span><span class="nx">MustCompile</span><span class="p">(</span><span class="s">`'s|'t|'re|'ve|'m|'ll|'d| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+`</span><span class="p">)</span>
+</code></pre></div>
+
+<ul>
+<li><code>?\p{L}+</code>：可选的<strong>一个前导空格</strong> + 一串字母（<code>\p{L}</code> 包括汉字）。所以英文 token 通常长这样：<code>" model"</code>、<code>" the"</code>，空格贴在词的前面。</li>
+<li><code>?\p{N}+</code>：数字单独成段。GPT-4 的规则更进一步，把数字限制成最多 3 位一组，下面的实测里 <code>1234567890…</code> 被切成 <code>123</code> <code>456</code> <code>789</code>，就是这个规则的结果。</li>
+<li><code>'s|'t|…</code>：英文缩写单独切。</li>
+</ul>
+<p>这是 GPT-2 规则的简化版。练习里训练 600 词表时学到的前 5 条合并是 <code>" t"</code>、<code>"he"</code>、<code>" a"</code>、<code>" the"</code>、一个汉字的前两个字节 <code>e4 b8</code>，可以看到空格总是在前面。<code>TestBPENoMergeAcrossSpaces</code> 检查所有学到的 token 都不会把空格夹在中间。</p>
+<h2 id="7-编码按学到的顺序合并">7. 编码：按学到的顺序合并</h2>
+<p>编码不是“找当前最频繁的 pair”（编码时没有统计数据），而是<strong>在所有能合并的 pair 里，选学得最早（id 最小）的那条规则</strong>：</p>
+<div class="hl"><pre><span></span><code><span class="k">for</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">seq</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">bestID</span><span class="p">,</span><span class="w"> </span><span class="nx">bestPair</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nx">Pair</span><span class="p">{}</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">j</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="nx">j</span><span class="o">+</span><span class="mi">1</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">seq</span><span class="p">);</span><span class="w"> </span><span class="nx">j</span><span class="o">++</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">p</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">Pair</span><span class="p">{</span><span class="nx">seq</span><span class="p">[</span><span class="nx">j</span><span class="p">],</span><span class="w"> </span><span class="nx">seq</span><span class="p">[</span><span class="nx">j</span><span class="o">+</span><span class="mi">1</span><span class="p">]}</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">id</span><span class="p">,</span><span class="w"> </span><span class="nx">ok</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">t</span><span class="p">.</span><span class="nx">merges</span><span class="p">[</span><span class="nx">p</span><span class="p">];</span><span class="w"> </span><span class="nx">ok</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="p">(</span><span class="nx">bestID</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nx">id</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="nx">bestID</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nx">bestID</span><span class="p">,</span><span class="w"> </span><span class="nx">bestPair</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">id</span><span class="p">,</span><span class="w"> </span><span class="nx">p</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">bestID</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">break</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="nx">seq</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">merge</span><span class="p">(</span><span class="nx">seq</span><span class="p">,</span><span class="w"> </span><span class="nx">bestPair</span><span class="p">,</span><span class="w"> </span><span class="nx">bestID</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>为什么必须按顺序？看 <code>TestBPEEncodeFollowsMergeRank</code>：先学会 <code>bc</code>（256），后学会 <code>ab</code>（257）。编码 <code>"abc"</code>：</p>
+<ul>
+<li>按规则顺序：先用 <code>bc</code>，得到 <code>a</code> + <code>bc</code>，和训练时的切法一致；</li>
+<li>如果“从左往右遇到哪个就合并哪个”：先碰到 <code>ab</code>，得到 <code>ab</code> + <code>c</code>。</li>
+</ul>
+<p>两种结果都能无损解码，所以往返测试发现不了这个 bug。但模型在训练时只见过第一种切法，第二种切法的 token 序列对它来说是“没见过的写法”，效果会变差。这类 bug 只能用专门的测试抓。</p>
+<h2 id="8-真实分词器实测">8. 真实分词器：实测</h2>
+<p>用 OpenAI 的 <code>tiktoken</code> 实测（练习目录里的 <code>tokens.py</code>，<code>uv run tokens.py</code> 即可复现）：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>文本</th>
+<th>UTF-8 字节</th>
+<th>cl100k_base</th>
+<th>o200k_base</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Hello, how are you today?</code></td>
+<td>25</td>
+<td>7</td>
+<td>7</td>
+</tr>
+<tr>
+<td><code>The quick brown fox jumps over the lazy dog.</code></td>
+<td>44</td>
+<td>10</td>
+<td>10</td>
+</tr>
+<tr>
+<td><code>你好，今天过得怎么样？</code></td>
+<td>33</td>
+<td>12</td>
+<td>7</td>
+</tr>
+<tr>
+<td><code>人工智能体需要可靠的工具调用。</code></td>
+<td>45</td>
+<td>16</td>
+<td>9</td>
+</tr>
+<tr>
+<td><code>12345678901234567890</code></td>
+<td>21</td>
+<td>8</td>
+<td>8</td>
+</tr>
+<tr>
+<td><code>strawberry</code></td>
+<td>10</td>
+<td>3（<code>str</code> <code>aw</code> <code>berry</code>）</td>
+<td>3（<code>st</code> <code>raw</code> <code>berry</code>）</td>
+</tr>
+</tbody>
+</table></div>
+<p>几个结论：</p>
+<ul>
+<li><strong>英文两代分词器几乎一样</strong>，大约 4 个字符一个 token。</li>
+<li><strong>中文差别很大</strong>：o200k 把“人工”“智能”“需要”“可靠”“工具”“调用”都学成了单个 token，同一句话少了 44% 的 token。换句话说，<strong>同样的中文内容，换模型可能便宜近一半，上下文也能多装近一倍</strong>。</li>
+<li>cl100k 甚至把“智”拆成了两个 token：<code>e6 99</code> 和 <code>ba</code>。单独看任何一个都不是合法 UTF-8。</li>
+<li>练习里的小分词器（语料 2 KB，词表 400）更极端：英文 0.43 token/字符，中文 1.57 token/字符（<code>TestChineseCostsMoreTokens</code> 会打印）。原因一样：训练语料以英文为主，中文的合并学得少。</li>
+</ul>
+<h2 id="9-对-agent-工程的直接影响">9. 对 Agent 工程的直接影响</h2>
+<p><strong>计费和预算一律按 token 算。</strong> 上下文窗口、价格、每分钟限流（TPM）、<code>max_tokens</code> 都是 token 数。做预算控制时：</p>
+<ul>
+<li>不要用“字符数 ÷ 4”估算中文，实测会低估 2–4 倍；</li>
+<li>不同厂商、不同代际的分词器不同，同一段文本的 token 数不能互相换算；</li>
+<li>要精确计数，用厂商提供的计数接口（Anthropic 和 Gemini 都有 count tokens 接口，OpenAI 可以用 <code>tiktoken</code> 离线算），或者直接读响应里的 <code>usage</code> 字段。第 07 模块的成本指标就基于 <code>usage</code>。</li>
+</ul>
+<p><strong>token 边界不是字符边界，流式输出必须缓冲。</strong> 服务端每生成一个 token 就推一个 SSE 事件。如果某个 token 是半个汉字，直接 <code>string(bytes)</code> 推给前端，就会出现 <code>�</code>。练习里的 <code>StreamDecoder</code> 把不完整的 UTF-8 尾巴扣在缓冲里，等下一个 token 补齐：</p>
+<div class="hl"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">d</span><span class="w"> </span><span class="o">*</span><span class="nx">StreamDecoder</span><span class="p">)</span><span class="w"> </span><span class="nx">Push</span><span class="p">(</span><span class="nx">id</span><span class="w"> </span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">d</span><span class="p">.</span><span class="nx">buf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">d</span><span class="p">.</span><span class="nx">buf</span><span class="p">,</span><span class="w"> </span><span class="nx">d</span><span class="p">.</span><span class="nx">tok</span><span class="p">.</span><span class="nx">vocab</span><span class="p">[</span><span class="nx">id</span><span class="p">]...)</span>
+<span class="w">    </span><span class="nx">n</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">completePrefix</span><span class="p">(</span><span class="nx">d</span><span class="p">.</span><span class="nx">buf</span><span class="p">)</span>
+<span class="w">    </span><span class="nx">out</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="kt">string</span><span class="p">(</span><span class="nx">d</span><span class="p">.</span><span class="nx">buf</span><span class="p">[:</span><span class="nx">n</span><span class="p">])</span>
+<span class="w">    </span><span class="nx">d</span><span class="p">.</span><span class="nx">buf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">d</span><span class="p">.</span><span class="nx">buf</span><span class="p">[:</span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="nx">d</span><span class="p">.</span><span class="nx">buf</span><span class="p">[</span><span class="nx">n</span><span class="p">:]...)</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">out</span>
+<span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="nx">completePrefix</span><span class="p">(</span><span class="nx">b</span><span class="w"> </span><span class="p">[]</span><span class="kt">byte</span><span class="p">)</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">b</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">b</span><span class="p">)</span><span class="o">-</span><span class="mi">3</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="o">--</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">c</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">b</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">c</span><span class="o">&amp;</span><span class="mh">0xC0</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mh">0x80</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1">// 10xxxxxx：续字节，继续往前找</span>
+<span class="w">            </span><span class="k">continue</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="nx">need</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">        </span><span class="k">switch</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="nx">c</span><span class="o">&amp;</span><span class="mh">0x80</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mh">0x00</span><span class="p">:</span>
+<span class="w">            </span><span class="nx">need</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span>
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="nx">c</span><span class="o">&amp;</span><span class="mh">0xE0</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mh">0xC0</span><span class="p">:</span>
+<span class="w">            </span><span class="nx">need</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span>
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="nx">c</span><span class="o">&amp;</span><span class="mh">0xF0</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mh">0xE0</span><span class="p">:</span>
+<span class="w">            </span><span class="nx">need</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span>
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="nx">c</span><span class="o">&amp;</span><span class="mh">0xF8</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mh">0xF0</span><span class="p">:</span>
+<span class="w">            </span><span class="nx">need</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">4</span>
+<span class="w">        </span><span class="k">default</span><span class="p">:</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">b</span><span class="p">)</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">b</span><span class="p">)</span><span class="o">-</span><span class="nx">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="nx">need</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="nx">i</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">b</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">b</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<ul>
+<li>UTF-8 编码规则：起始字节的高位告诉你这个字符一共几个字节（<code>0xxxxxxx</code> 1 个，<code>110xxxxx</code> 2 个，<code>1110xxxx</code> 3 个，<code>11110xxx</code> 4 个），后续字节都是 <code>10xxxxxx</code>。</li>
+<li>所以只要从尾部往前找到最后一个起始字节，看它后面的字节够不够数：不够，就扣住从它开始的部分；够，就全部输出。</li>
+<li>最多往回看 3 个字节：一个字符最多 4 字节，结尾那个没收完的字符最多已经收到 3 个字节。</li>
+<li><code>d.buf = append(d.buf[:0], d.buf[n:]...)</code>：把剩下的尾巴挪到缓冲开头，复用底层数组，不重新分配内存。</li>
+<li><code>default: return len(b)</code>：碰到非法起始字节（比如 <code>0xff</code>），不要无限等待，直接输出，交给 <code>string()</code> 变成 <code>U+FFFD</code>。</li>
+</ul>
+<p><code>TestStreamDecoderNeverSplitsRunes</code> 用纯字节词表（每个汉字必然拆成 3 个 token）验证：每次 <code>Push</code> 返回的都是合法 UTF-8，拼起来等于原文；同时证明“不缓冲直接输出”一定会产生非法 UTF-8。</p>
+<p><strong>你在 TS 客户端里也会遇到同一个问题</strong>，不过这时是网络分块（0.4 课的 <code>ReadableStream</code>）切断了字符。浏览器和 Node 的 <code>TextDecoder</code> 内置了同样的缓冲：</p>
+<div class="hl"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">decoder</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">TextDecoder</span><span class="p">();</span><span class="w">                      </span><span class="c1">// ① 默认 UTF-8</span>
+<span class="k">for</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="p">(</span><span class="kd">const</span><span class="w"> </span><span class="nx">chunk</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="nx">response</span><span class="p">.</span><span class="nx">body</span><span class="o">!</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">             </span><span class="c1">// ② chunk: Uint8Array</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">text</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">decoder</span><span class="p">.</span><span class="nx">decode</span><span class="p">(</span><span class="nx">chunk</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">stream</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="w"> </span><span class="p">});</span><span class="w"> </span><span class="c1">// ③ 扣住不完整的尾巴</span>
+<span class="w">  </span><span class="nx">render</span><span class="p">(</span><span class="nx">text</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="nx">render</span><span class="p">(</span><span class="nx">decoder</span><span class="p">.</span><span class="nx">decode</span><span class="p">());</span><span class="w">                               </span><span class="c1">// ④ 流结束，吐出剩余字节</span>
+</code></pre></div>
+
+<p>对照 Go 逐行看：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>TS</th>
+<th>Go（练习）</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>① <code>new TextDecoder()</code></td>
+<td><code>NewStreamDecoder(tok)</code></td>
+<td>创建一个带内部缓冲的解码器；TS 版输入是字节，Go 版输入是 token id，再查表成字节</td>
+</tr>
+<tr>
+<td>② <code>for await (const chunk of response.body!)</code></td>
+<td>调用方的 <code>for _, id := range ids</code></td>
+<td>一块一块地喂；<code>!</code> 是告诉 TS 编译器 <code>body</code> 不为 null</td>
+</tr>
+<tr>
+<td>③ <code>decoder.decode(chunk, { stream: true })</code></td>
+<td><code>d.Push(id)</code></td>
+<td><code>stream: true</code> 就是“后面还有数据，结尾不完整的字符先别解”，等价于 <code>completePrefix</code> 加缓冲</td>
+</tr>
+<tr>
+<td>④ <code>decoder.decode()</code></td>
+<td><code>d.Flush()</code></td>
+<td>不带参数调用表示流结束，剩下的字节全部输出，不完整的变成 <code>U+FFFD</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>常见错误是每个 chunk <code>new TextDecoder().decode(chunk)</code>，或者忘了 <code>{ stream: true }</code>。在英文测试里永远发现不了，一到中文就出 <code>�</code>。</p>
+<hr />
+<h1 id="第三部分transformer">第三部分：Transformer</h1>
+<p>这部分不推导训练，只讲推理时的数据流，以及和 Agent 工程直接相关的几个结论：注意力为什么是 O(n²)，KV Cache 为什么能省算力却吃显存，为什么长上下文贵。</p>
+<h2 id="10-嵌入把-id-变成向量">10. 嵌入：把 id 变成向量</h2>
+<p>每个 token id 查一张 <code>词表大小 × d</code> 的表，得到一个 d 维向量（d 常见 2048–8192）。这张表是训练学出来的，意思相近的 token，向量也相近。</p>
+<p>向量本身不带位置信息：“猫追狗”和“狗追猫”的三个向量完全一样。所以要注入位置。现在主流模型用 <strong>RoPE（旋转位置编码）</strong>：不是给向量加一个位置向量，而是在算注意力之前，把 q 和 k 按位置旋转一个角度，使得 q·k 只和两个位置的<strong>相对距离</strong>有关。你需要知道的工程结论是：上下文窗口能从 8K 扩到 128K、1M，很大程度上靠的是对 RoPE 的插值和外推技巧；超出训练长度太多，效果会明显退化（1.5 课讲长上下文退化）。</p>
+<h2 id="11-注意力每个位置去前文里查资料">11. 注意力：每个位置去前文里“查资料”</h2>
+<p>注意力的直觉：每个位置拿着一个<strong>问题</strong>（query）去问前文所有位置，每个位置有一个<strong>标签</strong>（key）和一份<strong>内容</strong>（value）。问题和标签越匹配，就从那份内容里拿越多。</p>
+<p>公式：</p>
+<div class="hl"><pre><span></span><code>Attention(Q, K, V) = softmax(Q·Kᵀ / √d) · V
+</code></pre></div>
+
+<p>Q、K、V 都是 n×d 矩阵（n 是序列长度），由输入向量分别乘三个学到的矩阵得来。练习里的实现：</p>
+<div class="hl"><pre><span></span><code><span class="c1">// projects/06-llm-basics/attention.go</span>
+<span class="kd">func</span><span class="w"> </span><span class="nx">Attention</span><span class="p">(</span><span class="nx">q</span><span class="p">,</span><span class="w"> </span><span class="nx">k</span><span class="p">,</span><span class="w"> </span><span class="nx">v</span><span class="w"> </span><span class="nx">Matrix</span><span class="p">,</span><span class="w"> </span><span class="nx">causal</span><span class="w"> </span><span class="kt">bool</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="nx">Matrix</span><span class="p">,</span><span class="w"> </span><span class="nx">Matrix</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">n</span><span class="p">,</span><span class="w"> </span><span class="nx">d</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">q</span><span class="p">),</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">q</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="w">    </span><span class="nx">scale</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="nx">math</span><span class="p">.</span><span class="nx">Sqrt</span><span class="p">(</span><span class="kt">float64</span><span class="p">(</span><span class="nx">d</span><span class="p">))</span>
+<span class="w">    </span><span class="nx">weights</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">make</span><span class="p">(</span><span class="nx">Matrix</span><span class="p">,</span><span class="w"> </span><span class="nx">n</span><span class="p">)</span>
+<span class="w">    </span><span class="nx">out</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">make</span><span class="p">(</span><span class="nx">Matrix</span><span class="p">,</span><span class="w"> </span><span class="nx">n</span><span class="p">)</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">n</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">scores</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">make</span><span class="p">([]</span><span class="kt">float64</span><span class="p">,</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">k</span><span class="p">))</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="nx">j</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">k</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="nx">causal</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">j</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="nx">scores</span><span class="p">[</span><span class="nx">j</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">math</span><span class="p">.</span><span class="nx">Inf</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<span class="w">                </span><span class="k">continue</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">            </span><span class="nx">scores</span><span class="p">[</span><span class="nx">j</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">dot</span><span class="p">(</span><span class="nx">q</span><span class="p">[</span><span class="nx">i</span><span class="p">],</span><span class="w"> </span><span class="nx">k</span><span class="p">[</span><span class="nx">j</span><span class="p">])</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nx">scale</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="nx">w</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">Softmax</span><span class="p">(</span><span class="nx">scores</span><span class="p">)</span>
+<span class="w">        </span><span class="nx">weights</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">w</span>
+<span class="w">        </span><span class="nx">out</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">make</span><span class="p">([]</span><span class="kt">float64</span><span class="p">,</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">v</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="nx">j</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">v</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="nx">w</span><span class="p">[</span><span class="nx">j</span><span class="p">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="k">continue</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">            </span><span class="k">for</span><span class="w"> </span><span class="nx">t</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">v</span><span class="p">[</span><span class="nx">j</span><span class="p">]</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="nx">out</span><span class="p">[</span><span class="nx">i</span><span class="p">][</span><span class="nx">t</span><span class="p">]</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="nx">w</span><span class="p">[</span><span class="nx">j</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nx">v</span><span class="p">[</span><span class="nx">j</span><span class="p">][</span><span class="nx">t</span><span class="p">]</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">out</span><span class="p">,</span><span class="w"> </span><span class="nx">weights</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<ul>
+<li>外层 <code>for i</code>：每个位置算一次。内层 <code>for j</code>：和每个位置的 key 做点积。<strong>两层循环就是 O(n²)</strong>：上下文从 8K 到 128K，长 16 倍，注意力的计算量涨 256 倍。这是长上下文贵的根本原因之一。</li>
+<li><code>dot(q[i], k[j]) * scale</code>：点积衡量“问题和标签有多匹配”，然后乘 1/√d（下一段解释）。</li>
+<li><code>Softmax(scores)</code>：把分数变成和为 1 的权重。</li>
+<li>最后一段：输出是所有 value 的加权和。权重为 0 的位置直接跳过。</li>
+<li>同时返回 <code>weights</code>，方便测试检查“未来位置的权重是不是严格为 0”。</li>
+</ul>
+<p><strong>为什么除以 √d？</strong> q 和 k 的每一维大致是均值 0、方差 1 的随机数，d 维点积的方差是 d，标准差是 √d。d=512 时点积动辄几十，softmax 之后几乎变成 one-hot：只看一个位置，其他全是 0，训练时梯度也几乎为 0。除以 √d 把方差拉回 1。<code>TestScalingKeepsSoftmaxSoft</code> 实测：d=512、32 个位置，不缩放时注意力分布的熵只有 <strong>0.148 bit</strong>（几乎只看一个位置），缩放后是 <strong>4.35 bit</strong>（上限是 log₂32 = 5）。</p>
+<h2 id="12-因果掩码只能看过去">12. 因果掩码：只能看过去</h2>
+<p>生成模型（GPT、Claude、Gemini 都是 decoder-only）的位置 i <strong>只能看到 0..i</strong>。实现就是那一行：</p>
+<div class="hl"><pre><span></span><code><span class="k">if</span><span class="w"> </span><span class="nx">causal</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">j</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">scores</span><span class="p">[</span><span class="nx">j</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">math</span><span class="p">.</span><span class="nx">Inf</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<span class="w">    </span><span class="k">continue</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>-∞ 经过 softmax 变成严格的 0（<code>Softmax</code> 先减最大值再取 exp，<code>exp(-Inf) = 0</code>）。<code>TestCausalMask</code> 用最直接的方式验证：修改最后一个位置的 K、V，前 5 个位置的输出必须完全不变；去掉掩码（<code>causal=false</code>，BERT 那样的双向注意力）之后，第 0 个位置的输出会跟着变。</p>
+<p>因果掩码带来两个结论：</p>
+<ol>
+<li><strong>训练可以并行</strong>：整段文本一次喂进去，每个位置预测下一个 token，掩码保证它看不到答案。</li>
+<li><strong>前文的计算结果不会因为后文而改变</strong>，所以可以缓存。这就是 KV Cache 和 Prompt Caching 成立的前提。</li>
+</ol>
+<h2 id="13-一层-transformer-还有什么">13. 一层 Transformer 还有什么</h2>
+<p>单个注意力只是一层的一半。完整的一层大致是：</p>
+<div class="hl"><pre><span></span><code>x = x + Attention(RMSNorm(x))     ← 多头注意力：在序列方向上交换信息
+x = x + FFN(RMSNorm(x))           ← 前馈网络：在每个位置内部做变换，大部分参数在这里
+</code></pre></div>
+
+<ul>
+<li><strong>多头（multi-head）</strong>：把 d 维切成 h 份，每份独立算一套注意力再拼起来。不同的头可以关注不同的关系（语法、指代、代码括号匹配……）。</li>
+<li><strong>GQA（分组查询注意力）</strong>：多个 query 头共享一组 K、V 头。比如 32 个 query 头只配 8 个 KV 头，KV Cache 直接变成 1/4。Llama 3、Qwen 等主流开源模型都用它。</li>
+<li><strong>残差连接 <code>x = x + ...</code></strong>：每层只学“增量”，几十上百层叠起来也能训练。</li>
+<li><strong>RMSNorm</strong>：把向量缩放到稳定的数值范围。</li>
+<li><strong>FFN</strong>：通常是“升维 4 倍左右 → 激活函数 → 降维”，现在多用 SwiGLU。MoE 模型（如 DeepSeek、Qwen3 的 MoE 版本）把 FFN 换成几十上百个“专家”，每个 token 只激活其中几个，所以“总参数”和“激活参数”是两个数。</li>
+</ul>
+<p>把这样的层叠 N 次（8B 模型约 32 层，70B 约 80 层），最后一层输出乘一个 <code>d × 词表大小</code> 的矩阵，就得到 logits。</p>
+<h2 id="14-kv-cache用显存换算力">14. KV Cache：用显存换算力</h2>
+<p>生成第 t 个 token 时，前 t-1 个位置的 K、V 在上一步已经算过，而且因果掩码保证它们不会变。所以只需要算新 token 自己的 q、k、v，把 k、v 追加进缓存，再用这一个 q 去看缓存：</p>
+<div class="hl"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">c</span><span class="w"> </span><span class="o">*</span><span class="nx">KVCache</span><span class="p">)</span><span class="w"> </span><span class="nx">Step</span><span class="p">(</span><span class="nx">q</span><span class="p">,</span><span class="w"> </span><span class="nx">k</span><span class="p">,</span><span class="w"> </span><span class="nx">v</span><span class="w"> </span><span class="p">[]</span><span class="kt">float64</span><span class="p">)</span><span class="w"> </span><span class="p">[]</span><span class="kt">float64</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">c</span><span class="p">.</span><span class="nx">K</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">c</span><span class="p">.</span><span class="nx">K</span><span class="p">,</span><span class="w"> </span><span class="nx">k</span><span class="p">)</span>
+<span class="w">    </span><span class="nx">c</span><span class="p">.</span><span class="nx">V</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">c</span><span class="p">.</span><span class="nx">V</span><span class="p">,</span><span class="w"> </span><span class="nx">v</span><span class="p">)</span>
+<span class="w">    </span><span class="nx">scale</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="nx">math</span><span class="p">.</span><span class="nx">Sqrt</span><span class="p">(</span><span class="kt">float64</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nx">q</span><span class="p">)))</span>
+<span class="w">    </span><span class="nx">scores</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">make</span><span class="p">([]</span><span class="kt">float64</span><span class="p">,</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">c</span><span class="p">.</span><span class="nx">K</span><span class="p">))</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">j</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">c</span><span class="p">.</span><span class="nx">K</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">scores</span><span class="p">[</span><span class="nx">j</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">dot</span><span class="p">(</span><span class="nx">q</span><span class="p">,</span><span class="w"> </span><span class="nx">c</span><span class="p">.</span><span class="nx">K</span><span class="p">[</span><span class="nx">j</span><span class="p">])</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nx">scale</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="nx">w</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">Softmax</span><span class="p">(</span><span class="nx">scores</span><span class="p">)</span>
+<span class="w">    </span><span class="p">...</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<ul>
+<li>不需要掩码：缓存里只有过去和现在，天然满足因果。</li>
+<li>每一步的计算量从“整段重算”降到“和缓存里每个位置做一次点积”。</li>
+<li><code>TestKVCacheMatchesFull</code> 验证增量计算的每一步都和整段计算的对应行完全一致（误差 &lt; 1e-9）。<strong>这种“优化前后结果一致”的测试，是写任何性能优化时都该有的。</strong></li>
+</ul>
+<p>代价是显存。每个 token 要在每一层存一份 K 和一份 V：</p>
+<div class="hl"><pre><span></span><code>KV Cache 字节数 = 2 × 层数 × KV 头数 × 头维度 × token 数 × 每个数的字节数
+</code></pre></div>
+
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>模型规格（GQA, fp16）</th>
+<th>每 token</th>
+<th>32K 上下文</th>
+<th>128K 上下文</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>8B 级：32 层、8 KV 头、头维度 128</td>
+<td>128 KiB</td>
+<td>4 GiB</td>
+<td>16 GiB</td>
+</tr>
+<tr>
+<td>70B 级：80 层、8 KV 头、头维度 128</td>
+<td>320 KiB</td>
+<td>10 GiB</td>
+<td>40 GiB</td>
+</tr>
+</tbody>
+</table></div>
+<p>（第一行就是练习里 <code>KVCacheBytes(32, 8, 128, 1, 2)</code> 的断言值。）</p>
+<p>这张表解释了很多工程现象：</p>
+<ul>
+<li><strong>一个 128K 的长请求可能独占一张卡的大部分显存</strong>，所以长上下文请求的并发上不去，单价也更高；</li>
+<li><strong>Prompt Caching 的本质</strong>就是把这些 K、V 留在服务端，下次同样的前缀直接复用，跳过 prefill（1.5 课详细讲）。所以缓存命中要求<strong>前缀完全一致</strong>，system prompt 里放一个时间戳就会让缓存全部失效；</li>
+<li>vLLM 的 PagedAttention、SGLang 的 RadixAttention 都是在管理这块显存（09 模块）。</li>
+</ul>
+<hr />
+<h1 id="第四部分采样">第四部分：采样</h1>
+<h2 id="15-从-logits-到概率数值稳定的-softmax">15. 从 logits 到概率：数值稳定的 softmax</h2>
+<div class="hl"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nx">Softmax</span><span class="p">(</span><span class="nx">logits</span><span class="w"> </span><span class="p">[]</span><span class="kt">float64</span><span class="p">)</span><span class="w"> </span><span class="p">[]</span><span class="kt">float64</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">maxL</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">math</span><span class="p">.</span><span class="nx">Inf</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">l</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">logits</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">maxL</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">math</span><span class="p">.</span><span class="nx">Max</span><span class="p">(</span><span class="nx">maxL</span><span class="p">,</span><span class="w"> </span><span class="nx">l</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="nx">probs</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">make</span><span class="p">([]</span><span class="kt">float64</span><span class="p">,</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">logits</span><span class="p">))</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">math</span><span class="p">.</span><span class="nx">IsInf</span><span class="p">(</span><span class="nx">maxL</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">probs</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="nx">sum</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mf">0.0</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="p">,</span><span class="w"> </span><span class="nx">l</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">logits</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">probs</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">math</span><span class="p">.</span><span class="nx">Exp</span><span class="p">(</span><span class="nx">l</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nx">maxL</span><span class="p">)</span>
+<span class="w">        </span><span class="nx">sum</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="nx">probs</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">probs</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">probs</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span><span class="w"> </span><span class="o">/=</span><span class="w"> </span><span class="nx">sum</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">probs</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<ul>
+<li>公式是 <code>p_i = exp(l_i) / Σ exp(l_j)</code>。</li>
+<li><strong>先减最大值</strong>：<code>exp(1000)</code> 在 float64 里是 <code>+Inf</code>，<code>Inf/Inf = NaN</code>。减去最大值后最大的那项是 <code>exp(0)=1</code>，不会溢出，而结果数学上完全不变（分子分母同乘 <code>exp(-max)</code>）。<code>TestSoftmaxStable</code> 用 <code>[1000, 1001, 1002]</code> 验证；把 <code>- maxL</code> 删掉，这个测试立刻失败。</li>
+<li><code>if math.IsInf(maxL, -1)</code>：所有 token 都被过滤成 -∞ 时返回全 0，而不是 <code>0/0 = NaN</code>。</li>
+</ul>
+<h2 id="16-温度把分布拉尖或压平">16. 温度：把分布拉尖或压平</h2>
+<div class="hl"><pre><span></span><code><span class="k">if</span><span class="w"> </span><span class="nx">p</span><span class="p">.</span><span class="nx">Temperature</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">p</span><span class="p">.</span><span class="nx">Temperature</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">out</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">out</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span><span class="w"> </span><span class="o">/=</span><span class="w"> </span><span class="nx">p</span><span class="p">.</span><span class="nx">Temperature</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>logits 除以 T 再做 softmax：</p>
+<ul>
+<li><strong>T &lt; 1</strong>：差距被放大，高概率 token 更高，分布更“尖”，输出更保守、更重复；</li>
+<li><strong>T = 1</strong>：模型原始分布；</li>
+<li><strong>T &gt; 1</strong>：差距被缩小，低概率 token 也有机会，输出更多样，也更容易胡说；</li>
+<li><strong>T → 0</strong>：退化成 argmax，也就是贪心。所以 <code>Sample</code> 里 <code>Temperature == 0</code> 单独走贪心分支，避免除以 0。</li>
+</ul>
+<p><code>TestTemperatureEntropy</code> 验证温度从 0.2 升到 3，分布的熵单调增大。</p>
+<h2 id="17-截断top-ktop-pmin-p">17. 截断：top-k、top-p、min-p</h2>
+<p>温度只改变形状，不会把任何 token 的概率变成 0。词表有 20 万个 token，长尾里大量“完全不合理”的 token 加起来可能占几个百分点，采样几百步总会抽中一个。截断就是把长尾直接砍掉。</p>
+<p><strong>top-k</strong>：只保留分数最高的 k 个。问题是 k 固定：模型很确定时（下一个字几乎只能是“。”），k=40 仍然留了 39 个垃圾；模型不确定时（开放式写作），k=40 又可能太少。</p>
+<p><strong>top-p（nucleus）</strong>：按概率从高到低累加，保留<strong>累计概率刚好达到 p 的最小集合</strong>：</p>
+<div class="hl"><pre><span></span><code><span class="k">if</span><span class="w"> </span><span class="nx">p</span><span class="p">.</span><span class="nx">TopP</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">p</span><span class="p">.</span><span class="nx">TopP</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">probs</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">Softmax</span><span class="p">(</span><span class="nx">out</span><span class="p">)</span>
+<span class="w">    </span><span class="nx">idx</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">argsortDesc</span><span class="p">(</span><span class="nx">probs</span><span class="p">)</span>
+<span class="w">    </span><span class="nx">cum</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mf">0.0</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">idx</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">cum</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="nx">p</span><span class="p">.</span><span class="nx">TopP</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nx">out</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">math</span><span class="p">.</span><span class="nx">Inf</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<span class="w">            </span><span class="k">continue</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="nx">cum</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="nx">probs</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>注意判断在<strong>累加之前</strong>：只要前面还没凑够 p，当前这个就保留，哪怕加上它之后超过了 p。也就是说“跨过阈值的那一个”要留下。<code>TestTopP</code> 的例子：概率 0.5、0.3、0.15、0.05，<code>top_p=0.6</code> 时保留前两个（0.5 不够，加上 0.3 才够）。如果写成“先累加，超过就删”，跨过阈值的 0.3 会被删掉，只剩一个，测试会失败。这是最常见的 top-p 实现 bug。</p>
+<p><strong>min-p</strong>：保留概率 ≥ <code>min_p × 最大概率</code> 的 token。阈值随模型的把握自动缩放：</p>
+<div class="hl"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nx">TestMinPAdaptsToConfidence</span><span class="p">(</span><span class="nx">t</span><span class="w"> </span><span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">T</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">confident</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">概率</span><span class="w"> </span><span class="p">[</span><span class="mf">0.9</span><span class="p">,</span><span class="w"> </span><span class="mf">0.05</span><span class="p">,</span><span class="w"> </span><span class="mf">0.03</span><span class="p">,</span><span class="w"> </span><span class="mf">0.02</span><span class="p">]</span><span class="w">   </span><span class="c1">// min_p=0.1 → 阈值 0.09 → 只留第一个</span>
+<span class="w">    </span><span class="nx">unsure</span><span class="w">    </span><span class="o">:=</span><span class="w"> </span><span class="nx">概率</span><span class="w"> </span><span class="p">[</span><span class="mf">0.3</span><span class="p">,</span><span class="w"> </span><span class="mf">0.28</span><span class="p">,</span><span class="w"> </span><span class="mf">0.22</span><span class="p">,</span><span class="w"> </span><span class="mf">0.2</span><span class="p">]</span><span class="w">    </span><span class="c1">// min_p=0.1 → 阈值 0.03 → 全部保留</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>min-p 在开源推理引擎（vLLM、llama.cpp、SGLang）里很常用，闭源 API 一般不开放。</p>
+<h2 id="18-惩罚与-logit-bias">18. 惩罚与 logit bias</h2>
+<div class="hl"><pre><span></span><code><span class="k">for</span><span class="w"> </span><span class="nx">id</span><span class="p">,</span><span class="w"> </span><span class="nx">n</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">seen</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">p</span><span class="p">.</span><span class="nx">RepetitionPenalty</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">p</span><span class="p">.</span><span class="nx">RepetitionPenalty</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">out</span><span class="p">[</span><span class="nx">id</span><span class="p">]</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nx">out</span><span class="p">[</span><span class="nx">id</span><span class="p">]</span><span class="w"> </span><span class="o">/=</span><span class="w"> </span><span class="nx">p</span><span class="p">.</span><span class="nx">RepetitionPenalty</span>
+<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nx">out</span><span class="p">[</span><span class="nx">id</span><span class="p">]</span><span class="w"> </span><span class="o">*=</span><span class="w"> </span><span class="nx">p</span><span class="p">.</span><span class="nx">RepetitionPenalty</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="nx">out</span><span class="p">[</span><span class="nx">id</span><span class="p">]</span><span class="w"> </span><span class="o">-=</span><span class="w"> </span><span class="nx">p</span><span class="p">.</span><span class="nx">PresencePenalty</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">p</span><span class="p">.</span><span class="nx">FrequencyPenalty</span><span class="o">*</span><span class="kt">float64</span><span class="p">(</span><span class="nx">n</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>三种惩罚来自两个流派：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>参数</th>
+<th>来源</th>
+<th>做法</th>
+<th>效果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>presence_penalty</code></td>
+<td>OpenAI</td>
+<td>出现过就减一个固定值</td>
+<td>鼓励换话题</td>
+</tr>
+<tr>
+<td><code>frequency_penalty</code></td>
+<td>OpenAI</td>
+<td>出现 n 次减 n 倍</td>
+<td>抑制同一个词反复出现</td>
+</tr>
+<tr>
+<td><code>repetition_penalty</code></td>
+<td>HF / vLLM</td>
+<td>乘法：正 logit 除以 r，负 logit 乘以 r</td>
+<td>两种情况都让它更不可能</td>
+</tr>
+</tbody>
+</table></div>
+<p>乘法惩罚为什么要分正负？如果对 -1 也“除以 2”，得到 -0.5，反而变大了。<code>TestPenaltiesAndBias</code> 用 <code>[2, 2, -1, 0]</code> 检查了这一点。</p>
+<p><strong>logit bias</strong> 直接给指定 token 的分数加偏置，-100 约等于禁用，+100 约等于强制。Agent 里的用法：禁止输出某些 token，或者做分类时只允许“是”“否”两个 token。注意它是按 <strong>token id</strong> 指定的，换模型（换分词器）就要重新查 id。</p>
+<p>一个容易漏的点：<strong>温度为 0 时 bias 也要生效</strong>。练习里的贪心分支先走一遍 <code>Process</code>（只开 bias 和惩罚），再取 argmax。如果直接 <code>Argmax(logits)</code>，<code>TestPenaltiesAndBias</code> 最后一个断言会失败。</p>
+<h2 id="19-处理顺序">19. 处理顺序</h2>
+<div class="hl"><pre><span></span><code><span class="c1">// Process 按推理引擎的常见顺序处理 logits：</span>
+<span class="c1">//  1. logit bias → 2. 重复/存在/频率惩罚 → 3. 温度 → 4. top-k → 5. top-p → 6. min-p</span>
+</code></pre></div>
+
+<p>规律是<strong>先改分数，再调形状，最后截断</strong>。顺序会影响结果：top-p 在温度之后做，同样的 <code>top_p=0.9</code> 在高温下会保留更多 token。不同引擎的顺序不完全一样（比如有的把 min-p 放在温度之前），所以<strong>同一组参数在 vLLM 和 llama.cpp 里效果可能不同</strong>。</p>
+<h2 id="20-贪心的问题重复循环">20. 贪心的问题：重复循环</h2>
+<p>练习的 bigram 模型（只看上一个 token）在 500 词表上，以 <code>"The model"</code> 为开头生成 25 个 token，实测：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>参数</th>
+<th>输出</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>temperature=0</code></td>
+<td><code>wabababababababababababab</code>（被 <code>max_tokens</code> 截断）</td>
+</tr>
+<tr>
+<td><code>temperature=0, frequency_penalty=1</code></td>
+<td><code>wabie</code>（遇到句号停止）</td>
+</tr>
+<tr>
+<td><code>temperature=0.7, top_p=0.9</code></td>
+<td><code>as a sency is measured in tokens</code></td>
+</tr>
+<tr>
+<td><code>temperature=1.5</code>，不截断</td>
+<td><code>or\xbb\x93构笡\xe5est…</code>（乱码和随机汉字）</td>
+</tr>
+</tbody>
+</table></div>
+<p>这四行就是采样参数的全部故事：</p>
+<ol>
+<li><strong>贪心会陷入循环</strong>：<code>a</code> 后面最可能是 <code>b</code>，<code>b</code> 后面最可能是 <code>a</code>，于是永远 <code>abab</code>。真实大模型看的是整段上下文，不会这么傻，但同样存在“一句话无限重复”的退化，尤其在长输出和低温度下。</li>
+<li><strong>惩罚能打破循环</strong>，但也会误伤必须重复的东西（代码里的变量名、JSON 里的键名），所以 Agent 场景一般不开或只开很小。</li>
+<li><strong>适度的温度加截断</strong>最接近语料的样子。</li>
+<li><strong>高温不截断</strong>会从长尾里抽出垃圾。练习的模型给每个没见过的组合留了 <code>1e-3</code> 的平滑概率，几百个这样的 token 加起来，高温下就很容易被抽中，而且字节级 token 抽出来就是乱码。这就是 top-p 存在的理由。</li>
+</ol>
+<h2 id="21-temperature0-不等于确定">21. temperature=0 不等于确定</h2>
+<p>很多人以为 <code>temperature=0</code> 就能保证每次输出一样，然后在 Eval 里用它做“确定性”回归测试。实际不行。</p>
+<p>Thinking Machines Lab 在 2025 年 9 月发表的《Defeating Nondeterminism in LLM Inference》做了实验：用 Qwen3-235B，在 temperature 0 下对同一个 prompt 采样 1000 次，每次 1000 个 token，得到 <strong>80 种不同的输出</strong>。前 102 个 token 全部相同，第 103 个 token 开始分叉：992 次生成了 “Queens, New York”，8 次生成了 “New York City”。</p>
+<p>原因不是常说的“GPU 并行导致浮点误差随机”（单个 kernel 在固定输入形状下其实是确定的），而是<strong>服务端的批大小随负载变化</strong>：你的请求和多少个别人的请求拼在一个 batch 里，决定了矩阵乘法和归约的切分方式，浮点加法顺序随之改变，最后一位的误差在几十层里放大，某一步两个 token 的分数恰好接近时就翻转了。他们换成“批不变”的 kernel 之后，1000 次输出完全一致，代价是吞吐下降。</p>
+<p>工程结论：</p>
+<ul>
+<li><strong>不要把“输出逐字相同”当成 Agent 测试的断言。</strong> 第 06 模块会讲：确定性的部分用假模型和录制回放测（就像这一课的 bigram 和下面练习 3 的脚本模型），概率性的部分用 Eval 统计成功率；</li>
+<li>有的 API 提供 <code>seed</code> 参数，也只承诺“尽力而为”。</li>
+</ul>
+<h2 id="22-2026-年各家-api-的实际情况">22. 2026 年各家 API 的实际情况</h2>
+<p>本地推理引擎几乎所有参数都能调，但主流闭源 API 的趋势是<strong>越来越不让调</strong>，尤其是推理模型：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>厂商</th>
+<th>现状</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OpenAI</td>
+<td>GPT-5 系列的推理模型只有在 <code>reasoning.effort</code> 为 <code>none</code> 时才接受 <code>temperature</code>、<code>top_p</code>、<code>logprobs</code>；开启推理时传这些参数会直接返回 400。替代手段是 <code>reasoning.effort</code>、<code>text.verbosity</code> 和 <code>max_output_tokens</code></td>
+</tr>
+<tr>
+<td>Anthropic</td>
+<td>从 Claude Opus 4.1、Sonnet 4.5 这一代起，<code>temperature</code> 和 <code>top_p</code> 不能同时指定；Claude 4.7 及之后的模型不再支持 <code>temperature</code>、<code>top_p</code>、<code>top_k</code>，设成非默认值返回 400，官方建议用 prompt 引导行为</td>
+</tr>
+<tr>
+<td>Google</td>
+<td>Gemini 3 的 <code>temperature</code> 范围是 0–2，但官方“强烈建议”保持默认值 1.0，调低可能导致循环或在复杂推理任务上性能下降</td>
+</tr>
+</tbody>
+</table></div>
+<p>为什么？推理模型在训练（强化学习）时就是在默认温度下采样思考过程的，换个温度等于让它在没练过的分布上推理；温度太低还容易陷入第 20 节那种循环。</p>
+<p>对 Agent 代码的直接要求：</p>
+<ol>
+<li><strong>不要在公共代码里硬编码 <code>temperature: 0</code></strong>。换一个模型名，请求就会 400。很多开源项目的 issue 都是这么来的。</li>
+<li>采样参数应该是<strong>按模型配置</strong>的：模型能力表里记录“支持哪些参数、默认值是多少”，请求构造时只发支持的参数。第 11 模块的模型网关会做这件事。</li>
+<li>想要“稳定”，靠结构化输出（1.3 课）、更好的 prompt 和 Eval，而不是靠温度。</li>
+</ol>
+<h2 id="23-回到生成循环停止条件">23. 回到生成循环：停止条件</h2>
+<p>除了 <code>max_tokens</code> 和模型的结束 token，API 还支持<strong>停止序列</strong>（<code>stop</code> / <code>stop_sequences</code>）：输出里出现指定字符串就停。它有两个实现细节，下面的练习 3 会让你亲手踩一遍：</p>
+<ul>
+<li>停止序列是<strong>字符串</strong>，可能横跨多个 token（<code>&lt;/answer&gt;</code> 在大多数分词器里是 3–4 个 token），所以要在解码后的文本上匹配，不能在 token id 上匹配；</li>
+<li>流式输出时，如果已经把 <code>&lt;/answer&gt;</code> 的前 5 个字节推给了用户，后面才发现是停止序列，就收不回来了。所以要在末尾<strong>扣住</strong>最多“停止序列长度 - 1”个字节，确认不是停止序列的开头再推出去。</li>
+</ul>
+<hr />
+<h2 id="本课小结">本课小结</h2>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>知识点</th>
+<th>一句话</th>
+<th>练习里的代码</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>自回归</td>
+<td>每一步只出一个 token，prefill 并行、decode 串行</td>
+<td><code>Generate</code></td>
+</tr>
+<tr>
+<td>BPE 训练</td>
+<td>反复合并最频繁的相邻对，顺序即优先级</td>
+<td><code>Train</code>、<code>mostFrequent</code></td>
+</tr>
+<tr>
+<td>BPE 编码</td>
+<td>按学到的顺序合并，不是从左到右</td>
+<td><code>Encode</code>、<code>TestBPEEncodeFollowsMergeRank</code></td>
+</tr>
+<tr>
+<td>字节级</td>
+<td>永远没有 <code>&lt;unk&gt;</code>，但 token 可能是半个字符</td>
+<td><code>TestBPERoundTrip</code></td>
+</tr>
+<tr>
+<td>流式解码</td>
+<td>扣住不完整的 UTF-8 尾巴</td>
+<td><code>StreamDecoder</code>、TS 的 <code>{ stream: true }</code></td>
+</tr>
+<tr>
+<td>注意力</td>
+<td>softmax(QKᵀ/√d)V，O(n²)</td>
+<td><code>Attention</code></td>
+</tr>
+<tr>
+<td>因果掩码</td>
+<td>只看过去，-∞ 变成严格的 0</td>
+<td><code>TestCausalMask</code></td>
+</tr>
+<tr>
+<td>KV Cache</td>
+<td>缓存过去的 K、V，用显存换算力</td>
+<td><code>KVCache</code>、<code>KVCacheBytes</code></td>
+</tr>
+<tr>
+<td>softmax</td>
+<td>先减最大值</td>
+<td><code>Softmax</code></td>
+</tr>
+<tr>
+<td>温度</td>
+<td>除以 T，T→0 退化为贪心</td>
+<td><code>Process</code>、<code>Sample</code></td>
+</tr>
+<tr>
+<td>top-p</td>
+<td>保留累计概率达到 p 的最小集合，跨阈值那个要留</td>
+<td><code>TestTopP</code></td>
+</tr>
+<tr>
+<td>min-p</td>
+<td>阈值随最大概率缩放</td>
+<td><code>TestMinPAdaptsToConfidence</code></td>
+</tr>
+<tr>
+<td>惩罚</td>
+<td>加法（OpenAI）与乘法（HF），乘法要分正负</td>
+<td><code>TestPenaltiesAndBias</code></td>
+</tr>
+<tr>
+<td>不确定性</td>
+<td>temperature=0 也会变，根源是批大小</td>
+<td>第 21 节</td>
+</tr>
+<tr>
+<td>API 现状</td>
+<td>推理模型越来越不让调采样参数</td>
+<td>第 22 节</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="练习今天做完">练习（今天做完）</h2>
+<p>练习目录：<code>projects/06-llm-basics/</code>。</p>
+<div class="hl"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>projects/06-llm-basics
+make<span class="w"> </span><span class="nb">test</span><span class="w">        </span><span class="c1"># go vet + go test -race -v</span>
+make<span class="w"> </span>tokens<span class="w">      </span><span class="c1"># 用 tiktoken 对比 cl100k_base 和 o200k_base（需要 uv）</span>
+</code></pre></div>
+
+<h3 id="练习-1读懂测试输出做三个小实验">练习 1：读懂测试输出，做三个小实验</h3>
+<ol>
+<li>运行 <code>make test</code>，找到三行 <code>t.Logf</code> 打印：中英文 token/字符比、注意力熵、贪心生成结果。每一行用一句话解释它说明了什么。</li>
+<li>修改 <code>TestChineseCostsMoreTokens</code> 里的词表大小（400 → 1000 → 2000），记录中文 token/字符比的变化。到某个词表大小之后为什么降不下去了？（提示：语料只有 2 KB。）</li>
+<li>运行 <code>make tokens</code>，再往 <code>tokens.py</code> 里加三段你自己的文本：一段 Go 代码、一段 JSON 工具调用参数、一段中英混排。记录两个分词器的 token 数，看哪一类文本两代分词器差别最大。</li>
+</ol>
+<h3 id="练习-2改坏它看哪个测试失败">练习 2：改坏它，看哪个测试失败</h3>
+<p>每次只改一处，跑 <code>go test</code>，记录失败的测试名和原因，然后改回来：</p>
+<ol>
+<li><code>Softmax</code> 里把 <code>math.Exp(l - maxL)</code> 改成 <code>math.Exp(l)</code>；</li>
+<li>top-p 循环改成“先 <code>cum += probs[i]</code>，如果 <code>cum &gt; p.TopP</code> 就删掉当前 token”；</li>
+<li><code>StreamDecoder.Push</code> 里把 <code>n := completePrefix(d.buf)</code> 改成 <code>n := len(d.buf)</code>；</li>
+<li><code>Attention</code> 里删掉 <code>causal &amp;&amp; j &gt; i</code> 的判断（提示：会有两个测试失败）；</li>
+<li><code>Sample</code> 的贪心分支改成直接 <code>return Argmax(logits)</code>；</li>
+<li><code>Encode</code> 里把条件改成 <code>ok &amp;&amp; bestID == -1</code>（只用第一个遇到的可合并 pair）。想一想：为什么 <code>TestBPERoundTrip</code> 还能通过？</li>
+</ol>
+<h3 id="练习-3跨-token-的停止序列-流式推送">练习 3：跨 token 的停止序列 + 流式推送</h3>
+<p>在 <code>lm.go</code> 里新增：</p>
+<div class="hl"><pre><span></span><code><span class="c1">// GenerateText 生成文本，遇到 stops 中任意一个字符串就停止（停止序列本身不输出）。</span>
+<span class="c1">// 每当有可以安全推给用户的文本时调用 emit。</span>
+<span class="c1">// 返回完整输出（不含停止序列）和 finish_reason（"stop" 或 "length"）。</span>
+<span class="kd">func</span><span class="w"> </span><span class="nx">GenerateText</span><span class="p">(</span><span class="nx">m</span><span class="w"> </span><span class="nx">Model</span><span class="p">,</span><span class="w"> </span><span class="nx">tok</span><span class="w"> </span><span class="o">*</span><span class="nx">Tokenizer</span><span class="p">,</span><span class="w"> </span><span class="nx">prompt</span><span class="w"> </span><span class="p">[]</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="nx">maxTokens</span><span class="w"> </span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="nx">stops</span><span class="w"> </span><span class="p">[]</span><span class="kt">string</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">p</span><span class="w"> </span><span class="nx">SamplingParams</span><span class="p">,</span><span class="w"> </span><span class="nx">rng</span><span class="w"> </span><span class="o">*</span><span class="nx">rand</span><span class="p">.</span><span class="nx">Rand</span><span class="p">,</span><span class="w"> </span><span class="nx">emit</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="kt">string</span><span class="p">))</span><span class="w"> </span><span class="p">(</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span>
+</code></pre></div>
+
+<p>要求：</p>
+<ul>
+<li>停止序列可能横跨多个 token；</li>
+<li><code>emit</code> 推出去的内容拼起来必须等于返回的文本，<strong>不能包含停止序列的任何前缀片段</strong>；</li>
+<li><code>emit</code> 推出去的每一段都必须是合法 UTF-8；</li>
+<li>写一个测试：用一个“按脚本依次输出指定 token”的假模型，脚本内容是 <code>答案是42。&lt;/answer&gt;后面不该出现</code>，用纯字节分词器（<code>newByteTokenizer()</code>），停止序列 <code>&lt;/answer&gt;</code>。断言返回 <code>答案是42。</code> 和 <code>"stop"</code>，并且没有任何一段 <code>emit</code> 包含 <code>&lt;</code>。</li>
+</ul>
+<h3 id="选做top-k-用堆实现">选做：top-k 用堆实现</h3>
+<p>现在的 top-k 对整个词表排序，O(V log V)。真实词表 20 万，每步都排序太浪费。用 <code>container/heap</code> 维护一个大小为 k 的最小堆，改成 O(V log k)，写一个 benchmark 对比 V=200000、k=50 时两种实现的速度。</p>
+<hr />
+<h2 id="自测题">自测题</h2>
+<ol>
+<li>为什么说“模型不是一个字一个字地读”？用 <code>strawberry</code> 解释为什么数字母这类题对模型难。</li>
+<li>prefill 和 decode 分别是什么？为什么输入很长时首 token 延迟会变长，而输出的 tokens/s 基本不变？</li>
+<li>为什么输出 token 的单价通常比输入高好几倍？</li>
+<li>BPE 训练时为什么要处理“次数并列”的情况？不处理会怎样？</li>
+<li>BPE 编码时为什么要按合并规则的学习顺序，而不是从左到右遇到就合并？两种做法都能无损还原，错误的那种到底错在哪？</li>
+<li>同一句中文在 cl100k_base 是 16 个 token，在 o200k_base 是 9 个。这对 Agent 的成本和上下文预算意味着什么？为什么不能用“字符数 ÷ 4”估 token？</li>
+<li>流式输出里偶尔出现 <code>�</code> 的根本原因是什么？服务端和客户端分别应该怎么处理？</li>
+<li>注意力为什么要除以 √d？不除会怎样？</li>
+<li>KV Cache 为什么不会改变输出结果？一个 70B 级模型（80 层、8 KV 头、头维度 128、fp16）跑 128K 上下文，KV Cache 大约多大？</li>
+<li>Prompt Caching 为什么要求“前缀完全一致”？在 system prompt 开头放当前时间会有什么后果？</li>
+<li>top-p=0.6，概率分别是 0.5、0.3、0.15、0.05，保留哪些？为什么跨过阈值的那个要保留？</li>
+<li>为什么 <code>repetition_penalty</code> 对正负 logit 要分别处理？</li>
+<li><code>temperature=0</code> 为什么仍然可能每次输出不同？这对 Agent 的测试策略有什么影响？</li>
+<li>你的 Agent 框架在所有请求里都写死了 <code>temperature: 0</code>。换成 Claude 4.7 之后的模型或开启推理的 GPT-5 系列模型，会发生什么？应该怎么改？</li>
+</ol>
+<hr />
+<h1 id="参考答案与详解">参考答案与详解</h1>
+<h2 id="自测题答案">自测题答案</h2>
+<p><strong>1.</strong> 模型的输入是 token id，不是字符。<code>strawberry</code> 在 cl100k_base 里是 <code>str</code> <code>aw</code> <code>berry</code> 三个整数，在 o200k_base 里是 <code>st</code> <code>raw</code> <code>berry</code>。模型从来没有直接“看到”过十个字母，要回答“有几个 r”，它必须从训练数据里间接学到“<code>berry</code> 这个 token 里有两个 r”这种知识，然后再加起来。这和人看图数东西不是一回事。现在的推理模型能答对，靠的是在思考过程中把单词逐字母拼出来（每个字母成为单独的 token），再数。</p>
+<p><strong>2.</strong> prefill 是把输入的所有 token 一次性送进模型，算出每个位置每一层的 K、V（存进 KV Cache），以及最后一个位置的 logits，从而得到第一个输出 token。因为所有输入 token 同时已知，可以组成大矩阵并行计算，但总计算量和输入长度成正比（注意力部分甚至是平方），所以输入越长，首 token 越晚。decode 是之后每一步只处理一个新 token：算它的 q、k、v，和 KV Cache 做注意力，得到下一个 token。每步的工作量差不多（只是缓存略微变长），所以输出速度基本恒定。</p>
+<p><strong>3.</strong> decode 每一步只为一个 token（或者一个 batch 里每个请求各一个 token）做计算，但要把整个模型的权重从显存读一遍。这时瓶颈是显存带宽而不是算力，GPU 的计算单元大部分时间在等数据。prefill 则是一次处理成千上万个 token，同一份权重读一次用很多次，算力利用率高得多。所以生成一个输出 token 占用的 GPU 时间远多于处理一个输入 token，定价自然高。</p>
+<p><strong>4.</strong> 并列时如果不定规则，选哪个就取决于遍历顺序。Go 的 map 遍历顺序每次都是随机的，所以同一份语料每次训练会学出不同的合并规则和词表，这意味着同一段文本在两次训练出的分词器里得到不同的 id，模型和分词器就对不上了。练习里用“<code>(A,B)</code> 字典序最小”打破并列，<code>TestBPETrainDeterministic</code> 训练两次逐个比较词表。</p>
+<p><strong>5.</strong> 训练时，每条规则都是在“前面的规则已经全部应用过”的序列上学出来的。编码时只有按同样的顺序应用规则，得到的切分才和模型训练时见过的切分一致。从左到右遇到就合并，会产生训练时从未出现过的切法（练习里 <code>abc</code> 被切成 <code>ab</code>+<code>c</code> 而不是 <code>a</code>+<code>bc</code>）。这两种切法解码后都是 <code>abc</code>，所以往返测试发现不了；但对模型来说，<code>[ab, c]</code> 是一个它在训练里几乎没见过的 token 序列，等于给它一段“拼写奇怪”的输入，理解和生成质量都会下降。这种 bug 只能用专门构造的测试来抓。</p>
+<p><strong>6.</strong> token 数直接决定三件事：钱（按 token 计费）、上下文能装多少（窗口按 token 算）、限流（TPM 按 token 算）。同样的中文内容，o200k 比 cl100k 少约 44% 的 token：费用少近一半，同样的窗口能多装近一倍的历史或检索结果。“字符数 ÷ 4”是英文的经验值（英文约 4 个字符一个 token）；中文在 o200k 下约 1.5 个字符一个 token，在 cl100k 下接近 1 个字符一个 token，在训练语料偏英文的小分词器里甚至一个字要好几个 token。用英文经验值估中文，会把 token 数低估 2–4 倍，导致上下文超限或预算失控。（Go 里 <code>len(text)</code> 还是字节数而不是字符数，一个汉字算 3，又是另一种偏差。）正确做法是用厂商的计数接口或离线分词库，事后以响应里的 <code>usage</code> 为准。</p>
+<p><strong>7.</strong> 字节级 BPE 的 token 边界不保证落在 UTF-8 字符边界上，一个汉字的 3 个字节可能分属两个 token（cl100k 把“智”拆成 <code>e6 99</code> 和 <code>ba</code>）。服务端如果每个 token 单独转字符串推送，半个字符就会被替换成 <code>U+FFFD</code>，也就是 <code>�</code>。另外，网络分块也可能在字符中间切开。处理方法：服务端解码时扣住不完整的 UTF-8 尾巴，等下一个 token 补齐（练习的 <code>StreamDecoder</code>）；客户端用 <code>TextDecoder</code> 的 <code>{ stream: true }</code> 模式（或 Go 里用 <code>bufio</code> 按完整字符读），流结束时再 flush 一次。</p>
+<p><strong>8.</strong> q、k 每一维近似均值 0、方差 1，d 维点积的方差是 d。d 很大时点积的绝对值很大，softmax 会极度偏向最大的那一项，接近 one-hot。后果是：每个位置只“看”一个位置，信息混合能力很差；训练时 softmax 在饱和区，梯度接近 0，学不动。除以 √d 让点积方差回到 1 左右。练习实测 d=512 时，不缩放的注意力熵是 0.148 bit，缩放后是 4.35 bit（上限 5）。</p>
+<p><strong>9.</strong> 因果掩码保证位置 i 的 K、V 只依赖 0..i 的输入，后面生成什么都不会改变它们，所以缓存下来复用和重新计算的结果在数学上完全相同（<code>TestKVCacheMatchesFull</code> 验证误差 &lt; 1e-9）。大小：<code>2 × 80 × 8 × 128 × 2 字节 = 327,680 字节 = 320 KiB</code> 每 token；128K token（131,072）× 320 KiB = 40 GiB。这只是一个请求的缓存，还不算模型权重本身（70B fp16 约 140 GB）。</p>
+<p><strong>10.</strong> Prompt Caching 缓存的是前缀对应的 KV Cache。位置 i 的 K、V 取决于 0..i 的所有 token，只要前缀中任何一个 token 不同，从那个位置往后的所有 K、V 都会不同，缓存就无法复用。在 system prompt 开头放当前时间，每次请求的第一段就不一样，后面所有内容（工具定义、长文档、历史消息）的缓存全部失效，每次都要重新 prefill，既慢又贵。正确做法是把不变的内容放前面、变化的内容（时间、用户输入）放最后。</p>
+<p><strong>11.</strong> 保留 0.5 和 0.3。按从高到低累加：拿到 0.5 时累计 0.5 &lt; 0.6，还没够，继续；拿到 0.3 时累计 0.8 ≥ 0.6，这一个也要保留，因为没有它就凑不够 0.6；之后的 0.15、0.05 全部丢掉。top-p 的定义是“累计概率达到 p 的<strong>最小</strong>集合”，跨过阈值的那个元素正是让集合达到 p 的必要成员。如果把它丢掉，保留的集合累计概率只有 0.5，不满足定义；在极端情况下（第一个 token 概率就超过 p），错误实现会把所有 token 都删掉。</p>
+<p><strong>12.</strong> 惩罚的目的是“让已经出现过的 token 更不可能”，也就是让 logit 变小。正 logit 除以 r（r&gt;1）会变小，没问题；但负 logit 除以 r 会变大（-1 / 2 = -0.5），反而更可能被选中，所以负数要乘以 r（-1 × 2 = -2）。加法惩罚（presence/frequency）不存在这个问题，因为减一个正数总是变小。</p>
+<p><strong>13.</strong> 服务端会把很多用户的请求拼在一个 batch 里一起算，batch 的大小随负载变化。batch 大小会改变矩阵乘法、归一化、注意力 kernel 的切分和归约方式，浮点加法顺序随之变化，产生最后几位的差异。这些差异在几十层里放大，当某一步最高的两个 token 分数非常接近时，argmax 就可能翻转，之后的输出完全分叉。Thinking Machines 的实验里，1000 次 temperature 0 采样得到 80 种结果。影响：Agent 的测试不能断言“输出逐字相同”。确定性逻辑（循环控制、工具调度、解析）用假模型或录制回放来测；模型行为用 Eval 在多次运行上统计成功率和稳定性（pass^k），这是第 06 模块的内容。</p>
+<p><strong>14.</strong> 请求会直接失败：Claude 4.7 及之后的模型对非默认的 <code>temperature</code> 返回 400；GPT-5 系列在开启推理时不接受 <code>temperature</code>，同样返回 400。Gemini 3 虽然接受，但官方建议保持 1.0，设成 0 可能导致循环或推理质量下降。改法：把采样参数从业务代码里拿出来，放进按模型维护的配置（模型能力表），记录每个模型支持哪些参数和推荐默认值；构造请求时只发送该模型支持且明确配置了的参数，默认什么都不发，让厂商用它自己的默认值。需要“稳定输出”时，用结构化输出、更清晰的 prompt 和 Eval 来保证，而不是依赖温度。</p>
+<h2 id="练习参考答案">练习参考答案</h2>
+<h3 id="练习-1">练习 1</h3>
+<ol>
+<li>三行日志的含义：
+   - <code>tokens/字符：英文 0.43，中文 1.57</code>：在以英文为主的小语料上训练的分词器，英文平均 2–3 个字符合成一个 token，中文平均一个字要 1.5 个 token 以上（一个汉字 3 个字节，只有少数常见字被合并）。这就是“分词器偏向训练语料的语言”。
+   - <code>d=512 时注意力熵：不缩放 0.148 bit，缩放后 4.350 bit</code>：不缩放时注意力几乎只看一个位置，缩放后在 32 个位置上分布得比较均匀（上限 5 bit）。
+   - <code>贪心：" wabababab…"（length）</code>：bigram 模型在贪心下陷入两 token 循环，直到 <code>max_tokens</code> 才停。</li>
+<li>词表从 400 增大到 1000、2000，中文 token/字符比会先明显下降，之后基本不动。原因是语料只有 2 KB，里面的中文只有几百个字，能学的合并很快就学完了：所有片段都已经合并成单个 token，<code>mostFrequent</code> 返回 <code>ok=false</code>，训练提前结束（可以打印 <code>VocabSize()</code> 验证，词表根本到不了 2000）。真实分词器的中文效率取决于训练语料里有多少中文，这正是 o200k 比 cl100k 对中文好得多的原因。</li>
+<li>一般会看到：英文代码两代差别不大；JSON 里的英文键名差别也不大；中英混排和纯中文差别最大。如果你的 Agent 主要处理中文，选模型时 token 效率是一个实打实的成本因素。</li>
+</ol>
+<h3 id="练习-2">练习 2</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>改动</th>
+<th>失败的测试</th>
+<th>原因</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. 去掉 <code>- maxL</code></td>
+<td><code>TestSoftmaxStable</code></td>
+<td><code>exp(1000)</code> 溢出成 <code>+Inf</code>，<code>Inf/Inf = NaN</code></td>
+</tr>
+<tr>
+<td>2. top-p 先累加再判断</td>
+<td><code>TestTopP</code></td>
+<td>跨过阈值的 token 被删掉，<code>top_p=0.6</code> 只剩一个</td>
+</tr>
+<tr>
+<td>3. 不扣住尾巴</td>
+<td><code>TestStreamDecoderNeverSplitsRunes</code></td>
+<td>半个汉字被直接输出，<code>utf8.ValidString</code> 失败</td>
+</tr>
+<tr>
+<td>4. 去掉因果判断</td>
+<td><code>TestCausalMask</code>、<code>TestKVCacheMatchesFull</code></td>
+<td>过去位置看到了未来；整段计算变成双向注意力，和只看过去的增量计算对不上</td>
+</tr>
+<tr>
+<td>5. 贪心直接 argmax</td>
+<td><code>TestPenaltiesAndBias</code></td>
+<td><code>temperature=0</code> 时 logit bias 失效，被禁用的 token 仍然被选中</td>
+</tr>
+<tr>
+<td>6. 只用第一个可合并 pair</td>
+<td><code>TestBPEEncodeFollowsMergeRank</code></td>
+<td><code>abc</code> 被切成 <code>ab</code>+<code>c</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>第 4 条的第二个失败值得注意：<code>TestKVCacheMatchesFull</code> 本来是测 KV Cache 的，但它把“整段计算”当作标准答案。标准答案错了，测试也会失败。这说明<strong>等价性测试同时保护了两边</strong>。</p>
+<p>第 6 条里 <code>TestBPERoundTrip</code> 还能通过，是因为解码只是把每个 token 的字节拼起来，不管怎么切，拼回去都是原文。往返测试只能证明“无损”，不能证明“切法正确”。</p>
+<h3 id="练习-3">练习 3</h3>
+<div class="hl"><pre><span></span><code><span class="c1">// GenerateText 支持字符串级停止序列，并通过 emit 流式推送文本。</span>
+<span class="kd">func</span><span class="w"> </span><span class="nx">GenerateText</span><span class="p">(</span><span class="nx">m</span><span class="w"> </span><span class="nx">Model</span><span class="p">,</span><span class="w"> </span><span class="nx">tok</span><span class="w"> </span><span class="o">*</span><span class="nx">Tokenizer</span><span class="p">,</span><span class="w"> </span><span class="nx">prompt</span><span class="w"> </span><span class="p">[]</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="nx">maxTokens</span><span class="w"> </span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="nx">stops</span><span class="w"> </span><span class="p">[]</span><span class="kt">string</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">p</span><span class="w"> </span><span class="nx">SamplingParams</span><span class="p">,</span><span class="w"> </span><span class="nx">rng</span><span class="w"> </span><span class="o">*</span><span class="nx">rand</span><span class="p">.</span><span class="nx">Rand</span><span class="p">,</span><span class="w"> </span><span class="nx">emit</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="kt">string</span><span class="p">))</span><span class="w"> </span><span class="p">(</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">ctx</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">append</span><span class="p">([]</span><span class="kt">int</span><span class="p">(</span><span class="kc">nil</span><span class="p">),</span><span class="w"> </span><span class="nx">prompt</span><span class="p">...)</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nx">text</span><span class="w"> </span><span class="p">[]</span><span class="kt">byte</span>
+<span class="w">    </span><span class="nx">sent</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="c1">// text[:sent] 已经推给用户</span>
+<span class="w">    </span><span class="nx">hold</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="c1">// 末尾最多要扣住的字节数</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">s</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">stops</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">hold</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">max</span><span class="p">(</span><span class="nx">hold</span><span class="p">,</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">s</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="nx">flush</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">upto</span><span class="w"> </span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">upto</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">sent</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">completePrefix</span><span class="p">(</span><span class="nx">text</span><span class="p">[</span><span class="nx">sent</span><span class="p">:</span><span class="nx">upto</span><span class="p">])</span><span class="w"> </span><span class="c1">// 不在汉字中间切</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">upto</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="nx">sent</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nx">emit</span><span class="p">(</span><span class="kt">string</span><span class="p">(</span><span class="nx">text</span><span class="p">[</span><span class="nx">sent</span><span class="p">:</span><span class="nx">upto</span><span class="p">]))</span>
+<span class="w">            </span><span class="nx">sent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">upto</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">maxTokens</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">next</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">Sample</span><span class="p">(</span><span class="nx">m</span><span class="p">.</span><span class="nx">Logits</span><span class="p">(</span><span class="nx">ctx</span><span class="p">),</span><span class="w"> </span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">p</span><span class="p">,</span><span class="w"> </span><span class="nx">rng</span><span class="p">)</span>
+<span class="w">        </span><span class="nx">ctx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">next</span><span class="p">)</span>
+<span class="w">        </span><span class="nx">text</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">text</span><span class="p">,</span><span class="w"> </span><span class="nx">tok</span><span class="p">.</span><span class="nx">TokenBytes</span><span class="p">(</span><span class="nx">next</span><span class="p">)...)</span>
+
+<span class="w">        </span><span class="nx">from</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="nx">sent</span><span class="o">-</span><span class="nx">hold</span><span class="p">)</span><span class="w"> </span><span class="c1">// 更早的部分已经确认不含停止序列</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">s</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">stops</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">strings</span><span class="p">.</span><span class="nx">Index</span><span class="p">(</span><span class="kt">string</span><span class="p">(</span><span class="nx">text</span><span class="p">[</span><span class="nx">from</span><span class="p">:]),</span><span class="w"> </span><span class="nx">s</span><span class="p">);</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="nx">cut</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">from</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">i</span>
+<span class="w">                </span><span class="nx">flush</span><span class="p">(</span><span class="nx">cut</span><span class="p">)</span>
+<span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="kt">string</span><span class="p">(</span><span class="nx">text</span><span class="p">[:</span><span class="nx">cut</span><span class="p">]),</span><span class="w"> </span><span class="s">"stop"</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="nx">flush</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="nx">sent</span><span class="p">,</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">text</span><span class="p">)</span><span class="o">-</span><span class="nx">hold</span><span class="p">))</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">sent</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">text</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">emit</span><span class="p">(</span><span class="kt">string</span><span class="p">(</span><span class="nx">text</span><span class="p">[</span><span class="nx">sent</span><span class="p">:]))</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="kt">string</span><span class="p">(</span><span class="nx">text</span><span class="p">),</span><span class="w"> </span><span class="s">"length"</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>要点：</p>
+<ul>
+<li><strong>在字节上匹配，而不是在 token 上匹配</strong>：每来一个 token 就把它的字节追加到 <code>text</code>，在文本上找停止序列。这样无论 <code>&lt;/answer&gt;</code> 被切成几个 token、在哪里切，都能找到。</li>
+<li><strong>扣住 <code>len(stop)-1</code> 个字节</strong>：<code>text</code> 末尾这么多字节可能是停止序列的开头，暂时不推。比如已经收到“答案是42。”加上 <code>&lt;/answer&gt;</code> 的前 5 个字节，末尾 8 个字节先扣着；下一个 token 如果补成了 <code>&lt;/answer&gt;</code>，就在 <code>&lt;</code> 之前截断，用户永远看不到这半截标签。</li>
+<li><strong><code>from := max(0, sent-hold)</code></strong>：只在可能包含新匹配的区域里搜索，避免每步扫描整段文本（O(n²)）。停止序列最早可能从“已发送位置往前 hold 字节”开始。严格来说，已发送的部分不可能包含停止序列的开头（否则当时就不会发送），这里多往前看一段只是保险。</li>
+<li><strong><code>flush</code> 里再套一层 <code>completePrefix</code></strong>：扣住停止序列前缀之后，剩下要推的部分末尾仍然可能是半个汉字，两种扣留要叠加。</li>
+<li><strong><code>finish_reason</code></strong>：找到停止序列返回 <code>"stop"</code>；跑满 <code>maxTokens</code> 返回 <code>"length"</code>，并把扣住的尾巴全部推出去。</li>
+</ul>
+<p>测试：</p>
+<div class="hl"><pre><span></span><code><span class="c1">// script 是按脚本依次输出指定 token 的假模型：</span>
+<span class="c1">// 让目标 token 的 logit 为 0，其他都是 -50，贪心必然选中它。</span>
+<span class="kd">type</span><span class="w"> </span><span class="nx">script</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">ids</span><span class="w"> </span><span class="p">[]</span><span class="kt">int</span>
+<span class="w">    </span><span class="nx">i</span><span class="w">   </span><span class="kt">int</span>
+<span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">s</span><span class="w"> </span><span class="o">*</span><span class="nx">script</span><span class="p">)</span><span class="w"> </span><span class="nx">Logits</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="p">[]</span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="p">[]</span><span class="kt">float64</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">out</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">make</span><span class="p">([]</span><span class="kt">float64</span><span class="p">,</span><span class="w"> </span><span class="mi">256</span><span class="p">)</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">j</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">out</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">out</span><span class="p">[</span><span class="nx">j</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">-</span><span class="mi">50</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="nx">out</span><span class="p">[</span><span class="nx">s</span><span class="p">.</span><span class="nx">ids</span><span class="p">[</span><span class="nx">s</span><span class="p">.</span><span class="nx">i</span><span class="p">]]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">    </span><span class="nx">s</span><span class="p">.</span><span class="nx">i</span><span class="o">++</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">out</span>
+<span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="nx">TestStopAcrossTokens</span><span class="p">(</span><span class="nx">t</span><span class="w"> </span><span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">T</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">tok</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">newByteTokenizer</span><span class="p">()</span>
+<span class="w">    </span><span class="nx">ids</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">tok</span><span class="p">.</span><span class="nx">Encode</span><span class="p">(</span><span class="s">"答案是42。&lt;/answer&gt;后面不该出现"</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nx">chunks</span><span class="w"> </span><span class="p">[]</span><span class="kt">string</span>
+<span class="w">    </span><span class="nx">text</span><span class="p">,</span><span class="w"> </span><span class="nx">reason</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">GenerateText</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">script</span><span class="p">{</span><span class="nx">ids</span><span class="p">:</span><span class="w"> </span><span class="nx">ids</span><span class="p">},</span><span class="w"> </span><span class="nx">tok</span><span class="p">,</span><span class="w"> </span><span class="p">[]</span><span class="kt">int</span><span class="p">{</span><span class="mi">1</span><span class="p">},</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="p">[]</span><span class="kt">string</span><span class="p">{</span><span class="s">"&lt;/answer&gt;"</span><span class="p">},</span>
+<span class="w">        </span><span class="nx">SamplingParams</span><span class="p">{</span><span class="nx">Temperature</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">},</span><span class="w"> </span><span class="nx">rand</span><span class="p">.</span><span class="nx">New</span><span class="p">(</span><span class="nx">rand</span><span class="p">.</span><span class="nx">NewPCG</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">)),</span>
+<span class="w">        </span><span class="kd">func</span><span class="p">(</span><span class="nx">s</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">chunks</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">chunks</span><span class="p">,</span><span class="w"> </span><span class="nx">s</span><span class="p">)</span><span class="w"> </span><span class="p">})</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">text</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="s">"答案是42。"</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nx">reason</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="s">"stop"</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">t</span><span class="p">.</span><span class="nx">Fatalf</span><span class="p">(</span><span class="s">"got %q %s"</span><span class="p">,</span><span class="w"> </span><span class="nx">text</span><span class="p">,</span><span class="w"> </span><span class="nx">reason</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">strings</span><span class="p">.</span><span class="nx">Join</span><span class="p">(</span><span class="nx">chunks</span><span class="p">,</span><span class="w"> </span><span class="s">""</span><span class="p">)</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="nx">text</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">t</span><span class="p">.</span><span class="nx">Fatalf</span><span class="p">(</span><span class="s">"emitted %q"</span><span class="p">,</span><span class="w"> </span><span class="nx">chunks</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">c</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">chunks</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">strings</span><span class="p">.</span><span class="nx">Contains</span><span class="p">(</span><span class="nx">c</span><span class="p">,</span><span class="w"> </span><span class="s">"&lt;"</span><span class="p">)</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="o">!</span><span class="nx">utf8</span><span class="p">.</span><span class="nx">ValidString</span><span class="p">(</span><span class="nx">c</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nx">t</span><span class="p">.</span><span class="nx">Fatalf</span><span class="p">(</span><span class="s">"bad chunk %q"</span><span class="p">,</span><span class="w"> </span><span class="nx">c</span><span class="p">)</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>这个假模型是 Agent 测试里最常用的技巧（第 06 模块会系统讲）：<strong>把模型换成一个按脚本输出的假实现，让概率性的东西变成确定性的</strong>，于是“停止序列”“工具调用解析”“流式推送”这些纯逻辑都可以写成普通的单元测试。</p>
+<h3 id="选做top-k-用堆">选做：top-k 用堆</h3>
+<div class="hl"><pre><span></span><code><span class="kd">type</span><span class="w"> </span><span class="nx">minHeap</span><span class="w"> </span><span class="p">[]</span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">v</span><span class="w"> </span><span class="kt">float64</span>
+<span class="w">    </span><span class="nx">i</span><span class="w"> </span><span class="kt">int</span>
+<span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">h</span><span class="w"> </span><span class="nx">minHeap</span><span class="p">)</span><span class="w"> </span><span class="nx">Len</span><span class="p">()</span><span class="w"> </span><span class="kt">int</span><span class="w">           </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">h</span><span class="p">)</span><span class="w"> </span><span class="p">}</span>
+<span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">h</span><span class="w"> </span><span class="nx">minHeap</span><span class="p">)</span><span class="w"> </span><span class="nx">Less</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span><span class="w"> </span><span class="nx">b</span><span class="w"> </span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nx">h</span><span class="p">[</span><span class="nx">a</span><span class="p">].</span><span class="nx">v</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="nx">h</span><span class="p">[</span><span class="nx">b</span><span class="p">].</span><span class="nx">v</span><span class="w"> </span><span class="p">}</span>
+<span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">h</span><span class="w"> </span><span class="nx">minHeap</span><span class="p">)</span><span class="w"> </span><span class="nx">Swap</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span><span class="w"> </span><span class="nx">b</span><span class="w"> </span><span class="kt">int</span><span class="p">)</span><span class="w">      </span><span class="p">{</span><span class="w"> </span><span class="nx">h</span><span class="p">[</span><span class="nx">a</span><span class="p">],</span><span class="w"> </span><span class="nx">h</span><span class="p">[</span><span class="nx">b</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">h</span><span class="p">[</span><span class="nx">b</span><span class="p">],</span><span class="w"> </span><span class="nx">h</span><span class="p">[</span><span class="nx">a</span><span class="p">]</span><span class="w"> </span><span class="p">}</span>
+<span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">h</span><span class="w"> </span><span class="o">*</span><span class="nx">minHeap</span><span class="p">)</span><span class="w"> </span><span class="nx">Push</span><span class="p">(</span><span class="nx">x</span><span class="w"> </span><span class="kt">any</span><span class="p">)</span><span class="w">        </span><span class="p">{</span><span class="w"> </span><span class="o">*</span><span class="nx">h</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="o">*</span><span class="nx">h</span><span class="p">,</span><span class="w"> </span><span class="nx">x</span><span class="p">.(</span><span class="kd">struct</span><span class="p">{</span><span class="w"> </span><span class="nx">v</span><span class="w"> </span><span class="kt">float64</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="p">}))</span><span class="w"> </span><span class="p">}</span>
+<span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">h</span><span class="w"> </span><span class="o">*</span><span class="nx">minHeap</span><span class="p">)</span><span class="w"> </span><span class="nx">Pop</span><span class="p">()</span><span class="w"> </span><span class="kt">any</span><span class="w">          </span><span class="p">{</span><span class="w"> </span><span class="nx">old</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="o">*</span><span class="nx">h</span><span class="p">;</span><span class="w"> </span><span class="nx">x</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">old</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="nx">old</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">];</span><span class="w"> </span><span class="o">*</span><span class="nx">h</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">old</span><span class="p">[:</span><span class="nb">len</span><span class="p">(</span><span class="nx">old</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">];</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nx">x</span><span class="w"> </span><span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="nx">topKHeap</span><span class="p">(</span><span class="nx">xs</span><span class="w"> </span><span class="p">[]</span><span class="kt">float64</span><span class="p">,</span><span class="w"> </span><span class="nx">k</span><span class="w"> </span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="p">[]</span><span class="kt">int</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">h</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">make</span><span class="p">(</span><span class="nx">minHeap</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="nx">k</span><span class="p">)</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="p">,</span><span class="w"> </span><span class="nx">v</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">xs</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">h</span><span class="p">.</span><span class="nx">Len</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="nx">k</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nx">heap</span><span class="p">.</span><span class="nx">Push</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">h</span><span class="p">,</span><span class="w"> </span><span class="kd">struct</span><span class="p">{</span><span class="w"> </span><span class="nx">v</span><span class="w"> </span><span class="kt">float64</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="p">}{</span><span class="nx">v</span><span class="p">,</span><span class="w"> </span><span class="nx">i</span><span class="p">})</span>
+<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="nx">v</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="nx">h</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">v</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1">// 比堆里最小的大，就替换它</span>
+<span class="w">            </span><span class="nx">h</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kd">struct</span><span class="p">{</span><span class="w"> </span><span class="nx">v</span><span class="w"> </span><span class="kt">float64</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="p">}{</span><span class="nx">v</span><span class="p">,</span><span class="w"> </span><span class="nx">i</span><span class="p">}</span>
+<span class="w">            </span><span class="nx">heap</span><span class="p">.</span><span class="nx">Fix</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">h</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="nx">out</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">make</span><span class="p">([]</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="nx">h</span><span class="p">.</span><span class="nx">Len</span><span class="p">())</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="p">,</span><span class="w"> </span><span class="nx">e</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">h</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">out</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">e</span><span class="p">.</span><span class="nx">i</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">out</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>堆里始终保存“目前最大的 k 个”，堆顶是其中最小的。每个元素只需和堆顶比一次，大于堆顶才替换并下沉，O(log k)。V=200000、k=50 时，排序要做约 V·log₂V ≈ 350 万次比较，堆约 V + (替换次数)·log₂k，通常快一个数量级。注意并列值的处理：排序版用 <code>SliceStable</code> 保证并列时取小下标，堆版不保证，需要的话在 <code>Less</code> 里加上下标比较。</p>
+<hr />
+<h2 id="完成标准">完成标准</h2>
+<ul>
+<li>[ ] <code>make test</code> 21 个测试全部通过，能说出每个测试在验证什么；</li>
+<li>[ ] 练习 1：记录了词表大小对中文 token 比的影响，并能解释为什么到某个大小后降不下去；用 <code>make tokens</code> 对比了自己的三段文本；</li>
+<li>[ ] 练习 2：六处改动都做过，每一处都能说出失败的测试和根本原因，尤其是第 4 条为什么有两个测试失败、第 6 条为什么往返测试发现不了；</li>
+<li>[ ] 练习 3：<code>GenerateText</code> 和 <code>TestStopAcrossTokens</code> 通过 <code>go test -race</code>；</li>
+<li>[ ] 能不看课件画出第 1 节的链路图，并在图上标出 prefill、decode、KV Cache、采样分别在哪一步；</li>
+<li>[ ] 自测题 14 道都能讲清楚，尤其是第 5、7、9、13、14 题；</li>
+<li>[ ] 能凭记忆写出数值稳定的 softmax 和正确的 top-p 循环。</li>
+</ul>
+<p>做到以上几条，1.1 就可以勾选。下一课 <strong>1.2 主流 API</strong>：OpenAI Responses、Anthropic Messages、Gemini，三家的消息结构、工具调用、流式事件格式逐一对比，并用 Go 写一个统一的客户端接口。</p>
+    <nav class="pager"><a class="prev" href="00-06-database-cache.html"><span>← 上一课 0.6</span>数据库与缓存</a></nav>
+    <p class="foot">© 2026 duang777 · 课件源文件：<a href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/notes/01-llm/01-transformer-tokenizer-sampling.md">notes/01-llm/01-transformer-tokenizer-sampling.md</a></p>
+  </article>
+</div>
+<script>
+document.querySelectorAll('article pre').forEach(function(pre){
+  var b=document.createElement('button');b.className='code__copy';b.textContent='复制';
+  b.onclick=function(){navigator.clipboard.writeText(pre.innerText).then(function(){b.textContent='已复制';setTimeout(function(){b.textContent='复制'},1200)})};
+  pre.parentNode.insertBefore(b,pre);
+});
+var links=[].slice.call(document.querySelectorAll('.toc a')),map={};
+links.forEach(function(a){map[decodeURIComponent(a.getAttribute('href').slice(1))]=a});
+var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting&&map[e.target.id]){links.forEach(function(l){l.classList.remove('on')});map[e.target.id].classList.add('on')}})},{rootMargin:'-80px 0px -70% 0px'});
+document.querySelectorAll('article h1[id],article h2[id]').forEach(function(h){io.observe(h)});
+</script>
+</body>
+</html>

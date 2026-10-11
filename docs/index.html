@@ -208,14 +208,14 @@
         <section class="stats" data-reveal>
           <div class="stat"><span class="stat__fig x-mono">14</span><span class="stat__label">模块</span></div>
           <div class="stat"><span class="stat__fig x-mono">84</span><span class="stat__label">知识点</span></div>
-          <div class="stat"><span class="stat__fig x-mono">Day 4</span><span class="stat__label">今天</span></div>
+          <div class="stat"><span class="stat__fig x-mono">Day 5</span><span class="stat__label">今天</span></div>
           <div class="stat"><span class="stat__fig x-mono">5/84</span><span class="stat__label">已完成</span></div>
         </section>
 
         <section class="section" id="progress" data-nav="进度">
           <div class="head" data-reveal>
             <p class="head__eyebrow x-kicker">当前进度</p>
-            <h2 class="x-h2">0.6 数据库与缓存已上线，做完练习模块 00 收官，接着进入 01 LLM 原理与使用。</h2>
+            <h2 class="x-h2">进入 01 LLM 原理与使用：1.1 Transformer、Tokenizer 与采样参数已上线；0.6 练习收尾中。</h2>
             <p class="head__sub">学完且有笔记或代码产出，才在 ROADMAP 里打勾。</p>
           </div>
           <div class="x-progress" data-reveal>
@@ -337,6 +337,25 @@
                 <dd><span class="chip x-chip x-chip--live">进行中</span></dd>
               </dl>
             </article>
+            <article class="step">
+              <div class="step__intro">
+                <p class="step__num x-step-num">1.1</p>
+                <p class="step__eyebrow">进行中 · 01 LLM 原理与使用</p>
+              </div>
+              <div>
+                <h3>Transformer、Tokenizer 与采样参数：从一段文本到下一个 token</h3>
+                <p class="sub">手写字节级 BPE 与流式 UTF-8 解码、缩放点积注意力与因果掩码、KV Cache 显存估算、temperature / top-p / min-p / 惩罚，以及各家 API 对采样参数的最新限制。</p>
+                <div class="links" style="margin-top: 16px">
+                  <a class="x-btn x-btn--primary" href="notes/01-01-transformer-tokenizer-sampling.html">在线阅读</a>
+                </div>
+              </div>
+              <dl class="step__panel">
+                <dt>课件</dt>
+                <dd><span class="chip x-chip x-chip--done">已完成</span></dd>
+                <dt>练习</dt>
+                <dd><span class="chip x-chip x-chip--live">进行中</span></dd>
+              </dl>
+            </article>
           </div>
         </section>
 
@@ -347,6 +366,21 @@
           </div>
           <ol class="timeline" data-reveal>
             <li class="is-current">
+              <p class="timeline__when"><span class="x-mono">Day 5 · 2026-10-12</span></p>
+              <div class="timeline__what">
+                <p><strong>Transformer、Tokenizer 与采样</strong></p>
+                <ul>
+                  <li>手写字节级 BPE：编码按合并顺序而不是从左到右，往返测试抓不到这个 bug</li>
+                  <li>实测“人工智能体需要可靠的工具调用。”：cl100k 16 个 token，o200k 9 个</li>
+                  <li>流式解码扣住半个汉字，TS 里对应 TextDecoder 的 stream: true</li>
+                  <li>注意力不除 √d：d=512 时熵从 4.35 bit 掉到 0.148 bit；KV Cache 70B 跑 128K 要 40 GiB</li>
+                  <li>temperature=0 也不确定：根源是服务端批大小随负载变化</li>
+                </ul>
+                <p class="x-think">思考：新模型为什么越来越不让调 temperature？</p>
+              </div>
+              <p><a class="x-btn x-btn--ghost" href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/logs/2026-10-12.md" target="_blank" rel="noopener">日志</a></p>
+            </li>
+            <li>
               <p class="timeline__when"><span class="x-mono">Day 4 · 2026-10-11</span></p>
               <div class="timeline__what">
                 <p><strong>数据库与缓存</strong></p>
@@ -429,7 +463,7 @@
               </ul>
             </div>
             <div class="x-card">
-              <div class="x-card__top"><span class="x-card__num">01</span><span class="chip x-chip">未开始</span></div>
+              <div class="x-card__top"><span class="x-card__num">01</span><span class="chip x-chip x-chip--live">进行中</span></div>
               <h3>LLM 原理与使用</h3>
               <ul>
                 <li>Transformer、Tokenizer、采样参数（temperature/top-p）</li>

@@ -26,6 +26,7 @@ LESSONS = [
     ("notes/00-foundations/04-streaming.md", "00-04-streaming", "0.4", "HTTP / SSE / WebSocket", "4–5 小时"),
     ("notes/00-foundations/05-engineering.md", "00-05-engineering", "0.5", "Git、Docker、Linux", "4–5 小时"),
     ("notes/00-foundations/06-database-cache.md", "00-06-database-cache", "0.6", "数据库与缓存", "5–6 小时"),
+    ("notes/01-llm/01-transformer-tokenizer-sampling.md", "01-01-transformer-tokenizer-sampling", "1.1", "Transformer、Tokenizer 与采样", "5–6 小时"),
 ]
 
 CSS = r"""
