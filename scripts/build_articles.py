@@ -19,6 +19,8 @@ OUT = ROOT / "docs" / "notes"
 REPO = "https://github.com/Duang777/ai-agent-fullstack-roadmap"
 
 # 课件顺序。新增一课，在这里加一行。
+MODULES = {"00": "00 · 基础功底", "01": "01 · LLM 原理与使用"}
+
 LESSONS = [
     ("notes/00-foundations/01-go.md", "00-01-go", "0.1", "Go 基础与并发", "5–6 小时"),
     ("notes/00-foundations/02-typescript.md", "00-02-typescript", "0.2", "TypeScript", "4–5 小时"),
@@ -199,7 +201,7 @@ def page(i: int) -> str:
 <div class="wrap">
   <aside class="toc"><div class="toc__label">本课目录</div>{toc}</aside>
   <article>
-    <div class="meta">模块 00 · 基础功底 · 第 {num} 课</div>
+    <div class="meta">模块 {MODULES[slug[:2]]} · 第 {num} 课</div>
     <h1 class="title">{html.escape(title)}</h1>
     {body}
     <nav class="pager">{prev_html}{next_html}</nav>
