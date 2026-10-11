@@ -740,18 +740,17 @@ npm run dev                     # 看终端里逐字打印
 ## 自测题
 
 1. 下面这段 SSE 会派发几个事件？每个的 `event` 和 `data` 是什么？
-   ```
-   : hello
 
-   event: a
+        : hello
 
-   data: 1
-   data: 2
+        event: a
 
-   event: b
-   data:3
+        data: 1
+        data: 2
 
-   ```
+        event: b
+        data:3
+
 2. 为什么调模型 API 不用浏览器的 `EventSource`？
 3. 客户端的 `reader.read()` 返回了 `done: true`，可以认为模型已经输出完了吗？
 4. 本地流式正常，上线后变成一次性全出来。说出至少三个可能的原因。
@@ -767,6 +766,7 @@ npm run dev                     # 看终端里逐字打印
 ## 自测题答案
 
 **1.** 两个。
+
 - `: hello` 是注释，丢弃；后面的空行触发派发，但没有 data，不派发。
 - `event: a` 后面跟空行：没有 data，不派发，event 类型被清空。
 - `data: 1`、`data: 2`、空行：派发 `{ event: "message", data: "1\n2" }`。注意类型是 `message`，因为上一个 `event: a` 已经在空行时被清掉了。

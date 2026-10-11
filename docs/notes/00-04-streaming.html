@@ -933,34 +933,39 @@ npm<span class="w"> </span>run<span class="w"> </span>dev<span class="w">       
 <h2 id="自测题">自测题</h2>
 <ol>
 <li>
-<dl>
-<dt>下面这段 SSE 会派发几个事件？每个的 <code>event</code> 和 <code>data</code> 是什么？</dt>
-<dt>```</dt>
-<dd>hello</dd>
-</dl>
+<p>下面这段 SSE 会派发几个事件？每个的 <code>event</code> 和 <code>data</code> 是什么？</p>
+<div class="hl"><pre><span></span><code>: hello
+
+event: a
+
+data: 1
+data: 2
+
+event: b
+data:3
+</code></pre></div>
+
 </li>
+<li>
+<p>为什么调模型 API 不用浏览器的 <code>EventSource</code>？</p>
+</li>
+<li>客户端的 <code>reader.read()</code> 返回了 <code>done: true</code>，可以认为模型已经输出完了吗？</li>
+<li>本地流式正常，上线后变成一次性全出来。说出至少三个可能的原因。</li>
+<li>Go 里为什么要先 <code>w.(http.Flusher)</code> 断言？什么情况下会失败？</li>
+<li>Node 里判断客户端断开，为什么监听 <code>res.on("close")</code> 而不是 <code>req.on("close")</code>？</li>
+<li>用户开了 7 个标签页，第 7 个页面的所有请求都卡住了。最可能的原因是什么？怎么解决？</li>
+<li>做一个文字聊天 Agent，你会选 SSE 还是 WebSocket？做一个可以随时打断的语音 Agent 呢？</li>
 </ol>
-<p>event: a</p>
-<p>data: 1
-   data: 2</p>
-<p>event: b
-   data:3</p>
-<p><code>``
-2. 为什么调模型 API 不用浏览器的</code>EventSource<code>？
-3. 客户端的</code>reader.read()<code>返回了</code>done: true<code>，可以认为模型已经输出完了吗？
-4. 本地流式正常，上线后变成一次性全出来。说出至少三个可能的原因。
-5. Go 里为什么要先</code>w.(http.Flusher)<code>断言？什么情况下会失败？
-6. Node 里判断客户端断开，为什么监听</code>res.on("close")<code>而不是</code>req.on("close")`？
-7. 用户开了 7 个标签页，第 7 个页面的所有请求都卡住了。最可能的原因是什么？怎么解决？
-8. 做一个文字聊天 Agent，你会选 SSE 还是 WebSocket？做一个可以随时打断的语音 Agent 呢？</p>
 <hr />
 <h1 id="参考答案与详解">参考答案与详解</h1>
 <h2 id="自测题答案">自测题答案</h2>
-<p><strong>1.</strong> 两个。
-- <code>: hello</code> 是注释，丢弃；后面的空行触发派发，但没有 data，不派发。
-- <code>event: a</code> 后面跟空行：没有 data，不派发，event 类型被清空。
-- <code>data: 1</code>、<code>data: 2</code>、空行：派发 <code>{ event: "message", data: "1\n2" }</code>。注意类型是 <code>message</code>，因为上一个 <code>event: a</code> 已经在空行时被清掉了。
-- <code>event: b</code>、<code>data:3</code>、空行：派发 <code>{ event: "b", data: "3" }</code>。<code>data:3</code> 冒号后没有空格，值就是 <code>3</code>。</p>
+<p><strong>1.</strong> 两个。</p>
+<ul>
+<li><code>: hello</code> 是注释，丢弃；后面的空行触发派发，但没有 data，不派发。</li>
+<li><code>event: a</code> 后面跟空行：没有 data，不派发，event 类型被清空。</li>
+<li><code>data: 1</code>、<code>data: 2</code>、空行：派发 <code>{ event: "message", data: "1\n2" }</code>。注意类型是 <code>message</code>，因为上一个 <code>event: a</code> 已经在空行时被清掉了。</li>
+<li><code>event: b</code>、<code>data:3</code>、空行：派发 <code>{ event: "b", data: "3" }</code>。<code>data:3</code> 冒号后没有空格，值就是 <code>3</code>。</li>
+</ul>
 <p><strong>2.</strong> <code>EventSource</code> 只能发 GET，不能带请求体，也不能自定义请求头（没法带 <code>Authorization</code>）。模型 API 需要 POST 一大段 JSON 并鉴权，只能用 <code>fetch</code> 自己读流、自己解析。</p>
 <p><strong>3.</strong> 不能。网关超时、服务重启、网络中断都可能让连接被正常关闭，<code>read()</code> 同样返回 <code>done: true</code>。要以收到协议里的结束标记（<code>data: [DONE]</code>、<code>message_stop</code>、<code>done</code> 事件）为准，没收到就当作失败处理：重试或用 <code>Last-Event-ID</code> 续传。</p>
 <p><strong>4.</strong> 任意三个即可：
