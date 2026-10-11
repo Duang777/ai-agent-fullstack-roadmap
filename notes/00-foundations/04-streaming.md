@@ -249,19 +249,73 @@ parser.feed(decoder.decode()); // 最后冲刷一次，吐出解码器里剩的�
 
 ## 6. 客户端：为什么不用 EventSource
 
-浏览器自带 `EventSource`，用起来很简单：
+先说结论：**后端用的是 SSE 格式，但前端通常不用浏览器原生的 `EventSource`，而是 `fetch` + `ReadableStream` 自己解析。** 这不矛盾：SSE 是一种响应格式（`text/event-stream`），`EventSource` 只是浏览器提供的其中一种接收方式。
+
+### 6.1 EventSource 擅长什么
 
 ```ts
 const es = new EventSource("/events");
 es.addEventListener("token", (e) => console.log(e.data));
 ```
 
-它还会**自动重连**，重连时自动带上 `Last-Event-ID` 请求头。但它有两个致命限制：
+两行代码，浏览器帮你做了一整套事情：
 
-- **只能 GET**，不能带请求体。而调模型要 POST 一大段 messages。
-- **不能自定义请求头**，没法带 `Authorization`。
+```
+发起 GET 请求
+   ↓
+持续接收 text/event-stream
+   ↓
+解析 event / data / id
+   ↓
+连接断开 → 自动重连（带上 Last-Event-ID，见 9 节）
+```
 
-所以调模型 API、或者自己的 Agent 前端调后端时，**统一用 `fetch` + 自己解析**：
+所以如果场景是“浏览器 `GET /events`，服务端单向推通知、进度、日志”，**`EventSource` 非常合适**，没必要自己造轮子。
+
+### 6.2 模型聊天的请求不是这个形状
+
+调模型（或者你自己的 Agent 后端）时，请求长这样：
+
+```http
+POST /api/chat
+Authorization: Bearer xxx
+Content-Type: application/json
+Accept: text/event-stream
+
+{"model": "xxx", "messages": [{"role": "user", "content": "帮我解释一下 Transformer"}]}
+```
+
+`EventSource` 在这里有两个硬伤：
+
+- **只能发 GET**，构造函数只接收一个 URL，没有地方放请求体，几十 KB 的 `messages` 塞不进去；
+- **不能自定义请求头**，没有 `headers` 选项，带不了 `Authorization`。（它只有一个 `withCredentials` 开关，能带同源 / 跨域 Cookie，但不是任意请求头。）
+
+另外它也不能接 `AbortController`，只能 `es.close()`。
+
+```
+                    SSE（text/event-stream）
+                            │
+              ┌─────────────┴─────────────┐
+              │                           │
+         EventSource                    fetch
+              │                           │
+         只能 GET                    GET / POST / …
+       不能自定义请求头               任意请求头
+        不能带请求体                  可以带请求体
+       自动重连、自动解析            自己解析、自己重连
+              │                           │
+    适合：通知、进度推送         适合：LLM Chat / Agent / 模型 API
+```
+
+所以 LLM / Agent 场景的标准链路是：
+
+```
+fetch(POST) → response.body（ReadableStream）→ 自己解析 SSE → token / tool / done
+```
+
+### 6.3 fetch 版客户端：三层检查
+
+代码（练习 `03-streaming` 里的同款）：
 
 ```ts
 export async function* streamChat(url: string, body: unknown, opts: { signal?: AbortSignal } = {}) {
@@ -284,8 +338,39 @@ export async function* streamChat(url: string, body: unknown, opts: { signal?: A
 
 **逐行解读**
 
-- **① 先查状态码**：出错时（`401`、`429`）服务端一般返回普通 JSON，不是 SSE。直接拿去解析，你只会得到“什么事件都没有”，排查半天。
-- **③ 没收到结束标记就断了，要当作失败**。连接可能因为网关超时、服务重启被掐断，这时 `reader.read()` 也会返回 `done: true`，看起来像“正常结束”。**以收到 `[DONE]` / `done` 事件为准**，否则交给上层重试或续传。这一点线上非常常见。
+- **① HTTP 层：先查状态码。** `401 Unauthorized`、`429 Too Many Requests`、`500` 时，服务端返回的一般是普通 JSON（`{"error": "rate limit exceeded"}`），不是 `event: token`。直接交给 SSE 解析器，你只会得到“什么事件都没有”，排查半天。顺序必须是**先判断 HTTP 成功，再进入 SSE 层**。
+- **② SSE 层：确认真的是流。** 正常应该是 `Content-Type: text/event-stream`。如果是 `application/json`（比如某个网关把错误包成了 200，或者你忘了在请求里开 `stream: true`），就不是 SSE，不要喂给解析器。用 `startsWith` 是因为后面可能跟着 `; charset=utf-8`。
+- **③ 业务层：没收到结束标记就断了，要当作失败。** 这是最容易被忽略的一层。网络断开、服务器重启、Nginx 超时、网关掐连接、后端进程异常退出，表现出来都可能只是 `reader.read()` 返回 `done: true`，看起来和“正常结束”一模一样。
+
+记住这句：
+
+```
+HTTP 流正常结束  ≠  LLM 任务正常完成
+```
+
+所以协议里必须有一个**业务级的结束信号**：OpenAI Chat Completions 的 `data: [DONE]`、Anthropic 的 `message_stop`、我们练习里的 `event: done`。只有收到它才算成功；流结束了却没收到，就交给上层重试或续传。
+
+### 6.4 记成一个三层状态机
+
+```
+① HTTP 层
+   ├── 2xx                 → 继续
+   └── 401 / 429 / 5xx     → 失败（读 JSON 错误体，429 按 Retry-After 退避）
+
+② SSE 协议层
+   ├── text/event-stream   → 继续
+   └── 其他 Content-Type   → 失败
+
+③ 业务协议层
+   ├── token               → 持续输出
+   ├── tool                → 工具调用事件
+   ├── done                → 成功结束
+   └── 流 EOF 但没有 done  → 异常 / 未完成
+```
+
+这比“SSE 断了就是失败”更准确：**判断成功的不是连接有没有断，而是业务层有没有收到明确的完成信号。**
+
+> 面试可以这样说：`EventSource` 适合简单的 GET SSE 场景；LLM / Agent 流式接口需要 POST 携带 messages，还要 `Authorization`、`AbortController`，所以前端用 `fetch` 拿到 `ReadableStream` 自己解析 SSE。并且不能把 HTTP 流结束等同于业务成功，必须以 `done` / `[DONE]` 这类业务级结束事件确认生成完整结束。
 
 ## 7. 服务端：Go 版
 
@@ -391,7 +476,18 @@ SSE 自带了续传机制：
 3. 重连时带请求头 `Last-Event-ID: 最后的 id`；
 4. 服务端从这个 id 之后接着发。
 
-`EventSource` 会自动做第 2、3 步，用 `fetch` 时自己做。练习的服务端是这样处理的：
+`EventSource` 会自动做第 2、3 步，用 `fetch` 时自己做。但要说精确一点：
+
+- 前提是**服务端发了 `id:`**。服务端从来不发 `id`，`EventSource` 重连时就没有 `Last-Event-ID` 可带；
+- **自动重连 ≠ 自动续传业务状态。** 浏览器只负责“重新连上并告诉服务端我最后收到的是 123”，能不能从 124 开始补发，完全取决于后端有没有把事件存下来。后端没存历史，重连之后它要么从头再来，要么根本不知道从哪继续，`Last-Event-ID` 本身解决不了问题。
+
+```
+client ── Last-Event-ID: 123 ──▶ server ── 从 124 开始补发 ──▶ 124, 125, 126 …
+                                    ↑
+                         前提：事件按 id 存在某处
+```
+
+练习的服务端是这样处理的：
 
 ```ts
 const lastId = Number(req.headers["last-event-id"] ?? -1);
