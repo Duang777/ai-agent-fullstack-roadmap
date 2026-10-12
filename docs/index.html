@@ -6,6 +6,10 @@
     <meta name="theme-color" content="#0A0A0A" />
     <title>AI Agent 全栈学习计划 · 从零到生产</title>
     <meta name="description" content="14 个模块，84 个知识点。每天一课、一份日志、一次提交，全部开源。" />
+    <script>
+      try { document.documentElement.setAttribute("data-theme", localStorage.getItem("x-theme") === "light" ? "light" : "dark"); }
+      catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
+    </script>
     <link rel="stylesheet" href="hark.css" />
     <link rel="stylesheet" href="hark-hero.css" />
     <script>
@@ -14,14 +18,20 @@
       }
     </script>
     <style>
-      /* Requested design: a fixed dark theme, set through the library's own tokens. */
+      /* 黑白灰两套主题：默认深色，导航栏按钮切换浅色，选择存在 localStorage（x-theme）。 */
       :root,
-      :root[data-theme="light"],
       :root[data-theme="dark"] {
         color-scheme: dark;
+        --ink: #ffffff;
+        --ink-rgb: 255 255 255;
+        --bg-rgb: 10 10 10;
+        --ink-hover: #e5e5e5;
+        --card-hover: #151515;
+        --text-body: #d4d4d4;
+        --hero-img-filter: none;
         --text-primary: #ededed;
         --text-secondary: #a1a1a1;
-        --text-tertiary: rgb(255 255 255 / 0.32);
+        --text-tertiary: rgb(var(--ink-rgb) / 0.32);
         --text-primary-on: #0a0a0a;
         --text-secondary-on: #555555;
         --fill-primary: #ededed;
@@ -30,23 +40,23 @@
         --fill-segment: #1a1a1a;
         --fill-system-green: #22c55e;
         --fill-system-orange: #ededed;
-        --stroke-system-orange: rgb(255 255 255 / 0.12);
-        --stroke-primary: rgb(255 255 255 / 0.1);
-        --stroke-secondary: rgb(255 255 255 / 0.08);
+        --stroke-system-orange: rgb(var(--ink-rgb) / 0.12);
+        --stroke-primary: rgb(var(--ink-rgb) / 0.1);
+        --stroke-secondary: rgb(var(--ink-rgb) / 0.08);
         --stroke-primary-on: rgb(0 0 0 / 0.1);
-        --stroke-composer: rgb(255 255 255 / 0.08);
-        --hover-wash: rgb(255 255 255 / 0.05);
+        --stroke-composer: rgb(var(--ink-rgb) / 0.08);
+        --hover-wash: rgb(var(--ink-rgb) / 0.05);
         --hover-wash-primary-on: rgb(0 0 0 / 0.06);
         --mat-agent: rgb(17 17 17 / 0.72);
-        --hark-shadow: 0 1px 0 rgb(255 255 255 / 0.04) inset;
+        --hark-shadow: 0 1px 0 rgb(var(--ink-rgb) / 0.04) inset;
         --hero-surface: #0a0a0a;
         --hero-text: #ededed;
         --hero-text-muted: #a1a1a1;
-        --hero-scrim-strong: rgb(10 10 10 / 0.9);
-        --hero-scrim-soft: rgb(10 10 10 / 0.4);
-        --hero-scrim-side: rgb(10 10 10 / 0.6);
-        --hero-glass: rgb(10 10 10 / 0.5);
-        --hero-glass-stroke: rgb(255 255 255 / 0.1);
+        --hero-scrim-strong: rgb(var(--bg-rgb) / 0.9);
+        --hero-scrim-soft: rgb(var(--bg-rgb) / 0.4);
+        --hero-scrim-side: rgb(var(--bg-rgb) / 0.6);
+        --hero-glass: rgb(var(--bg-rgb) / 0.5);
+        --hero-glass-stroke: rgb(var(--ink-rgb) / 0.1);
         --sans: Inter, -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
         --x-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
       }
@@ -59,16 +69,16 @@
         z-index: -1;
         pointer-events: none;
         background:
-          linear-gradient(to right, rgb(255 255 255 / 0.025) 1px, transparent 1px) 0 0 / 64px 64px,
-          linear-gradient(to bottom, rgb(255 255 255 / 0.025) 1px, transparent 1px) 0 0 / 64px 64px;
+          linear-gradient(to right, rgb(var(--ink-rgb) / 0.025) 1px, transparent 1px) 0 0 / 64px 64px,
+          linear-gradient(to bottom, rgb(var(--ink-rgb) / 0.025) 1px, transparent 1px) 0 0 / 64px 64px;
         -webkit-mask-image: linear-gradient(to bottom, #000 0%, rgb(0 0 0 / 0.35) 60%, transparent 100%);
         mask-image: linear-gradient(to bottom, #000 0%, rgb(0 0 0 / 0.35) 60%, transparent 100%);
       }
 
       .x-mono { font-family: var(--x-mono); letter-spacing: 0.02em; }
-      .x-grad { color: #ffffff; }
-      .x-hero h1 { color: #d4d4d4; }
-      .x-hero h1 .x-grad { color: #ffffff; }
+      .x-grad { color: var(--ink); }
+      .x-hero h1 { color: var(--text-body); }
+      .x-hero h1 .x-grad { color: var(--ink); }
 
       /* Top bar */
       .x-top {
@@ -83,13 +93,13 @@
         padding-top: env(safe-area-inset-top, 0px);
         margin-inline: calc(var(--gutter) * -1);
         padding-inline: var(--gutter);
-        background: rgb(10 10 10 / 0.72);
+        background: rgb(var(--bg-rgb) / 0.72);
         -webkit-backdrop-filter: var(--hark-blur);
         backdrop-filter: var(--hark-blur);
         border-bottom: 1px solid var(--stroke-secondary);
       }
       .x-brand { display: inline-flex; align-items: center; gap: 10px; font: var(--type-label); text-decoration: none; min-height: var(--tap); }
-      .x-brand i { width: 10px; height: 10px; border-radius: 3px; background: #ffffff; }
+      .x-brand i { width: 10px; height: 10px; border-radius: 3px; background: var(--ink); }
       .x-top nav { display: flex; align-items: center; gap: 4px; }
       .x-top nav a:not(.x-btn) {
         display: inline-flex; align-items: center; min-height: var(--tap);
@@ -117,10 +127,10 @@
         font: var(--type-label); text-decoration: none; white-space: nowrap;
         transition: transform var(--dur-quick) var(--ease-out), box-shadow var(--dur-quick) ease, background var(--dur-quick) ease;
       }
-      .x-btn--primary { background: #ffffff; color: #000000; border: 1px solid #ffffff; }
-      .x-btn--primary:hover { background: #e5e5e5; border-color: #e5e5e5; transform: translateY(-1px); }
-      .x-btn--ghost { background: transparent; color: #ffffff; border: 1px solid rgb(255 255 255 / 0.12); }
-      .x-btn--ghost:hover { background: rgb(255 255 255 / 0.05); border-color: rgb(255 255 255 / 0.24); }
+      .x-btn--primary { background: var(--ink); color: var(--fill-primary-on); border: 1px solid var(--ink); }
+      .x-btn--primary:hover { background: var(--ink-hover); border-color: var(--ink-hover); transform: translateY(-1px); }
+      .x-btn--ghost { background: transparent; color: var(--ink); border: 1px solid rgb(var(--ink-rgb) / 0.12); }
+      .x-btn--ghost:hover { background: rgb(var(--ink-rgb) / 0.05); border-color: rgb(var(--ink-rgb) / 0.24); }
       .x-btn[target="_blank"]::after { content: "\2197"; font-size: 12px; opacity: 0.7; }
       .x-btn:focus-visible { outline-color: var(--text-primary); }
 
@@ -132,19 +142,19 @@
       .x-progress { display: grid; gap: 12px; padding: 24px; border: 1px solid var(--stroke-primary); border-radius: var(--r-m); background: var(--fill-tertiary); }
       .x-progress__row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-size: var(--size-small); color: var(--text-secondary); }
       .x-progress__row strong { font: var(--weight-regular) var(--size-heading)/1 var(--x-mono); color: var(--text-primary); }
-      .x-bar { position: relative; height: 6px; border-radius: var(--r-pill); background: rgb(255 255 255 / 0.06); overflow: hidden; }
-      .x-bar span { position: absolute; inset: 0 auto 0 0; min-width: 6px; border-radius: inherit; background: #ffffff; }
+      .x-bar { position: relative; height: 6px; border-radius: var(--r-pill); background: rgb(var(--ink-rgb) / 0.06); overflow: hidden; }
+      .x-bar span { position: absolute; inset: 0 auto 0 0; min-width: 6px; border-radius: inherit; background: var(--ink); }
       .x-ticks { display: grid; grid-template-columns: repeat(84, 1fr); gap: 2px; }
-      .x-ticks i { height: 10px; border-radius: 1px; background: rgb(255 255 255 / 0.08); }
-      .x-ticks i.is-on { background: #ffffff; }
+      .x-ticks i { height: 10px; border-radius: 1px; background: rgb(var(--ink-rgb) / 0.08); }
+      .x-ticks i.is-on { background: var(--ink); }
 
       /* Hover glow cards */
       .x-card { position: relative; border: 1px solid var(--stroke-primary); transition: border-color var(--dur-quick) ease, box-shadow 300ms var(--ease-out), background 300ms ease; }
-      .x-card:hover { border-color: rgb(255 255 255 / 0.18); background: #151515; box-shadow: inset 0 0 40px -16px rgb(255 255 255 / 0.12), inset 0 1px 0 rgb(255 255 255 / 0.06); }
+      .x-card:hover { border-color: rgb(var(--ink-rgb) / 0.18); background: var(--card-hover); box-shadow: inset 0 0 40px -16px rgb(var(--ink-rgb) / 0.12), inset 0 1px 0 rgb(var(--ink-rgb) / 0.06); }
       .x-card__top { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 14px; }
       .x-card__num { font: var(--weight-regular) var(--size-small)/1 var(--x-mono); color: var(--text-secondary); }
-      .x-card.is-now .x-card__num { color: #ffffff; }
-      .x-card.is-now { border-color: rgb(255 255 255 / 0.2); }
+      .x-card.is-now .x-card__num { color: var(--ink); }
+      .x-card.is-now { border-color: rgb(var(--ink-rgb) / 0.2); }
 
       /* Status chips: neutral; only "in progress" carries the green dot */
       .x-chip { background: transparent; color: var(--text-secondary); border: 1px solid var(--stroke-primary); }
@@ -152,7 +162,7 @@
       .x-chip--live { color: var(--text-primary); }
       .x-chip--live::before { background: #22c55e; box-shadow: none; }
       .x-chip--done { color: var(--text-primary); }
-      .x-chip--done::before { background: #ededed; box-shadow: none; }
+      .x-chip--done::before { background: var(--text-primary); box-shadow: none; }
       .x-card li { font-size: var(--size-small); color: var(--text-secondary); padding: 8px 0 !important; }
 
       .x-step-num { font-family: var(--x-mono); font-size: 40px; letter-spacing: -0.02em; }
@@ -176,6 +186,50 @@
 
       .timeline__what ul { color: var(--text-secondary); }
       .x-think { color: var(--text-primary); }
+    
+      :root[data-theme="light"] {
+        color-scheme: light;
+        --ink: #000000;
+        --ink-rgb: 0 0 0;
+        --bg-rgb: 255 255 255;
+        --ink-hover: #262626;
+        --card-hover: #f5f5f5;
+        --text-body: #404040;
+        --hero-img-filter: invert(1);
+        --text-primary: #0a0a0a;
+        --text-secondary: #555555;
+        --text-tertiary: rgb(0 0 0 / 0.4);
+        --text-primary-on: #ffffff;
+        --text-secondary-on: #a1a1a1;
+        --fill-primary: #0a0a0a;
+        --fill-primary-on: #ffffff;
+        --fill-tertiary: #fafafa;
+        --fill-segment: #f2f2f2;
+        --fill-system-orange: #0a0a0a;
+        --stroke-system-orange: rgb(0 0 0 / 0.12);
+        --stroke-primary: rgb(0 0 0 / 0.1);
+        --stroke-secondary: rgb(0 0 0 / 0.08);
+        --stroke-primary-on: rgb(255 255 255 / 0.1);
+        --stroke-composer: rgb(0 0 0 / 0.08);
+        --hover-wash: rgb(0 0 0 / 0.04);
+        --hover-wash-primary-on: rgb(255 255 255 / 0.06);
+        --mat-agent: rgb(255 255 255 / 0.72);
+        --hark-shadow: 0 1px 0 rgb(0 0 0 / 0.04) inset;
+        --hero-surface: #ffffff;
+        --hero-text: #0a0a0a;
+        --hero-text-muted: #555555;
+        --hero-scrim-strong: rgb(255 255 255 / 0.9);
+        --hero-scrim-soft: rgb(255 255 255 / 0.4);
+        --hero-scrim-side: rgb(255 255 255 / 0.6);
+        --hero-glass: rgb(255 255 255 / 0.5);
+        --hero-glass-stroke: rgb(0 0 0 / 0.1);
+      }
+      .hero__img { filter: var(--hero-img-filter); }
+      .theme-toggle { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; margin-left: 4px; border-radius: 8px; border: 1px solid rgb(var(--ink-rgb) / 0.12); background: transparent; color: var(--text-primary); cursor: pointer; transition: background 0.15s, border-color 0.15s; }
+      .theme-toggle:hover { background: rgb(var(--ink-rgb) / 0.05); border-color: rgb(var(--ink-rgb) / 0.24); }
+      .theme-toggle svg { width: 16px; height: 16px; }
+      .theme-toggle .i-moon, :root[data-theme="light"] .theme-toggle .i-sun { display: none; }
+      :root[data-theme="light"] .theme-toggle .i-moon { display: block; }
     </style>
   </head>
   <body>
@@ -187,6 +241,7 @@
           <a href="#log">日志</a>
           <a href="#roadmap">路线图</a>
           <a class="x-btn x-btn--ghost" href="https://github.com/Duang777/ai-agent-fullstack-roadmap" target="_blank" rel="noopener">GitHub</a>
+          <button class="theme-toggle" id="theme-toggle" type="button" aria-label="切换浅色 / 深色" title="切换浅色 / 深色"><svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg><svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
         </nav>
       </header>
 
@@ -194,7 +249,7 @@
         <section class="hero x-hero">
           <img class="hero__img" src="hero-mono.webp" alt="黑色背景上的白色节点连线图" />
           <div class="hero__copy">
-            <p class="hero__eyebrow x-mono">PUBLIC LEARNING · DAY 3</p>
+            <p class="hero__eyebrow x-mono">PUBLIC LEARNING · DAY 6</p>
             <h1 class="x-display">从零到生产，<br />公开学习 <span class="x-grad">AI Agent 全栈</span></h1>
             <p class="hero__sub">14 个模块，84 个知识点。每天一课、一份日志、一次提交，全部开源。</p>
             <div class="links">
@@ -745,6 +800,13 @@
         }, { rootMargin: "0px 0px -8% 0px", threshold: 0.05 });
         document.querySelectorAll("[data-reveal]").forEach(function (el) { io.observe(el); });
       })();
+    </script>
+    <script>
+      document.getElementById("theme-toggle").addEventListener("click", function () {
+        var r = document.documentElement, next = r.getAttribute("data-theme") === "light" ? "dark" : "light";
+        r.setAttribute("data-theme", next);
+        try { localStorage.setItem("x-theme", next); } catch (e) {}
+      });
     </script>
   </body>
 </html>
