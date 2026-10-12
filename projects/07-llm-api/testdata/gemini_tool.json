@@ -1,0 +1,11 @@
+{
+  "id": "int_g1",
+  "object": "interaction",
+  "model": "gemini-3.8-flash",
+  "status": "requires_action",
+  "steps": [
+    {"type": "thought", "signature": "thought_sig_abcd", "summary": [{"type": "text", "text": "需要查天气。"}]},
+    {"type": "function_call", "id": "fc_g1", "name": "get_weather", "arguments": {"city": "北京"}}
+  ],
+  "usage": {"total_input_tokens": 100, "total_cached_tokens": 40, "total_output_tokens": 25, "total_thought_tokens": 30, "total_tokens": 155}
+}

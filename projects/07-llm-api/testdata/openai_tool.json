@@ -1,0 +1,10 @@
+{
+  "id": "resp_tool_1",
+  "object": "response",
+  "status": "completed",
+  "output": [
+    {"id": "rs_1", "type": "reasoning", "summary": [{"type": "summary_text", "text": "需要先查天气。"}], "encrypted_content": "gAAAA-ENCRYPTED-REASONING"},
+    {"id": "fc_1", "type": "function_call", "status": "completed", "call_id": "call_abc", "name": "get_weather", "arguments": "{\"city\":\"北京\"}"}
+  ],
+  "usage": {"input_tokens": 120, "input_tokens_details": {"cached_tokens": 64}, "output_tokens": 90, "output_tokens_details": {"reasoning_tokens": 70}, "total_tokens": 210}
+}

@@ -63,6 +63,7 @@
 | # | 主题 | 核心内容 | 课件 | 练习 | 状态 |
 |---|---|---|---|---|---|
 | 1.1 | Transformer、Tokenizer、采样 | 字节级 BPE、流式 UTF-8 解码、注意力与因果掩码、KV Cache、temperature / top-p / min-p / 惩罚、API 采样参数现状 | [课件](notes/01-llm/01-transformer-tokenizer-sampling.md) | [`06-llm-basics`](projects/06-llm-basics) | 📖 学习中 |
+| 1.2 | 主流模型 API | OpenAI Responses、Anthropic Messages、Gemini Interactions 的消息结构、工具调用、流式事件、用量口径；推理块回传；同家无损、跨家降级的 Go 统一客户端与工具循环 | [课件](notes/01-llm/02-mainstream-apis.md) | [`07-llm-api`](projects/07-llm-api) | 📖 学习中 |
 
 ### 全部模块
 
@@ -117,6 +118,9 @@ cd projects/05-store && make up && make test
 
 # 1.1 Transformer、Tokenizer、采样
 cd projects/06-llm-basics && make test   # make tokens 用 tiktoken 对比真实分词器
+
+# 1.2 主流模型 API
+cd projects/07-llm-api && make test     # go run ./cmd/chat -p anthropic -m <模型> "..." 用真实 Key 试
 ```
 
 推荐学习方式：先读课件 → 关掉参考答案自己写练习 → 跑测试 → 再对照参考实现。

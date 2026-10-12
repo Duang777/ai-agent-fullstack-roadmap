@@ -1,0 +1,1721 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>1.2 主流模型 API：OpenAI Responses、Anthropic Messages、Gemini Interactions · AI Agent 全栈</title>
+<meta name="description" content="1.2 主流模型 API：OpenAI Responses、Anthropic Messages、Gemini Interactions。duang777 的 AI Agent 全栈公开学习课件。" />
+<style>
+:root{
+  --bg:#0a0a0a;--surface:#111;--text:#ededed;--text-2:#a1a1a1;--text-3:rgb(255 255 255/.4);
+  --line:rgb(255 255 255/.1);--line-2:rgb(255 255 255/.06);
+  --sans:Inter,-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei","Helvetica Neue",sans-serif;
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+}
+*{box-sizing:border-box}
+html{color-scheme:dark}
+.toc{scrollbar-width:none}.toc::-webkit-scrollbar{display:none}
+html{scrollbar-width:thin;scrollbar-color:#333 transparent}
+::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#2a2a2a;border-radius:8px}::-webkit-scrollbar-thumb:hover{background:#3a3a3a}
+html{scroll-behavior:smooth;scroll-padding-top:80px}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;line-height:1.8;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+.nav{position:sticky;top:0;z-index:10;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;border-bottom:1px solid var(--line);background:rgb(10 10 10/.8);backdrop-filter:blur(12px)}
+.nav__brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-size:14px;font-weight:500}
+.nav__dot{width:10px;height:10px;border-radius:3px;background:var(--text)}
+.nav__links{display:flex;gap:20px;font-size:14px;color:var(--text-2)}
+.nav__links a{text-decoration:none}.nav__links a:hover{color:var(--text)}
+.wrap{max-width:1200px;margin:0 auto;padding:0 24px;display:grid;grid-template-columns:220px minmax(0,1fr);gap:56px}
+.toc{position:sticky;top:80px;align-self:start;max-height:calc(100vh - 100px);overflow:auto;padding:40px 0 40px;font-size:13px;line-height:1.6}
+.toc__label{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--text-3);text-transform:uppercase;margin-bottom:12px}
+.toc ul{list-style:none;margin:0;padding:0}
+.toc li{margin:0}
+.toc a{display:block;padding:4px 0 4px 12px;border-left:1px solid var(--line);color:var(--text-2);text-decoration:none}
+.toc a:hover,.toc a.on{color:var(--text);border-left-color:var(--text)}
+.toc ul ul a{padding-left:24px;font-size:12.5px;color:var(--text-3)}
+.toc ul ul a:hover,.toc ul ul a.on{color:var(--text)}
+article{min-width:0;max-width:760px;padding:48px 0 96px}
+.meta{font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--text-3);margin-bottom:16px}
+article h1.title{font-size:40px;line-height:1.2;letter-spacing:-.02em;font-weight:600;margin:0 0 24px}
+article h1{font-size:28px;line-height:1.3;letter-spacing:-.01em;font-weight:600;margin:72px 0 20px;padding-top:32px;border-top:1px solid var(--line)}
+article h2{font-size:22px;line-height:1.4;font-weight:600;margin:48px 0 16px}
+article h3{font-size:18px;font-weight:600;margin:36px 0 12px}
+article h4{font-size:16px;font-weight:600;margin:28px 0 8px}
+article p{margin:0 0 18px;color:#d4d4d4}
+article strong{color:var(--text);font-weight:600}
+article ul,article ol{padding-left:22px;margin:0 0 18px;color:#d4d4d4}
+article li{margin:4px 0}
+article a{text-decoration:underline;text-decoration-color:var(--text-3);text-underline-offset:3px}
+article a:hover{text-decoration-color:var(--text)}
+article hr{border:0;border-top:1px solid var(--line);margin:48px 0}
+article blockquote{margin:0 0 20px;padding:12px 18px;border-left:2px solid var(--text-2);background:var(--surface);border-radius:0 8px 8px 0;color:var(--text-2)}
+article blockquote p{margin:6px 0;color:var(--text-2)}
+article code{font-family:var(--mono);font-size:.88em;background:#1a1a1a;border:1px solid var(--line-2);border-radius:5px;padding:1px 6px}
+article pre{position:relative;margin:0 0 22px;padding:16px 18px;background:#0f0f0f;border:1px solid var(--line);border-radius:10px;overflow:auto;font-size:13.5px;line-height:1.65}
+article pre code{background:none;border:0;padding:0;font-size:inherit}
+.code{position:relative}
+.code__lang{position:absolute;top:8px;right:46px;font-family:var(--mono);font-size:11px;color:var(--text-3);z-index:1}
+.code__copy{position:absolute;top:6px;right:8px;z-index:1;font:11px var(--mono);color:var(--text-2);background:#1a1a1a;border:1px solid var(--line);border-radius:6px;padding:2px 7px;cursor:pointer}
+.code__copy:hover{color:var(--text)}
+.tbl{overflow-x:auto;margin:0 0 22px;border:1px solid var(--line);border-radius:10px}
+article table{border-collapse:collapse;width:100%;font-size:14px}
+article th,article td{padding:10px 14px;border-bottom:1px solid var(--line-2);text-align:left;vertical-align:top}
+article th{font-weight:600;background:var(--surface);color:var(--text)}
+article tr:last-child td{border-bottom:0}
+article details{margin:0 0 18px;border:1px solid var(--line);border-radius:10px;padding:10px 16px;background:var(--surface)}
+article summary{cursor:pointer;font-weight:500}
+.pager{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:72px;padding-top:32px;border-top:1px solid var(--line)}
+.pager a{display:block;padding:16px 18px;border:1px solid var(--line);border-radius:10px;text-decoration:none}
+.pager a:hover{border-color:var(--text-2)}
+.pager span{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--text-3)}
+.pager .next{text-align:right;grid-column:2}
+.foot{margin-top:40px;font-size:13px;color:var(--text-3)}
+/* 代码高亮：黑白灰为主 */
+.hl .c,.hl .c1,.hl .cm,.hl .ch,.hl .cs,.hl .cp,.hl .cpf{color:#6b6b6b;font-style:italic}
+.hl .k,.hl .kd,.hl .kn,.hl .kr,.hl .kt,.hl .kc,.hl .kp,.hl .ow{color:#ffffff;font-weight:600}
+.hl .s,.hl .s1,.hl .s2,.hl .sb,.hl .sc,.hl .sd,.hl .se,.hl .sh,.hl .si,.hl .sx,.hl .sr,.hl .ss,.hl .dl,.hl .sa{color:#86efac}
+.hl .m,.hl .mi,.hl .mf,.hl .mh,.hl .mo,.hl .il{color:#fcd34d}
+.hl .nf,.hl .fm,.hl .nc,.hl .nn{color:#e5e5e5;font-weight:500}
+.hl .nb,.hl .bp,.hl .nd,.hl .na,.hl .nt{color:#bdbdbd}
+.hl .o,.hl .p{color:#9a9a9a}
+.hl .gd{color:#fca5a5}.hl .gi{color:#86efac}
+.hl{color:#d4d4d4}
+@media (max-width:960px){.wrap{grid-template-columns:1fr;gap:0}.toc{display:none}article h1.title{font-size:30px}.nav__links a.hide-sm{display:none}}
+</style>
+</head>
+<body>
+<header class="nav">
+  <a class="nav__brand" href="../index.html"><span class="nav__dot"></span>AI Agent 全栈</a>
+  <nav class="nav__links">
+    <a href="../index.html#progress">课件</a>
+    <a class="hide-sm" href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/ROADMAP.md">路线图</a>
+    <a href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/notes/01-llm/02-mainstream-apis.md">在 GitHub 上查看</a>
+  </nav>
+</header>
+<div class="wrap">
+  <aside class="toc"><div class="toc__label">本课目录</div><ul>
+<li><a href="#读前说明">读前说明</a></li>
+<li><a href="#第一部分全景">第一部分：全景</a><ul>
+<li><a href="#1-三家一张表">1. 三家一张表</a></li>
+<li><a href="#2-2026-年的大方向从补全接口到agent-接口">2. 2026 年的大方向：从“补全接口”到“Agent 接口”</a></li>
+</ul>
+</li>
+<li><a href="#第二部分openai-responses">第二部分：OpenAI Responses</a><ul>
+<li><a href="#3-请求一切都是-item">3. 请求：一切都是 item</a></li>
+<li><a href="#4-响应output-是一个-item-数组">4. 响应：output 是一个 item 数组</a></li>
+<li><a href="#5-一轮完整的工具往返">5. 一轮完整的工具往返</a></li>
+<li><a href="#6-流式语义事件">6. 流式：语义事件</a></li>
+</ul>
+</li>
+<li><a href="#第三部分anthropic-messages">第三部分：Anthropic Messages</a><ul>
+<li><a href="#7-请求两个人轮流说话">7. 请求：两个人轮流说话</a></li>
+<li><a href="#8-内容块与工具往返">8. 内容块与工具往返</a></li>
+<li><a href="#9-stop_reason七种结局">9. stop_reason：七种结局</a></li>
+<li><a href="#10-流式自己拼块">10. 流式：自己拼块</a></li>
+<li><a href="#11-三家的用量口径不一样">11. 三家的用量口径不一样</a></li>
+</ul>
+</li>
+<li><a href="#第四部分gemini-interactions">第四部分：Gemini Interactions</a><ul>
+<li><a href="#12-请求与-steps-时间线">12. 请求与 steps 时间线</a></li>
+<li><a href="#13-流式step-事件以及文档自相矛盾时怎么办">13. 流式：step 事件，以及文档自相矛盾时怎么办</a></li>
+<li><a href="#14-老接口-generatecontent-对照">14. 老接口 generateContent 对照</a></li>
+</ul>
+</li>
+<li><a href="#第五部分统一客户端">第五部分：统一客户端</a><ul>
+<li><a href="#15-统一什么不统一什么">15. 统一什么，不统一什么</a></li>
+<li><a href="#16-类型设计">16. 类型设计</a></li>
+<li><a href="#17-provider-接口go-的-iterseq2-对照-ts-的-asyncgenerator">17. Provider 接口：Go 的 iter.Seq2 对照 TS 的 AsyncGenerator</a></li>
+<li><a href="#18-三层检查写一次给三家用">18. 三层检查，写一次给三家用</a></li>
+<li><a href="#19-拼装流式结果必须和非流式一模一样">19. 拼装：流式结果必须和非流式一模一样</a></li>
+<li><a href="#20-错误与重试">20. 错误与重试</a></li>
+<li><a href="#21-对三家完全相同的-agent-循环">21. 对三家完全相同的 Agent 循环</a></li>
+<li><a href="#22-换模型历史怎么迁移">22. 换模型：历史怎么迁移</a></li>
+<li><a href="#23-官方-sdkopenai-兼容层还要自己写吗">23. 官方 SDK、OpenAI 兼容层，还要自己写吗？</a></li>
+<li><a href="#本课小结">本课小结</a></li>
+<li><a href="#练习今天做完">练习（今天做完）</a></li>
+<li><a href="#自测题">自测题</a></li>
+</ul>
+</li>
+<li><a href="#参考答案与详解">参考答案与详解</a><ul>
+<li><a href="#自测题答案">自测题答案</a></li>
+<li><a href="#练习参考答案">练习参考答案</a></li>
+<li><a href="#完成标准">完成标准</a></li>
+</ul>
+</li>
+</ul>
+</aside>
+  <article>
+    <div class="meta">模块 01 · LLM 原理与使用 · 第 1.2 课</div>
+    <h1 class="title">1.2 主流模型 API：OpenAI Responses、Anthropic Messages、Gemini Interactions</h1>
+    <blockquote>
+<p>第 1 部分 · 第 2 课 ｜ 预计 5–6 小时 ｜ 前置：0.4 流式协议、1.1 Transformer 与采样</p>
+<p>配套练习：<code>projects/07-llm-api/</code>（纯 Go 标准库，20 个测试）。手写一个能同时对接三家的统一客户端：请求编码、响应解码、三套流式协议的状态机、错误分类、一个对三家完全相同的工具调用循环，以及“换模型时历史怎么迁移”。</p>
+</blockquote>
+<h2 id="读前说明">读前说明</h2>
+<p>上一课讲的是模型内部，这一课讲你每天真正打交道的东西：HTTP 请求长什么样、回来的 JSON 怎么读、流式事件怎么拼。下面这些问题，不把三家的协议摸透是答不上来的：</p>
+<ul>
+<li>同样是“调用工具”，为什么 OpenAI 的参数是字符串，Anthropic 和 Gemini 是对象？</li>
+<li>带推理的模型调完工具，下一轮为什么必须把一段看不懂的加密字符串原样发回去？不发会怎样？</li>
+<li>Anthropic 账单上的 <code>input_tokens</code> 为什么比你算的少一大截？</li>
+<li>流式输出时工具参数是一段段来的，什么时候才能 <code>JSON.parse</code>？</li>
+<li>网关返回 529、429、400，哪些该重试？流式已经推了一半给用户，还能重试吗？</li>
+<li>想从 Claude 换到 Gemini，已有的对话历史能直接发过去吗？</li>
+</ul>
+<p>这一课分五部分：<strong>全景 → OpenAI Responses → Anthropic Messages → Gemini Interactions → 统一客户端</strong>。前四部分讲协议，第五部分把它们收进一个 Go 接口，练习里每个结论都有测试。</p>
+<p>本课结束时你能：</p>
+<ol>
+<li>不看文档写出三家“带工具的一轮完整往返”的请求和响应 JSON，说清每个字段的作用；</li>
+<li>读懂三家的流式事件序列，知道哪个事件是终止信号、工具参数在哪一步才能解析；</li>
+<li>正确处理推理块：OpenAI 的 <code>encrypted_content</code>、Anthropic 的 <code>signature</code>、Gemini 的 thought signature；</li>
+<li>把三家的停止原因、用量、错误统一成一套口径，并知道每一处换算的依据；</li>
+<li>设计一个“同家无损、跨家降级”的统一客户端，写出对三家完全相同的 Agent 工具循环；</li>
+<li>判断什么错误能重试、流式输出在什么时机还能重试。</li>
+</ol>
+<p><strong>关于时效</strong>：API 变得很快。本课内容核对的是 2026 年 10 月三家的官方文档，示例里的模型名（<code>gpt-6-astra</code>、<code>claude-opus-5-5</code>、<code>gemini-3.8-flash</code>）也取自当时的文档。字段名以官方 API 参考为准；遇到文档自相矛盾的地方，本课会明确指出并在代码里做容错。</p>
+<hr />
+<h1 id="第一部分全景">第一部分：全景</h1>
+<h2 id="1-三家一张表">1. 三家一张表</h2>
+<p>先把最重要的差异放在一张表里，后面每一节都是在展开这张表。</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th></th>
+<th>OpenAI Responses</th>
+<th>Anthropic Messages</th>
+<th>Gemini Interactions</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>端点</td>
+<td><code>POST /v1/responses</code></td>
+<td><code>POST /v1/messages</code></td>
+<td><code>POST /v1beta/interactions</code></td>
+</tr>
+<tr>
+<td>鉴权头</td>
+<td><code>Authorization: Bearer KEY</code></td>
+<td><code>x-api-key: KEY</code> + <code>anthropic-version: 2023-06-01</code></td>
+<td><code>x-goog-api-key: KEY</code></td>
+</tr>
+<tr>
+<td>系统提示</td>
+<td>顶层 <code>instructions</code></td>
+<td>顶层 <code>system</code></td>
+<td>顶层 <code>system_instruction</code></td>
+</tr>
+<tr>
+<td>对话结构</td>
+<td>扁平的 <code>input</code> 数组，元素叫 item</td>
+<td><code>messages</code> 数组，user / assistant 交替，内容是 block 数组</td>
+<td><code>input</code> 是 step 数组（时间线）</td>
+</tr>
+<tr>
+<td>工具定义</td>
+<td><code>{"type":"function","name","parameters"}</code></td>
+<td><code>{"name","input_schema"}</code></td>
+<td><code>{"type":"function","name","parameters"}</code></td>
+</tr>
+<tr>
+<td>工具调用</td>
+<td>独立 item <code>function_call</code>，<code>arguments</code> 是 <strong>JSON 字符串</strong></td>
+<td>assistant 消息里的 <code>tool_use</code> block，<code>input</code> 是<strong>对象</strong></td>
+<td>独立 step <code>function_call</code>，<code>arguments</code> 是<strong>对象</strong></td>
+</tr>
+<tr>
+<td>工具结果</td>
+<td>独立 item <code>function_call_output</code>，按 <code>call_id</code> 配对</td>
+<td>下一条 user 消息里的 <code>tool_result</code> block，按 <code>tool_use_id</code> 配对</td>
+<td>独立 step <code>function_result</code>，按 <code>call_id</code> 配对，还要带 <code>name</code></td>
+</tr>
+<tr>
+<td>输出上限</td>
+<td><code>max_output_tokens</code>（可选）</td>
+<td><code>max_tokens</code>（<strong>必填</strong>）</td>
+<td><code>generation_config.max_output_tokens</code>（可选）</td>
+</tr>
+<tr>
+<td>“要你执行工具”</td>
+<td>输出里有 <code>function_call</code></td>
+<td><code>stop_reason: "tool_use"</code></td>
+<td><code>status: "requires_action"</code></td>
+</tr>
+<tr>
+<td>被截断</td>
+<td><code>status: "incomplete"</code> + <code>reason: "max_output_tokens"</code></td>
+<td><code>stop_reason: "max_tokens"</code></td>
+<td><code>status: "incomplete"</code></td>
+</tr>
+<tr>
+<td>流式开关</td>
+<td><code>"stream": true</code></td>
+<td><code>"stream": true</code></td>
+<td><code>"stream": true</code></td>
+</tr>
+<tr>
+<td>流式终止事件</td>
+<td><code>response.completed</code> / <code>.incomplete</code> / <code>.failed</code></td>
+<td><code>message_stop</code></td>
+<td><code>interaction.completed</code> / <code>requires_action</code></td>
+</tr>
+<tr>
+<td>推理块回传</td>
+<td>reasoning item（含 <code>encrypted_content</code>）</td>
+<td>thinking block（含 <code>signature</code>）</td>
+<td>thought step（含 <code>signature</code>）</td>
+</tr>
+<tr>
+<td>服务端状态</td>
+<td><code>store</code> + <code>previous_response_id</code></td>
+<td>无（全量发送）</td>
+<td><code>store</code>（默认 true）+ <code>previous_interaction_id</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>一句话记忆：<strong>OpenAI 和 Gemini 是“一条时间线上的条目”，Anthropic 是“两个人轮流说话，每句话由多个块组成”。</strong> 工具结果在 Anthropic 里是“用户说的话”，在另外两家是独立条目。</p>
+<h2 id="2-2026-年的大方向从补全接口到agent-接口">2. 2026 年的大方向：从“补全接口”到“Agent 接口”</h2>
+<p>三家这两年都在做同一件事：把“给一段对话、补全下一句”的老接口，换成为 Agent 设计的新接口。</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>厂商</th>
+<th>老接口</th>
+<th>新接口</th>
+<th>现状</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OpenAI</td>
+<td>Chat Completions（<code>/v1/chat/completions</code>）</td>
+<td>Responses（<code>/v1/responses</code>）</td>
+<td>Chat Completions 仍可用，但 GPT-6 Astra 和 GPT-6.1 Sol 的工具调用<strong>只支持 Responses</strong>；官方说推理模型在 Responses 上效果更好</td>
+</tr>
+<tr>
+<td>Google</td>
+<td><code>generateContent</code></td>
+<td>Interactions</td>
+<td>2026 年 6 月 GA，官方推荐所有新项目使用，<strong>新模型和新功能只上 Interactions</strong>；<code>generateContent</code> 被称为 legacy 但继续支持</td>
+</tr>
+<tr>
+<td>Anthropic</td>
+<td>—</td>
+<td>Messages</td>
+<td>接口形状没变，持续加能力：服务端工具、<code>pause_turn</code>、拒答后的模型回退</td>
+</tr>
+</tbody>
+</table></div>
+<p>新接口共同的变化：</p>
+<ol>
+<li><strong>输出是“条目 / 步骤”的序列，不再是一段文本</strong>。推理、工具调用、内置搜索、最终回答都是平级的条目，前端可以逐个渲染；</li>
+<li><strong>服务端可以替你保存状态</strong>。OpenAI 用 <code>previous_response_id</code>，Gemini 用 <code>previous_interaction_id</code>，下一轮只发新增内容；</li>
+<li><strong>流式事件是“语义事件”</strong>，带类型，不再是一堆 <code>delta</code> 让你猜。</li>
+</ol>
+<p><strong>本课的选择：无状态模式</strong>（OpenAI <code>store: false</code>，Gemini <code>store: false</code>，Anthropic 本来就无状态），每次把完整历史发过去。原因：</p>
+<ul>
+<li><strong>可移植</strong>：历史在你手里，随时能换模型、换厂商（第 22 节）；</li>
+<li><strong>可审计、可回放</strong>：每一次请求的完整输入都在你的日志里，第 06 模块做 Eval、第 07 模块做 Tracing 都依赖这一点；</li>
+<li><strong>数据合规</strong>：Gemini 的 interaction 默认存储，付费层保留 55 天、免费层 1 天；不想让对话留在厂商那里，就得显式关掉；</li>
+<li>代价是每轮都发全量历史，输入 token 变多。这笔钱靠 <strong>Prompt Caching</strong> 省回来（1.5 课），前提是你每轮发的前缀完全一致。</li>
+</ul>
+<p>服务端状态什么时候值得用？对话很长、你不需要换模型、又想少传数据时。它和无状态模式不是二选一，第 03 模块讲长任务时会再权衡。</p>
+<hr />
+<h1 id="第二部分openai-responses">第二部分：OpenAI Responses</h1>
+<h2 id="3-请求一切都是-item">3. 请求：一切都是 item</h2>
+<p><strong>要解决的问题</strong>：用户问天气，模型可以调用 <code>get_weather</code>。</p>
+<div class="hl"><pre><span></span><code>curl<span class="w"> </span>https://api.openai.com/v1/responses<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Authorization: Bearer </span><span class="nv">$OPENAI_API_KEY</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Content-Type: application/json"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-d<span class="w"> </span><span class="s1">'{</span>
+<span class="s1">    "model": "gpt-6-astra",</span>
+<span class="s1">    "instructions": "你是一个简洁的助手。",</span>
+<span class="s1">    "input": [</span>
+<span class="s1">      {"role": "user", "content": "北京天气怎么样？"}</span>
+<span class="s1">    ],</span>
+<span class="s1">    "tools": [{</span>
+<span class="s1">      "type": "function",</span>
+<span class="s1">      "name": "get_weather",</span>
+<span class="s1">      "description": "查询城市天气",</span>
+<span class="s1">      "parameters": {</span>
+<span class="s1">        "type": "object",</span>
+<span class="s1">        "properties": {"city": {"type": "string"}},</span>
+<span class="s1">        "required": ["city"],</span>
+<span class="s1">        "additionalProperties": false</span>
+<span class="s1">      },</span>
+<span class="s1">      "strict": true</span>
+<span class="s1">    }],</span>
+<span class="s1">    "max_output_tokens": 2048,</span>
+<span class="s1">    "store": false</span>
+<span class="s1">  }'</span>
+</code></pre></div>
+
+<p><strong>逐行解读</strong></p>
+<ul>
+<li><strong><code>instructions</code></strong>：系统提示放在顶层，不是 <code>input</code> 里的一条 <code>system</code> 消息。用 <code>previous_response_id</code> 续聊时，<code>instructions</code> 不会被继承，每次都要重新传。</li>
+<li><strong><code>input</code></strong>：可以是一个字符串，也可以是 item 数组。最常见的 item 是“消息”：<code>{"role": "user", "content": "..."}</code>，<code>content</code> 可以是字符串，也可以是 <code>[{"type":"input_text","text":"..."}]</code> 这样的内容数组（要传图片时用后者）。</li>
+<li><strong><code>tools</code></strong>：Responses 的函数定义是<strong>扁平的</strong>：<code>type</code>、<code>name</code>、<code>parameters</code> 在同一层。Chat Completions 是 <code>{"type":"function","function":{...}}</code> 多套了一层，迁移时最容易写错。</li>
+<li><strong><code>strict: true</code></strong>：让模型输出的参数严格符合 schema（1.3 课讲原理），要求 schema 里所有字段都列进 <code>required</code>、<code>additionalProperties: false</code>。</li>
+<li><strong><code>store: false</code></strong>：不在 OpenAI 那边保存这次响应。注意这个字段<strong>必须显式发 <code>false</code></strong>，在 Go 里不能给它加 <code>omitempty</code>，否则零值被省略，服务端就按默认值存储了。练习的 <code>TestOpenAIEncode</code> 专门检查这一点。</li>
+</ul>
+<h2 id="4-响应output-是一个-item-数组">4. 响应：output 是一个 item 数组</h2>
+<div class="hl"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"resp_tool_1"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"completed"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"output"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"rs_1"</span><span class="p">,</span><span class="w"> </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"reasoning"</span><span class="p">,</span>
+<span class="w">     </span><span class="nt">"summary"</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"summary_text"</span><span class="p">,</span><span class="w"> </span><span class="nt">"text"</span><span class="p">:</span><span class="w"> </span><span class="s2">"需要先查天气。"</span><span class="p">}],</span>
+<span class="w">     </span><span class="nt">"encrypted_content"</span><span class="p">:</span><span class="w"> </span><span class="s2">"gAAAA..."</span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"fc_1"</span><span class="p">,</span><span class="w"> </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"function_call"</span><span class="p">,</span><span class="w"> </span><span class="nt">"status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"completed"</span><span class="p">,</span>
+<span class="w">     </span><span class="nt">"call_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"call_abc"</span><span class="p">,</span><span class="w"> </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"get_weather"</span><span class="p">,</span>
+<span class="w">     </span><span class="nt">"arguments"</span><span class="p">:</span><span class="w"> </span><span class="s2">"{\"city\":\"北京\"}"</span><span class="p">}</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">"usage"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"input_tokens"</span><span class="p">:</span><span class="w"> </span><span class="mi">120</span><span class="p">,</span><span class="w"> </span><span class="nt">"input_tokens_details"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"cached_tokens"</span><span class="p">:</span><span class="w"> </span><span class="mi">64</span><span class="p">},</span>
+<span class="w">    </span><span class="nt">"output_tokens"</span><span class="p">:</span><span class="w"> </span><span class="mi">90</span><span class="p">,</span><span class="w"> </span><span class="nt">"output_tokens_details"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"reasoning_tokens"</span><span class="p">:</span><span class="w"> </span><span class="mi">70</span><span class="p">},</span>
+<span class="w">    </span><span class="nt">"total_tokens"</span><span class="p">:</span><span class="w"> </span><span class="mi">210</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>逐行解读</strong></p>
+<ul>
+<li><strong><code>output</code> 里没有“回答”这个字段</strong>。文本回答是一个 <code>type: "message"</code> 的 item，里面的 <code>content</code> 是 <code>output_text</code> 数组。SDK 提供的 <code>response.output_text</code> 只是把这些拼起来的便利属性，HTTP 响应里没有它。</li>
+<li><strong><code>reasoning</code> item</strong>：推理过程的容器。原始推理 token 不会给你，只有可选的 <code>summary</code>（要在请求里开 <code>reasoning.summary</code>）和一段 <strong><code>encrypted_content</code></strong>。无状态模式（<code>store: false</code>）下，推理 item 默认就带 <code>encrypted_content</code>；以前需要在 <code>include</code> 里写 <code>reasoning.encrypted_content</code>，现在这个写法仍然兼容，但不再必需。</li>
+<li><strong><code>function_call</code> 的两个 id</strong>：<code>id</code>（<code>fc_...</code>）是这个 item 自己的 id；<strong><code>call_id</code></strong>（<code>call_...</code>）是配对用的，回传结果时用它。拿错 id 是常见 bug。</li>
+<li><strong><code>arguments</code> 是字符串</strong>。要 <code>JSON.parse</code> 一次才能用；模型理论上可能生成不合法的 JSON（不开 strict 时），所以解析失败要当错误处理。练习里的 <code>argsObject</code> 就是干这个的，<code>TestInvalidToolArguments</code> 会喂一段截断的参数。</li>
+<li><strong><code>status</code></strong>：<code>completed</code>、<code>incomplete</code>、<code>failed</code>，还有后台模式下的 <code>queued</code>、<code>in_progress</code>。<strong>没有“tool_use”这种状态</strong>，判断“要不要执行工具”看 <code>output</code> 里有没有 <code>function_call</code>。</li>
+<li><strong><code>usage</code></strong>：<code>input_tokens</code> <strong>已经包含</strong>命中缓存的 <code>cached_tokens</code>；<code>output_tokens</code> <strong>已经包含</strong> <code>reasoning_tokens</code>。上面这个例子：90 个输出 token 里 70 个是看不见的推理。</li>
+</ul>
+<p><strong>被截断时</strong>：<code>status</code> 是 <code>incomplete</code>，<code>incomplete_details.reason</code> 是 <code>max_output_tokens</code>。推理模型有一个坑：上限可能在推理阶段就被耗光，一个可见字都没输出，但输入和推理 token 照样计费。官方建议刚开始至少给推理和输出留 25000 个 token。练习里 <code>TestOpenAITextAndIncomplete</code> 用的就是这种“300 个输出 token 全是推理”的响应。</p>
+<h2 id="5-一轮完整的工具往返">5. 一轮完整的工具往返</h2>
+<p>拿到 <code>function_call</code> 后，执行工具，把结果作为 <code>function_call_output</code> 追加进 <code>input</code>，再请求一次：</p>
+<div class="hl"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">"model"</span><span class="p">:</span><span class="w"> </span><span class="s2">"gpt-6-astra"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"store"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"input"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span><span class="nt">"role"</span><span class="p">:</span><span class="w"> </span><span class="s2">"user"</span><span class="p">,</span><span class="w"> </span><span class="nt">"content"</span><span class="p">:</span><span class="w"> </span><span class="s2">"北京天气怎么样？"</span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"rs_1"</span><span class="p">,</span><span class="w"> </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"reasoning"</span><span class="p">,</span><span class="w"> </span><span class="nt">"summary"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="err">...</span><span class="p">],</span><span class="w"> </span><span class="nt">"encrypted_content"</span><span class="p">:</span><span class="w"> </span><span class="s2">"gAAAA..."</span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"fc_1"</span><span class="p">,</span><span class="w"> </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"function_call"</span><span class="p">,</span><span class="w"> </span><span class="nt">"call_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"call_abc"</span><span class="p">,</span>
+<span class="w">     </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"get_weather"</span><span class="p">,</span><span class="w"> </span><span class="nt">"arguments"</span><span class="p">:</span><span class="w"> </span><span class="s2">"{\"city\":\"北京\"}"</span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"function_call_output"</span><span class="p">,</span><span class="w"> </span><span class="nt">"call_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"call_abc"</span><span class="p">,</span><span class="w"> </span><span class="nt">"output"</span><span class="p">:</span><span class="w"> </span><span class="s2">"晴，25°C"</span><span class="p">}</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">"tools"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="err">...同上...</span><span class="w"> </span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>要点</strong></p>
+<ol>
+<li><strong>上一轮的 output item 原样放回 <code>input</code></strong>，包括 reasoning item。官方原话是“强烈建议”把最后一次函数调用附带的推理 item 一起传回；模型连续调用多个函数时，从最后一条用户消息之后的所有 reasoning、function_call、function_call_output 都要原样传回。服务端会自动忽略无关的推理 item，所以最简单的做法就是<strong>全部原样回传</strong>。</li>
+<li><strong>不传会怎样</strong>：请求不会报错，但模型丢了推理上下文，要重新思考，效果变差、推理 token 变多。这种问题不报错、只“变笨变贵”，最难排查。</li>
+<li><strong><code>output</code> 字段是字符串</strong>。工具返回结构化数据就自己序列化成 JSON 字符串。Responses 的 <code>function_call_output</code> <strong>没有 <code>is_error</code> 字段</strong>，工具出错只能写在文本里（练习里加了 <code>ERROR:</code> 前缀）。</li>
+<li><strong>每个 <code>function_call</code> 都必须有对应的 output</strong>。模型一轮可能并行调用多个函数，少回一个就会报错。想强制每轮最多一个调用，设 <code>parallel_tool_calls: false</code>。</li>
+<li><strong>助手消息的 <code>phase</code></strong>：GPT-5.4 之后的模型在长任务中会输出 <code>phase: "commentary"</code>（调用工具前的说明）和 <code>phase: "final_answer"</code>（最终回答）。手动管理历史时要<strong>原样保留</strong> <code>phase</code>，丢了它，模型可能把中间说明当成最终回答而提前结束。这又是一个“只能原样回传”的字段。</li>
+</ol>
+<p>这几条合起来就是统一客户端的第一条设计原则：<strong>发回同一家时，原样回放它给你的原始 JSON，不要“规范化”后再重建</strong>。你重建时漏掉的任何字段（<code>encrypted_content</code>、<code>phase</code>、将来新增的字段）都会让模型悄悄变差。</p>
+<h2 id="6-流式语义事件">6. 流式：语义事件</h2>
+<p><code>"stream": true</code> 后，响应变成 SSE，每个事件的 <code>data</code> 里都有 <code>type</code>：</p>
+<div class="hl"><pre><span></span><code>event: response.created
+data: {"type":"response.created","response":{"id":"resp_s1","status":"in_progress",...}}
+
+event: response.output_item.added
+data: {"type":"response.output_item.added","output_index":1,
+       "item":{"type":"function_call","call_id":"call_s1","name":"get_weather","arguments":""}}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","output_index":1,"delta":"{\"ci"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","output_index":1,"delta":"ty\":\"上海\"}"}
+
+event: response.function_call_arguments.done
+data: {"type":"response.function_call_arguments.done","output_index":1,"arguments":"{\"city\":\"上海\"}"}
+
+event: response.output_item.done
+data: {"type":"response.output_item.done","output_index":1,"item":{...完整的 function_call...}}
+
+event: response.completed
+data: {"type":"response.completed","response":{...完整的 response 对象，和非流式一样...}}
+</code></pre></div>
+
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>事件</th>
+<th>含义</th>
+<th>统一客户端怎么用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>response.created</code> / <code>in_progress</code></td>
+<td>开始了</td>
+<td>忽略</td>
+</tr>
+<tr>
+<td><code>response.output_item.added</code></td>
+<td>新 item 开始；如果是 <code>function_call</code>，此时已知 <code>name</code> 和 <code>call_id</code></td>
+<td>发 <code>tool_start</code>，前端可以立刻显示“正在调用 get_weather…”</td>
+</tr>
+<tr>
+<td><code>response.output_text.delta</code></td>
+<td>文本增量</td>
+<td>发 <code>text</code></td>
+</tr>
+<tr>
+<td><code>response.function_call_arguments.delta</code></td>
+<td>参数 JSON 的一段</td>
+<td>发 <code>tool_args</code>，<strong>不要解析</strong></td>
+</tr>
+<tr>
+<td><code>response.function_call_arguments.done</code> / <code>output_item.done</code></td>
+<td>这个 item 完整了</td>
+<td>忽略（终止事件里有完整数据）</td>
+</tr>
+<tr>
+<td><code>response.completed</code> / <code>response.incomplete</code></td>
+<td><strong>终止</strong>，携带完整 response</td>
+<td>直接复用非流式的解码函数</td>
+</tr>
+<tr>
+<td><code>response.failed</code> / <code>error</code></td>
+<td>失败</td>
+<td>转成 <code>APIError</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>一个省事的事实</strong>：OpenAI 的终止事件里带着完整的 response 对象，最终结果不用自己拼，直接走非流式的解码路径。另外两家没这么好，要自己拼，这是第 19 节的内容。</p>
+<p><strong>参数增量什么时候能解析？</strong> 只有在 item 完成之后。<code>{"ci</code> 和 <code>ty":"上海"}</code> 单独都不是合法 JSON，中文字符也可能被劈在两段之间（1.1 课第 5 节）。想在参数还没生成完时就展示，需要“部分 JSON 解析器”，那是前端体验优化，不是正确性要求。</p>
+<hr />
+<h1 id="第三部分anthropic-messages">第三部分：Anthropic Messages</h1>
+<h2 id="7-请求两个人轮流说话">7. 请求：两个人轮流说话</h2>
+<div class="hl"><pre><span></span><code>curl<span class="w"> </span>https://api.anthropic.com/v1/messages<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"x-api-key: </span><span class="nv">$ANTHROPIC_API_KEY</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"anthropic-version: 2023-06-01"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Content-Type: application/json"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-d<span class="w"> </span><span class="s1">'{</span>
+<span class="s1">    "model": "claude-opus-5-5",</span>
+<span class="s1">    "max_tokens": 4096,</span>
+<span class="s1">    "system": "你是一个简洁的助手。",</span>
+<span class="s1">    "messages": [</span>
+<span class="s1">      {"role": "user", "content": "北京天气怎么样？"}</span>
+<span class="s1">    ],</span>
+<span class="s1">    "tools": [{</span>
+<span class="s1">      "name": "get_weather",</span>
+<span class="s1">      "description": "查询城市天气",</span>
+<span class="s1">      "input_schema": {</span>
+<span class="s1">        "type": "object",</span>
+<span class="s1">        "properties": {"city": {"type": "string"}},</span>
+<span class="s1">        "required": ["city"]</span>
+<span class="s1">      }</span>
+<span class="s1">    }]</span>
+<span class="s1">  }'</span>
+</code></pre></div>
+
+<p><strong>逐行解读</strong></p>
+<ul>
+<li><strong>两个必需的头</strong>：<code>x-api-key</code>（不是 <code>Authorization</code>）和 <code>anthropic-version</code>。版本号这些年一直是 <code>2023-06-01</code>，新功能通过 <code>anthropic-beta</code> 头单独开启。</li>
+<li><strong><code>max_tokens</code> 必填</strong>。另外两家可以不填，统一客户端在用户没给时要补一个默认值（练习里是 4096）。</li>
+<li><strong><code>system</code> 在顶层</strong>。也可以是 block 数组，用来给系统提示打缓存断点（1.5 课）。</li>
+<li><strong><code>messages</code> 只有 <code>user</code> 和 <code>assistant</code> 两种角色</strong>。没有 <code>tool</code> 角色、没有 <code>system</code> 角色。</li>
+<li><strong>工具定义叫 <code>input_schema</code></strong>，不叫 <code>parameters</code>。</li>
+</ul>
+<h2 id="8-内容块与工具往返">8. 内容块与工具往返</h2>
+<p>响应：</p>
+<div class="hl"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"msg_a1"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"message"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"role"</span><span class="p">:</span><span class="w"> </span><span class="s2">"assistant"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"content"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"thinking"</span><span class="p">,</span><span class="w"> </span><span class="nt">"thinking"</span><span class="p">:</span><span class="w"> </span><span class="s2">"用户问天气，需要调用工具。"</span><span class="p">,</span><span class="w"> </span><span class="nt">"signature"</span><span class="p">:</span><span class="w"> </span><span class="s2">"EqQB..."</span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"text"</span><span class="p">,</span><span class="w"> </span><span class="nt">"text"</span><span class="p">:</span><span class="w"> </span><span class="s2">"我查一下。"</span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"tool_use"</span><span class="p">,</span><span class="w"> </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"toolu_1"</span><span class="p">,</span><span class="w"> </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"get_weather"</span><span class="p">,</span><span class="w"> </span><span class="nt">"input"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"city"</span><span class="p">:</span><span class="w"> </span><span class="s2">"北京"</span><span class="p">}}</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">"stop_reason"</span><span class="p">:</span><span class="w"> </span><span class="s2">"tool_use"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"usage"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"input_tokens"</span><span class="p">:</span><span class="w"> </span><span class="mi">30</span><span class="p">,</span><span class="w"> </span><span class="nt">"cache_creation_input_tokens"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">"cache_read_input_tokens"</span><span class="p">:</span><span class="w"> </span><span class="mi">1000</span><span class="p">,</span><span class="w"> </span><span class="nt">"output_tokens"</span><span class="p">:</span><span class="w"> </span><span class="mi">60</span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>下一轮请求：</p>
+<div class="hl"><pre><span></span><code><span class="nt">"messages"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">  </span><span class="p">{</span><span class="nt">"role"</span><span class="p">:</span><span class="w"> </span><span class="s2">"user"</span><span class="p">,</span><span class="w"> </span><span class="nt">"content"</span><span class="p">:</span><span class="w"> </span><span class="s2">"北京天气怎么样？"</span><span class="p">},</span>
+<span class="w">  </span><span class="p">{</span><span class="nt">"role"</span><span class="p">:</span><span class="w"> </span><span class="s2">"assistant"</span><span class="p">,</span><span class="w"> </span><span class="nt">"content"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"thinking"</span><span class="p">,</span><span class="w"> </span><span class="nt">"thinking"</span><span class="p">:</span><span class="w"> </span><span class="s2">"用户问天气，需要调用工具。"</span><span class="p">,</span><span class="w"> </span><span class="nt">"signature"</span><span class="p">:</span><span class="w"> </span><span class="s2">"EqQB..."</span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"text"</span><span class="p">,</span><span class="w"> </span><span class="nt">"text"</span><span class="p">:</span><span class="w"> </span><span class="s2">"我查一下。"</span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"tool_use"</span><span class="p">,</span><span class="w"> </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"toolu_1"</span><span class="p">,</span><span class="w"> </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"get_weather"</span><span class="p">,</span><span class="w"> </span><span class="nt">"input"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"city"</span><span class="p">:</span><span class="w"> </span><span class="s2">"北京"</span><span class="p">}}</span>
+<span class="w">  </span><span class="p">]},</span>
+<span class="w">  </span><span class="p">{</span><span class="nt">"role"</span><span class="p">:</span><span class="w"> </span><span class="s2">"user"</span><span class="p">,</span><span class="w"> </span><span class="nt">"content"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"tool_result"</span><span class="p">,</span><span class="w"> </span><span class="nt">"tool_use_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"toolu_1"</span><span class="p">,</span><span class="w"> </span><span class="nt">"content"</span><span class="p">:</span><span class="w"> </span><span class="s2">"晴，25°C"</span><span class="p">}</span>
+<span class="w">  </span><span class="p">]}</span>
+<span class="p">]</span>
+</code></pre></div>
+
+<p><strong>要点</strong></p>
+<ol>
+<li><strong><code>input</code> 是对象</strong>，不用再解析。但流式时它是一段段字符串（第 10 节）。</li>
+<li><strong>工具结果是一条 user 消息</strong>，里面放 <code>tool_result</code> block。规则很严格：<ul>
+<li>上一轮的<strong>每个</strong> <code>tool_use</code> 都要有对应的 <code>tool_result</code>；</li>
+<li><code>tool_result</code> 必须<strong>排在这条消息的最前面</strong>，放在其他内容后面会报 400；</li>
+<li><strong>不要在 <code>tool_result</code> 后面再加文字</strong>。官方文档专门说了：这样做会让模型学到“工具结果后面用户总会再说点什么”，于是它直接结束这一轮，返回一个只有 2–3 个 token 的空回复，<code>stop_reason</code> 还是 <code>end_turn</code>。想补充信息，等这一轮结束后另发一条 user 消息。</li>
+</ul>
+</li>
+<li><strong><code>is_error: true</code></strong>：工具执行失败时标记出来，模型会据此改参数重试或换思路。这是三家里唯一一个在协议层区分“工具出错”的（Gemini 的 <code>function_result</code> 也有 <code>is_error</code>，OpenAI 没有）。</li>
+<li><strong>thinking block 必须原样回传</strong>。开启扩展思考时，带工具调用的那一轮的 <code>thinking</code> block 要和 <code>signature</code> 一起原封不动放回 assistant 消息里，签名用来验证这段思考没被篡改。改一个字、删掉它，或者把 <code>redacted_thinking</code> 的加密内容弄丢，请求都可能直接失败。</li>
+<li><strong>不能发空 text block</strong>。<code>{"type":"text","text":""}</code> 会被拒绝，统一客户端在编码时要跳过空文本（<code>TestAnthropicEncode</code> 覆盖了这一条）。</li>
+</ol>
+<h2 id="9-stop_reason七种结局">9. stop_reason：七种结局</h2>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>值</th>
+<th>含义</th>
+<th>怎么处理</th>
+<th>统一口径</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>end_turn</code></td>
+<td>正常说完</td>
+<td>用结果</td>
+<td><code>end</code></td>
+</tr>
+<tr>
+<td><code>stop_sequence</code></td>
+<td>碰到了你的停止序列</td>
+<td>看 <code>stop_sequence</code> 字段是哪个</td>
+<td><code>end</code></td>
+</tr>
+<tr>
+<td><code>max_tokens</code></td>
+<td>到了 <code>max_tokens</code></td>
+<td>结果被截断；如果最后一个块是不完整的 <code>tool_use</code>，要调大上限重发</td>
+<td><code>length</code></td>
+</tr>
+<tr>
+<td><code>model_context_window_exceeded</code></td>
+<td>输出撑满了上下文窗口</td>
+<td>当作截断</td>
+<td><code>length</code></td>
+</tr>
+<tr>
+<td><code>tool_use</code></td>
+<td>等你执行工具</td>
+<td>执行后回传 <code>tool_result</code></td>
+<td><code>tool_use</code></td>
+</tr>
+<tr>
+<td><code>pause_turn</code></td>
+<td>服务端工具（如 web search）循环到了迭代上限（默认 10 次）</td>
+<td><strong>把这次的 assistant 内容原样发回去</strong>，它会接着做</td>
+<td><code>pause</code></td>
+</tr>
+<tr>
+<td><code>refusal</code></td>
+<td>拒绝回答（安全分类器触发）</td>
+<td>看 <code>stop_details</code>；可以换模型重试</td>
+<td><code>refusal</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>两个容易混淆的点：</p>
+<ul>
+<li><strong><code>refusal</code> 是 HTTP 200</strong>，不是错误。只检查状态码的代码会把拒答当成正常回答展示给用户。</li>
+<li><strong><code>pause_turn</code> 和 <code>tool_use</code> 不会同时出现</strong>：需要你执行客户端工具时一定是 <code>tool_use</code>，<code>pause_turn</code> 只和服务端工具有关。练习的 <code>RunTools</code> 遇到 <code>pause</code> 时直接再发一次。</li>
+</ul>
+<h2 id="10-流式自己拼块">10. 流式：自己拼块</h2>
+<div class="hl"><pre><span></span><code>event: message_start
+data: {"type":"message_start","message":{"id":"msg_a1","content":[],"usage":{"input_tokens":30,...}}}
+
+event: content_block_start
+data: {"type":"content_block_start","index":0,"content_block":{"type":"thinking","thinking":"","signature":""}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":"用户问天气，"}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"signature_delta","signature":"EqQB..."}}
+
+event: content_block_stop
+data: {"type":"content_block_stop","index":0}
+
+event: ping
+data: {"type": "ping"}
+
+event: content_block_start
+data: {"type":"content_block_start","index":2,"content_block":{"type":"tool_use","id":"toolu_1","name":"get_weather","input":{}}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"{\"city\": \"北"}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"京\"}"}}
+
+event: content_block_stop
+data: {"type":"content_block_stop","index":2}
+
+event: message_delta
+data: {"type":"message_delta","delta":{"stop_reason":"tool_use"},"usage":{"output_tokens":60}}
+
+event: message_stop
+data: {"type":"message_stop"}
+</code></pre></div>
+
+<p><strong>逐行解读</strong></p>
+<ul>
+<li><strong>结构是固定的</strong>：<code>message_start</code> → 若干个块（每块 <code>content_block_start</code> → 若干 <code>content_block_delta</code> → <code>content_block_stop</code>）→ <code>message_delta</code> → <code>message_stop</code>。中间随时可能插入 <code>ping</code>。</li>
+<li><strong><code>index</code> 就是这个块在最终 <code>content</code> 数组里的位置</strong>。拼装时按 index 存，最后按 index 排序。</li>
+<li><strong>四种 delta</strong>：<code>text_delta</code>（文本）、<code>input_json_delta</code>（工具参数的一段 JSON 字符串）、<code>thinking_delta</code>（思考文本）、<code>signature_delta</code>（思考块的签名，在 <code>content_block_stop</code> 之前到达）。</li>
+<li><strong><code>content_block_start</code> 里 <code>tool_use</code> 的 <code>input</code> 是 <code>{}</code></strong>，真正的参数在后面的 <code>input_json_delta</code> 里。拼完后在 <code>content_block_stop</code> 时解析；如果一个 delta 都没有（无参工具），参数就是空字符串，要当成 <code>{}</code>。</li>
+<li><strong>官方说明</strong>：当前模型一次只吐出一个完整的“键和值”，然后切成多段 delta 发出来，所以工具参数会“一卡一卡”地到。想要更细粒度、更低延迟，可以在工具定义上开 <code>eager_input_streaming</code>。</li>
+<li><strong><code>stop_reason</code> 只在 <code>message_delta</code> 里</strong>，<code>message_start</code> 里是 <code>null</code>。</li>
+<li><strong><code>message_delta</code> 里的 <code>usage</code> 是累计值</strong>，直接覆盖，不要累加。</li>
+<li><strong><code>error</code> 事件</strong>：高峰期可能在流中途收到 <code>{"type":"error","error":{"type":"overloaded_error",...}}</code>，对应非流式时的 HTTP 529。这时 HTTP 状态码早就是 200 了，只能靠事件判断。</li>
+<li><strong>未知事件要忽略</strong>。官方的版本策略明确说会新增事件类型，解析器遇到不认识的类型不能报错。</li>
+</ul>
+<p><strong>断线续传</strong>：流断了，Claude 4.5 及更早的模型可以把已收到的部分放进一条 assistant 消息，让模型接着写（prefill）。<strong>Claude 4.6 及之后改了</strong>：要发一条 <strong>user</strong> 消息，内容是“你之前的回答在 […] 处中断了，从那里接着写”。工具调用块和思考块不能部分恢复，只能从最近的文本块续写。</p>
+<h2 id="11-三家的用量口径不一样">11. 三家的用量口径不一样</h2>
+<p>这是统一客户端里最容易算错钱的地方：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th></th>
+<th>输入里包含缓存吗</th>
+<th>输出里包含推理吗</th>
+<th>依据</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OpenAI</td>
+<td><strong>包含</strong>：<code>input_tokens</code> 已含 <code>cached_tokens</code></td>
+<td><strong>包含</strong>：<code>output_tokens</code> 已含 <code>reasoning_tokens</code></td>
+<td>usage 示例：75 + 1186 = 1261，1186 里有 1024 是推理</td>
+</tr>
+<tr>
+<td>Anthropic</td>
+<td><strong>不包含</strong>：<code>input_tokens</code> 只是缓存断点之后的部分，总输入 = <code>input_tokens</code> + <code>cache_creation_input_tokens</code> + <code>cache_read_input_tokens</code></td>
+<td>思考 token 计入 <code>output_tokens</code></td>
+<td>Messages API 的 usage 定义</td>
+</tr>
+<tr>
+<td>Gemini Interactions</td>
+<td><code>total_input_tokens</code> 含缓存，<code>total_cached_tokens</code> 单列</td>
+<td><strong>不包含</strong>：思考单列在 <code>total_thought_tokens</code></td>
+<td>官方示例：7 + 20 + 22 = 49 = <code>total_tokens</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>练习里统一成：<strong><code>InputTokens</code> 含缓存，<code>OutputTokens</code> 含推理</strong>（和 OpenAI 一致）。于是：</p>
+<ul>
+<li>Anthropic：<code>InputTokens = input + cache_creation + cache_read</code>。<code>TestAnthropicGenerateUsageIncludesCache</code> 里，<code>input_tokens</code> 字段只有 30，真实输入是 1030；只看这个字段，你的成本报表会少算 97%。</li>
+<li>Gemini：<code>OutputTokens = total_output + total_thought</code>。</li>
+</ul>
+<p>为什么要统一？第 09 模块做成本治理时，所有厂商的账要能放在一张表里比，口径不一致，比较就没有意义。注意<strong>统一的是“数量”，不是“价格”</strong>：缓存读、缓存写、推理 token 各家单价不同，算钱时还要按厂商的价目表分别乘。</p>
+<hr />
+<h1 id="第四部分gemini-interactions">第四部分：Gemini Interactions</h1>
+<h2 id="12-请求与-steps-时间线">12. 请求与 steps 时间线</h2>
+<div class="hl"><pre><span></span><code>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span><span class="s2">"https://generativelanguage.googleapis.com/v1beta/interactions"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"x-goog-api-key: </span><span class="nv">$GEMINI_API_KEY</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Content-Type: application/json"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-d<span class="w"> </span><span class="s1">'{</span>
+<span class="s1">    "model": "gemini-3.8-flash",</span>
+<span class="s1">    "system_instruction": "你是一个简洁的助手。",</span>
+<span class="s1">    "input": [</span>
+<span class="s1">      {"type": "user_input", "content": [{"type": "text", "text": "北京天气怎么样？"}]}</span>
+<span class="s1">    ],</span>
+<span class="s1">    "tools": [{</span>
+<span class="s1">      "type": "function",</span>
+<span class="s1">      "name": "get_weather",</span>
+<span class="s1">      "description": "查询城市天气",</span>
+<span class="s1">      "parameters": {"type": "object", "properties": {"city": {"type": "string"}}, "required": ["city"]}</span>
+<span class="s1">    }],</span>
+<span class="s1">    "generation_config": {"max_output_tokens": 2048},</span>
+<span class="s1">    "store": false</span>
+<span class="s1">  }'</span>
+</code></pre></div>
+
+<p>响应：</p>
+<div class="hl"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"int_g1"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"requires_action"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"steps"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"thought"</span><span class="p">,</span><span class="w"> </span><span class="nt">"signature"</span><span class="p">:</span><span class="w"> </span><span class="s2">"thought_sig_abcd"</span><span class="p">,</span>
+<span class="w">     </span><span class="nt">"summary"</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"text"</span><span class="p">,</span><span class="w"> </span><span class="nt">"text"</span><span class="p">:</span><span class="w"> </span><span class="s2">"需要查天气。"</span><span class="p">}]},</span>
+<span class="w">    </span><span class="p">{</span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"function_call"</span><span class="p">,</span><span class="w"> </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"fc_g1"</span><span class="p">,</span><span class="w"> </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"get_weather"</span><span class="p">,</span>
+<span class="w">     </span><span class="nt">"arguments"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"city"</span><span class="p">:</span><span class="w"> </span><span class="s2">"北京"</span><span class="p">}}</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">"usage"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"total_input_tokens"</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="nt">"total_cached_tokens"</span><span class="p">:</span><span class="w"> </span><span class="mi">40</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">"total_output_tokens"</span><span class="p">:</span><span class="w"> </span><span class="mi">25</span><span class="p">,</span><span class="w"> </span><span class="nt">"total_thought_tokens"</span><span class="p">:</span><span class="w"> </span><span class="mi">30</span><span class="p">,</span><span class="w"> </span><span class="nt">"total_tokens"</span><span class="p">:</span><span class="w"> </span><span class="mi">155</span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>逐行解读</strong></p>
+<ul>
+<li><strong><code>input</code></strong> 可以是字符串、内容数组或 <strong>step 数组</strong>。无状态多轮对话用 step 数组：用户说的话是 <code>user_input</code>，模型说的话是 <code>model_output</code>，两者的 <code>content</code> 都是内容数组。</li>
+<li><strong><code>steps</code> 是一条时间线</strong>：<code>thought</code>（思考）、<code>function_call</code>、<code>function_result</code>、<code>model_output</code>，以及内置工具的 <code>google_search_call</code> / <code>google_search_result</code> 等。<code>POST</code> 只返回模型产出的 step；<code>GET /interactions/{id}</code> 返回包括 <code>user_input</code> 在内的完整时间线。</li>
+<li><strong><code>status</code></strong>：<code>completed</code>、<code>requires_action</code>（需要你执行工具）、<code>incomplete</code>（比如撞上输出上限）、<code>failed</code>、<code>cancelled</code>，后台模式还有 <code>in_progress</code>、<code>queued</code>。</li>
+<li><strong><code>arguments</code> 是对象</strong>，和 Anthropic 一样。</li>
+<li><strong><code>thought</code> step 带 <code>signature</code></strong>。无状态模式下，下一轮要把它原样放回 <code>input</code>。</li>
+<li><strong><code>generation_config</code></strong> 放采样相关的配置（<code>max_output_tokens</code>、<code>temperature</code>、<code>thinking_level</code>……）；输出格式（JSON Schema、图片、音频）放在顶层的 <code>response_format</code>，1.3 课讲。</li>
+<li><strong>作用域</strong>：用 <code>previous_interaction_id</code> 续聊时，只有对话历史会被继承；<code>tools</code>、<code>system_instruction</code>、<code>generation_config</code> 都是<strong>本次 interaction 有效</strong>，每次都要重新传。</li>
+</ul>
+<p>下一轮：</p>
+<div class="hl"><pre><span></span><code><span class="nt">"input"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">  </span><span class="p">{</span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"user_input"</span><span class="p">,</span><span class="w"> </span><span class="nt">"content"</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"text"</span><span class="p">,</span><span class="w"> </span><span class="nt">"text"</span><span class="p">:</span><span class="w"> </span><span class="s2">"北京天气怎么样？"</span><span class="p">}]},</span>
+<span class="w">  </span><span class="p">{</span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"thought"</span><span class="p">,</span><span class="w"> </span><span class="nt">"signature"</span><span class="p">:</span><span class="w"> </span><span class="s2">"thought_sig_abcd"</span><span class="p">,</span><span class="w"> </span><span class="nt">"summary"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="err">...</span><span class="p">]},</span>
+<span class="w">  </span><span class="p">{</span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"function_call"</span><span class="p">,</span><span class="w"> </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"fc_g1"</span><span class="p">,</span><span class="w"> </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"get_weather"</span><span class="p">,</span><span class="w"> </span><span class="nt">"arguments"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"city"</span><span class="p">:</span><span class="w"> </span><span class="s2">"北京"</span><span class="p">}},</span>
+<span class="w">  </span><span class="p">{</span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"function_result"</span><span class="p">,</span><span class="w"> </span><span class="nt">"call_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"fc_g1"</span><span class="p">,</span><span class="w"> </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"get_weather"</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">"result"</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"text"</span><span class="p">,</span><span class="w"> </span><span class="nt">"text"</span><span class="p">:</span><span class="w"> </span><span class="s2">"晴，25°C"</span><span class="p">}]}</span>
+<span class="p">]</span>
+</code></pre></div>
+
+<p><code>function_result</code> 用 <code>call_id</code> 配对，同时还要带 <code>name</code>；<code>result</code> 可以是内容数组、对象或字符串；工具出错时可以加 <code>is_error: true</code>。</p>
+<h2 id="13-流式step-事件以及文档自相矛盾时怎么办">13. 流式：step 事件，以及文档自相矛盾时怎么办</h2>
+<div class="hl"><pre><span></span><code>event: interaction.created
+data: {"event_type":"interaction.created","interaction":{"id":"int_gs1","status":"in_progress"}}
+
+event: step.start
+data: {"event_type":"step.start","index":0,"step":{"type":"thought"}}
+
+event: step.delta
+data: {"event_type":"step.delta","index":0,"delta":{"type":"thought_signature","signature":"sig_..."}}
+
+event: step.stop
+data: {"event_type":"step.stop","index":0}
+
+event: step.start
+data: {"event_type":"step.start","index":1,"step":{"type":"function_call","id":"fc_gs1","name":"get_weather"}}
+
+event: step.delta
+data: {"event_type":"step.delta","index":1,"delta":{"type":"arguments_delta","arguments":"{\"city\": \"广州\"}"}}
+
+event: step.stop
+data: {"event_type":"step.stop","index":1,"status":"waiting"}
+
+event: interaction.requires_action
+data: {"interaction":{"id":"int_gs1","status":"requires_action","usage":{...}}}
+</code></pre></div>
+
+<p>结构和 Anthropic 很像：<code>step.start</code> → <code>step.delta</code>* → <code>step.stop</code>，按 <code>index</code> 拼。不同的地方：</p>
+<ul>
+<li><strong>终止事件里的 interaction 可能是“部分的”</strong>：参考手册说流式生命周期事件里的 interaction“可能省略只有非流式响应才有的字段”，所以 <code>steps</code> 要自己拼，不能指望终止事件给全；</li>
+<li><strong>每个事件可以带 <code>event_id</code></strong>，用来从某个事件之后恢复流。这和 0.4 课的 <code>Last-Event-ID</code> 是同一个思路，只不过放在了业务层；</li>
+<li><strong>思考签名</strong>以 <code>thought_signature</code> 类型的 delta 单独到达，思考摘要以 <code>thought_summary</code> delta 到达。</li>
+</ul>
+<p><strong>文档自相矛盾的地方</strong>。写这一课时，同一家的三份官方材料对“工具参数增量”的写法不一致：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>来源</th>
+<th>delta 的 type</th>
+<th>字段</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>API 参考手册（<code>ArgumentsDelta</code>）</td>
+<td><code>arguments_delta</code></td>
+<td><code>arguments</code></td>
+</tr>
+<tr>
+<td>迁移指南的 SSE 示例</td>
+<td><code>arguments</code></td>
+<td><code>partial_arguments</code></td>
+</tr>
+<tr>
+<td>2026 年 5 月破坏性变更说明</td>
+<td>文字描述为 <code>arguments_delta</code></td>
+<td>—</td>
+</tr>
+</tbody>
+</table></div>
+<p>事件的判别字段也有两种写法：参考手册的示例是 <code>event_type</code>，部分指南示例是 <code>type</code>。</p>
+<p>工程上的处理：<strong>以参考手册为准，同时兼容另一种写法</strong>，并且用测试把两种写法都钉住。练习的 <code>gemini_stream_tool.sse</code> 故意混用了两种写法，<code>TestGeminiStream</code> 要求都能拼出 <code>{"city": "广州"}</code>。这类容错写一次就够了，比线上某天突然“工具参数全是空的”好查得多。</p>
+<p><strong>接口演进的速度</strong>：Interactions API 在 2026 年 5 月做过一次破坏性变更：响应从扁平的 <code>outputs</code> 数组改成 <code>steps</code> 时间线，流式事件从 <code>content.delta</code> 改成 <code>step.delta</code>，旧格式 6 月 8 日下线。用 REST 直连的人可以用 <code>Api-Revision</code> 请求头选择版本。这就是为什么第五部分要把厂商协议关在 <code>openai.go</code>、<code>anthropic.go</code>、<code>gemini.go</code> 三个文件里：协议变了只改一个文件，Agent 逻辑一行不动。</p>
+<h2 id="14-老接口-generatecontent-对照">14. 老接口 generateContent 对照</h2>
+<p>大量现有代码、教程和兼容层还在用 <code>generateContent</code>，要能读懂：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th></th>
+<th><code>generateContent</code></th>
+<th>Interactions</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>端点</td>
+<td><code>/v1beta/models/{model}:generateContent</code>，流式是单独的 <code>:streamGenerateContent</code></td>
+<td><code>/v1beta/interactions</code>，流式用 <code>"stream": true</code></td>
+</tr>
+<tr>
+<td>对话</td>
+<td><code>contents: [{"role": "user" 或 "model", "parts": [...]}]</code></td>
+<td><code>input: [step, ...]</code></td>
+</tr>
+<tr>
+<td>系统提示</td>
+<td><code>systemInstruction: {"parts": [...]}</code></td>
+<td><code>system_instruction: "..."</code></td>
+</tr>
+<tr>
+<td>工具定义</td>
+<td><code>tools: [{"functionDeclarations": [...]}]</code>（多包一层）</td>
+<td><code>tools: [{"type":"function", ...}]</code></td>
+</tr>
+<tr>
+<td>工具调用</td>
+<td><code>parts</code> 里的 <code>{"functionCall": {"name", "args"}}</code></td>
+<td><code>function_call</code> step</td>
+</tr>
+<tr>
+<td>工具结果</td>
+<td><code>role: "user"</code> 的 <code>parts</code> 里放 <code>{"functionResponse": {"name", "response"}}</code></td>
+<td><code>function_result</code> step</td>
+</tr>
+<tr>
+<td>结果</td>
+<td><code>candidates[0].content.parts</code>，<code>finishReason</code>，<code>usageMetadata</code></td>
+<td><code>steps</code>，<code>status</code>，<code>usage</code></td>
+</tr>
+<tr>
+<td>流式工具调用</td>
+<td>函数调用在一个 chunk 里<strong>整块到达</strong>，看不到参数生成过程</td>
+<td>参数以增量到达</td>
+</tr>
+<tr>
+<td>字段命名</td>
+<td>camelCase</td>
+<td>snake_case</td>
+</tr>
+</tbody>
+</table></div>
+<p>两点提醒：</p>
+<ul>
+<li>有些功能目前只在 <code>generateContent</code> 上有：Batch API、显式缓存、自定义安全设置、Python 的自动函数调用。用到这些就还得走老接口；</li>
+<li>Gemini 也提供 <strong>OpenAI 兼容端点</strong>，可以用 OpenAI 的 SDK 调 Gemini。兼容层的问题第 23 节讲。</li>
+</ul>
+<hr />
+<h1 id="第五部分统一客户端">第五部分：统一客户端</h1>
+<h2 id="15-统一什么不统一什么">15. 统一什么，不统一什么</h2>
+<p><strong>要解决的问题</strong>：Agent 代码（工具循环、记忆、评测、成本统计）不应该知道背后是哪家模型；但每家都有自己独特的东西，硬塞进一个“最大公约数”会丢信息。</p>
+<p>练习采用三条原则：</p>
+<ol>
+<li><strong>统一“最小公共语义”</strong>：文本、工具调用、工具结果、推理块、停止原因、用量。这是 Agent 循环真正需要的全部；</li>
+<li><strong>同一家，原样回放</strong>：每个 <code>Part</code> 都记着它来自哪家（<code>Provider</code>）和原始 JSON（<code>Raw</code>）。发回同一家时直接用 <code>Raw</code>，<code>encrypted_content</code>、<code>signature</code>、<code>phase</code>、将来新增的字段一个都不会丢；</li>
+<li><strong>换一家，按规范化字段重建</strong>：文本、工具调用、工具结果有对应格式，可以转换；推理块和厂商特有的内容（服务端工具记录）对方看不懂，丢掉。</li>
+</ol>
+<p>这就是“<strong>同家无损、跨家降级</strong>”。很多开源框架只做了第 1、3 条，每次都从规范化字段重建请求，于是推理模型在多轮工具调用里会悄悄变差，而且不报错。</p>
+<h2 id="16-类型设计">16. 类型设计</h2>
+<div class="hl"><pre><span></span><code><span class="kd">type</span><span class="w"> </span><span class="nx">Part</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">Type</span><span class="w"> </span><span class="nx">PartType</span><span class="w"> </span><span class="c1">// text | tool_call | tool_result | reasoning | opaque</span>
+
+<span class="w">    </span><span class="nx">Text</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="c1">// text；reasoning 的可读摘要</span>
+
+<span class="w">    </span><span class="nx">CallID</span><span class="w">  </span><span class="kt">string</span><span class="w">          </span><span class="c1">// tool_call / tool_result</span>
+<span class="w">    </span><span class="nx">Name</span><span class="w">    </span><span class="kt">string</span>
+<span class="w">    </span><span class="nx">Args</span><span class="w">    </span><span class="nx">json</span><span class="p">.</span><span class="nx">RawMessage</span><span class="w"> </span><span class="c1">// tool_call：一定是 JSON 对象</span>
+<span class="w">    </span><span class="nx">Result</span><span class="w">  </span><span class="kt">string</span><span class="w">          </span><span class="c1">// tool_result</span>
+<span class="w">    </span><span class="nx">IsError</span><span class="w"> </span><span class="kt">bool</span>
+
+<span class="w">    </span><span class="nx">Provider</span><span class="w"> </span><span class="kt">string</span><span class="w">          </span><span class="c1">// 这块内容来自哪家</span>
+<span class="w">    </span><span class="nx">Raw</span><span class="w">      </span><span class="nx">json</span><span class="p">.</span><span class="nx">RawMessage</span><span class="w"> </span><span class="c1">// 它在原协议里的 JSON，发回同一家时原样回放</span>
+<span class="p">}</span>
+
+<span class="kd">type</span><span class="w"> </span><span class="nx">Message</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">Role</span><span class="w">  </span><span class="nx">Role</span><span class="w"> </span><span class="c1">// 只有 user / assistant</span>
+<span class="w">    </span><span class="nx">Parts</span><span class="w"> </span><span class="p">[]</span><span class="nx">Part</span>
+<span class="p">}</span>
+
+<span class="kd">type</span><span class="w"> </span><span class="nx">Response</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">ID</span><span class="w">      </span><span class="kt">string</span>
+<span class="w">    </span><span class="nx">Message</span><span class="w"> </span><span class="nx">Message</span>
+<span class="w">    </span><span class="nx">Stop</span><span class="w">    </span><span class="nx">StopReason</span><span class="w"> </span><span class="c1">// end | length | tool_use | refusal | pause | other</span>
+<span class="w">    </span><span class="nx">RawStop</span><span class="w"> </span><span class="kt">string</span><span class="w">     </span><span class="c1">// 原始值，排查问题用</span>
+<span class="w">    </span><span class="nx">Usage</span><span class="w">   </span><span class="nx">Usage</span><span class="w">      </span><span class="c1">// InputTokens 含缓存，OutputTokens 含推理</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>逐行解读</strong></p>
+<ul>
+<li><strong>一个 <code>Part</code> 结构体，用 <code>Type</code> 区分种类</strong>，而不是五个类型加一个接口。Go 没有和类型系统结合的 tagged union，接口加类型断言写起来更啰嗦，序列化也麻烦。代价是一些字段只对某些类型有意义，靠注释约定。</li>
+<li><strong>为什么只有两种 <code>Role</code></strong>：工具结果放在 user 消息里，这是 Anthropic 的模型，也是三家里最严格的。编码给 OpenAI、Gemini 时再拆成独立的 item / step，这个方向的转换是无损的；反过来（从“独立条目”合并成“user 消息”）就要处理顺序和分组。<strong>选最严格的那家做内部表示，往宽松的方向转换。</strong></li>
+<li><strong><code>Args</code> 是 <code>json.RawMessage</code>，而且一定是对象</strong>：OpenAI 给的是字符串，解码时解析一次；Anthropic 和 Gemini 给的是对象，直接存。所有来源都过一遍 <code>argsObject</code>：校验、压缩成紧凑格式。这样三家来源的参数字节一致，转给 OpenAI 时（它要字符串）也稳定，日志里也好比对。</li>
+<li><strong><code>PartOpaque</code></strong>：OpenAI 的 <code>web_search_call</code>、Anthropic 的 <code>server_tool_use</code>、Gemini 的 <code>google_search_result</code>……统一层不理解，但同一家要能原样回放（Anthropic 的 <code>pause_turn</code> 就要求把这些块发回去）。</li>
+<li><strong><code>RawStop</code></strong>：规范化会丢信息（<code>end_turn</code> 和 <code>stop_sequence</code> 都变成 <code>end</code>），出问题时要能看到原始值。</li>
+</ul>
+<h2 id="17-provider-接口go-的-iterseq2-对照-ts-的-asyncgenerator">17. Provider 接口：Go 的 iter.Seq2 对照 TS 的 AsyncGenerator</h2>
+<div class="hl"><pre><span></span><code><span class="kd">type</span><span class="w"> </span><span class="nx">Provider</span><span class="w"> </span><span class="kd">interface</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">Name</span><span class="p">()</span><span class="w"> </span><span class="kt">string</span>
+<span class="w">    </span><span class="nx">Generate</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">req</span><span class="w"> </span><span class="o">*</span><span class="nx">Request</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="nx">Response</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span>
+<span class="w">    </span><span class="nx">Stream</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">req</span><span class="w"> </span><span class="o">*</span><span class="nx">Request</span><span class="p">)</span><span class="w"> </span><span class="nx">iter</span><span class="p">.</span><span class="nx">Seq2</span><span class="p">[</span><span class="nx">Event</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">]</span>
+<span class="p">}</span>
+
+<span class="c1">// 用法（Go 1.23 起）</span>
+<span class="k">for</span><span class="w"> </span><span class="nx">ev</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">p</span><span class="p">.</span><span class="nx">Stream</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">req</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">err</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">ev</span><span class="p">.</span><span class="nx">Type</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nx">llm</span><span class="p">.</span><span class="nx">EventText</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Print</span><span class="p">(</span><span class="nx">ev</span><span class="p">.</span><span class="nx">Text</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>同样的接口用 TypeScript 写：</p>
+<div class="hl"><pre><span></span><code><span class="kd">interface</span><span class="w"> </span><span class="nx">Provider</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">generate</span><span class="p">(</span><span class="nx">req</span><span class="o">:</span><span class="w"> </span><span class="kt">Request</span><span class="p">,</span><span class="w"> </span><span class="nx">signal?</span><span class="o">:</span><span class="w"> </span><span class="kt">AbortSignal</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">Response</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">stream</span><span class="p">(</span><span class="nx">req</span><span class="o">:</span><span class="w"> </span><span class="kt">Request</span><span class="p">,</span><span class="w"> </span><span class="nx">signal?</span><span class="o">:</span><span class="w"> </span><span class="kt">AbortSignal</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nx">AsyncGenerator</span><span class="o">&lt;</span><span class="nx">LLMEvent</span><span class="p">,</span><span class="w"> </span><span class="ow">void</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c1">// 用法</span>
+<span class="k">for</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="p">(</span><span class="kd">const</span><span class="w"> </span><span class="nx">ev</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="nx">p</span><span class="p">.</span><span class="nx">stream</span><span class="p">(</span><span class="nx">req</span><span class="p">,</span><span class="w"> </span><span class="nx">ac</span><span class="p">.</span><span class="nx">signal</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">ev</span><span class="p">.</span><span class="kr">type</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s2">"text"</span><span class="p">)</span><span class="w"> </span><span class="nx">process</span><span class="p">.</span><span class="nx">stdout</span><span class="p">.</span><span class="nx">write</span><span class="p">(</span><span class="nx">ev</span><span class="p">.</span><span class="nx">text</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>逐行对照</strong></p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Go</th>
+<th>TypeScript</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>iter.Seq2[Event, error]</code></td>
+<td><code>AsyncGenerator&lt;LLMEvent, void&gt;</code></td>
+<td>都是“拉取式”的事件序列：调用方要一个，生产方给一个</td>
+</tr>
+<tr>
+<td><code>for ev, err := range seq</code></td>
+<td><code>for await (const ev of gen)</code></td>
+<td>Go 1.23 的 range-over-func；TS 的异步迭代</td>
+</tr>
+<tr>
+<td>错误通过第二个返回值 <code>err</code> 产出</td>
+<td>错误通过 <code>throw</code> 抛出，<code>for await</code> 外面 <code>try/catch</code></td>
+<td>Go 的错误是值，所以序列里要带一个 <code>error</code> 位置</td>
+</tr>
+<tr>
+<td><code>ctx context.Context</code></td>
+<td><code>signal?: AbortSignal</code></td>
+<td>取消信号，0.1、0.2 课讲过：ctx 取消 ⇔ <code>ac.abort()</code></td>
+</tr>
+<tr>
+<td>调用方 <code>break</code> → <code>yield</code> 返回 <code>false</code> → 生产方 <code>return</code>，<code>defer resp.Body.Close()</code> 关掉连接</td>
+<td>调用方 <code>break</code> → 运行时调用 <code>gen.return()</code> → 生成器里的 <code>finally { reader.cancel() }</code> 执行</td>
+<td>两边都要保证“消费方不要了，连接就断开”，否则上游模型还在生成、还在计费</td>
+</tr>
+<tr>
+<td>生产方函数 <code>func(yield func(Event, error) bool)</code></td>
+<td><code>async function*</code>，里面用 <code>yield ev</code></td>
+<td>Go 里 <code>yield</code> 是一个普通函数参数，返回值告诉你还要不要继续</td>
+</tr>
+</tbody>
+</table></div>
+<p>最后一行是关键差异：<strong>Go 的 <code>yield</code> 返回 <code>false</code> 时，你必须停止</strong>，继续调用会 panic。所以 <code>runStream</code> 里每个 <code>yield</code> 都检查返回值：</p>
+<div class="hl"><pre><span></span><code><span class="k">for</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">e</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">out</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="o">!</span><span class="nx">yield</span><span class="p">(</span><span class="nx">e</span><span class="p">,</span><span class="w"> </span><span class="kc">nil</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1">// 调用方 break 了：defer 关闭连接，上游停止生成</span>
+<span class="w">        </span><span class="k">return</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><code>TestStreamBreakClosesConnection</code> 验证的就是这件事：调用方收到 3 个事件后 <code>break</code>，服务端的 <code>r.Context()</code> 必须在 2 秒内被取消。</p>
+<p>为什么不用 channel（<code>&lt;-chan Event</code>）？channel 版本要额外起一个 goroutine 往里写，调用方中途不读了，这个 goroutine 就会永远阻塞在发送上，除非再加一个取消机制。迭代器是同步拉取的，没有这个问题。</p>
+<h2 id="18-三层检查写一次给三家用">18. 三层检查，写一次给三家用</h2>
+<p>0.4 课补充的“三层状态机”在这里落成了两个函数：</p>
+<div class="hl"><pre><span></span><code><span class="c1">// post：① HTTP 层、② SSE 层</span>
+<span class="k">if</span><span class="w"> </span><span class="nx">resp</span><span class="p">.</span><span class="nx">StatusCode</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">200</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nx">resp</span><span class="p">.</span><span class="nx">StatusCode</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">299</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">defer</span><span class="w"> </span><span class="nx">resp</span><span class="p">.</span><span class="nx">Body</span><span class="p">.</span><span class="nx">Close</span><span class="p">()</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="nx">parseAPIError</span><span class="p">(</span><span class="nx">provider</span><span class="p">,</span><span class="w"> </span><span class="nx">resp</span><span class="p">)</span><span class="w"> </span><span class="c1">// 解析三家各自的错误体</span>
+<span class="p">}</span>
+<span class="k">if</span><span class="w"> </span><span class="nx">stream</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">!</span><span class="nx">strings</span><span class="p">.</span><span class="nx">HasPrefix</span><span class="p">(</span><span class="nx">resp</span><span class="p">.</span><span class="nx">Header</span><span class="p">.</span><span class="nx">Get</span><span class="p">(</span><span class="s">"Content-Type"</span><span class="p">),</span><span class="w"> </span><span class="s">"text/event-stream"</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">resp</span><span class="p">.</span><span class="nx">Body</span><span class="p">.</span><span class="nx">Close</span><span class="p">()</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">APIError</span><span class="p">{...,</span><span class="w"> </span><span class="nx">Type</span><span class="p">:</span><span class="w"> </span><span class="s">"bad_content_type"</span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// runStream：③ 业务层</span>
+<span class="nx">ev</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">next</span><span class="p">()</span>
+<span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nx">io</span><span class="p">.</span><span class="nx">EOF</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="o">!</span><span class="nx">dec</span><span class="p">.</span><span class="nx">done</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1">// HTTP 流正常结束 ≠ 模型输出完了</span>
+<span class="w">        </span><span class="nx">yield</span><span class="p">(</span><span class="nx">Event</span><span class="p">{},</span><span class="w"> </span><span class="nx">ErrIncompleteStream</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>每家只需要实现一个很小的状态机接口：</p>
+<div class="hl"><pre><span></span><code><span class="kd">type</span><span class="w"> </span><span class="nx">streamDecoder</span><span class="w"> </span><span class="kd">interface</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">feed</span><span class="p">(</span><span class="nx">ev</span><span class="w"> </span><span class="nx">sseEvent</span><span class="p">)</span><span class="w"> </span><span class="p">([]</span><span class="nx">Event</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="c1">// 喂一个 SSE 事件，吐出 0 个或多个统一事件</span>
+<span class="w">    </span><span class="nx">done</span><span class="p">()</span><span class="w"> </span><span class="kt">bool</span><span class="w">                        </span><span class="c1">// 收到终止事件了吗</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>三家的终止事件分别是 <code>response.completed</code>（及 <code>incomplete</code>、<code>failed</code>）、<code>message_stop</code>、<code>interaction.completed</code>（及 <code>requires_action</code>）。<code>TestAnthropicStreamTruncatedIsError</code> 用一段在工具参数中途断掉的流验证：用户已经看到了“我查一下。”，但没有 <code>message_stop</code>，整体必须判失败。</p>
+<h2 id="19-拼装流式结果必须和非流式一模一样">19. 拼装：流式结果必须和非流式一模一样</h2>
+<p>Anthropic 和 Gemini 的终止事件不带完整结果，要自己拼。思路：<strong>按 index 收集每个块，结束时按 index 排序，重建出和非流式响应完全相同的 JSON，再交给非流式的解码函数</strong>。</p>
+<div class="hl"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">s</span><span class="w"> </span><span class="o">*</span><span class="nx">anStream</span><span class="p">)</span><span class="w"> </span><span class="nx">build</span><span class="p">()</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="nx">Response</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// ……按 index 排序……</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">idx</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">b</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">s</span><span class="p">.</span><span class="nx">blocks</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span>
+<span class="w">        </span><span class="kd">var</span><span class="w"> </span><span class="nx">raw</span><span class="w"> </span><span class="nx">json</span><span class="p">.</span><span class="nx">RawMessage</span>
+<span class="w">        </span><span class="k">switch</span><span class="w"> </span><span class="nx">b</span><span class="p">.</span><span class="nx">typ</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="s">"text"</span><span class="p">:</span>
+<span class="w">            </span><span class="nx">raw</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">rawOf</span><span class="p">(</span><span class="kt">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">string</span><span class="p">{</span><span class="s">"type"</span><span class="p">:</span><span class="w"> </span><span class="s">"text"</span><span class="p">,</span><span class="w"> </span><span class="s">"text"</span><span class="p">:</span><span class="w"> </span><span class="nx">b</span><span class="p">.</span><span class="nx">text</span><span class="p">.</span><span class="nx">String</span><span class="p">()})</span>
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="s">"thinking"</span><span class="p">:</span>
+<span class="w">            </span><span class="nx">raw</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">rawOf</span><span class="p">(</span><span class="kt">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">string</span><span class="p">{</span><span class="s">"type"</span><span class="p">:</span><span class="w"> </span><span class="s">"thinking"</span><span class="p">,</span><span class="w"> </span><span class="s">"thinking"</span><span class="p">:</span><span class="w"> </span><span class="nx">b</span><span class="p">.</span><span class="nx">text</span><span class="p">.</span><span class="nx">String</span><span class="p">(),</span><span class="w"> </span><span class="s">"signature"</span><span class="p">:</span><span class="w"> </span><span class="nx">b</span><span class="p">.</span><span class="nx">signature</span><span class="p">})</span>
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="s">"tool_use"</span><span class="p">,</span><span class="w"> </span><span class="s">"server_tool_use"</span><span class="p">:</span>
+<span class="w">            </span><span class="nx">input</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">argsObject</span><span class="p">(</span><span class="nx">b</span><span class="p">.</span><span class="nx">json</span><span class="p">.</span><span class="nx">String</span><span class="p">())</span><span class="w"> </span><span class="c1">// 参数在这里第一次被完整解析</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">            </span><span class="nx">raw</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">rawOf</span><span class="p">(</span><span class="kt">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">any</span><span class="p">{</span><span class="s">"type"</span><span class="p">:</span><span class="w"> </span><span class="nx">b</span><span class="p">.</span><span class="nx">typ</span><span class="p">,</span><span class="w"> </span><span class="s">"id"</span><span class="p">:</span><span class="w"> </span><span class="nx">b</span><span class="p">.</span><span class="nx">id</span><span class="p">,</span><span class="w"> </span><span class="s">"name"</span><span class="p">:</span><span class="w"> </span><span class="nx">b</span><span class="p">.</span><span class="nx">name</span><span class="p">,</span><span class="w"> </span><span class="s">"input"</span><span class="p">:</span><span class="w"> </span><span class="nx">input</span><span class="p">})</span>
+<span class="w">        </span><span class="k">default</span><span class="p">:</span><span class="w"> </span><span class="c1">// redacted_thinking、各种 *_tool_result：start 里就是完整内容</span>
+<span class="w">            </span><span class="nx">raw</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">b</span><span class="p">.</span><span class="nx">start</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="nx">r</span><span class="p">.</span><span class="nx">Content</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nx">Content</span><span class="p">,</span><span class="w"> </span><span class="nx">raw</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">toResponse</span><span class="p">()</span><span class="w"> </span><span class="c1">// 复用非流式的解码</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>逐行解读</strong></p>
+<ul>
+<li><strong>复用非流式解码</strong>：流式和非流式只在“怎么得到完整 JSON”上不同，后面的规范化逻辑只写一份，就不会出现“流式时停止原因映射漏了一个”这种不一致。</li>
+<li><strong>思考块要把 <code>signature_delta</code> 拼回去</strong>，否则下一轮回传时签名是空的。</li>
+<li><strong><code>default</code> 分支</strong>：<code>redacted_thinking</code>（加密的思考）和服务端工具结果没有 delta，<code>content_block_start</code> 里就是完整内容，原样保存。</li>
+<li><strong>测试方法</strong>：<code>TestAnthropicStreamMatchesGenerate</code> 用一对内容相同的流式 / 非流式 fixture，逐块比较类型、文本、参数、Raw、停止原因和用量。“两条路径结果必须相等”比手写断言更能抓 bug，和 0.4 课“任意位置切块结果都一样”的模糊测试是同一个思想。</li>
+</ul>
+<h2 id="20-错误与重试">20. 错误与重试</h2>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>情况</th>
+<th>例子</th>
+<th>重试？</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>限流</td>
+<td>429（OpenAI <code>rate_limit_exceeded</code>，Gemini <code>RESOURCE_EXHAUSTED</code>，Anthropic <code>rate_limit_error</code>）</td>
+<td>是，<strong>优先按 <code>Retry-After</code> 等</strong></td>
+</tr>
+<tr>
+<td>过载</td>
+<td>Anthropic 529 <code>overloaded_error</code>；流中途的 <code>error</code> 事件</td>
+<td>是</td>
+</tr>
+<tr>
+<td>服务端错误</td>
+<td>500、502、503、504</td>
+<td>是</td>
+</tr>
+<tr>
+<td>请求错误</td>
+<td>400（参数不支持、schema 不合法、<code>tool_use</code> 缺少 <code>tool_result</code>）</td>
+<td><strong>否</strong>，重试一万次也是 400</td>
+</tr>
+<tr>
+<td>鉴权</td>
+<td>401、403</td>
+<td>否</td>
+</tr>
+<tr>
+<td>流断了</td>
+<td><code>ErrIncompleteStream</code></td>
+<td>是，但<strong>只在还没推给用户任何内容时</strong>（练习 3）</td>
+</tr>
+<tr>
+<td>拒答</td>
+<td><code>stop: refusal</code>（HTTP 200）</td>
+<td>不是错误；可以换模型重试</td>
+</tr>
+</tbody>
+</table></div>
+<p>三家的错误体形状也不同，<code>parseAPIError</code> 一个函数兼容三种：</p>
+<div class="hl"><pre><span></span><code>OpenAI:    {"error":{"message":"...","type":"...","code":"..."}}
+Anthropic: {"type":"error","error":{"type":"overloaded_error","message":"..."}}
+Gemini:    {"error":{"code":429,"message":"...","status":"RESOURCE_EXHAUSTED"}}
+</code></pre></div>
+
+<p>最常见的 400 之一，就是 1.1 课第 22 节说的：给不支持的模型传了 <code>temperature</code>。比如 GPT-6 Astra 不支持 <code>reasoning.effort: "none"</code>，传了直接 400。所以<strong>参数要按模型能力表来发</strong>，第 11 模块的模型网关会做这件事。<code>TestHTTPErrors</code> 用表驱动测试覆盖了三家的 6 种错误。</p>
+<h2 id="21-对三家完全相同的-agent-循环">21. 对三家完全相同的 Agent 循环</h2>
+<div class="hl"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nx">RunTools</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">p</span><span class="w"> </span><span class="nx">Provider</span><span class="p">,</span><span class="w"> </span><span class="nx">req</span><span class="w"> </span><span class="nx">Request</span><span class="p">,</span><span class="w"> </span><span class="nx">tools</span><span class="w"> </span><span class="kt">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="nx">ToolFunc</span><span class="p">,</span><span class="w"> </span><span class="nx">maxSteps</span><span class="w"> </span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="nx">Response</span><span class="p">,</span><span class="w"> </span><span class="p">[]</span><span class="nx">Message</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">history</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">append</span><span class="p">([]</span><span class="nx">Message</span><span class="p">(</span><span class="kc">nil</span><span class="p">),</span><span class="w"> </span><span class="nx">req</span><span class="p">.</span><span class="nx">Messages</span><span class="p">...)</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">step</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="nx">step</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="nx">maxSteps</span><span class="p">;</span><span class="w"> </span><span class="nx">step</span><span class="o">++</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">r</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">req</span>
+<span class="w">        </span><span class="nx">r</span><span class="p">.</span><span class="nx">Messages</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">history</span>
+<span class="w">        </span><span class="nx">resp</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">p</span><span class="p">.</span><span class="nx">Generate</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">r</span><span class="p">)</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="nx">history</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="nx">history</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">history</span><span class="p">,</span><span class="w"> </span><span class="nx">resp</span><span class="p">.</span><span class="nx">Message</span><span class="p">)</span><span class="w"> </span><span class="c1">// ① 助手消息原样进历史</span>
+<span class="w">        </span><span class="k">switch</span><span class="w"> </span><span class="nx">resp</span><span class="p">.</span><span class="nx">Stop</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="nx">StopToolUse</span><span class="p">:</span>
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="nx">StopPause</span><span class="p">:</span><span class="w"> </span><span class="c1">// ② 服务端工具暂停：原样再发一次</span>
+<span class="w">            </span><span class="k">continue</span>
+<span class="w">        </span><span class="k">default</span><span class="p">:</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="nx">resp</span><span class="p">,</span><span class="w"> </span><span class="nx">history</span><span class="p">,</span><span class="w"> </span><span class="kc">nil</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="nx">results</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">Message</span><span class="p">{</span><span class="nx">Role</span><span class="p">:</span><span class="w"> </span><span class="nx">RoleUser</span><span class="p">}</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">c</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">resp</span><span class="p">.</span><span class="nx">Message</span><span class="p">.</span><span class="nx">ToolCalls</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1">// ③ 每个调用都必须有结果</span>
+<span class="w">            </span><span class="nx">res</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">Part</span><span class="p">{</span><span class="nx">Type</span><span class="p">:</span><span class="w"> </span><span class="nx">PartToolResult</span><span class="p">,</span><span class="w"> </span><span class="nx">CallID</span><span class="p">:</span><span class="w"> </span><span class="nx">c</span><span class="p">.</span><span class="nx">CallID</span><span class="p">,</span><span class="w"> </span><span class="nx">Name</span><span class="p">:</span><span class="w"> </span><span class="nx">c</span><span class="p">.</span><span class="nx">Name</span><span class="p">}</span>
+<span class="w">            </span><span class="nx">fn</span><span class="p">,</span><span class="w"> </span><span class="nx">ok</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">tools</span><span class="p">[</span><span class="nx">c</span><span class="p">.</span><span class="nx">Name</span><span class="p">]</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="o">!</span><span class="nx">ok</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="nx">res</span><span class="p">.</span><span class="nx">Result</span><span class="p">,</span><span class="w"> </span><span class="nx">res</span><span class="p">.</span><span class="nx">IsError</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"unknown tool: "</span><span class="o">+</span><span class="nx">c</span><span class="p">.</span><span class="nx">Name</span><span class="p">,</span><span class="w"> </span><span class="kc">true</span>
+<span class="w">            </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="nx">out</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">fn</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">c</span><span class="p">.</span><span class="nx">Args</span><span class="p">);</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="nx">res</span><span class="p">.</span><span class="nx">Result</span><span class="p">,</span><span class="w"> </span><span class="nx">res</span><span class="p">.</span><span class="nx">IsError</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">err</span><span class="p">.</span><span class="nx">Error</span><span class="p">(),</span><span class="w"> </span><span class="kc">true</span><span class="w"> </span><span class="c1">// ④ 工具出错交给模型，不中断循环</span>
+<span class="w">            </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="nx">res</span><span class="p">.</span><span class="nx">Result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">out</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">            </span><span class="nx">results</span><span class="p">.</span><span class="nx">Parts</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">results</span><span class="p">.</span><span class="nx">Parts</span><span class="p">,</span><span class="w"> </span><span class="nx">res</span><span class="p">)</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="nx">history</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">history</span><span class="p">,</span><span class="w"> </span><span class="nx">results</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="nx">history</span><span class="p">,</span><span class="w"> </span><span class="nx">ErrMaxSteps</span><span class="w"> </span><span class="c1">// ⑤ 步数上限</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>逐行解读</strong></p>
+<ul>
+<li><strong>① 原样进历史</strong>：<code>resp.Message</code> 里每个 Part 都带着 <code>Raw</code>，下一轮编码时同一家直接回放。推理块、签名、<code>phase</code> 全在里面，循环本身完全不用知道它们的存在。</li>
+<li><strong>② <code>pause</code></strong>：只有 Anthropic 会出现，但循环不需要知道是哪家。</li>
+<li><strong>③ 每个调用都要有结果</strong>：模型并行调用了 3 个工具，你只回了 2 个，三家都会报错。连“工具不存在”也要回一个错误结果。</li>
+<li><strong>④ 工具出错不中断</strong>：参数错了、外部服务超时，把错误信息作为 <code>is_error</code> 结果交给模型，它通常会改正参数重试。只有 ctx 被取消这类“整体要停”的情况才应该中断循环（第 03 模块细化）。</li>
+<li><strong>⑤ 步数上限</strong>：模型可能陷入“一直调工具”的循环，必须有上限。<code>TestRunToolsUnknownToolAndMaxSteps</code> 模拟了一个一直调用不存在工具的模型。</li>
+</ul>
+<p><code>TestRunToolsAllProviders</code> 用同一个 <code>RunTools</code> 对三家各跑一轮“调工具 → 回答”，然后检查第二个请求的原始 JSON：OpenAI 的 <code>encrypted_content</code>、Anthropic 的 <code>signature</code>、Gemini 的 thought <code>signature</code> 都必须被原样带了回去，工具结果都按各家格式和调用配上了对。</p>
+<p>这个循环现在是串行执行工具、没有超时、没有审批、没有检查点。第 03 模块会在这个骨架上逐个加上去。</p>
+<h2 id="22-换模型历史怎么迁移">22. 换模型：历史怎么迁移</h2>
+<p><strong>场景</strong>：前半段用 Claude，后半段想换 Gemini（更便宜、上下文更长，或者 Claude 拒答了要回退）。</p>
+<p>编码时的规则已经在每家的 <code>encode</code> 里了：</p>
+<div class="hl"><pre><span></span><code><span class="k">if</span><span class="w"> </span><span class="nx">part</span><span class="p">.</span><span class="nx">Provider</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s">"gemini"</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">part</span><span class="p">.</span><span class="nx">Raw</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1">// 同一家：原样回放</span>
+<span class="w">    </span><span class="nx">out</span><span class="p">.</span><span class="nx">Input</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">out</span><span class="p">.</span><span class="nx">Input</span><span class="p">,</span><span class="w"> </span><span class="nx">part</span><span class="p">.</span><span class="nx">Raw</span><span class="p">)</span>
+<span class="w">    </span><span class="k">continue</span>
+<span class="p">}</span>
+<span class="k">switch</span><span class="w"> </span><span class="nx">part</span><span class="p">.</span><span class="nx">Type</span><span class="w"> </span><span class="p">{</span>
+<span class="k">case</span><span class="w"> </span><span class="nx">PartText</span><span class="p">:</span><span class="w">       </span><span class="c1">// → user_input / model_output</span>
+<span class="k">case</span><span class="w"> </span><span class="nx">PartToolCall</span><span class="p">:</span><span class="w">   </span><span class="c1">// → function_call，arguments 是对象</span>
+<span class="k">case</span><span class="w"> </span><span class="nx">PartToolResult</span><span class="p">:</span><span class="w"> </span><span class="c1">// → function_result，带 name</span>
+<span class="c1">// PartReasoning、PartOpaque：别家的，丢掉</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><code>TestCrossProviderHistory</code> 把一段带 thinking 的 Anthropic 历史分别编码给 OpenAI 和 Gemini，断言：思考块和签名一个字节都没有泄漏过去，工具调用和结果都转成了对方的格式。</p>
+<p><strong>为什么推理块必须丢掉</strong>：签名和加密内容只有原厂商能验证、解密，发给别家要么报错，要么被当成普通文本塞进上下文。连同一家都有限制：OpenAI 的文档说推理只能在同一个模型家族里复用（GPT-5.6 系列内部可以，跨到 GPT-5.5 就会被忽略）。</p>
+<p><strong>代价</strong>：换模型后，新模型看不到之前的推理过程，只能看到“说了什么、调了什么工具、拿到了什么结果”。对大多数任务够用；对很依赖前面推理的长任务，换模型前可以让旧模型先写一段总结，作为文本放进历史。</p>
+<h2 id="23-官方-sdkopenai-兼容层还要自己写吗">23. 官方 SDK、OpenAI 兼容层，还要自己写吗？</h2>
+<p>本课手写客户端是为了<strong>看清协议</strong>。生产环境的选择：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>方案</th>
+<th>优点</th>
+<th>缺点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>各家官方 SDK</td>
+<td>新功能第一时间支持；类型完整；内置重试、流式拼装</td>
+<td>三套 API，Agent 代码要自己做适配层</td>
+</tr>
+<tr>
+<td>OpenAI 兼容端点（Gemini、大多数国产模型都提供）</td>
+<td>一套 SDK 调多家</td>
+<td>只覆盖“公共子集”；推理块、签名、厂商特有功能往往不支持或行为不同；错误码和停止原因映射各家不一</td>
+</tr>
+<tr>
+<td>第三方统一 SDK（Vercel AI SDK 等，第 04 模块讲）</td>
+<td>现成的统一抽象</td>
+<td>抽象层的取舍不一定合你的需要；新功能有延迟</td>
+</tr>
+<tr>
+<td>自己的薄适配层（本课）</td>
+<td>完全可控；能做“同家无损”</td>
+<td>要自己跟进协议变化</td>
+</tr>
+</tbody>
+</table></div>
+<p>本课程主线项目的选择：<strong>底层用官方 SDK 或直连 HTTP，上面套一层自己的 <code>Provider</code> 接口</strong>。接口是自己的，Agent 逻辑、评测、成本统计都依赖它；每家的实现可以随时从手写换成官方 SDK，只要测试还过。</p>
+<hr />
+<h2 id="本课小结">本课小结</h2>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>知识点</th>
+<th>一句话</th>
+<th>练习里的代码</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>三家形状</td>
+<td>OpenAI、Gemini 是时间线上的条目；Anthropic 是轮流说话、每句多个块</td>
+<td><code>encode</code> × 3</td>
+</tr>
+<tr>
+<td>工具参数</td>
+<td>OpenAI 是字符串，另两家是对象；统一成紧凑的 JSON 对象</td>
+<td><code>argsObject</code></td>
+</tr>
+<tr>
+<td>工具结果</td>
+<td>OpenAI 无 <code>is_error</code>；Anthropic 放在 user 消息最前面；Gemini 要带 <code>name</code></td>
+<td><code>TestOpenAIEncode</code> 等</td>
+</tr>
+<tr>
+<td>推理块</td>
+<td><code>encrypted_content</code> / <code>signature</code> / thought <code>signature</code>，必须原样回传</td>
+<td><code>TestRunToolsAllProviders</code></td>
+</tr>
+<tr>
+<td><code>store: false</code></td>
+<td>无状态，可移植可审计；Go 里不能 <code>omitempty</code></td>
+<td><code>oaRequest.Store</code></td>
+</tr>
+<tr>
+<td>停止原因</td>
+<td>七种原始值归成六种；<code>refusal</code> 是 HTTP 200</td>
+<td><code>anStop</code>、<code>toResponse</code></td>
+</tr>
+<tr>
+<td>用量口径</td>
+<td>Anthropic 输入不含缓存，Gemini 输出不含思考</td>
+<td><code>TestAnthropicGenerateUsageIncludesCache</code></td>
+</tr>
+<tr>
+<td>流式终止</td>
+<td>没收到终止事件就是失败</td>
+<td><code>runStream</code>、<code>ErrIncompleteStream</code></td>
+</tr>
+<tr>
+<td>流式拼装</td>
+<td>按 index 收集、排序，重建 JSON，复用非流式解码</td>
+<td><code>anStream.build</code>、<code>TestAnthropicStreamMatchesGenerate</code></td>
+</tr>
+<tr>
+<td>文档矛盾</td>
+<td>以参考手册为准、兼容另一种写法、用测试钉住</td>
+<td><code>TestGeminiStream</code></td>
+</tr>
+<tr>
+<td>迭代器</td>
+<td><code>iter.Seq2</code> ⇔ <code>AsyncGenerator</code>；<code>yield</code> 返回 false 必须停</td>
+<td><code>TestStreamBreakClosesConnection</code></td>
+</tr>
+<tr>
+<td>重试</td>
+<td>429 / 5xx / 529 / 断流可重试，4xx 不行；先听 <code>Retry-After</code></td>
+<td><code>APIError.Retryable</code>、<code>TestHTTPErrors</code></td>
+</tr>
+<tr>
+<td>Agent 循环</td>
+<td>原样进历史、每个调用都回结果、工具出错交给模型、有步数上限</td>
+<td><code>RunTools</code></td>
+</tr>
+<tr>
+<td>换模型</td>
+<td>同家无损、跨家降级，推理块丢掉</td>
+<td><code>TestCrossProviderHistory</code></td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="练习今天做完">练习（今天做完）</h2>
+<p>练习目录：<code>projects/07-llm-api/</code>。</p>
+<div class="hl"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>projects/07-llm-api
+make<span class="w"> </span><span class="nb">test</span><span class="w">                    </span><span class="c1"># go vet + go test -race -v，20 个测试</span>
+</code></pre></div>
+
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>文件</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>llm.go</code></td>
+<td>统一类型、<code>Provider</code> 接口、错误分类、HTTP 与三层检查、<code>runStream</code>、<code>Collect</code></td>
+</tr>
+<tr>
+<td><code>sse.go</code></td>
+<td>SSE 解析器（0.4 课的规范，按字节读行）</td>
+</tr>
+<tr>
+<td><code>openai.go</code> / <code>anthropic.go</code> / <code>gemini.go</code></td>
+<td>三家的编码、解码、流式状态机</td>
+</tr>
+<tr>
+<td><code>agent.go</code></td>
+<td><code>RunTools</code> 工具循环</td>
+</tr>
+<tr>
+<td><code>llm_test.go</code> + <code>testdata/</code></td>
+<td>20 个测试，fixture 按 2026 年 10 月官方文档的格式手写</td>
+</tr>
+<tr>
+<td><code>cmd/chat/</code></td>
+<td>用真实 API Key 试一下的命令行</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="练习-1读测试再打一次真实-api">练习 1：读测试，再打一次真实 API</h3>
+<ol>
+<li>运行 <code>make test</code>，找到三行 <code>t.Logf</code>：推理耗光输出上限、Anthropic 的真实输入、断流判失败。每一行用一句话说明它防住了什么线上问题。</li>
+<li>打开 <code>testdata/</code> 里的三个 <code>*_stream_tool.sse</code>，对照第 6、10、13 节，在纸上画出每家“工具调用”从第一个事件到终止事件的状态变化。</li>
+<li>如果你有任意一家的 API Key（国内可以用兼容 OpenAI 的模型服务，见选做），运行：</li>
+</ol>
+<div class="hl"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">ANTHROPIC_API_KEY</span><span class="o">=</span>...<span class="w">   </span><span class="c1"># 或 OPENAI_API_KEY / GEMINI_API_KEY</span>
+go<span class="w"> </span>run<span class="w"> </span>./cmd/chat<span class="w"> </span>-p<span class="w"> </span>anthropic<span class="w"> </span>-m<span class="w"> </span>你的模型名<span class="w"> </span><span class="s2">"用一句话解释 KV Cache"</span>
+go<span class="w"> </span>run<span class="w"> </span>./cmd/chat<span class="w"> </span>-p<span class="w"> </span>anthropic<span class="w"> </span>-m<span class="w"> </span>你的模型名<span class="w"> </span>-tools<span class="w"> </span><span class="s2">"现在几点？再算一下 17*23"</span>
+</code></pre></div>
+
+<p>记录 stderr 里打印的 <code>stop</code>、<code>input</code>、<code>cached</code>、<code>output</code>、<code>reasoning</code>。连续跑两次第二条命令，看 <code>cached</code> 有没有变化，想一想为什么（提示：1.5 课）。</p>
+<h3 id="练习-2改坏它看哪个测试失败">练习 2：改坏它，看哪个测试失败</h3>
+<p>每次只改一处，跑 <code>go test</code>，记录失败的测试名和原因（没有测试失败的，想清楚为什么），然后改回来：</p>
+<ol>
+<li><code>oaRequest</code> 的 <code>Store</code> 字段加上 <code>omitempty</code>；</li>
+<li><code>OpenAI.encode</code> 里删掉 <code>if part.Provider == "openai" &amp;&amp; len(part.Raw) &gt; 0</code> 这个分支（提示：想一想线上的表现会是什么）；</li>
+<li><code>anUsage.normalize</code> 里 <code>InputTokens</code> 只用 <code>u.InputTokens</code>；</li>
+<li><code>anStream.feed</code> 里 <code>message_delta</code> 的 usage 改成累加（<code>s.usage.OutputTokens += ...</code>）；</li>
+<li><code>runStream</code> 里把 <code>if !dec.done() { yield(Event{}, ErrIncompleteStream) }</code> 改成直接 <code>return</code>；</li>
+<li><code>gmStream.feed</code> 里删掉 <code>"arguments"</code> 这个 case 标签，只保留 <code>"arguments_delta"</code>；</li>
+<li><code>runStream</code> 里把 <code>if !yield(e, nil) { return }</code> 改成 <code>yield(e, nil)</code>（提示：看 panic 信息）；</li>
+<li><code>RunTools</code> 里工具出错时改成 <code>return nil, history, err</code>。哪个测试会失败？如果没有测试失败，补一个。</li>
+</ol>
+<h3 id="练习-3给任意-provider-加上重试">练习 3：给任意 Provider 加上重试</h3>
+<p>新建 <code>retry.go</code>，实现一个包装器：</p>
+<div class="hl"><pre><span></span><code><span class="c1">// Retry 给任意 Provider 加上重试。它本身也是一个 Provider。</span>
+<span class="kd">type</span><span class="w"> </span><span class="nx">Retry</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">Provider</span>
+<span class="w">    </span><span class="nx">MaxAttempts</span><span class="w"> </span><span class="kt">int</span><span class="w">           </span><span class="c1">// 总尝试次数，含第一次</span>
+<span class="w">    </span><span class="nx">Base</span><span class="w">        </span><span class="nx">time</span><span class="p">.</span><span class="nx">Duration</span><span class="w"> </span><span class="c1">// 第一次退避的上限</span>
+<span class="w">    </span><span class="nx">Max</span><span class="w">         </span><span class="nx">time</span><span class="p">.</span><span class="nx">Duration</span><span class="w"> </span><span class="c1">// 单次退避的上限</span>
+<span class="w">    </span><span class="nx">Sleep</span><span class="w">       </span><span class="kd">func</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">d</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Duration</span><span class="p">)</span><span class="w"> </span><span class="kt">error</span><span class="w"> </span><span class="c1">// 测试时替换掉</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>要求：</p>
+<ul>
+<li><code>Generate</code>：只重试 <code>IsRetryable</code> 的错误；第 n 次退避在 <code>[0, min(Base·2ⁿ, Max))</code> 里均匀随机（全抖动）；服务端给了 <code>Retry-After</code> 就按它等；等待期间 ctx 取消要立刻返回；</li>
+<li><code>Stream</code>：<strong>只有在还没有推出任何事件时才重试</strong>；已经推出过事件再失败，直接把错误交给调用方；</li>
+<li>写两个测试：<ul>
+<li>服务端依次返回 529、带 <code>Retry-After: 3</code> 的 429、正常结果，断言最终成功、等了两次、第二次正好等 3 秒；</li>
+<li>服务端第一次返回 503，第二次返回 <code>anthropic_stream_truncated.sse</code>，断言最终错误是 <code>ErrIncompleteStream</code>，而且服务端只被请求了 2 次。</li>
+</ul>
+</li>
+</ul>
+<h3 id="选做-1加一个-chat-completions-provider">选做 1：加一个 Chat Completions Provider</h3>
+<p>国内大多数模型服务（以及 Gemini 的兼容端点）提供的是 OpenAI <strong>Chat Completions</strong> 兼容接口：<code>POST /v1/chat/completions</code>，<code>messages</code> 里有 <code>system</code>、<code>tool</code> 角色，工具定义多包一层 <code>function</code>，工具调用在 <code>message.tool_calls</code> 里，流式用 <code>choices[0].delta</code> 增量、以 <code>data: [DONE]</code> 结束。实现一个 <code>ChatCompletions</code> Provider，让 <code>TestRunToolsAllProviders</code> 也能跑它。想一想：推理块在这个协议里放在哪？（提示：各家兼容层不一样，有的放在 <code>reasoning_content</code> 字段，有的不返回。）</p>
+<h3 id="选做-2gemini-的-generatecontent-provider">选做 2：Gemini 的 generateContent Provider</h3>
+<p>按第 14 节的对照表实现 <code>GeminiLegacy</code>，注意 <code>role: "model"</code>、camelCase、函数调用在流式里整块到达。</p>
+<hr />
+<h2 id="自测题">自测题</h2>
+<ol>
+<li>同样是工具调用参数，OpenAI Responses 给的是什么类型，Anthropic 和 Gemini 给的是什么类型？统一客户端怎么处理？</li>
+<li>OpenAI 的 <code>function_call</code> item 里有 <code>id</code> 和 <code>call_id</code>，回传结果时用哪个？</li>
+<li>带推理的模型调完工具，下一轮不把 reasoning item 发回去，会报错吗？会有什么后果？</li>
+<li>为什么 Go 里 <code>Store bool</code> 字段不能加 <code>omitempty</code>？</li>
+<li>Anthropic 的工具结果放在哪里？有哪三条摆放规则？违反最后一条会出现什么现象？</li>
+<li>Anthropic 返回 <code>stop_reason: "refusal"</code> 时 HTTP 状态码是多少？这对错误处理意味着什么？<code>pause_turn</code> 又该怎么处理？</li>
+<li>Anthropic 响应里 <code>input_tokens: 30</code>、<code>cache_read_input_tokens: 1000</code>、<code>cache_creation_input_tokens: 0</code>，这次请求的总输入是多少？Gemini 的 <code>total_output_tokens: 25</code>、<code>total_thought_tokens: 30</code>，统一口径的输出是多少？依据是什么？</li>
+<li>三家流式的终止事件分别是什么？哪一家的终止事件里带着完整结果？</li>
+<li>Anthropic 流式里，工具参数在什么时候才能 <code>JSON.parse</code>？无参工具会是什么情况？<code>message_delta</code> 的 usage 应该覆盖还是累加？</li>
+<li>Gemini 官方文档里工具参数增量有两种写法，你的解析器应该怎么办？</li>
+<li>Go 的 <code>iter.Seq2</code> 里 <code>yield</code> 返回 <code>false</code> 意味着什么？如果忽略它继续 <code>yield</code> 会怎样？TypeScript 的 <code>AsyncGenerator</code> 里对应的机制是什么？</li>
+<li>为什么统一客户端发回同一家时要用 <code>Raw</code> 原样回放，而不是用规范化字段重建？</li>
+<li>下面哪些错误该重试：400 <code>Unsupported parameter: 'temperature'</code>、429、Anthropic 529、401、流中途的 <code>overloaded_error</code>、流断了但已经给用户推了一半文字？</li>
+<li>对话前半段用 Claude（开了扩展思考），后半段换成 Gemini，历史里的 thinking block 应该怎么处理？为什么？换模型后会损失什么？</li>
+</ol>
+<hr />
+<h1 id="参考答案与详解">参考答案与详解</h1>
+<h2 id="自测题答案">自测题答案</h2>
+<p><strong>1.</strong> OpenAI Responses 的 <code>arguments</code> 是 <strong>JSON 字符串</strong>，Anthropic 的 <code>input</code> 和 Gemini 的 <code>arguments</code> 是 <strong>JSON 对象</strong>。统一客户端把所有来源都过一遍 <code>argsObject</code>：空串当 <code>{}</code>，不是对象就报错，合法的压缩成紧凑格式，存成 <code>json.RawMessage</code>。编码给 OpenAI 时再 <code>string(args)</code> 转成字符串。</p>
+<p><strong>2.</strong> 用 <strong><code>call_id</code></strong>（<code>call_...</code>）。<code>id</code>（<code>fc_...</code>）是这个 item 自己的 id，只在原样回放 item 时有意义。用错了，服务端找不到对应的调用，会报“没有对应 output 的 function_call”之类的错误。</p>
+<p><strong>3.</strong> 一般<strong>不会报错</strong>，这正是它危险的地方。后果是模型丢掉了做出这次调用时的推理上下文，要重新推理：效果变差、推理 token 变多、更贵。官方强烈建议把最后一次函数调用之后的所有 reasoning、function_call、function_call_output 原样传回。无状态模式下 reasoning item 里有 <code>encrypted_content</code>，就是让你原样带回去的。</p>
+<p><strong>4.</strong> <code>omitempty</code> 会在值为零值时省略字段，<code>false</code> 正好是 bool 的零值。于是 <code>store: false</code> 永远发不出去，服务端按默认值（存储）处理，你以为没存，其实存了。这类“想关的开关关不掉”的 bug 只能靠检查发出去的 JSON 来发现，<code>TestOpenAIEncode</code> 专门断言了请求里有 <code>"store":false</code>。</p>
+<p><strong>5.</strong> 放在下一条 <strong>user</strong> 消息里，作为 <code>tool_result</code> block。规则：上一轮每个 <code>tool_use</code> 都要有对应的 <code>tool_result</code>；<code>tool_result</code> 要排在这条消息最前面；<code>tool_result</code> 后面不要再加文字。违反最后一条，模型会学到“工具结果后面用户还会说话”，于是直接结束这一轮，返回一个只有 2–3 个 token 的空回复，<code>stop_reason</code> 是 <code>end_turn</code>，看起来像正常结束。</p>
+<p><strong>6.</strong> <strong>200</strong>。拒答是正常响应，只检查 HTTP 状态码的代码会把拒答当成正常回答。必须检查 <code>stop_reason</code>（统一口径里的 <code>Stop</code>），拒答时可以展示提示、换模型重试。<code>pause_turn</code> 表示服务端工具循环（比如 web search）到了迭代上限，把这次的 assistant 内容原样追加进历史再请求一次即可继续，<code>RunTools</code> 里就是 <code>continue</code>。</p>
+<p><strong>7.</strong> Anthropic：<code>30 + 0 + 1000 = 1030</code>，其中 1000 命中缓存。依据：Anthropic 的 <code>input_tokens</code> 只统计最后一个缓存断点之后的部分，缓存读写单独列出。Gemini：<code>25 + 30 = 55</code>。依据：Interactions 参考手册的示例里 <code>total_tokens</code> = 输入 + 输出 + 思考（7 + 20 + 22 = 49），说明 <code>total_output_tokens</code> 不含思考；统一口径的输出要包含推理，所以相加。</p>
+<p><strong>8.</strong> OpenAI：<code>response.completed</code>（以及 <code>response.incomplete</code>、<code>response.failed</code>）；Anthropic：<code>message_stop</code>；Gemini：<code>interaction.completed</code>（需要执行工具时是 <code>interaction.requires_action</code>）。<strong>OpenAI</strong> 的终止事件里带完整的 response 对象，可以直接复用非流式解码；另外两家要自己按 index 拼。</p>
+<p><strong>9.</strong> 在这个块的 <code>content_block_stop</code> 之后，把所有 <code>input_json_delta</code> 的 <code>partial_json</code> 拼起来再解析。中途的片段（<code>{"city": "北</code>）不是合法 JSON。无参工具可能一个 delta 都没有（或者只有一个空字符串的 delta），拼出来是空串，要当成 <code>{}</code>。<code>message_delta</code> 里的 usage 是<strong>累计值</strong>，要覆盖，累加会重复计数（练习 2 第 4 条）。</p>
+<p><strong>10.</strong> 以 API 参考手册为准（<code>arguments_delta</code> + <code>arguments</code>），同时兼容迁移指南的写法（<code>arguments</code> + <code>partial_arguments</code>），并在测试里用两种写法的 fixture 把行为钉住。不要只信一份示例；也不要因为文档矛盾就放弃流式。厂商修文档、改实现时，你的测试会第一时间告诉你哪种写法还在用。</p>
+<p><strong>11.</strong> 调用方不要更多数据了（<code>break</code>、<code>return</code> 或 panic）。生产方必须立刻停止并清理资源，在我们的实现里是 <code>return</code>，<code>defer resp.Body.Close()</code> 关闭 HTTP 连接，上游随之停止生成。忽略它继续调用 <code>yield</code>，Go 运行时会 panic（<code>range function continued iteration after function for loop body returned false</code>）。TypeScript 里对应的是：<code>for await</code> 中途 <code>break</code> 时运行时调用生成器的 <code>return()</code>，生成器里的 <code>finally</code> 块执行，在那里 <code>reader.cancel()</code> 释放连接。</p>
+<p><strong>12.</strong> 规范化字段只覆盖“公共语义”，而厂商响应里还有很多统一层不认识、但模型需要的东西：OpenAI 的 <code>encrypted_content</code>、<code>phase</code>，Anthropic 的 <code>signature</code>、<code>redacted_thinking</code> 的加密内容，Gemini 的 thought <code>signature</code>，以及未来新增的任何字段。重建时漏掉任何一个，轻则模型变笨变贵，重则请求被拒。原样回放保证同一家“一个字节都不丢”，统一层也不用追着每家的新字段改代码。</p>
+<p><strong>13.</strong> 该重试：429（按 <code>Retry-After</code>）、529、流中途的 <code>overloaded_error</code>。不该重试：400 参数不支持（改请求，不是重试）、401（检查 Key）。流断了但已经推给用户一半文字：<strong>不能直接重试</strong>，重试会从头再生成一遍，用户看到重复或前后不一致的内容。可选的做法：把错误报给用户由他决定；或者按第 10 节的办法续写；或者从一开始就把“生成”和“推送”解耦（0.4 课第 9 节的消息缓冲）。</p>
+<p><strong>14.</strong> 丢掉。thinking block 的签名只有 Anthropic 能验证，Gemini 不认识这种块，发过去要么被拒、要么被当成垃圾文本。规范化字段里的文本、工具调用、工具结果正常转换。损失是：新模型看不到之前的推理过程，只能看到对话内容和工具记录。对依赖前文推理的长任务，换模型前可以让原模型先写一段文字总结，作为普通文本留在历史里。</p>
+<h2 id="练习参考答案">练习参考答案</h2>
+<h3 id="练习-2">练习 2</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>改动</th>
+<th>失败的测试</th>
+<th>原因</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. <code>Store</code> 加 <code>omitempty</code></td>
+<td><code>TestOpenAIEncode</code></td>
+<td><code>"store":false</code> 被省略</td>
+</tr>
+<tr>
+<td>2. 删掉 OpenAI 原样回放分支</td>
+<td><code>TestRunToolsAllProviders/openai</code></td>
+<td>第二个请求里没有 <code>encrypted_content</code>（reasoning 被当成“别家的”丢了）。线上表现：不报错，只是变笨变贵</td>
+</tr>
+<tr>
+<td>3. 输入不加缓存</td>
+<td><code>TestAnthropicGenerateUsageIncludesCache</code>（<code>TestAnthropicStreamMatchesGenerate</code> 不会失败）</td>
+<td>30 ≠ 1030。流式和非流式用的是同一个 <code>normalize</code>，两边一起错，比较型测试发现不了，所以需要独立断言</td>
+</tr>
+<tr>
+<td>4. usage 累加</td>
+<td><code>TestAnthropicStreamMatchesGenerate</code></td>
+<td>流式的 output 变成 1 + 60 = 61，和非流式的 60 不一致</td>
+</tr>
+<tr>
+<td>5. 断流直接 return</td>
+<td>没有测试失败</td>
+<td>没有错误也没有 Done，<code>Collect</code> 兜底返回了 <code>ErrIncompleteStream</code>，所以 <code>TestAnthropicStreamTruncatedIsError</code> <strong>仍然通过</strong>。但直接 <code>range</code> 流的调用方会以为正常结束。补一个测试：不用 <code>Collect</code>，自己 <code>range</code>，断言要么收到 <code>EventDone</code>、要么收到非 nil 的 err</td>
+</tr>
+<tr>
+<td>6. 删掉 <code>"arguments"</code></td>
+<td><code>TestGeminiStream</code></td>
+<td>第二段参数被丢弃，拼出来是 <code>{"city":</code>，解析失败</td>
+</tr>
+<tr>
+<td>7. 忽略 <code>yield</code> 返回值</td>
+<td><code>TestStreamBreakClosesConnection</code></td>
+<td>panic：range function continued iteration after function for loop body returned false</td>
+</tr>
+<tr>
+<td>8. 工具出错中断循环</td>
+<td>没有测试失败</td>
+<td>现有测试里的工具都不出错。补一个：工具第一次返回 error、模型第二轮正常回答，断言 <code>RunTools</code> 成功且历史里有一条 <code>IsError</code> 的结果</td>
+</tr>
+</tbody>
+</table></div>
+<p>第 3、5、8 条是本练习想让你注意的：<strong>测试通过不等于行为正确</strong>。比较型测试抓不到两条路径一起错，兜底逻辑会掩盖下层的 bug。</p>
+<h3 id="练习-3retrygo">练习 3：<code>retry.go</code></h3>
+<div class="hl"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nx">llm</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="p">(</span>
+<span class="w">    </span><span class="s">"context"</span>
+<span class="w">    </span><span class="s">"errors"</span>
+<span class="w">    </span><span class="s">"iter"</span>
+<span class="w">    </span><span class="s">"math/rand/v2"</span>
+<span class="w">    </span><span class="s">"time"</span>
+<span class="p">)</span>
+
+<span class="c1">// Retry 给任意 Provider 加上重试：指数退避 + 全抖动，优先听服务端的 Retry-After。</span>
+<span class="c1">// 流式只在“还没有推出任何事件”时重试：推出去的东西收不回来。</span>
+<span class="kd">type</span><span class="w"> </span><span class="nx">Retry</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">Provider</span>
+<span class="w">    </span><span class="nx">MaxAttempts</span><span class="w"> </span><span class="kt">int</span><span class="w">                                              </span><span class="c1">// 总尝试次数，含第一次</span>
+<span class="w">    </span><span class="nx">Base</span><span class="w">        </span><span class="nx">time</span><span class="p">.</span><span class="nx">Duration</span><span class="w">                                    </span><span class="c1">// 第一次退避的上限</span>
+<span class="w">    </span><span class="nx">Max</span><span class="w">         </span><span class="nx">time</span><span class="p">.</span><span class="nx">Duration</span><span class="w">                                    </span><span class="c1">// 单次退避的上限</span>
+<span class="w">    </span><span class="nx">Sleep</span><span class="w">       </span><span class="kd">func</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">d</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Duration</span><span class="p">)</span><span class="w"> </span><span class="kt">error</span><span class="w"> </span><span class="c1">// 测试时替换掉</span>
+<span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">r</span><span class="w"> </span><span class="o">*</span><span class="nx">Retry</span><span class="p">)</span><span class="w"> </span><span class="nx">attempts</span><span class="p">()</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">MaxAttempts</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">1</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">MaxAttempts</span>
+<span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">r</span><span class="w"> </span><span class="o">*</span><span class="nx">Retry</span><span class="p">)</span><span class="w"> </span><span class="nx">delay</span><span class="p">(</span><span class="nx">attempt</span><span class="w"> </span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Duration</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nx">ae</span><span class="w"> </span><span class="o">*</span><span class="nx">APIError</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">errors</span><span class="p">.</span><span class="nx">As</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">ae</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">ae</span><span class="p">.</span><span class="nx">RetryAfter</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">ae</span><span class="p">.</span><span class="nx">RetryAfter</span><span class="w"> </span><span class="c1">// 服务端说了等多久，就等多久</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="nx">d</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">Base</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="nx">attempt</span><span class="w"> </span><span class="c1">// Base, 2Base, 4Base ...</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">d</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nx">d</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">Max</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">Max</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">d</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">rand</span><span class="p">.</span><span class="nx">N</span><span class="p">(</span><span class="nx">d</span><span class="p">)</span><span class="w"> </span><span class="c1">// 全抖动：[0, d) 均匀分布，避免一群客户端同时重试</span>
+<span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">r</span><span class="w"> </span><span class="o">*</span><span class="nx">Retry</span><span class="p">)</span><span class="w"> </span><span class="nx">wait</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">d</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Duration</span><span class="p">)</span><span class="w"> </span><span class="kt">error</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">Sleep</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">Sleep</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">d</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="nx">t</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">NewTimer</span><span class="p">(</span><span class="nx">d</span><span class="p">)</span>
+<span class="w">    </span><span class="k">defer</span><span class="w"> </span><span class="nx">t</span><span class="p">.</span><span class="nx">Stop</span><span class="p">()</span>
+<span class="w">    </span><span class="k">select</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="o">&lt;-</span><span class="nx">ctx</span><span class="p">.</span><span class="nx">Done</span><span class="p">():</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">ctx</span><span class="p">.</span><span class="nx">Err</span><span class="p">()</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="o">&lt;-</span><span class="nx">t</span><span class="p">.</span><span class="nx">C</span><span class="p">:</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">r</span><span class="w"> </span><span class="o">*</span><span class="nx">Retry</span><span class="p">)</span><span class="w"> </span><span class="nx">Generate</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">req</span><span class="w"> </span><span class="o">*</span><span class="nx">Request</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="nx">Response</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nx">last</span><span class="w"> </span><span class="kt">error</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">attempt</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="nx">attempt</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">attempts</span><span class="p">();</span><span class="w"> </span><span class="nx">attempt</span><span class="o">++</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">resp</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">Provider</span><span class="p">.</span><span class="nx">Generate</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">req</span><span class="p">)</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="o">!</span><span class="nx">IsRetryable</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="nx">resp</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="nx">last</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">err</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">attempt</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">attempts</span><span class="p">()</span><span class="o">-</span><span class="mi">1</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">break</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">wait</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">delay</span><span class="p">(</span><span class="nx">attempt</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="p">));</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="nx">last</span>
+<span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">r</span><span class="w"> </span><span class="o">*</span><span class="nx">Retry</span><span class="p">)</span><span class="w"> </span><span class="nx">Stream</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">req</span><span class="w"> </span><span class="o">*</span><span class="nx">Request</span><span class="p">)</span><span class="w"> </span><span class="nx">iter</span><span class="p">.</span><span class="nx">Seq2</span><span class="p">[</span><span class="nx">Event</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">]</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">yield</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">Event</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="kt">bool</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="nx">attempt</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="p">;</span><span class="w"> </span><span class="nx">attempt</span><span class="o">++</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nx">emitted</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="kc">false</span>
+<span class="w">            </span><span class="kd">var</span><span class="w"> </span><span class="nx">failed</span><span class="w"> </span><span class="kt">error</span>
+<span class="w">            </span><span class="k">for</span><span class="w"> </span><span class="nx">ev</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">Provider</span><span class="p">.</span><span class="nx">Stream</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">req</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                    </span><span class="nx">failed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">err</span>
+<span class="w">                    </span><span class="k">break</span>
+<span class="w">                </span><span class="p">}</span>
+<span class="w">                </span><span class="nx">emitted</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
+<span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="o">!</span><span class="nx">yield</span><span class="p">(</span><span class="nx">ev</span><span class="p">,</span><span class="w"> </span><span class="kc">nil</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                    </span><span class="k">return</span>
+<span class="w">                </span><span class="p">}</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="nx">failed</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="k">return</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="nx">emitted</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="o">!</span><span class="nx">IsRetryable</span><span class="p">(</span><span class="nx">failed</span><span class="p">)</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nx">attempt</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">attempts</span><span class="p">()</span><span class="o">-</span><span class="mi">1</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="nx">yield</span><span class="p">(</span><span class="nx">Event</span><span class="p">{},</span><span class="w"> </span><span class="nx">failed</span><span class="p">)</span>
+<span class="w">                </span><span class="k">return</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">wait</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">delay</span><span class="p">(</span><span class="nx">attempt</span><span class="p">,</span><span class="w"> </span><span class="nx">failed</span><span class="p">));</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="nx">yield</span><span class="p">(</span><span class="nx">Event</span><span class="p">{},</span><span class="w"> </span><span class="nx">err</span><span class="p">)</span>
+<span class="w">                </span><span class="k">return</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>逐行解读</strong></p>
+<ul>
+<li><strong>嵌入 <code>Provider</code></strong>：<code>Retry</code> 自动获得 <code>Name()</code>，又覆盖了 <code>Generate</code> 和 <code>Stream</code>，所以它本身就是一个 <code>Provider</code>，可以套在任何实现外面，也可以再被别的包装器套住（第 08 模块的熔断、第 11 模块的模型回退都是这个形状）。</li>
+<li><strong><code>delay</code></strong>：先看 <code>Retry-After</code>；没有就用指数退避加全抖动。<code>r.Base &lt;&lt; attempt</code> 在 attempt 很大时会溢出成负数，所以要检查 <code>d &lt;= 0</code>。<code>rand.N</code> 来自 <code>math/rand/v2</code>，参数必须大于 0。</li>
+<li><strong>为什么要抖动</strong>：限流时一大批客户端同时失败，如果都在 1 秒、2 秒、4 秒整点重试，会再次同时打爆服务。在区间里随机分散开，峰值就削平了。</li>
+<li><strong><code>Sleep</code> 可注入</strong>：测试里替换成“记录时长、立刻返回”，测试不用真的等，还能断言等了多久。</li>
+<li><strong><code>Stream</code> 的 <code>emitted</code></strong>：推出过任何事件之后就不再重试。注意内层 <code>range</code> 里 <code>break</code> 之后，内层迭代器会收到 <code>yield</code> 返回 <code>false</code>，关闭那次的 HTTP 连接，资源不泄漏。</li>
+</ul>
+<p>测试：</p>
+<div class="hl"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nx">llm</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="p">(</span>
+<span class="w">    </span><span class="s">"context"</span>
+<span class="w">    </span><span class="s">"errors"</span>
+<span class="w">    </span><span class="s">"io"</span>
+<span class="w">    </span><span class="s">"net/http"</span>
+<span class="w">    </span><span class="s">"net/http/httptest"</span>
+<span class="w">    </span><span class="s">"os"</span>
+<span class="w">    </span><span class="s">"sync/atomic"</span>
+<span class="w">    </span><span class="s">"testing"</span>
+<span class="w">    </span><span class="s">"time"</span>
+<span class="p">)</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="nx">TestRetry</span><span class="p">(</span><span class="nx">t</span><span class="w"> </span><span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">T</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nx">n</span><span class="w"> </span><span class="nx">atomic</span><span class="p">.</span><span class="nx">Int32</span>
+<span class="w">    </span><span class="nx">srv</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">httptest</span><span class="p">.</span><span class="nx">NewServer</span><span class="p">(</span><span class="nx">http</span><span class="p">.</span><span class="nx">HandlerFunc</span><span class="p">(</span><span class="kd">func</span><span class="p">(</span><span class="nx">w</span><span class="w"> </span><span class="nx">http</span><span class="p">.</span><span class="nx">ResponseWriter</span><span class="p">,</span><span class="w"> </span><span class="nx">r</span><span class="w"> </span><span class="o">*</span><span class="nx">http</span><span class="p">.</span><span class="nx">Request</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">switch</span><span class="w"> </span><span class="nx">n</span><span class="p">.</span><span class="nx">Add</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="mi">1</span><span class="p">:</span>
+<span class="w">            </span><span class="nx">w</span><span class="p">.</span><span class="nx">WriteHeader</span><span class="p">(</span><span class="mi">529</span><span class="p">)</span>
+<span class="w">            </span><span class="nx">io</span><span class="p">.</span><span class="nx">WriteString</span><span class="p">(</span><span class="nx">w</span><span class="p">,</span><span class="w"> </span><span class="s">`{"type":"error","error":{"type":"overloaded_error","message":"x"}}`</span><span class="p">)</span>
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="mi">2</span><span class="p">:</span>
+<span class="w">            </span><span class="nx">w</span><span class="p">.</span><span class="nx">Header</span><span class="p">().</span><span class="nx">Set</span><span class="p">(</span><span class="s">"Retry-After"</span><span class="p">,</span><span class="w"> </span><span class="s">"3"</span><span class="p">)</span>
+<span class="w">            </span><span class="nx">w</span><span class="p">.</span><span class="nx">WriteHeader</span><span class="p">(</span><span class="mi">429</span><span class="p">)</span>
+<span class="w">            </span><span class="nx">io</span><span class="p">.</span><span class="nx">WriteString</span><span class="p">(</span><span class="nx">w</span><span class="p">,</span><span class="w"> </span><span class="s">`{"type":"error","error":{"type":"rate_limit_error","message":"x"}}`</span><span class="p">)</span>
+<span class="w">        </span><span class="k">default</span><span class="p">:</span>
+<span class="w">            </span><span class="nx">b</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">os</span><span class="p">.</span><span class="nx">ReadFile</span><span class="p">(</span><span class="s">"testdata/anthropic_tool.json"</span><span class="p">)</span>
+<span class="w">            </span><span class="nx">w</span><span class="p">.</span><span class="nx">Write</span><span class="p">(</span><span class="nx">b</span><span class="p">)</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}))</span>
+<span class="w">    </span><span class="k">defer</span><span class="w"> </span><span class="nx">srv</span><span class="p">.</span><span class="nx">Close</span><span class="p">()</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nx">waits</span><span class="w"> </span><span class="p">[]</span><span class="nx">time</span><span class="p">.</span><span class="nx">Duration</span>
+<span class="w">    </span><span class="nx">r</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">Retry</span><span class="p">{</span><span class="nx">Provider</span><span class="p">:</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">Anthropic</span><span class="p">{</span><span class="nx">BaseURL</span><span class="p">:</span><span class="w"> </span><span class="nx">srv</span><span class="p">.</span><span class="nx">URL</span><span class="p">},</span><span class="w"> </span><span class="nx">MaxAttempts</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="nx">Base</span><span class="p">:</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="p">,</span><span class="w"> </span><span class="nx">Max</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="p">,</span>
+<span class="w">        </span><span class="nx">Sleep</span><span class="p">:</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">_</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">d</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Duration</span><span class="p">)</span><span class="w"> </span><span class="kt">error</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">waits</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">waits</span><span class="p">,</span><span class="w"> </span><span class="nx">d</span><span class="p">);</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">}}</span>
+<span class="w">    </span><span class="nx">resp</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">Generate</span><span class="p">(</span><span class="nx">context</span><span class="p">.</span><span class="nx">Background</span><span class="p">(),</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">Request</span><span class="p">{</span><span class="nx">Model</span><span class="p">:</span><span class="w"> </span><span class="s">"m"</span><span class="p">})</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nx">resp</span><span class="p">.</span><span class="nx">Stop</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="nx">StopToolUse</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">t</span><span class="p">.</span><span class="nx">Fatal</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">waits</span><span class="p">)</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nx">waits</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nx">waits</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">3</span><span class="o">*</span><span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">t</span><span class="p">.</span><span class="nx">Fatalf</span><span class="p">(</span><span class="s">"waits %v"</span><span class="p">,</span><span class="w"> </span><span class="nx">waits</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="nx">TestRetryStreamOnlyBeforeFirstEvent</span><span class="p">(</span><span class="nx">t</span><span class="w"> </span><span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">T</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nx">n</span><span class="w"> </span><span class="nx">atomic</span><span class="p">.</span><span class="nx">Int32</span>
+<span class="w">    </span><span class="nx">srv</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">httptest</span><span class="p">.</span><span class="nx">NewServer</span><span class="p">(</span><span class="nx">http</span><span class="p">.</span><span class="nx">HandlerFunc</span><span class="p">(</span><span class="kd">func</span><span class="p">(</span><span class="nx">w</span><span class="w"> </span><span class="nx">http</span><span class="p">.</span><span class="nx">ResponseWriter</span><span class="p">,</span><span class="w"> </span><span class="nx">r</span><span class="w"> </span><span class="o">*</span><span class="nx">http</span><span class="p">.</span><span class="nx">Request</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">k</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">n</span><span class="p">.</span><span class="nx">Add</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">k</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nx">w</span><span class="p">.</span><span class="nx">WriteHeader</span><span class="p">(</span><span class="mi">503</span><span class="p">)</span>
+<span class="w">            </span><span class="k">return</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="nx">w</span><span class="p">.</span><span class="nx">Header</span><span class="p">().</span><span class="nx">Set</span><span class="p">(</span><span class="s">"Content-Type"</span><span class="p">,</span><span class="w"> </span><span class="s">"text/event-stream"</span><span class="p">)</span>
+<span class="w">        </span><span class="nx">b</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">os</span><span class="p">.</span><span class="nx">ReadFile</span><span class="p">(</span><span class="s">"testdata/anthropic_stream_truncated.sse"</span><span class="p">)</span>
+<span class="w">        </span><span class="nx">w</span><span class="p">.</span><span class="nx">Write</span><span class="p">(</span><span class="nx">b</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}))</span>
+<span class="w">    </span><span class="k">defer</span><span class="w"> </span><span class="nx">srv</span><span class="p">.</span><span class="nx">Close</span><span class="p">()</span>
+<span class="w">    </span><span class="nx">r</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">Retry</span><span class="p">{</span><span class="nx">Provider</span><span class="p">:</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">Anthropic</span><span class="p">{</span><span class="nx">BaseURL</span><span class="p">:</span><span class="w"> </span><span class="nx">srv</span><span class="p">.</span><span class="nx">URL</span><span class="p">},</span><span class="w"> </span><span class="nx">MaxAttempts</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="nx">Base</span><span class="p">:</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Millisecond</span><span class="p">,</span><span class="w"> </span><span class="nx">Max</span><span class="p">:</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Millisecond</span><span class="p">}</span>
+<span class="w">    </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">Collect</span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nx">Stream</span><span class="p">(</span><span class="nx">context</span><span class="p">.</span><span class="nx">Background</span><span class="p">(),</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">Request</span><span class="p">{</span><span class="nx">Model</span><span class="p">:</span><span class="w"> </span><span class="s">"m"</span><span class="p">}),</span><span class="w"> </span><span class="kc">nil</span><span class="p">)</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="o">!</span><span class="nx">errors</span><span class="p">.</span><span class="nx">Is</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span><span class="w"> </span><span class="nx">ErrIncompleteStream</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">t</span><span class="p">.</span><span class="nx">Fatalf</span><span class="p">(</span><span class="s">"got %v"</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">n</span><span class="p">.</span><span class="nx">Load</span><span class="p">()</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">t</span><span class="p">.</span><span class="nx">Fatalf</span><span class="p">(</span><span class="s">"attempts %d: must not retry after events were emitted"</span><span class="p">,</span><span class="w"> </span><span class="nx">n</span><span class="p">.</span><span class="nx">Load</span><span class="p">())</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<hr />
+<h2 id="完成标准">完成标准</h2>
+<ul>
+<li>[ ] <code>make test</code> 20 个测试全部通过，能说出每个测试在防什么问题；</li>
+<li>[ ] 练习 1：画出了三家“工具调用”的流式状态变化；有 Key 的话用 <code>cmd/chat</code> 跑通了一次普通对话和一次工具调用，记录了用量；</li>
+<li>[ ] 练习 2：八处改动都做过，尤其能解释第 2、3、5 条为什么“测试发现不了”或“线上不报错”，并给第 5、8 条补上了测试；</li>
+<li>[ ] 练习 3：<code>retry.go</code> 和两个测试通过 <code>go test -race</code>；</li>
+<li>[ ] 能不看课件写出三家“带工具调用的一轮完整往返”的请求和响应 JSON；</li>
+<li>[ ] 能说出三家用量口径的两处差异和换算依据；</li>
+<li>[ ] 自测题 14 道都能讲清楚，尤其是第 3、5、7、12、13 题。</li>
+</ul>
+<p>做到以上几条，1.2 就可以勾选。下一课 <strong>1.3 结构化输出</strong>：JSON Schema、strict 模式、constrained decoding 的原理（回到 1.1 课的采样：在每一步把不合法的 token 的 logit 设成 -∞），以及三家结构化输出的差异。</p>
+    <nav class="pager"><a class="prev" href="01-01-transformer-tokenizer-sampling.html"><span>← 上一课 1.1</span>Transformer、Tokenizer 与采样</a></nav>
+    <p class="foot">© 2026 duang777 · 课件源文件：<a href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/notes/01-llm/02-mainstream-apis.md">notes/01-llm/02-mainstream-apis.md</a></p>
+  </article>
+</div>
+<script>
+document.querySelectorAll('article pre').forEach(function(pre){
+  var b=document.createElement('button');b.className='code__copy';b.textContent='复制';
+  b.onclick=function(){navigator.clipboard.writeText(pre.innerText).then(function(){b.textContent='已复制';setTimeout(function(){b.textContent='复制'},1200)})};
+  pre.parentNode.insertBefore(b,pre);
+});
+var links=[].slice.call(document.querySelectorAll('.toc a')),map={};
+links.forEach(function(a){map[decodeURIComponent(a.getAttribute('href').slice(1))]=a});
+var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting&&map[e.target.id]){links.forEach(function(l){l.classList.remove('on')});map[e.target.id].classList.add('on')}})},{rootMargin:'-80px 0px -70% 0px'});
+document.querySelectorAll('article h1[id],article h2[id]').forEach(function(h){io.observe(h)});
+</script>
+</body>
+</html>

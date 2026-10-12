@@ -1,0 +1,10 @@
+{
+  "id": "resp_text_1",
+  "object": "response",
+  "status": "completed",
+  "output": [
+    {"id": "msg_1", "type": "message", "role": "assistant", "status": "completed", "phase": "final_answer",
+     "content": [{"type": "output_text", "text": "北京今天晴，", "annotations": []}, {"type": "output_text", "text": "25°C。", "annotations": []}]}
+  ],
+  "usage": {"input_tokens": 200, "input_tokens_details": {"cached_tokens": 128}, "output_tokens": 12, "output_tokens_details": {"reasoning_tokens": 0}, "total_tokens": 212}
+}

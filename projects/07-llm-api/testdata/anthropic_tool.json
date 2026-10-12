@@ -1,0 +1,13 @@
+{
+  "id": "msg_a1",
+  "type": "message",
+  "role": "assistant",
+  "content": [
+    {"type": "thinking", "thinking": "用户问天气，需要调用工具。", "signature": "EqQBSIG=="},
+    {"type": "text", "text": "我查一下。"},
+    {"type": "tool_use", "id": "toolu_1", "name": "get_weather", "input": {"city": "北京"}}
+  ],
+  "stop_reason": "tool_use",
+  "stop_sequence": null,
+  "usage": {"input_tokens": 30, "cache_creation_input_tokens": 0, "cache_read_input_tokens": 1000, "output_tokens": 60}
+}

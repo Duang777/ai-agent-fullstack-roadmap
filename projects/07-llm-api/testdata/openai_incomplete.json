@@ -1,0 +1,7 @@
+{
+  "id": "resp_inc_1",
+  "status": "incomplete",
+  "incomplete_details": {"reason": "max_output_tokens"},
+  "output": [{"id": "rs_9", "type": "reasoning", "summary": [], "encrypted_content": "gAAAA-X"}],
+  "usage": {"input_tokens": 50, "input_tokens_details": {"cached_tokens": 0}, "output_tokens": 300, "output_tokens_details": {"reasoning_tokens": 300}}
+}

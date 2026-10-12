@@ -1,0 +1,33 @@
+event: interaction.created
+data: {"event_type":"interaction.created","interaction":{"id":"int_gs1","status":"in_progress","model":"gemini-3.8-flash"}}
+
+event: interaction.status_update
+data: {"event_type":"interaction.status_update","interaction_id":"int_gs1","status":"in_progress"}
+
+event: step.start
+data: {"event_type":"step.start","index":0,"step":{"type":"thought"}}
+
+event: step.delta
+data: {"event_type":"step.delta","index":0,"delta":{"type":"thought_summary","content":{"type":"text","text":"需要查天气。"}}}
+
+event: step.delta
+data: {"event_type":"step.delta","index":0,"delta":{"type":"thought_signature","signature":"sig_stream_1"}}
+
+event: step.stop
+data: {"event_type":"step.stop","index":0}
+
+event: step.start
+data: {"event_type":"step.start","index":1,"step":{"type":"function_call","id":"fc_gs1","name":"get_weather"}}
+
+event: step.delta
+data: {"event_type":"step.delta","index":1,"delta":{"type":"arguments_delta","arguments":"{\"city\": "}}
+
+event: step.delta
+data: {"type":"step.delta","index":1,"delta":{"type":"arguments","partial_arguments":"\"广州\"}"}}
+
+event: step.stop
+data: {"event_type":"step.stop","index":1,"status":"waiting"}
+
+event: interaction.requires_action
+data: {"type":"interaction.requires_action","interaction":{"id":"int_gs1","status":"requires_action","usage":{"total_input_tokens":90,"total_output_tokens":20,"total_thought_tokens":15}}}
+
