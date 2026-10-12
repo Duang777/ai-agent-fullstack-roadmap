@@ -56,16 +56,16 @@
 | 0.3 | Python | uv、Pydantic、asyncio TaskGroup、异步生成器 | [课件](notes/00-foundations/03-python.md) | [`02-py-agent-core`](projects/02-py-agent-core) | ✅ 完成 |
 | 0.4 | 流式协议 | HTTP 分块与 Flush、SSE 解析器、断线续传、中间层缓冲、WebSocket 双向打断 | [课件](notes/00-foundations/04-streaming.md) | [`03-streaming`](projects/03-streaming) | ✅ 完成 |
 | 0.5 | 工程基础 | Git 工作流、Linux 信号与排查、多阶段 Docker、健康检查、优雅退出、CI | [课件](notes/00-foundations/05-engineering.md) | [`04-ship`](projects/04-ship) | ✅ 完成 |
-| 0.6 | 数据库与缓存 | Postgres 建模、索引与键集分页、隔离级别与写偏斜、幂等键、SKIP LOCKED 队列、迁移；Redis 缓存与限流 | [课件](notes/00-foundations/06-database-cache.md) | [`05-store`](projects/05-store) | 📖 学习中 |
+| 0.6 | 数据库与缓存 | Postgres 建模、索引与键集分页、隔离级别与写偏斜、幂等键、SKIP LOCKED 队列、迁移；Redis 缓存与限流 | [课件](notes/00-foundations/06-database-cache.md) | [`05-store`](projects/05-store) | ✅ 完成 |
 
 ### 01 · LLM 原理与使用
 
 | # | 主题 | 核心内容 | 课件 | 练习 | 状态 |
 |---|---|---|---|---|---|
-| 1.1 | Transformer、Tokenizer、采样 | 字节级 BPE、流式 UTF-8 解码、注意力与因果掩码、KV Cache、temperature / top-p / min-p / 惩罚、API 采样参数现状 | [课件](notes/01-llm/01-transformer-tokenizer-sampling.md) | [`06-llm-basics`](projects/06-llm-basics) | 📖 学习中 |
-| 1.2 | 主流模型 API | OpenAI Responses、Anthropic Messages、Gemini Interactions 的消息结构、工具调用、流式事件、用量口径；推理块回传；同家无损、跨家降级的 Go 统一客户端与工具循环 | [课件](notes/01-llm/02-mainstream-apis.md) | [`07-llm-api`](projects/07-llm-api) | 📖 学习中 |
-| 1.3 | 结构化输出 | 提示词 / JSON mode / strict 三个层次；约束解码原理与手写前缀检查器；分布扭曲与字段顺序；三家 schema 子集、规则检查与转换；校验驱动的重试循环 | [课件](notes/01-llm/03-structured-output.md) | [`08-structured-output`](projects/08-structured-output) | 📖 学习中 |
-| 1.4 | 推理模型 | 推理 token 的四个特点；三家 effort / thinking / thinking_level 的写法与 400 组合；用量口径与两种截断；思考块签名绑定模型与前缀、只追加不修改；逐级升级、多数投票与“每个正确答案的 token” | [课件](notes/01-llm/04-reasoning-models.md) | [`09-reasoning`](projects/09-reasoning) | 📖 学习中 |
+| 1.1 | Transformer、Tokenizer、采样 | 字节级 BPE、流式 UTF-8 解码、注意力与因果掩码、KV Cache、temperature / top-p / min-p / 惩罚、API 采样参数现状 | [课件](notes/01-llm/01-transformer-tokenizer-sampling.md) | [`06-llm-basics`](projects/06-llm-basics) | ✅ 完成 |
+| 1.2 | 主流模型 API | OpenAI Responses、Anthropic Messages、Gemini Interactions 的消息结构、工具调用、流式事件、用量口径；推理块回传；同家无损、跨家降级的 Go 统一客户端与工具循环 | [课件](notes/01-llm/02-mainstream-apis.md) | [`07-llm-api`](projects/07-llm-api) | ✅ 完成 |
+| 1.3 | 结构化输出 | 提示词 / JSON mode / strict 三个层次；约束解码原理与手写前缀检查器；分布扭曲与字段顺序；三家 schema 子集、规则检查与转换；校验驱动的重试循环 | [课件](notes/01-llm/03-structured-output.md) | [`08-structured-output`](projects/08-structured-output) | ✅ 完成 |
+| 1.4 | 推理模型 | 推理 token 的四个特点；三家 effort / thinking / thinking_level 的写法与 400 组合；用量口径与两种截断；思考块签名绑定模型与前缀、只追加不修改；逐级升级、多数投票与“每个正确答案的 token” | [课件](notes/01-llm/04-reasoning-models.md) | [`09-reasoning`](projects/09-reasoning) | ✅ 完成 |
 
 ### 全部模块
 

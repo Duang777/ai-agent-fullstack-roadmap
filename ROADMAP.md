@@ -23,13 +23,13 @@
 - [x] Python（够用即可）：asyncio、Pydantic、uv
 - [x] HTTP / SSE / WebSocket 流式协议
 - [x] Git 工作流、Docker、Linux 基础
-- [ ] 数据库与缓存基础：Postgres 建模、索引、事务与隔离级别、迁移；Redis 数据结构
+- [x] 数据库与缓存基础：Postgres 建模、索引、事务与隔离级别、迁移；Redis 数据结构
 
 ## 1. LLM 原理与使用
-- [ ] Transformer、Tokenizer、采样参数（temperature/top-p）
-- [ ] 主流 API：OpenAI Responses、Anthropic Messages、Gemini
-- [ ] 结构化输出：JSON Schema、constrained decoding
-- [ ] 推理模型（reasoning / thinking budget）与成本权衡
+- [x] Transformer、Tokenizer、采样参数（temperature/top-p）
+- [x] 主流 API：OpenAI Responses、Anthropic Messages、Gemini
+- [x] 结构化输出：JSON Schema、constrained decoding
+- [x] 推理模型（reasoning / thinking budget）与成本权衡
 - [ ] 上下文窗口、Prompt Caching、长上下文退化
 - [ ] Prompt / Context Engineering 系统方法
 
