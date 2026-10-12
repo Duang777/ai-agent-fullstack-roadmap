@@ -1,0 +1,1187 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>1.4 推理模型：reasoning effort、thinking 与成本权衡 · AI Agent 全栈</title>
+<meta name="description" content="1.4 推理模型：reasoning effort、thinking 与成本权衡。duang777 的 AI Agent 全栈公开学习课件。" />
+<style>
+:root{
+  --bg:#0a0a0a;--surface:#111;--text:#ededed;--text-2:#a1a1a1;--text-3:rgb(255 255 255/.4);
+  --line:rgb(255 255 255/.1);--line-2:rgb(255 255 255/.06);
+  --sans:Inter,-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei","Helvetica Neue",sans-serif;
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+}
+*{box-sizing:border-box}
+html{color-scheme:dark}
+.toc{scrollbar-width:none}.toc::-webkit-scrollbar{display:none}
+html{scrollbar-width:thin;scrollbar-color:#333 transparent}
+::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#2a2a2a;border-radius:8px}::-webkit-scrollbar-thumb:hover{background:#3a3a3a}
+html{scroll-behavior:smooth;scroll-padding-top:80px}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;line-height:1.8;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+.nav{position:sticky;top:0;z-index:10;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;border-bottom:1px solid var(--line);background:rgb(10 10 10/.8);backdrop-filter:blur(12px)}
+.nav__brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-size:14px;font-weight:500}
+.nav__dot{width:10px;height:10px;border-radius:3px;background:var(--text)}
+.nav__links{display:flex;gap:20px;font-size:14px;color:var(--text-2)}
+.nav__links a{text-decoration:none}.nav__links a:hover{color:var(--text)}
+.wrap{max-width:1200px;margin:0 auto;padding:0 24px;display:grid;grid-template-columns:220px minmax(0,1fr);gap:56px}
+.toc{position:sticky;top:80px;align-self:start;max-height:calc(100vh - 100px);overflow:auto;padding:40px 0 40px;font-size:13px;line-height:1.6}
+.toc__label{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--text-3);text-transform:uppercase;margin-bottom:12px}
+.toc ul{list-style:none;margin:0;padding:0}
+.toc li{margin:0}
+.toc a{display:block;padding:4px 0 4px 12px;border-left:1px solid var(--line);color:var(--text-2);text-decoration:none}
+.toc a:hover,.toc a.on{color:var(--text);border-left-color:var(--text)}
+.toc ul ul a{padding-left:24px;font-size:12.5px;color:var(--text-3)}
+.toc ul ul a:hover,.toc ul ul a.on{color:var(--text)}
+article{min-width:0;max-width:760px;padding:48px 0 96px}
+.meta{font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--text-3);margin-bottom:16px}
+article h1.title{font-size:40px;line-height:1.2;letter-spacing:-.02em;font-weight:600;margin:0 0 24px}
+article h1{font-size:28px;line-height:1.3;letter-spacing:-.01em;font-weight:600;margin:72px 0 20px;padding-top:32px;border-top:1px solid var(--line)}
+article h2{font-size:22px;line-height:1.4;font-weight:600;margin:48px 0 16px}
+article h3{font-size:18px;font-weight:600;margin:36px 0 12px}
+article h4{font-size:16px;font-weight:600;margin:28px 0 8px}
+article p{margin:0 0 18px;color:#d4d4d4}
+article strong{color:var(--text);font-weight:600}
+article ul,article ol{padding-left:22px;margin:0 0 18px;color:#d4d4d4}
+article li{margin:4px 0}
+article a{text-decoration:underline;text-decoration-color:var(--text-3);text-underline-offset:3px}
+article a:hover{text-decoration-color:var(--text)}
+article hr{border:0;border-top:1px solid var(--line);margin:48px 0}
+article blockquote{margin:0 0 20px;padding:12px 18px;border-left:2px solid var(--text-2);background:var(--surface);border-radius:0 8px 8px 0;color:var(--text-2)}
+article blockquote p{margin:6px 0;color:var(--text-2)}
+article code{font-family:var(--mono);font-size:.88em;background:#1a1a1a;border:1px solid var(--line-2);border-radius:5px;padding:1px 6px}
+article pre{position:relative;margin:0 0 22px;padding:16px 18px;background:#0f0f0f;border:1px solid var(--line);border-radius:10px;overflow:auto;font-size:13.5px;line-height:1.65}
+article pre code{background:none;border:0;padding:0;font-size:inherit}
+.code{position:relative}
+.code__lang{position:absolute;top:8px;right:46px;font-family:var(--mono);font-size:11px;color:var(--text-3);z-index:1}
+.code__copy{position:absolute;top:6px;right:8px;z-index:1;font:11px var(--mono);color:var(--text-2);background:#1a1a1a;border:1px solid var(--line);border-radius:6px;padding:2px 7px;cursor:pointer}
+.code__copy:hover{color:var(--text)}
+.tbl{overflow-x:auto;margin:0 0 22px;border:1px solid var(--line);border-radius:10px}
+article table{border-collapse:collapse;width:100%;font-size:14px}
+article th,article td{padding:10px 14px;border-bottom:1px solid var(--line-2);text-align:left;vertical-align:top}
+article th{font-weight:600;background:var(--surface);color:var(--text)}
+article tr:last-child td{border-bottom:0}
+article details{margin:0 0 18px;border:1px solid var(--line);border-radius:10px;padding:10px 16px;background:var(--surface)}
+article summary{cursor:pointer;font-weight:500}
+.pager{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:72px;padding-top:32px;border-top:1px solid var(--line)}
+.pager a{display:block;padding:16px 18px;border:1px solid var(--line);border-radius:10px;text-decoration:none}
+.pager a:hover{border-color:var(--text-2)}
+.pager span{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--text-3)}
+.pager .next{text-align:right;grid-column:2}
+.foot{margin-top:40px;font-size:13px;color:var(--text-3)}
+/* 代码高亮：黑白灰为主 */
+.hl .c,.hl .c1,.hl .cm,.hl .ch,.hl .cs,.hl .cp,.hl .cpf{color:#6b6b6b;font-style:italic}
+.hl .k,.hl .kd,.hl .kn,.hl .kr,.hl .kt,.hl .kc,.hl .kp,.hl .ow{color:#ffffff;font-weight:600}
+.hl .s,.hl .s1,.hl .s2,.hl .sb,.hl .sc,.hl .sd,.hl .se,.hl .sh,.hl .si,.hl .sx,.hl .sr,.hl .ss,.hl .dl,.hl .sa{color:#86efac}
+.hl .m,.hl .mi,.hl .mf,.hl .mh,.hl .mo,.hl .il{color:#fcd34d}
+.hl .nf,.hl .fm,.hl .nc,.hl .nn{color:#e5e5e5;font-weight:500}
+.hl .nb,.hl .bp,.hl .nd,.hl .na,.hl .nt{color:#bdbdbd}
+.hl .o,.hl .p{color:#9a9a9a}
+.hl .gd{color:#fca5a5}.hl .gi{color:#86efac}
+.hl{color:#d4d4d4}
+@media (max-width:960px){.wrap{grid-template-columns:1fr;gap:0}.toc{display:none}article h1.title{font-size:30px}.nav__links a.hide-sm{display:none}}
+</style>
+</head>
+<body>
+<header class="nav">
+  <a class="nav__brand" href="../index.html"><span class="nav__dot"></span>AI Agent 全栈</a>
+  <nav class="nav__links">
+    <a href="../index.html#progress">课件</a>
+    <a class="hide-sm" href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/ROADMAP.md">路线图</a>
+    <a href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/notes/01-llm/04-reasoning-models.md">在 GitHub 上查看</a>
+  </nav>
+</header>
+<div class="wrap">
+  <aside class="toc"><div class="toc__label">本课目录</div><ul>
+<li><a href="#读前说明">读前说明</a></li>
+<li><a href="#第一部分推理模型是什么">第一部分：推理模型是什么</a><ul>
+<li><a href="#1-从一次过到先想再答">1. 从“一次过”到“先想再答”</a></li>
+<li><a href="#2-那些看不见的-token">2. 那些看不见的 token</a></li>
+<li><a href="#3-推理和工具调用交织">3. 推理和工具调用交织</a></li>
+</ul>
+</li>
+<li><a href="#第二部分怎么控制推理">第二部分：怎么控制推理</a><ul>
+<li><a href="#4-openaireasoningeffort">4. OpenAI：reasoning.effort</a></li>
+<li><a href="#5-anthropicadaptive-thinking-effort">5. Anthropic：adaptive thinking + effort</a></li>
+<li><a href="#6-geminithinking_level">6. Gemini：thinking_level</a></li>
+<li><a href="#7-统一映射">7. 统一映射</a></li>
+</ul>
+</li>
+<li><a href="#第三部分成本">第三部分：成本</a><ul>
+<li><a href="#8-推理-token-按输出价计费">8. 推理 token 按输出价计费</a></li>
+<li><a href="#9-两种截断">9. 两种截断</a></li>
+<li><a href="#10-推理配置和-prompt-cache">10. 推理配置和 Prompt Cache</a></li>
+</ul>
+</li>
+<li><a href="#第四部分推理块的生命周期">第四部分：推理块的生命周期</a><ul>
+<li><a href="#11-为什么必须回传">11. 为什么必须回传</a></li>
+<li><a href="#12-签名绑定了什么">12. 签名绑定了什么</a></li>
+<li><a href="#13-保留策略哪些历史推理还在上下文里">13. 保留策略：哪些历史推理还在上下文里</a></li>
+<li><a href="#14-换模型过滤和其他坑">14. 换模型、过滤和其他坑</a></li>
+</ul>
+</li>
+<li><a href="#第五部分什么时候值得多想">第五部分：什么时候值得多想</a><ul>
+<li><a href="#15-先按任务分类">15. 先按任务分类</a></li>
+<li><a href="#16-逐级升级先便宜地试失败了再多想">16. 逐级升级：先便宜地试，失败了再多想</a></li>
+<li><a href="#17-多数投票想得更多次">17. 多数投票：想得更多次</a></li>
+<li><a href="#18-给推理模型写提示词">18. 给推理模型写提示词</a></li>
+<li><a href="#本课小结">本课小结</a></li>
+<li><a href="#练习今天做完">练习（今天做完）</a></li>
+<li><a href="#自测题">自测题</a></li>
+</ul>
+</li>
+<li><a href="#参考答案与详解">参考答案与详解</a><ul>
+<li><a href="#自测题答案">自测题答案</a></li>
+<li><a href="#练习参考答案">练习参考答案</a></li>
+<li><a href="#完成标准">完成标准</a></li>
+</ul>
+</li>
+</ul>
+</aside>
+  <article>
+    <div class="meta">模块 01 · LLM 原理与使用 · 第 1.4 课</div>
+    <h1 class="title">1.4 推理模型：reasoning effort、thinking 与成本权衡</h1>
+    <blockquote>
+<p>第 1 部分 · 第 4 课 ｜ 预计 5–6 小时 ｜ 前置：1.1 采样与自回归、1.2 主流模型 API（推理块回传、用量口径）</p>
+<p>配套练习：<code>projects/09-reasoning/</code>（纯 Go 标准库，17 个测试）。把统一的推理强度映射到三家参数并处理不支持的取值；统一三家的推理 token 用量并算成本；用 HMAC 模拟思考块的签名，亲手验证“改一个字就 400”“改了前缀后面全失效”“换模型静默丢弃”；最后用一个能精确计算的模型回答“什么时候值得多想”。</p>
+</blockquote>
+<h2 id="读前说明">读前说明</h2>
+<p>1.2 课我们已经和推理块打过交道：调完工具要把一段看不懂的加密字符串原样发回去，不发模型就“变笨变贵”。那一课只讲了“怎么传”，这一课讲清楚三件事：</p>
+<ol>
+<li><strong>推理模型是什么</strong>：那些看不见的 token 在做什么，为什么它们能让答案更好；</li>
+<li><strong>怎么控制它</strong>：三家的旋钮各叫什么、取值范围是什么、哪些组合会直接 400；</li>
+<li><strong>值不值得</strong>：推理 token 按输出价计费，什么任务该开、开多大、怎么用更少的钱拿到同样的正确率。</li>
+</ol>
+<p>先看几个你会遇到的问题：</p>
+<ul>
+<li>同样 200 个字的回答，为什么一次请求比另一次贵了 20 倍？</li>
+<li><code>max_output_tokens</code> 设了 300，返回 <code>incomplete</code>，一个字都没有，钱却照扣了。为什么？</li>
+<li>把 <code>reasoning.effort</code> 从 <code>low</code> 改成 <code>high</code>，为什么 Prompt Cache 全部失效了？</li>
+<li>只是在客户端“整理了一下历史消息”，为什么 Anthropic 返回 400 “thinking blocks cannot be modified”？</li>
+<li>把对话从一个模型切到另一个，为什么推理上下文悄悄没了？</li>
+<li>什么任务开最高档也没用？什么任务开低档就够了？</li>
+</ul>
+<p>本课结束时你能：</p>
+<ol>
+<li>解释推理 token 的作用和代价：看不见、按输出计费、占上下文、可能耗光输出上限；</li>
+<li>写出三家的推理控制参数：OpenAI 的 <code>reasoning.effort</code>，Anthropic 的 adaptive thinking + <code>output_config.effort</code>，Gemini 的 <code>thinking_level</code>，并处理不支持的取值；</li>
+<li>统一三家的推理 token 用量口径，算出一次调用的真实成本，诊断两种截断；</li>
+<li>讲清推理块的生命周期：签名绑定模型和前缀、保留策略、跨模型丢弃，并避开常见的客户端 bug；</li>
+<li>用“每个正确答案花多少 token”评估推理策略，知道逐级升级、多数投票各自的前提。</li>
+</ol>
+<p><strong>关于时效</strong>：本课按 2026 年 10 月三家的官方文档核对。推理相关的参数是这一年变化最快的部分（Anthropic 4.7 起不再接受 <code>budget_tokens</code>，OpenAI 加了 <code>max</code> 档和 <code>pro</code> 模式），模型名和默认值一定以模型页为准。练习里的能力表是摘录，生产代码应该从 Models API 读取。</p>
+<hr />
+<h1 id="第一部分推理模型是什么">第一部分：推理模型是什么</h1>
+<h2 id="1-从一次过到先想再答">1. 从“一次过”到“先想再答”</h2>
+<p>1.1 课讲过，模型是自回归的：每一步只根据已经生成的内容预测下一个 token。普通模型回答问题时，从第一个字开始就是答案，中间没有草稿纸。一道题需要五步推导，它要么在“写答案”的过程中顺便推导，要么就直接猜。</p>
+<p>推理模型的做法是：<strong>先生成一段不给你看的推理，再生成答案</strong>。推理里它会复述问题、尝试几种思路、检查中间结果、放弃走不通的路。Anthropic 文档的描述很直接：没有思考时，模型必须一次就做对，不能打草稿、不能检查、不能中途改主意；对证明、棘手的 bug、长任务来说，第一个思路往往不是最好的。</p>
+<p>这种“用更多的生成来换更好的答案”叫<strong>测试时计算</strong>（test-time compute）：不改模型参数，只在推理阶段多花算力。它有两种基本形态：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>形态</th>
+<th>做法</th>
+<th>本课对应</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>想得更久</td>
+<td>单次生成更长的推理链</td>
+<td>第二部分的 effort / thinking_level</td>
+</tr>
+<tr>
+<td>想得更多次</td>
+<td>独立生成多个答案，投票或挑最好的</td>
+<td>第 16、17 节的逐级升级和多数投票</td>
+</tr>
+</tbody>
+</table></div>
+<p>推理模型为什么“会想”？公开资料里能确定的是：这类模型经过专门训练（通常包括在可验证任务上的强化学习），学会了产生有用的推理过程；具体训练细节各家没有公开，本课不展开。工程上你只需要记住两点：<strong>推理是生成出来的 token，所以要花钱、要时间、要占上下文</strong>；<strong>推理的长度可以调，但不能精确控制</strong>。</p>
+<h2 id="2-那些看不见的-token">2. 那些看不见的 token</h2>
+<p>推理 token 有四个特点，后面所有的工程问题都从这里来：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>特点</th>
+<th>含义</th>
+<th>后果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>看不见</strong></td>
+<td>三家都不返回原始推理链：OpenAI 只给可选的摘要和 <code>encrypted_content</code>；Anthropic 的 thinking 块是摘要（由另一个模型生成）或干脆为空；Gemini 的 thought step 只有可选摘要和 <code>signature</code></td>
+<td>你无法逐字检查模型怎么想的；摘要只能用来理解大致思路</td>
+</tr>
+<tr>
+<td><strong>按输出计费</strong></td>
+<td>计费按完整推理，不按你看到的摘要</td>
+<td>摘要很短，账单很长</td>
+</tr>
+<tr>
+<td><strong>占上下文</strong></td>
+<td>当前轮的推理占上下文窗口；历史推理是否保留看模型</td>
+<td>长对话里推理会挤占空间</td>
+</tr>
+<tr>
+<td><strong>算在输出上限里</strong></td>
+<td>OpenAI 的 <code>max_output_tokens</code>、Anthropic 的 <code>max_tokens</code>、Gemini 的 <code>max_output_tokens</code> 都包含推理</td>
+<td>上限设小了，推理阶段就能把它耗光</td>
+</tr>
+</tbody>
+</table></div>
+<p>关于“看不见”：Anthropic 文档说得很清楚，没有任何 <code>display</code> 设置会返回原始思维链；而且在 Opus 5.5、Sonnet 5.5 等模型上，在回答正文里索要模型的内部推理，可能被以 <code>reasoning_extraction</code> 类型拒答。想看推理就读 thinking 块，别在提示词里要求“把思考过程写出来”（1.3 课第 7 节提过同样的坑）。</p>
+<h2 id="3-推理和工具调用交织">3. 推理和工具调用交织</h2>
+<p>Agent 场景里，推理不只发生在开头。模型调用工具、拿到结果后，还会再想一想再决定下一步。这叫<strong>交错思考</strong>（interleaved thinking）：</p>
+<div class="hl"><pre><span></span><code>用户：北京今天要带伞吗？
+助手：[思考：需要查天气] [调用 get_weather(北京)]
+用户：[工具结果：小雨，18°C]
+助手：[思考：有雨，建议带伞] [回答：要带伞，今天有小雨。]
+</code></pre></div>
+
+<p>几个要点：</p>
+<ul>
+<li><strong>整个工具循环是同一个 assistant 回合</strong>。从模型的角度看，回合直到它给出最终回答才结束，中间的工具结果虽然以 user 消息的形式发回，但属于同一段连续的推理。练习的 <code>lastTurnStart</code> 就是按这个规则判断“最近一轮从哪开始”：只装着 <code>tool_result</code> 的 user 消息不算新的一轮；</li>
+<li><strong>中间的推理必须原样回传</strong>，否则模型丢了“我为什么要调这个工具”的上下文（1.2 课第 6 节）；</li>
+<li>三家现在都默认支持交错思考：OpenAI 的推理模型可以在工具调用之间思考；Anthropic 的 adaptive thinking 自动交错，不再需要 beta 头；Gemini 的 thought step 和 function call 在 <code>steps</code> 时间线上平级排列。</li>
+<li><strong>进度更新</strong>：Anthropic 的部分新模型（Fable 5.1、Opus 5.5、Sonnet 5.5 等）会在工具调用之间写一段给用户看的进度说明，它也是一个带签名的 thinking 块。<code>display: "updates"</code>（beta）只返回这类块的文字，适合做“思考中……正在编辑 auth.py”这样的状态栏。</li>
+</ul>
+<hr />
+<h1 id="第二部分怎么控制推理">第二部分：怎么控制推理</h1>
+<h2 id="4-openaireasoningeffort">4. OpenAI：reasoning.effort</h2>
+<div class="hl"><pre><span></span><code>curl<span class="w"> </span>https://api.openai.com/v1/responses<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Authorization: Bearer </span><span class="nv">$OPENAI_API_KEY</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Content-Type: application/json"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-d<span class="w"> </span><span class="s1">'{</span>
+<span class="s1">    "model": "gpt-6-astra",</span>
+<span class="s1">    "reasoning": {"effort": "low", "summary": "auto"},</span>
+<span class="s1">    "max_output_tokens": 25000,</span>
+<span class="s1">    "input": "写一个 bash 脚本，把 [1,2],[3,4],[5,6] 格式的矩阵转置后按同样格式输出。"</span>
+<span class="s1">  }'</span>
+</code></pre></div>
+
+<p><strong>逐行解读</strong></p>
+<ul>
+<li><strong><code>reasoning.effort</code></strong>：取值和模型有关，可能包括 <code>none</code>、<code>minimal</code>、<code>low</code>、<code>medium</code>、<code>high</code>、<code>xhigh</code>、<code>max</code>。越低越快越省，越高想得越完整。模型在同一档内部也会自适应：简单任务少想，复杂任务多想。</li>
+<li><strong>不支持的取值直接 400</strong>：GPT-6 Astra 不支持 <code>none</code>；GPT-6.1 Sol 不支持 <code>none</code> 和 <code>minimal</code>，默认 <code>medium</code>。默认值也因模型而异（GPT-5.5、GPT-5.6 默认 <code>medium</code>）。</li>
+<li><strong><code>summary: "auto"</code></strong>：要推理摘要。不写就没有。部分模型使用摘要前需要先完成组织验证。</li>
+<li><strong><code>max_output_tokens</code></strong>：包含推理 token。官方建议刚开始至少给推理和输出留 25000（第 9 节）。</li>
+</ul>
+<p>官方对各档的建议（节选）：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>effort</th>
+<th>适合</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>none</code></td>
+<td>延迟敏感、不需要推理的任务：语音、快速检索、分类</td>
+</tr>
+<tr>
+<td><code>low</code></td>
+<td>需要工具、规划、搜索但要省时省钱：数据分析、起草、客服</td>
+</tr>
+<tr>
+<td><code>medium</code></td>
+<td>质量和可靠性重要：Agent 编程、研究；多数场景的默认</td>
+</tr>
+<tr>
+<td><code>high</code></td>
+<td>难题、复杂调试、深度规划，质量比延迟重要</td>
+</tr>
+<tr>
+<td><code>xhigh</code></td>
+<td>深度研究、长时间运行的异步任务；<strong>只在 Eval 证明有明显收益时用</strong></td>
+</tr>
+<tr>
+<td><code>max</code></td>
+<td>最难的任务；在用 <code>xhigh</code> 的话，评估 <code>max</code> 是否更强</td>
+</tr>
+</tbody>
+</table></div>
+<p>另外四个 2026 年的新东西：</p>
+<ul>
+<li><strong><code>reasoning.mode: "pro"</code></strong>（GPT-5.6、GPT-6 系列）：和 effort 正交，做更多“模型工作”（官方说会聚合更多的模型工作来产出最终答案），token 用量和成本更高，按所选模型的标准单价计费；</li>
+<li><strong><code>reasoning.context</code></strong>：<code>current_turn</code> 只让当前回合的推理可用；<code>all_turns</code> 把之前回合的推理也渲染进上下文（GPT-5.6 系列和 GPT-6.1 Sol 默认 <code>all_turns</code>，更早的模型默认 <code>current_turn</code>）。推理只能在同一模型家族内复用，跨家族会被自动忽略；</li>
+<li><strong><code>configuration_update</code></strong>（GPT-6 系列）：在对话中途插入一个 <code>{"type": "configuration_update", "reasoning": {"effort": "high"}}</code> 条目来改推理强度，<strong>请求级的 <code>reasoning.effort</code> 保持不变</strong>，这样前缀不变，Prompt Cache 不会失效（第 10 节）；</li>
+<li><strong><code>phase</code></strong>：GPT-5.5 / 5.4 在长工具流程里建议给 assistant 消息标 <code>commentary</code>（中间说明）或 <code>final_answer</code>，回放历史时要保留，否则开场白可能被当成最终答案。</li>
+</ul>
+<h2 id="5-anthropicadaptive-thinking-effort">5. Anthropic：adaptive thinking + effort</h2>
+<div class="hl"><pre><span></span><code>curl<span class="w"> </span>https://api.anthropic.com/v1/messages<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"x-api-key: </span><span class="nv">$ANTHROPIC_API_KEY</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"anthropic-version: 2023-06-01"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Content-Type: application/json"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-d<span class="w"> </span><span class="s1">'{</span>
+<span class="s1">    "model": "claude-opus-5-5",</span>
+<span class="s1">    "max_tokens": 64000,</span>
+<span class="s1">    "thinking": {"type": "adaptive", "display": "summarized"},</span>
+<span class="s1">    "output_config": {"effort": "high"},</span>
+<span class="s1">    "messages": [{"role": "user", "content": "1071 和 462 的最大公约数是多少？"}]</span>
+<span class="s1">  }'</span>
+</code></pre></div>
+
+<p><strong>逐行解读</strong></p>
+<ul>
+<li><strong>两个旋钮</strong>：<code>thinking</code> 管“要不要在 thinking 块里思考”，<code>effort</code> 管“整个回答花多少功夫”，包括思考的频率和深度、正文长度、工具调用次数。降成本先降 effort；需要硬上限用 <code>max_tokens</code>（effort 只是行为信号，不是 token 预算）。</li>
+<li><strong><code>type: "adaptive"</code></strong>：模型自己决定想不想、想多深；低 effort 下简单问题可能完全不想。Opus 5.5、Sonnet 5.5、Haiku 5.5 等新模型默认就开着 adaptive，不用写；Opus 4.6 到 4.8、Sonnet 4.6 默认关闭，要显式写。</li>
+<li><strong>旧写法 <code>type: "enabled"</code> + <code>budget_tokens</code></strong>：固定思考预算（最少 1024）。4.6 上已弃用，<strong>4.7 及之后的模型直接 400</strong>。网上大量教程还是这个写法。</li>
+<li><strong>关掉思考</strong>：因模型而异。Opus 5.5 关不掉（<code>disabled</code> 返回 400）；Sonnet 5.5 不接受 <code>disabled</code>，最低档是 <code>between_tools</code>（不做开头的思考，只在工具之间写进度更新），且只在 effort ≤ <code>high</code> 时可用；Haiku 5.5、Opus 5 在 effort ≤ <code>high</code> 时可以 <code>disabled</code>。</li>
+<li><strong>effort 取值</strong>：<code>low</code>、<code>medium</code>、<code>high</code>、<code>xhigh</code>、<code>max</code>。大多数模型默认 <code>high</code>，<strong>Opus 5.5 和 Haiku 5.5 默认 <code>medium</code></strong>；不是每个支持 <code>max</code> 的模型都支持 <code>xhigh</code>（比如 Sonnet 4.6）。</li>
+<li><strong><code>display</code></strong>：<code>summarized</code> 返回摘要；<code>omitted</code> 返回空文本、只有签名（新模型的默认值，流式时首个正文 token 更快到，但<strong>照样按完整思考计费</strong>）；<code>updates</code>（beta）只返回进度更新的文字。</li>
+<li><strong>采样参数</strong>：Opus 4.7 及之后的大部分新模型上，非默认的 <code>temperature</code>、<code>top_p</code>、<code>top_k</code> <strong>不管开不开思考都返回 400</strong>（1.1 课第 22 节说过的坑在这里更严格了）。</li>
+</ul>
+<p>用量里的 <code>usage.output_tokens_details.thinking_tokens</code> 告诉你计费的输出 token 里有多少是思考；流式时这个拆分只在最后的 <code>message_delta</code> 事件里。</p>
+<h2 id="6-geminithinking_level">6. Gemini：thinking_level</h2>
+<div class="hl"><pre><span></span><code>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span><span class="s2">"https://generativelanguage.googleapis.com/v1beta/interactions"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"x-goog-api-key: </span><span class="nv">$GEMINI_API_KEY</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Content-Type: application/json"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-d<span class="w"> </span><span class="s1">'{</span>
+<span class="s1">    "model": "gemini-3.8-flash",</span>
+<span class="s1">    "input": "前 50 个质数的和是多少？",</span>
+<span class="s1">    "generation_config": {"thinking_level": "low", "thinking_summaries": "auto"}</span>
+<span class="s1">  }'</span>
+</code></pre></div>
+
+<p><strong>逐行解读</strong></p>
+<ul>
+<li><strong><code>thinking_level</code></strong>：只有 <code>minimal</code>、<code>low</code>、<code>medium</code>、<code>high</code> 四档，每个模型支持的子集和默认值不同：</li>
+</ul>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>模型</th>
+<th>默认</th>
+<th>支持</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>gemini-3.8-flash</td>
+<td>medium</td>
+<td>low、medium、high</td>
+</tr>
+<tr>
+<td>gemini-3.6-flash</td>
+<td>medium</td>
+<td>minimal、low、medium、high</td>
+</tr>
+<tr>
+<td>gemini-3.5-flash-lite</td>
+<td>minimal</td>
+<td>minimal、low、medium、high</td>
+</tr>
+<tr>
+<td>gemini-3.1-pro-preview</td>
+<td>high</td>
+<td>low、medium、high</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong><code>thinking_summaries: "auto"</code></strong>：要摘要。默认只返回最终输出。注意：简单请求、关闭摘要、或者图片类思考内容，都可能出现<strong>只有 signature 没有 summary</strong> 的 thought step，代码要能处理空摘要。</li>
+<li><strong><code>max_output_tokens</code></strong>：包含思考 token，是基础设施强制的硬截断，<strong>不会改变模型分配思考的方式</strong>。撞上限时状态是 <code>incomplete</code>，输出被截断或为空，思考 token 照样计费。官方建议：想省钱省时间，<strong>降 <code>thinking_level</code>，而不是把 <code>max_output_tokens</code> 设小</strong>。</li>
+<li><strong>流式</strong>：thought step 用 <code>thought_summary</code> delta 传摘要，最后一个 delta 是 <code>thought_signature</code>，然后 <code>step.stop</code>。</li>
+<li><strong>用量</strong>：<code>total_thought_tokens</code> 单独给出，<strong><code>total_output_tokens</code> 不含思考</strong>，计费是两者之和（和 OpenAI、Anthropic 的口径不同，第 8 节）。</li>
+</ul>
+<h2 id="7-统一映射">7. 统一映射</h2>
+<p>三家的旋钮放在一起：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th></th>
+<th>OpenAI</th>
+<th>Anthropic</th>
+<th>Gemini</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>参数</td>
+<td><code>reasoning.effort</code></td>
+<td><code>thinking.type</code> + <code>output_config.effort</code></td>
+<td><code>generation_config.thinking_level</code></td>
+</tr>
+<tr>
+<td>档位</td>
+<td>none、minimal、low、medium、high、xhigh、max（按模型）</td>
+<td>low、medium、high、xhigh、max（按模型）</td>
+<td>minimal、low、medium、high（按模型）</td>
+</tr>
+<tr>
+<td>关掉推理</td>
+<td><code>none</code>（部分模型不支持）</td>
+<td><code>disabled</code> 或 <code>between_tools</code>（部分模型关不掉，且只在 effort ≤ high）</td>
+<td>没有完全关闭的档位，最低 <code>minimal</code></td>
+</tr>
+<tr>
+<td>摘要</td>
+<td><code>reasoning.summary</code></td>
+<td><code>thinking.display</code></td>
+<td><code>thinking_summaries</code></td>
+</tr>
+<tr>
+<td>硬上限</td>
+<td><code>max_output_tokens</code>（含推理）</td>
+<td><code>max_tokens</code>（含思考）</td>
+<td><code>max_output_tokens</code>（含思考）</td>
+</tr>
+<tr>
+<td>中途改强度不破缓存</td>
+<td><code>configuration_update</code> 条目</td>
+<td>每条消息的 <code>output_config</code>（beta）</td>
+<td>未提供</td>
+</tr>
+</tbody>
+</table></div>
+<p>统一客户端要做的事：<strong>用一个统一的强度枚举，按模型能力表翻译成各家参数</strong>；遇到不支持的取值，要么报错，要么降到最近的受支持档位并记录警告。</p>
+<div class="hl"><pre><span></span><code><span class="kd">type</span><span class="w"> </span><span class="nx">Effort</span><span class="w"> </span><span class="kt">int</span>
+
+<span class="kd">const</span><span class="w"> </span><span class="p">(</span>
+<span class="w">    </span><span class="nx">EffortNone</span><span class="w"> </span><span class="nx">Effort</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">iota</span>
+<span class="w">    </span><span class="nx">EffortMinimal</span>
+<span class="w">    </span><span class="nx">EffortLow</span>
+<span class="w">    </span><span class="nx">EffortMedium</span>
+<span class="w">    </span><span class="nx">EffortHigh</span>
+<span class="w">    </span><span class="nx">EffortXHigh</span>
+<span class="w">    </span><span class="nx">EffortMax</span>
+<span class="p">)</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="nx">Resolve</span><span class="p">(</span><span class="nx">model</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">want</span><span class="w"> </span><span class="nx">Effort</span><span class="p">,</span><span class="w"> </span><span class="nx">strict</span><span class="w"> </span><span class="kt">bool</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="nx">Resolved</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">c</span><span class="p">,</span><span class="w"> </span><span class="nx">ok</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">Models</span><span class="p">[</span><span class="nx">model</span><span class="p">]</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="o">!</span><span class="nx">ok</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">Resolved</span><span class="p">{},</span><span class="w"> </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Errorf</span><span class="p">(</span><span class="s">"unknown model %q"</span><span class="p">,</span><span class="w"> </span><span class="nx">model</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nx">r</span><span class="w"> </span><span class="nx">Resolved</span>
+
+<span class="w">    </span><span class="c1">// “关掉推理”在 Anthropic 是单独的开关，先处理。</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">c</span><span class="p">.</span><span class="nx">Provider</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nx">Anthropic</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">want</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nx">EffortNone</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">c</span><span class="p">.</span><span class="nx">CanDisable</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nx">r</span><span class="p">.</span><span class="nx">Effort</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">EffortNone</span>
+<span class="w">            </span><span class="nx">r</span><span class="p">.</span><span class="nx">Body</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">any</span><span class="p">{</span><span class="s">"thinking"</span><span class="p">:</span><span class="w"> </span><span class="kt">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">any</span><span class="p">{</span><span class="s">"type"</span><span class="p">:</span><span class="w"> </span><span class="nx">c</span><span class="p">.</span><span class="nx">DisableAs</span><span class="p">}}</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="nx">r</span><span class="p">,</span><span class="w"> </span><span class="kc">nil</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">strict</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="nx">r</span><span class="p">,</span><span class="w"> </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Errorf</span><span class="p">(</span><span class="s">"%s: thinking cannot be disabled"</span><span class="p">,</span><span class="w"> </span><span class="nx">model</span><span class="p">)</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="nx">r</span><span class="p">.</span><span class="nx">Warnings</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nx">Warnings</span><span class="p">,</span><span class="w"> </span><span class="nx">model</span><span class="o">+</span><span class="s">": thinking cannot be disabled, using lowest effort"</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nx">eff</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">want</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="o">!</span><span class="nx">slices</span><span class="p">.</span><span class="nx">Contains</span><span class="p">(</span><span class="nx">c</span><span class="p">.</span><span class="nx">Supported</span><span class="p">,</span><span class="w"> </span><span class="nx">want</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">strict</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="nx">r</span><span class="p">,</span><span class="w"> </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Errorf</span><span class="p">(</span><span class="s">"%s does not support effort %q"</span><span class="p">,</span><span class="w"> </span><span class="nx">model</span><span class="p">,</span><span class="w"> </span><span class="nx">want</span><span class="p">)</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="nx">eff</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">nearest</span><span class="p">(</span><span class="nx">c</span><span class="p">.</span><span class="nx">Supported</span><span class="p">,</span><span class="w"> </span><span class="nx">want</span><span class="p">)</span>
+<span class="w">        </span><span class="nx">r</span><span class="p">.</span><span class="nx">Warnings</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nx">Warnings</span><span class="p">,</span><span class="w"> </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Sprintf</span><span class="p">(</span><span class="s">"%s: effort %s not supported, using %s"</span><span class="p">,</span><span class="w"> </span><span class="nx">model</span><span class="p">,</span><span class="w"> </span><span class="nx">want</span><span class="p">,</span><span class="w"> </span><span class="nx">eff</span><span class="p">))</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="c1">// ……按厂商生成 Body……</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>逐行解读</strong></p>
+<ul>
+<li><strong>枚举有顺序</strong>：<code>EffortNone</code> 到 <code>EffortMax</code> 的整数值从小到大，<code>nearest</code> 靠这个算“距离”。三家的档位名大致对齐，但同名档位在不同模型上花的 token 不一样（Anthropic 文档专门提醒 Sonnet 5.5 的档位“重新校准过”，不能照搬 Sonnet 5 的设置），所以统一的只是“意图”，效果要靠 Eval 校准。</li>
+<li><strong>Anthropic 的“关掉”单独处理</strong>：它不是 effort 的一个取值，而是 <code>thinking.type</code> 的另一种写法，而且每个模型写法不同（<code>disabled</code> 还是 <code>between_tools</code>）。练习的能力表用 <code>DisableAs</code> 字段记录。</li>
+<li><strong>strict 和 clamp 两种模式</strong>：strict 适合开发期，尽早发现配置错误（等价于服务端的 400）；clamp 适合网关，一个请求打到不同模型时自动降级，但要把警告记进日志和 trace，否则你会以为自己在用 <code>xhigh</code>，其实跑的是 <code>high</code>。</li>
+<li><strong>距离相同取便宜的</strong>：<code>claude-sonnet-4-6</code> 不支持 <code>xhigh</code>，<code>high</code> 和 <code>max</code> 一样近，选 <code>high</code>。原因是成本不对称：多想的那部分账单是实打实的，而少想的风险可以靠 Eval 和逐级升级补回来（第 16 节）。</li>
+</ul>
+<p><code>TestResolveStrictRejectsWhatTheServerRejects</code> 列了五个会被服务端拒绝的组合，<code>TestResolveClampPicksNearestCheaper</code> 验证降级结果。</p>
+<hr />
+<h1 id="第三部分成本">第三部分：成本</h1>
+<h2 id="8-推理-token-按输出价计费">8. 推理 token 按输出价计费</h2>
+<div class="hl"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nx">TestReasoningIsBilledAsOutput</span><span class="p">(</span><span class="nx">t</span><span class="w"> </span><span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">T</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">p</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">Price</span><span class="p">{</span><span class="nx">Input</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="nx">CacheRead</span><span class="p">:</span><span class="w"> </span><span class="mf">0.2</span><span class="p">,</span><span class="w"> </span><span class="nx">Output</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">}</span><span class="w"> </span><span class="c1">// 假价格，每百万 token</span>
+<span class="w">    </span><span class="nx">short</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">FromOpenAI</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">200</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
+<span class="w">    </span><span class="nx">long</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">FromOpenAI</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">8200</span><span class="p">,</span><span class="w"> </span><span class="mi">8000</span><span class="p">)</span><span class="w"> </span><span class="c1">// 同样 200 个可见 token，多了 8000 推理</span>
+<span class="w">    </span><span class="c1">// long.Cost(p) / short.Cost(p) == 21</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>用户看到的回答一模一样，成本差 21 倍。这是推理模型最反直觉的地方：<strong>成本由你看不见的部分决定</strong>。输出单价通常是输入单价的数倍（练习里假设 5 倍），而推理 token 全部按输出算。</p>
+<p>这也意味着：</p>
+<ul>
+<li>估算成本不能用“回答多长”，要看 <code>reasoning_tokens</code> / <code>thinking_tokens</code> / <code>total_thought_tokens</code> 的分布，最好按任务类型统计 P50 和 P95；</li>
+<li><code>display: "omitted"</code> 或不要摘要<strong>只省延迟、不省钱</strong>；</li>
+<li>降成本的主要手段是<strong>降 effort</strong>，其次是缩短输入（缓存、压缩上下文，1.5 课和第 03 模块），最后才是让回答变短。</li>
+</ul>
+<p>三家的用量口径不一样，练习统一成“Input 含缓存、Output 含推理”（和 1.2 课一致）：</p>
+<div class="hl"><pre><span></span><code><span class="c1">// OpenAI：input_tokens 已含 cached_tokens；output_tokens 已含 reasoning_tokens。</span>
+<span class="kd">func</span><span class="w"> </span><span class="nx">FromOpenAI</span><span class="p">(</span><span class="nx">input</span><span class="p">,</span><span class="w"> </span><span class="nx">cached</span><span class="p">,</span><span class="w"> </span><span class="nx">output</span><span class="p">,</span><span class="w"> </span><span class="nx">reasoning</span><span class="w"> </span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="nx">Usage</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">Usage</span><span class="p">{</span><span class="nx">Input</span><span class="p">:</span><span class="w"> </span><span class="nx">input</span><span class="p">,</span><span class="w"> </span><span class="nx">CacheRead</span><span class="p">:</span><span class="w"> </span><span class="nx">cached</span><span class="p">,</span><span class="w"> </span><span class="nx">Output</span><span class="p">:</span><span class="w"> </span><span class="nx">output</span><span class="p">,</span><span class="w"> </span><span class="nx">Reasoning</span><span class="p">:</span><span class="w"> </span><span class="nx">reasoning</span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// Anthropic：input_tokens 不含缓存，要把 cache_read 和 cache_creation 加回来；</span>
+<span class="c1">// output_tokens 已含思考，output_tokens_details.thinking_tokens 是其中的思考部分。</span>
+<span class="kd">func</span><span class="w"> </span><span class="nx">FromAnthropic</span><span class="p">(</span><span class="nx">input</span><span class="p">,</span><span class="w"> </span><span class="nx">cacheRead</span><span class="p">,</span><span class="w"> </span><span class="nx">cacheCreation</span><span class="p">,</span><span class="w"> </span><span class="nx">output</span><span class="p">,</span><span class="w"> </span><span class="nx">thinking</span><span class="w"> </span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="nx">Usage</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">Usage</span><span class="p">{</span><span class="nx">Input</span><span class="p">:</span><span class="w"> </span><span class="nx">input</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">cacheRead</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">cacheCreation</span><span class="p">,</span><span class="w"> </span><span class="nx">CacheRead</span><span class="p">:</span><span class="w"> </span><span class="nx">cacheRead</span><span class="p">,</span><span class="w"> </span><span class="nx">Output</span><span class="p">:</span><span class="w"> </span><span class="nx">output</span><span class="p">,</span><span class="w"> </span><span class="nx">Reasoning</span><span class="p">:</span><span class="w"> </span><span class="nx">thinking</span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// Gemini：total_output_tokens 不含思考，total_thought_tokens 单独给，计费是两者之和。</span>
+<span class="kd">func</span><span class="w"> </span><span class="nx">FromGemini</span><span class="p">(</span><span class="nx">input</span><span class="p">,</span><span class="w"> </span><span class="nx">output</span><span class="p">,</span><span class="w"> </span><span class="nx">thought</span><span class="w"> </span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="nx">Usage</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">Usage</span><span class="p">{</span><span class="nx">Input</span><span class="p">:</span><span class="w"> </span><span class="nx">input</span><span class="p">,</span><span class="w"> </span><span class="nx">Output</span><span class="p">:</span><span class="w"> </span><span class="nx">output</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">thought</span><span class="p">,</span><span class="w"> </span><span class="nx">Reasoning</span><span class="p">:</span><span class="w"> </span><span class="nx">thought</span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>逐行解读</strong></p>
+<ul>
+<li><strong>OpenAI</strong>：官方示例 <code>output_tokens: 1186</code> 里 1024 是推理，可见只有 162。</li>
+<li><strong>Anthropic</strong>：<code>output_tokens</code> 已经包含思考，<code>thinking_tokens</code> 是其中多少是思考。输入那边的坑在 1.2 课讲过：<code>input_tokens</code> 不含缓存。</li>
+<li><strong>Gemini</strong>：方向相反，<code>total_output_tokens</code> <strong>不含</strong>思考。官方流式示例里输出 171、思考 297，计费的输出是 468。把 Gemini 的 <code>total_output_tokens</code> 直接当成“总输出”，成本会算少一大半。</li>
+<li><code>TestUsageNormalization</code> 用的就是三家文档里的真实数字。</li>
+</ul>
+<h2 id="9-两种截断">9. 两种截断</h2>
+<p>推理模型撞上输出上限时，有两种完全不同的情况：</p>
+<div class="hl"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nx">Diagnose</span><span class="p">(</span><span class="nx">truncated</span><span class="w"> </span><span class="kt">bool</span><span class="p">,</span><span class="w"> </span><span class="nx">u</span><span class="w"> </span><span class="nx">Usage</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="nx">Diagnosis</span><span class="p">,</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">switch</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="o">!</span><span class="nx">truncated</span><span class="p">:</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">DiagOK</span><span class="p">,</span><span class="w"> </span><span class="s">""</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="nx">u</span><span class="p">.</span><span class="nx">Visible</span><span class="p">()</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">:</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">DiagExhaustedThinking</span><span class="p">,</span><span class="w"> </span><span class="s">"...raise the output limit or lower the effort"</span>
+<span class="w">    </span><span class="k">default</span><span class="p">:</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">DiagTruncatedAnswer</span><span class="p">,</span><span class="w"> </span><span class="s">"answer cut off: raise the output limit or ask for a shorter answer"</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>情况</th>
+<th>现象</th>
+<th>处理</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>推理阶段就耗光</strong></td>
+<td>一个可见字都没有；输入和推理照样计费</td>
+<td>调大上限，或者降 effort / thinking_level</td>
+</tr>
+<tr>
+<td><strong>回答写了一半</strong></td>
+<td>有部分回答</td>
+<td>调大上限，或者要求更短的回答</td>
+</tr>
+</tbody>
+</table></div>
+<p>第一种最坑：用户等了半分钟，什么都没收到，账单却照常。OpenAI 文档专门写了这种情况，并建议刚开始实验时至少给推理和输出留 25000 token，熟悉了自己任务的推理用量后再调。Gemini 文档的建议是降 <code>thinking_level</code> 而不是把 <code>max_output_tokens</code> 设小，因为后者只是硬截断，不会让模型少想。</p>
+<p>几条和上限相关的工程规则：</p>
+<ul>
+<li><strong>上限要按 effort 设</strong>：Anthropic 文档建议 Opus 系列在 <code>xhigh</code>、<code>max</code> 下从 64k 起步；Sonnet 5.5 做 Agent 编程直接设到 128000（模型上限）并用流式；</li>
+<li><strong>大上限要流式</strong>：Anthropic 的 SDK 在 <code>max_tokens</code> 超过 21333 时要求流式，避免 HTTP 超时（这是客户端校验，不是 API 限制）；</li>
+<li><strong>思考超过 32k 用 Batch</strong>：单次请求思考特别长时，容易撞上系统超时和连接限制，Anthropic 建议改用批处理接口；</li>
+<li><strong>监控 <code>Visible() == 0</code> 的比例</strong>：它是“上限设太小”的直接信号，放进第 09 模块的成本看板里。</li>
+</ul>
+<h2 id="10-推理配置和-prompt-cache">10. 推理配置和 Prompt Cache</h2>
+<p>1.5 课会系统讲缓存，这里先说一个和推理直接相关的坑：<strong>推理配置是前缀的一部分</strong>。</p>
+<ul>
+<li><strong>Anthropic</strong>：thinking 配置和最终生效的 effort 会被渲染进提示词。在 <code>adaptive</code>、<code>enabled</code>、<code>disabled</code> 之间切换，改 <code>budget_tokens</code>，改顶层 effort，都会让消息级的缓存断点失效（工具和 system 的断点也可能失效）。文档的实验：第三次请求把预算从 4000 改成 8000，<code>cache_read_input_tokens</code> 从 1370 变回 0；</li>
+<li><strong>OpenAI</strong>：改请求级的 <code>reasoning.effort</code> 同样会改变前缀。GPT-6 系列提供 <code>configuration_update</code> 条目：在下一条用户消息前插入它，请求级的 effort 保持不变，前缀不变，缓存保住；</li>
+<li><strong>Anthropic 的对应做法</strong>：支持的模型（Opus 5.5、Sonnet 5.5、Haiku 5.5 等）可以在 <code>messages</code> 里插一条 <code>role: "system"</code>、<code>content</code> 为空、带 <code>output_config.effort</code> 的消息（需要 beta 头 <code>mid-conversation-output-config-2026-07-01</code>），效果是从下一个有新输入的 user 回合开始换档，而且不破坏缓存。</li>
+</ul>
+<p>经验规则：<strong>一个长对话里，请求级的推理配置定下来就别动</strong>；需要换档，用各家提供的“中途更新”机制，或者在会话边界换。</p>
+<hr />
+<h1 id="第四部分推理块的生命周期">第四部分：推理块的生命周期</h1>
+<h2 id="11-为什么必须回传">11. 为什么必须回传</h2>
+<p>推理块（OpenAI 的 reasoning item、Anthropic 的 thinking 块、Gemini 的 thought step）在多轮对话里的规则，归纳成三句话：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th></th>
+<th>工具循环内（同一回合）</th>
+<th>跨回合</th>
+<th>没有工具调用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Anthropic</td>
+<td><strong>必须</strong>原样回传</td>
+<td><strong>建议</strong>全部回传，API 自己过滤</td>
+<td><strong>可以</strong>省略之前回合的思考</td>
+</tr>
+<tr>
+<td>OpenAI</td>
+<td><strong>强烈建议</strong>回传最后一次函数调用附带的推理；连续多次调用时，从最后一条用户消息之后的推理、调用、结果都要原样回传</td>
+<td>由 <code>reasoning.context</code> 决定是否使用</td>
+<td>同左</td>
+</tr>
+<tr>
+<td>Gemini（无状态模式）</td>
+<td><strong>必须</strong>原样回传全部 thought 块</td>
+<td>同左；切换模型时也要回传，后端负责兼容</td>
+<td>同左</td>
+</tr>
+</tbody>
+</table></div>
+<p>为什么工具循环内必须回传？模型调工具时，它的回答“暂停”了，等你把结果送回来它再接着写<strong>同一个回答</strong>。如果你把它之前的思考拿掉，它就得重新弄明白“我为什么要调这个工具、下一步打算干什么”，结果是更差、更贵，而且不报错。</p>
+<p>最简单、也是三家都推荐的做法：<strong>有状态模式</strong>（OpenAI 的 <code>previous_response_id</code>、Gemini 的 <code>previous_interaction_id</code> + <code>store: true</code>）让服务端管理；<strong>无状态模式</strong>就把上一轮的全部输出原样放回历史。1.2 课的统一客户端用 <code>Raw</code> 字段做的就是后者。</p>
+<h2 id="12-签名绑定了什么">12. 签名绑定了什么</h2>
+<p>练习用 HMAC 模拟了 Anthropic 文档描述的签名机制：</p>
+<div class="hl"><pre><span></span><code><span class="c1">// sign 生成签名：“模型 . 加密的完整思考 . MAC(模型, 前缀, 完整思考, 展示文本)”。</span>
+<span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">s</span><span class="w"> </span><span class="o">*</span><span class="nx">Server</span><span class="p">)</span><span class="w"> </span><span class="nx">sign</span><span class="p">(</span><span class="nx">model</span><span class="p">,</span><span class="w"> </span><span class="nx">prefix</span><span class="p">,</span><span class="w"> </span><span class="nx">hidden</span><span class="p">,</span><span class="w"> </span><span class="nx">shown</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">mac</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">hmac</span><span class="p">.</span><span class="nx">New</span><span class="p">(</span><span class="nx">sha256</span><span class="p">.</span><span class="nx">New</span><span class="p">,</span><span class="w"> </span><span class="nx">s</span><span class="p">.</span><span class="nx">key</span><span class="p">)</span>
+<span class="w">    </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Fprintf</span><span class="p">(</span><span class="nx">mac</span><span class="p">,</span><span class="w"> </span><span class="s">"%s\x00%s\x00%s\x00%s"</span><span class="p">,</span><span class="w"> </span><span class="nx">model</span><span class="p">,</span><span class="w"> </span><span class="nx">prefix</span><span class="p">,</span><span class="w"> </span><span class="nx">hidden</span><span class="p">,</span><span class="w"> </span><span class="nx">shown</span><span class="p">)</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">model</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">"."</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">base64</span><span class="p">.</span><span class="nx">StdEncoding</span><span class="p">.</span><span class="nx">EncodeToString</span><span class="p">([]</span><span class="kt">byte</span><span class="p">(</span><span class="nx">hidden</span><span class="p">))</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">"."</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">hex</span><span class="p">.</span><span class="nx">EncodeToString</span><span class="p">(</span><span class="nx">mac</span><span class="p">.</span><span class="nx">Sum</span><span class="p">(</span><span class="kc">nil</span><span class="p">))</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>逐行解读</strong></p>
+<ul>
+<li><strong>签名里带着完整思考</strong>：真实的 <code>signature</code> 是完整思考的加密副本。服务端收到回传的块时，从签名里还原完整思考放进上下文，而不是用你手里那段摘要。所以 <code>display: "omitted"</code> 的块虽然文本为空，回传后模型照样能“想起来”。练习用 base64 代替加密，只是为了能看出结构；真实签名是不透明的，<strong>不要解析它</strong>。</li>
+<li><strong>绑定模型</strong>：每个模型只读得懂自己和一组固定模型产生的思考块。练习的 <code>Reads</code> 表照文档设置：Fable 5.1 读得懂 Opus 5.5 和 Opus 5 的块；Opus 5.5 读得懂 Opus 5，但读不懂 Fable 5.1。读不懂的块<strong>静默丢弃，不报错，不计费</strong>。</li>
+<li><strong>绑定前缀</strong>：MAC 里包含“这个块之前所有内容”（system、tools、之前的消息）的哈希。前缀任何一处改了，这个块和<strong>之后所有思考块</strong>都失效。这是 Anthropic 从 Fable 5.1 开始的“preserved thinking”检查：2026 年 8 月 31 日之后创建的账号默认强制，更早的账号要在 <code>thinking.block_binding.prefix_mismatch_behavior</code> 里显式打开，可以选 <code>error</code>（整个请求 400）或 <code>drop_block</code>（丢掉失效的块继续）。</li>
+<li><strong>摘要也被签名覆盖</strong>：<code>summarized</code> 的块，改摘要里一个标点就失效（<code>TestEditingThinkingSummaryIsRejected</code>）；<code>omitted</code> 的块，客户端往空文本里写什么都会被忽略（<code>TestOmittedDisplayIgnoresClientText</code>），这也是文档原话。</li>
+</ul>
+<p>服务端的处理逻辑：</p>
+<div class="hl"><pre><span></span><code><span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="p">,</span><span class="w"> </span><span class="nx">b</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">msgs</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">b</span><span class="p">.</span><span class="nx">Kind</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="nx">KindThinking</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">b</span><span class="p">.</span><span class="nx">Kind</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="nx">KindRedacted</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">out</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">out</span><span class="p">,</span><span class="w"> </span><span class="nx">b</span><span class="p">)</span>
+<span class="w">        </span><span class="k">continue</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">invalidFrom</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">dropped</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">dropped</span><span class="p">,</span><span class="w"> </span><span class="nx">Dropped</span><span class="p">{</span><span class="nx">i</span><span class="p">,</span><span class="w"> </span><span class="s">"after_invalid"</span><span class="p">})</span><span class="w"> </span><span class="c1">// 前面有块失效了，后面全部作废</span>
+<span class="w">        </span><span class="k">continue</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="nx">producer</span><span class="p">,</span><span class="w"> </span><span class="nx">hidden</span><span class="p">,</span><span class="w"> </span><span class="nx">ok</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">s</span><span class="p">.</span><span class="nx">verify</span><span class="p">(</span><span class="nx">system</span><span class="p">,</span><span class="w"> </span><span class="nx">tools</span><span class="p">,</span><span class="w"> </span><span class="nx">msgs</span><span class="p">[:</span><span class="nx">i</span><span class="p">],</span><span class="w"> </span><span class="nx">b</span><span class="p">)</span>
+<span class="w">    </span><span class="k">switch</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="o">!</span><span class="nx">ok</span><span class="p">:</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">on</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nx">MismatchError</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Errorf</span><span class="p">(</span><span class="s">"messages[%d]: %w"</span><span class="p">,</span><span class="w"> </span><span class="nx">i</span><span class="p">,</span><span class="w"> </span><span class="nx">ErrModified</span><span class="p">)</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="nx">invalidFrom</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">i</span>
+<span class="w">        </span><span class="nx">dropped</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">dropped</span><span class="p">,</span><span class="w"> </span><span class="nx">Dropped</span><span class="p">{</span><span class="nx">i</span><span class="p">,</span><span class="w"> </span><span class="s">"invalid_signature"</span><span class="p">})</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="o">!</span><span class="nx">s</span><span class="p">.</span><span class="nx">canRead</span><span class="p">(</span><span class="nx">model</span><span class="p">,</span><span class="w"> </span><span class="nx">producer</span><span class="p">):</span>
+<span class="w">        </span><span class="nx">dropped</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">dropped</span><span class="p">,</span><span class="w"> </span><span class="nx">Dropped</span><span class="p">{</span><span class="nx">i</span><span class="p">,</span><span class="w"> </span><span class="s">"unreadable_model"</span><span class="p">})</span><span class="w"> </span><span class="c1">// 换了模型：静默丢弃</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="nx">lastTurn</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">!</span><span class="nx">s</span><span class="p">.</span><span class="nx">KeepAllTurns</span><span class="p">[</span><span class="nx">model</span><span class="p">]:</span>
+<span class="w">        </span><span class="nx">dropped</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">dropped</span><span class="p">,</span><span class="w"> </span><span class="nx">Dropped</span><span class="p">{</span><span class="nx">i</span><span class="p">,</span><span class="w"> </span><span class="s">"prior_turn"</span><span class="p">})</span><span class="w"> </span><span class="c1">// 只保留最近一轮的模型</span>
+<span class="w">    </span><span class="k">default</span><span class="p">:</span>
+<span class="w">        </span><span class="nx">out</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">out</span><span class="p">,</span><span class="w"> </span><span class="nx">Block</span><span class="p">{</span><span class="nx">Role</span><span class="p">:</span><span class="w"> </span><span class="nx">b</span><span class="p">.</span><span class="nx">Role</span><span class="p">,</span><span class="w"> </span><span class="nx">Kind</span><span class="p">:</span><span class="w"> </span><span class="nx">b</span><span class="p">.</span><span class="nx">Kind</span><span class="p">,</span><span class="w"> </span><span class="nx">Text</span><span class="p">:</span><span class="w"> </span><span class="nx">hidden</span><span class="p">,</span><span class="w"> </span><span class="nx">Signature</span><span class="p">:</span><span class="w"> </span><span class="nx">b</span><span class="p">.</span><span class="nx">Signature</span><span class="p">})</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><code>TestEditingPrefixInvalidatesLaterThinking</code> 演示了两种改前缀：改一个工具结果，它之后的那个思考块失效；改 system prompt，所有思考块都失效。<code>dropped</code> 列表对应真实 API 响应里的 <code>input_transformations</code>（需要 <code>thinking-binding-controls-2026-08-01</code> beta 头），它告诉你哪些块被丢了、为什么。</p>
+<p><strong>这对客户端意味着：对话历史要只追加、不修改</strong>。常见的“修改”包括：在 system prompt 里塞当前时间、每轮重写工具列表、客户端自己压缩或截断中间的消息、给旧消息打补丁。Anthropic 文档为每一种都给了替代方案：中途的 system 消息、<code>tool_addition</code> / <code>tool_removal</code> 块、每条消息的 <code>output_config</code>、服务端的压缩和上下文编辑。第 03 模块讲上下文工程时会详细展开。</p>
+<h2 id="13-保留策略哪些历史推理还在上下文里">13. 保留策略：哪些历史推理还在上下文里</h2>
+<p>即使你全部回传，服务端也不一定都用：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th></th>
+<th>规则</th>
+<th>后果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Anthropic “保留所有轮次”的模型（Opus 4.5 之后的 Opus、Sonnet 4.6 之后的 Sonnet、Haiku 5.5、Fable、Mythos）</td>
+<td>之前回合的思考块留在上下文，<strong>按输入计费</strong></td>
+<td>长对话里推理不断累积，占上下文、花钱；需要时用 thinking block clearing 清理</td>
+</tr>
+<tr>
+<td>Anthropic “只保留最近一轮”的模型（更早的 Opus、Sonnet，Haiku 4.5 及之前）</td>
+<td>用户发来新一轮输入时，之前的思考块自动剥离</td>
+<td>每轮的思考只是一次性成本</td>
+</tr>
+<tr>
+<td>OpenAI <code>current_turn</code> / <code>all_turns</code></td>
+<td>是否把之前回合的推理渲染进下一次采样</td>
+<td><code>all_turns</code> 有连续性，<code>current_turn</code> 省上下文</td>
+</tr>
+<tr>
+<td>Gemini</td>
+<td>无状态模式必须全部回传；有状态模式服务端管理</td>
+<td>—</td>
+</tr>
+</tbody>
+</table></div>
+<p><code>TestLastTurnOnlyModelsStripOlderThinking</code> 验证了两件事：用户发了新问题后，上一轮的两个思考块被剥离；但在工具循环内（最后一条 user 消息是 <code>tool_result</code>），思考块必须保留。这正是“工具循环是同一回合”的含义。</p>
+<h2 id="14-换模型过滤和其他坑">14. 换模型、过滤和其他坑</h2>
+<p><strong>换模型</strong>：<code>TestSwitchingModelsDropsUnreadableThinking</code> 里，从 Opus 5.5 切到 Fable 5.1，推理保住了；反方向切换，推理被静默丢弃。文档给的方向性很强：Fable 5.1 和 Mythos 5.1 能读更早模型的块，但从它们切走就会丢。OpenAI 同理，推理只在同一模型家族内复用（GPT-5.6 的 sol、terra、luna 之间可以，跨到 GPT-5.5 就不行）。Gemini 文档则说切换模型时照样回传，后端负责兼容。</p>
+<p><strong>结论</strong>：Anthropic 文档的建议是换模型时照样把思考块原样回传，由 API 决定丢不丢；只在“目标模型会忽略这些块”而你想省输入 token 时才自己剥离。跨厂商切换是另一回事：签名只有原厂商能验证，1.2 课的统一客户端在跨家时会丢掉推理块。</p>
+<p><strong>按类型过滤</strong>：</p>
+<div class="hl"><pre><span></span><code><span class="c1">// NaiveStrip 是一个常见的客户端 bug：只认识 text、thinking、tool_use 三种 assistant 块，</span>
+<span class="c1">// 其他类型一律过滤掉，结果把 redacted_thinking 弄丢了，破坏了回传协议。</span>
+</code></pre></div>
+
+<p>Anthropic 在部分推理因安全原因被加密时会返回 <code>redacted_thinking</code> 块，里面只有一个加密的 <code>data</code> 字段。如果你的代码按 <code>block.type == "thinking"</code> 挑选要回传的块，它会被静默丢掉。规则：<strong>不认识的块类型，原样保留</strong>。</p>
+<p><strong>回合中途切换思考配置</strong>：Anthropic 文档说，如果在工具调用和工具结果之间切换 thinking 配置，API 不报错，而是<strong>静默关闭这次请求的思考</strong>，还可能剥离会造成无效回合结构的思考块。检查方法是看响应里有没有 thinking 块。规则：<strong>在回合之间切换，不要在回合内切换</strong>。</p>
+<p><strong>强制工具调用</strong>：Opus 5.5、Sonnet 5.5、Fable 5.1、Mythos 5.1 在任何请求上都拒绝 <code>tool_choice: any</code> 或指定工具（400）；其他支持 adaptive 的模型可以强制，但强制时响应直接从工具调用开始，没有思考块。想让模型先想再调工具，用 <code>auto</code> 并在提示词里说明什么时候该用。</p>
+<hr />
+<h1 id="第五部分什么时候值得多想">第五部分：什么时候值得多想</h1>
+<h2 id="15-先按任务分类">15. 先按任务分类</h2>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>任务</th>
+<th>推理有没有用</th>
+<th>起步建议</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>分类、抽取、改写、翻译、简单问答</td>
+<td>基本没用，有时还会过度思考</td>
+<td>最低档（<code>none</code> / <code>minimal</code> / <code>low</code> / 关闭）</td>
+</tr>
+<tr>
+<td>客服、起草、执行明确的代码修改</td>
+<td>有一点</td>
+<td><code>low</code></td>
+</tr>
+<tr>
+<td>多步工具调用、规划、Agent 编程、研究</td>
+<td>明显</td>
+<td><code>medium</code>，按 Eval 决定是否升 <code>high</code></td>
+</tr>
+<tr>
+<td>数学证明、复杂调试、架构评审、安全审查</td>
+<td>很大</td>
+<td><code>high</code> 起步，<code>xhigh</code> / <code>max</code> 要有 Eval 证据</td>
+</tr>
+<tr>
+<td>长时间运行的异步任务（几十分钟以上）</td>
+<td>很大</td>
+<td><code>xhigh</code>，配合 Batch 或后台执行</td>
+</tr>
+</tbody>
+</table></div>
+<p>两条原则，三家文档说法一致：</p>
+<ol>
+<li><strong>effort 是调优旋钮，不是救命稻草</strong>。OpenAI 的原话是“把 <code>reasoning.effort</code> 当作调优旋钮，而不是恢复质量的主要手段”。效果不好，先看提示词、上下文、工具设计；</li>
+<li><strong>从文档建议的默认值起步，用 Eval 扫一遍</strong>。Anthropic 对每个新模型都建议重新做一次 effort sweep，而不是照搬旧模型的设置；OpenAI 对 <code>xhigh</code> 的说法是“只在你的 Eval 显示出明显收益、足以抵消额外延迟和成本时才用”。</li>
+</ol>
+<h2 id="16-逐级升级先便宜地试失败了再多想">16. 逐级升级：先便宜地试，失败了再多想</h2>
+<p>如果有一个可靠的<strong>验证器</strong>（单元测试、Schema 校验、能执行的检查、一个能判对错的规则），就不必每题都用最高档：先用 <code>low</code> 试，验证失败再升 <code>medium</code>、<code>high</code>。</p>
+<div class="hl"><pre><span></span><code><span class="c1">// 成功率 = 1 - Π(1 - p_i)</span>
+<span class="c1">// 期望 token = Σ tokens_i × Π_{j&lt;i}(1 - p_j)     （只有前面都失败，才会跑到第 i 级）</span>
+<span class="kd">func</span><span class="w"> </span><span class="nx">Escalate</span><span class="p">(</span><span class="nx">tiers</span><span class="w"> </span><span class="p">[]</span><span class="nx">Tier</span><span class="p">)</span><span class="w"> </span><span class="nx">Expect</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">fail</span><span class="p">,</span><span class="w"> </span><span class="nx">tokens</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">t</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">tiers</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">tokens</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="nx">fail</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nx">t</span><span class="p">.</span><span class="nx">Tokens</span>
+<span class="w">        </span><span class="nx">fail</span><span class="w"> </span><span class="o">*=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nx">t</span><span class="p">.</span><span class="nx">Success</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">Expect</span><span class="p">{</span><span class="mi">1</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nx">fail</span><span class="p">,</span><span class="w"> </span><span class="nx">tokens</span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>练习里设了一组（虚构但量级合理的）数字：70% 简单题、30% 难题，各档的成功率和平均 token 如下。</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th></th>
+<th>low</th>
+<th>medium</th>
+<th>high</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>简单题</td>
+<td>95%，800</td>
+<td>97%，3000</td>
+<td>98%，9000</td>
+</tr>
+<tr>
+<td>难题</td>
+<td>30%，1500</td>
+<td>60%，6000</td>
+<td>80%，20000</td>
+</tr>
+</tbody>
+</table></div>
+<p><code>TestEscalationBeatsAlwaysHigh</code> 的输出：</p>
+<div class="hl"><pre><span></span><code>永远 low ：成功率 75.5%， 1010 token/题， 1338 token/正确
+永远 high：成功率 92.6%，12300 token/题，13283 token/正确
+逐级升级 ：成功率 98.3%， 4064 token/题， 4134 token/正确
+</code></pre></div>
+
+<p>逐级升级同时赢了两边：比“永远 high”正确率更高、token 只有三分之一。原因有两个：大部分简单题在 <code>low</code> 就解决了，只有少数题走到 <code>high</code>；而难题在多次尝试下，总有一次成功的概率比单次 <code>high</code> 更高。</p>
+<p><strong>但这个结果有三个前提，缺一个就不成立</strong>：</p>
+<ol>
+<li><strong>验证器可靠</strong>。练习 3 会让你实现一个不完美的验证器：一半错误答案被放过时，成功率从 94.4% 掉到 56.6%。没有验证器，逐级升级就退化成“永远 low”；</li>
+<li><strong>尝试相互独立</strong>。公式假设每次尝试互不相关。实际上同一道题对模型“难”的原因往往是同一个，低档失败的题高档也更容易失败，所以真实收益会比公式算的少。这是一个乐观的上界；</li>
+<li><strong>能接受延迟</strong>。走到第三级的题要跑三次，P95 延迟会明显变长。交互式场景可以并行先跑 <code>low</code> 和 <code>high</code>，谁先通过验证用谁，用钱换时间。</li>
+</ol>
+<p><strong>看“每个正确答案花多少 token”</strong>，而不是只看成功率或只看成本。“永远 low” 的单题成本最低，但每答对一题要 1338 token；“永远 high” 是它的 10 倍。这个指标会在第 06 模块（Eval）和第 09 模块（成本治理）反复用到。</p>
+<h2 id="17-多数投票想得更多次">17. 多数投票：想得更多次</h2>
+<p>另一种测试时计算：同一个问题独立采样 n 次，取出现最多的答案（self-consistency）。</p>
+<div class="hl"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nx">MajorityAccuracy</span><span class="p">(</span><span class="nx">p</span><span class="w"> </span><span class="kt">float64</span><span class="p">,</span><span class="w"> </span><span class="nx">n</span><span class="w"> </span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="kt">float64</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">acc</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mf">0.0</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">k</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">n</span><span class="o">/</span><span class="mi">2</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="nx">k</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="nx">n</span><span class="p">;</span><span class="w"> </span><span class="nx">k</span><span class="o">++</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">acc</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="nx">binom</span><span class="p">(</span><span class="nx">n</span><span class="p">,</span><span class="w"> </span><span class="nx">k</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nx">math</span><span class="p">.</span><span class="nx">Pow</span><span class="p">(</span><span class="nx">p</span><span class="p">,</span><span class="w"> </span><span class="kt">float64</span><span class="p">(</span><span class="nx">k</span><span class="p">))</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nx">math</span><span class="p">.</span><span class="nx">Pow</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="nx">p</span><span class="p">,</span><span class="w"> </span><span class="kt">float64</span><span class="p">(</span><span class="nx">n</span><span class="o">-</span><span class="nx">k</span><span class="p">))</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">acc</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>单次正确率 60% 时：</p>
+<div class="hl"><pre><span></span><code>单次 60%，投票 1/3/5/15 次：60.0% / 64.8% / 68.3% / 78.7%
+</code></pre></div>
+
+<p>前提和限制：</p>
+<ul>
+<li><strong>答案要能比较是否相同</strong>：选择题、数值、分类标签可以；开放式文本不行（要用另一个模型当评委挑，第 06 模块）；</li>
+<li><strong>单次正确率要超过 50%</strong>：<code>MajorityAccuracy(0.4, 15)</code> 小于 0.4，投票会把错误的多数放大；</li>
+<li><strong>同样假设独立</strong>：用相同提示词、相同温度采样，错误往往是相关的，真实收益比公式小；</li>
+<li><strong>成本是 n 倍</strong>，但 n 次可以并行，延迟不变。</li>
+</ul>
+<p>和逐级升级相比：投票不需要验证器，但需要答案可比较；逐级升级需要验证器，但对开放式任务也适用。两者也可以和“想得更久”组合。</p>
+<h2 id="18-给推理模型写提示词">18. 给推理模型写提示词</h2>
+<p>推理模型的提示词和普通模型有几处不同，三家文档的建议基本一致：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>建议</th>
+<th>原因</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>给清楚的目标、约束和输出格式，<strong>不要规定每一步怎么想</strong></td>
+<td>模型自己会规划；你写的步骤可能比它想的更差</td>
+</tr>
+<tr>
+<td>对 Agent 任务，说清什么算完成、怎么自我验证</td>
+<td>推理模型会用这些信息检查自己的工作</td>
+</tr>
+<tr>
+<td>不要求“把思考过程写进回答”</td>
+<td>浪费 token；在 Anthropic 新模型上还可能被拒答；要看推理就读 thinking 块或摘要</td>
+</tr>
+<tr>
+<td>延迟敏感时，让模型先写一句简短的开场再深入思考</td>
+<td>OpenAI 的建议：首个可见 token 更早出现</td>
+</tr>
+<tr>
+<td>输出很长的任务，提示模型少想一点</td>
+<td>Gemini 的建议：把思考预算留给真正难的部分</td>
+</tr>
+<tr>
+<td>效果不好先改提示词和上下文，再考虑升档</td>
+<td>effort 是调优旋钮</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="本课小结">本课小结</h2>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>知识点</th>
+<th>一句话</th>
+<th>练习里的代码</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>推理 token</td>
+<td>看不见、按输出计费、占上下文、算在输出上限里</td>
+<td><code>Usage</code>、<code>TestReasoningIsBilledAsOutput</code></td>
+</tr>
+<tr>
+<td>三家旋钮</td>
+<td><code>reasoning.effort</code> / adaptive + <code>effort</code> / <code>thinking_level</code></td>
+<td><code>Resolve</code>、<code>Models</code></td>
+</tr>
+<tr>
+<td>不支持的取值</td>
+<td>服务端直接 400；网关里降到最近的便宜档并记录</td>
+<td><code>TestResolveStrict…</code>、<code>TestResolveClamp…</code></td>
+</tr>
+<tr>
+<td>用量口径</td>
+<td>OpenAI、Anthropic 的输出含推理；Gemini 的输出不含思考</td>
+<td><code>FromOpenAI</code>、<code>FromAnthropic</code>、<code>FromGemini</code></td>
+</tr>
+<tr>
+<td>两种截断</td>
+<td>推理阶段耗光最坑：一个字没有，照样计费</td>
+<td><code>Diagnose</code></td>
+</tr>
+<tr>
+<td>配置与缓存</td>
+<td>推理配置是前缀的一部分；中途改用 <code>configuration_update</code> / 每条消息的 <code>output_config</code></td>
+<td>第 10 节</td>
+</tr>
+<tr>
+<td>签名</td>
+<td>带着完整思考，绑定模型和前缀；改一个字就失效</td>
+<td><code>sign</code>、<code>verify</code>、<code>Render</code></td>
+</tr>
+<tr>
+<td>只追加不修改</td>
+<td>改前缀让之后所有思考块失效</td>
+<td><code>TestEditingPrefixInvalidatesLaterThinking</code></td>
+</tr>
+<tr>
+<td>保留策略</td>
+<td>有的模型保留所有轮次（按输入计费），有的只留最近一轮；工具循环内必须保留</td>
+<td><code>TestLastTurnOnly…</code></td>
+</tr>
+<tr>
+<td>换模型</td>
+<td>读不懂的思考静默丢弃，方向很重要</td>
+<td><code>TestSwitchingModels…</code></td>
+</tr>
+<tr>
+<td>值不值得</td>
+<td>看每个正确答案花多少 token；逐级升级要可靠的验证器，投票要可比较的答案</td>
+<td><code>Escalate</code>、<code>MajorityAccuracy</code></td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="练习今天做完">练习（今天做完）</h2>
+<p>练习目录：<code>projects/09-reasoning/</code>。</p>
+<div class="hl"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>projects/09-reasoning
+make<span class="w"> </span><span class="nb">test</span><span class="w">      </span><span class="c1"># go vet + go test -race -v，17 个测试</span>
+</code></pre></div>
+
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>文件</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>effort.go</code></td>
+<td>统一的推理强度枚举、模型能力表、<code>Resolve</code> 映射与降级</td>
+</tr>
+<tr>
+<td><code>usage.go</code></td>
+<td>三家用量统一、成本计算、截断诊断</td>
+</tr>
+<tr>
+<td><code>history.go</code></td>
+<td>思考块签名、前缀绑定、跨模型可读性、保留策略的模拟服务端</td>
+</tr>
+<tr>
+<td><code>value.go</code></td>
+<td>逐级升级与多数投票的期望计算</td>
+</tr>
+<tr>
+<td><code>reasoning_test.go</code></td>
+<td>17 个测试</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="练习-1读输出算一笔账">练习 1：读输出，算一笔账</h3>
+<ol>
+<li>运行 <code>make test</code>，找到三处 <code>t.Logf</code>。用自己的话解释：为什么“可见输出一样”成本能差 21 倍；为什么逐级升级能同时比“永远 high”更准、更便宜；为什么投票 15 次能把 60% 提到 78.7%。</li>
+<li>把 <code>easy</code> 和 <code>hard</code> 的比例从 70:30 改成 20:80（难题为主），再看三种策略的“token/正确”。逐级升级还划算吗？为什么？</li>
+<li>用 <code>FromGemini(62, 171, 297)</code> 和假价格 <code>Price{Input: 2, Output: 10}</code> 算一次成本；再假装你忘了加思考 token，用 <code>Usage{Input: 62, Output: 171}</code> 算一次。差了多少？</li>
+</ol>
+<h3 id="练习-2改坏它看哪个测试失败">练习 2：改坏它，看哪个测试失败</h3>
+<p>每次只改一处，跑 <code>go test</code>，记录失败的测试名和原因，然后改回来：</p>
+<ol>
+<li><code>nearest</code> 里距离相同时改成取更高的档位（<code>s &lt; best</code> 改成 <code>s &gt; best</code>）；</li>
+<li><code>FromAnthropic</code> 里不把缓存加回输入（<code>Input: input</code>）；</li>
+<li><code>FromGemini</code> 里不把思考加进输出（<code>Output: output</code>）；</li>
+<li><code>prefixDigest</code> 里把思考块也按 <code>Text</code> 计入前缀（把 <code>if b.Kind == KindThinking || b.Kind == KindRedacted</code> 改成 <code>if false</code>）。为什么偏偏是 omitted 的测试失败？</li>
+<li><code>lastTurnStart</code> 里把只装 <code>tool_result</code> 的 user 消息也当成新一轮（去掉 <code>&amp;&amp; msgs[i].Kind != KindToolResult</code>）；</li>
+<li><code>Render</code> 里遇到失效的块后不再记录 <code>invalidFrom</code>（改成 <code>_ = invalidFrom</code>）；</li>
+<li><code>canRead</code> 永远返回 true；</li>
+<li><code>Diagnose</code> 里用 <code>u.Output == 0</code> 代替 <code>u.Visible() == 0</code>。</li>
+</ol>
+<h3 id="练习-3不完美的验证器">练习 3：不完美的验证器</h3>
+<p>现实里的验证器会犯两种错：把错误答案放过（false accept），把正确答案打回（false reject）。在 <code>value.go</code> 里实现：</p>
+<div class="hl"><pre><span></span><code><span class="c1">// EscalateVerified：最后一级不再验证，直接返回。</span>
+<span class="kd">func</span><span class="w"> </span><span class="nx">EscalateVerified</span><span class="p">(</span><span class="nx">tiers</span><span class="w"> </span><span class="p">[]</span><span class="nx">Tier</span><span class="p">,</span><span class="w"> </span><span class="nx">falseAccept</span><span class="p">,</span><span class="w"> </span><span class="nx">falseReject</span><span class="w"> </span><span class="kt">float64</span><span class="p">)</span><span class="w"> </span><span class="nx">Expect</span>
+</code></pre></div>
+
+<p>新建 <code>verify_test.go</code>，断言：</p>
+<ul>
+<li><code>falseAccept = falseReject = 0</code> 时，结果和 <code>Escalate(hard)</code> 完全一样；</li>
+<li><code>falseAccept = 0.5</code> 时，成功率和 token 都比完美验证器低（错误答案提前“通过”了）；</li>
+<li><code>falseReject = 0.5</code> 时，token 比完美验证器高（正确答案被打回，多跑了高档）。</li>
+</ul>
+<p>做完想一想：在你的 Agent 里，哪些步骤有可靠的验证器？哪些没有？没有的那些，逐级升级还值得用吗？</p>
+<h3 id="选做一个推理网关">选做：一个推理网关</h3>
+<p>把 <code>Resolve</code>、<code>Usage</code>、<code>Diagnose</code> 组合成一个函数：输入任务类型和模型名，输出请求参数和建议的 <code>max_output_tokens</code>；每次响应回来后记录 <code>Visible() == 0</code> 的比例，超过 5% 时自动把该任务类型的上限调大一档。这是第 11 模块模型网关的一个雏形。</p>
+<hr />
+<h2 id="自测题">自测题</h2>
+<ol>
+<li>推理 token 有哪四个特点？各自带来什么工程问题？</li>
+<li>为什么 <code>display: "omitted"</code> 不省钱？它省的是什么？</li>
+<li>写出三家控制推理强度的参数名和取值范围。哪家可以完全关掉推理？关掉的写法分别是什么？</li>
+<li>为什么给 GPT-6 Astra 传 <code>reasoning.effort: "none"</code> 会失败？给 Claude Opus 4.7 传 <code>thinking: {type: "enabled", budget_tokens: 10000}</code> 呢？</li>
+<li>统一客户端遇到模型不支持的 effort，有哪两种处理方式？各适合什么场景？降级时为什么选便宜的那一档？</li>
+<li>三家用量里，“输出 token”是否包含推理？如果把 Gemini 的 <code>total_output_tokens</code> 当成总输出，会发生什么？</li>
+<li>推理模型的两种截断分别是什么？哪一种更糟？各自怎么处理？</li>
+<li>为什么在长对话里改 effort 会让 Prompt Cache 失效？OpenAI 和 Anthropic 分别提供了什么不破坏缓存的换档方式？</li>
+<li>Anthropic 的思考块签名绑定了哪两样东西？改了一个之前的工具结果，会发生什么？</li>
+<li>“对话历史只追加、不修改”具体要求什么？举三个常见的违反方式。</li>
+<li>为什么只装着 <code>tool_result</code> 的 user 消息不算新的一轮？这对“只保留最近一轮思考”的模型意味着什么？</li>
+<li>按 <code>block.type == "thinking"</code> 过滤要回传的块，会丢掉什么？为什么这是 bug？</li>
+<li>逐级升级在什么前提下比“永远最高档”又准又省？哪个前提最容易不成立？</li>
+<li>多数投票需要什么前提？单次正确率 40% 时投票会怎样？</li>
+<li>给推理模型写提示词，和给普通模型写有哪些不同？</li>
+</ol>
+<hr />
+<h1 id="参考答案与详解">参考答案与详解</h1>
+<h2 id="自测题答案">自测题答案</h2>
+<p><strong>1.</strong> 看不见：只能拿到摘要或加密内容，无法逐字审查推理。按输出计费：成本由看不见的部分决定，同样的回答可能差几十倍。占上下文：当前轮的推理和（部分模型）历史推理会挤占窗口，长对话要管理。算在输出上限里：上限设小了，推理阶段就能耗光，一个字都不输出。</p>
+<p><strong>2.</strong> 计费按完整思考算，和返回什么无关。<code>omitted</code> 省的是延迟：服务端不再流式传输思考文本，只传签名，正文的第一个 token 更早到达。</p>
+<p><strong>3.</strong> OpenAI：<code>reasoning.effort</code>，none / minimal / low / medium / high / xhigh / max，按模型支持子集，<code>none</code> 就是不推理（部分模型不支持）。Anthropic：<code>thinking.type</code>（adaptive / disabled / between_tools，旧模型还有 enabled）+ <code>output_config.effort</code>（low / medium / high / xhigh / max）；能否关闭看模型：Haiku 5.5、Opus 5 在 effort ≤ high 时可以 <code>disabled</code>，Sonnet 5.5 只能 <code>between_tools</code>，Opus 5.5 关不掉。Gemini：<code>generation_config.thinking_level</code>，minimal / low / medium / high，没有完全关闭的档位。</p>
+<p><strong>4.</strong> GPT-6 Astra 不支持 <code>none</code>，文档明确说会返回 400。Opus 4.7 及之后的模型不再支持 <code>type: "enabled"</code> + <code>budget_tokens</code>，同样 400；要改成 <code>thinking: {type: "adaptive"}</code> + <code>output_config.effort</code>。</p>
+<p><strong>5.</strong> strict：直接报错，适合开发期，尽早发现配置错误。clamp：降到最近的受支持档位并记录警告，适合网关这种一个请求可能打到不同模型的场景，警告必须进日志和 trace。距离相同选便宜的，因为多想的成本是确定的，少想的风险可以靠 Eval 发现、靠逐级升级补回来。</p>
+<p><strong>6.</strong> OpenAI 的 <code>output_tokens</code> 包含 <code>reasoning_tokens</code>；Anthropic 的 <code>output_tokens</code> 包含思考，<code>thinking_tokens</code> 是其中的部分；Gemini 的 <code>total_output_tokens</code> <strong>不含</strong>思考，<code>total_thought_tokens</code> 单独给。把 Gemini 的 <code>total_output_tokens</code> 当总输出，思考的部分没算进去，成本严重低估（文档示例里少算了 297 / 468，约 63%）。</p>
+<p><strong>7.</strong> 推理阶段就耗光上限：没有任何可见输出，但输入和推理照样计费；回答写了一半：有部分回答。前者更糟，用户什么都没得到。前者调大上限或降低推理强度（Gemini 文档特别建议降 <code>thinking_level</code> 而不是缩小 <code>max_output_tokens</code>）；后者调大上限或要求更短的回答。</p>
+<p><strong>8.</strong> 推理配置被渲染进提示词，是前缀的一部分，改了前缀就变了，缓存匹配不上。OpenAI（GPT-6 系列）：保持请求级的 <code>reasoning.effort</code> 不变，在下一条用户消息前插入 <code>configuration_update</code> 条目。Anthropic（支持的模型，beta）：在 <code>messages</code> 里插一条 <code>role: "system"</code>、内容为空、带 <code>output_config.effort</code> 的消息。</p>
+<p><strong>9.</strong> 产生它的模型，和它之前的全部内容（system、tools、之前的消息）。改了一个之前的工具结果，那个工具结果之后的思考块和再往后所有思考块都失效：<code>error</code> 模式下整个请求 400，<code>drop_block</code> 模式下这些块被丢弃，模型失去这部分推理上下文。</p>
+<p><strong>10.</strong> 每个 assistant 回合原样发回，新内容只追加在 <code>messages</code> 末尾，system 和 tools 保持不变。常见违反：在 system prompt 里放当前时间等每轮变化的内容；每轮按需重写工具列表；客户端自己压缩、截断或改写中间的消息；按类型过滤丢掉不认识的块。</p>
+<p><strong>11.</strong> 工具循环是同一个 assistant 回合：模型调工具时回答暂停，工具结果送回后接着写同一个回答。对“只保留最近一轮”的模型，工具循环内的思考都属于当前回合，必须保留；只有用户发来带新输入的消息时，之前回合的思考才会被剥离。如果把 <code>tool_result</code> 也当成新一轮，就会在工具循环中途丢掉思考（练习 2 第 5 条）。</p>
+<p><strong>12.</strong> 会丢掉 <code>redacted_thinking</code> 块（安全原因被整段加密，没有可读文本）。回传协议要求最近一条 assistant 消息里连续的思考块序列和模型生成时完全一致，丢一个就破坏了序列，可能导致 400 或推理上下文丢失。规则是不认识的块类型原样保留。</p>
+<p><strong>13.</strong> 有可靠的验证器、各次尝试大致独立、能接受更长的尾延迟，而且简单任务占多数。最容易不成立的是验证器可靠：很多 Agent 步骤（写一段总结、做一个判断）没有能自动判对错的检查，验证器一放过错误答案，升级就不会发生。其次是独立性：同一道题对模型难的原因往往相同，真实收益比公式小。</p>
+<p><strong>14.</strong> 答案能比较是否相同（选择题、数值、标签），单次正确率高于 50%，各次采样大致独立。单次 40% 时，投票会放大错误的多数，次数越多正确率越低。</p>
+<p><strong>15.</strong> 给目标、约束和输出格式，不要规定每一步怎么想；对 Agent 任务说清完成标准和自我验证方式；不要求把思考过程写进回答（浪费 token，Anthropic 新模型上可能被拒答）；延迟敏感时让模型先写一句开场；长输出任务提示模型少想；效果不好先改提示词和上下文，再考虑升档。</p>
+<h2 id="练习参考答案">练习参考答案</h2>
+<h3 id="练习-1">练习 1</h3>
+<p>第 2 题：难题占 80% 时，三种策略分别是：永远 low 成功率 43.0%、每答对一题 3163 token；永远 high 83.6%、21292 token；逐级升级 95.5%、9666 token。逐级升级依然最好，但单题成本从 4064 涨到 9233，是简单题为主时的两倍多：难题多了，走到高档的题就多，而且每道难题都先白付了 low 和 medium 的钱。它还划算的原因是这组数字里难题在 low、medium 上仍有 30%、60% 的成功率；如果低档在难题上几乎全错，前两级就是纯浪费。更好的做法是先用一个便宜的分类器判断难度，把明显的难题直接送到高档。</p>
+<p>第 3 题：正确的用量是输入 62、输出 468，成本 <code>(62×2 + 468×10) / 1e6</code>；忘了思考 token 时输出只有 171。按假价格，正确成本是 0.004804 美元，漏算后是 0.001834 美元，只有真实成本的 38%。</p>
+<h3 id="练习-2">练习 2</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>改动</th>
+<th>失败的测试</th>
+<th>原因</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. 平局取更高档</td>
+<td><code>TestResolveClampPicksNearestCheaper</code></td>
+<td><code>claude-sonnet-4-6</code> 的 <code>xhigh</code> 被降到 <code>max</code>，比要求的还贵</td>
+</tr>
+<tr>
+<td>2. Anthropic 不加回缓存</td>
+<td><code>TestUsageNormalization</code></td>
+<td>输入从 1387 变成 17，缓存命中率算出来超过 100%</td>
+</tr>
+<tr>
+<td>3. Gemini 不加思考</td>
+<td><code>TestUsageNormalization</code></td>
+<td>输出少了 297，成本严重低估</td>
+</tr>
+<tr>
+<td>4. 思考块按 Text 计入前缀</td>
+<td><code>TestOmittedDisplayIgnoresClientText</code></td>
+<td>客户端往 omitted 块里写字，改变了第二个思考块的前缀，第二个块的签名失效。summarized 的测试不受影响，因为它们没改 Text；只有“允许改、应该被忽略”的情况会暴露这个 bug</td>
+</tr>
+<tr>
+<td>5. tool_result 算新一轮</td>
+<td><code>TestLastTurnOnlyModelsStripOlderThinking</code></td>
+<td>工具循环内的思考被当成“上一轮”剥掉了</td>
+</tr>
+<tr>
+<td>6. 不记录失效位置</td>
+<td><code>TestEditingPrefixInvalidatesLaterThinking</code></td>
+<td>改 system prompt 后，第一个块失效，但第二个块被单独验证；它的前缀里包含第一个块的签名（没变），于是又“有效”了。真实规则是失效块之后的思考块全部作废</td>
+</tr>
+<tr>
+<td>7. 永远读得懂</td>
+<td><code>TestSwitchingModelsDropsUnreadableThinking</code></td>
+<td>Fable 5.1 的思考被 Opus 5.5 当成可读的放进上下文</td>
+</tr>
+<tr>
+<td>8. 用 Output 判断</td>
+<td><code>TestDiagnoseTruncation</code></td>
+<td>推理耗光时 <code>Output</code> 是 300 不是 0，被误诊成“回答写了一半”</td>
+</tr>
+</tbody>
+</table></div>
+<p>第 6 条值得多想：“这个块之后全部作废”不是多余的保守，因为后面的块的前缀虽然字节上没变，但它们是在一个已经无效的上下文之上产生的。</p>
+<h3 id="练习-3">练习 3</h3>
+<div class="hl"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nx">EscalateVerified</span><span class="p">(</span><span class="nx">tiers</span><span class="w"> </span><span class="p">[]</span><span class="nx">Tier</span><span class="p">,</span><span class="w"> </span><span class="nx">falseAccept</span><span class="p">,</span><span class="w"> </span><span class="nx">falseReject</span><span class="w"> </span><span class="kt">float64</span><span class="p">)</span><span class="w"> </span><span class="nx">Expect</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">reach</span><span class="p">,</span><span class="w"> </span><span class="nx">succ</span><span class="p">,</span><span class="w"> </span><span class="nx">tok</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="p">,</span><span class="w"> </span><span class="nx">t</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">tiers</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">tok</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="nx">reach</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nx">t</span><span class="p">.</span><span class="nx">Tokens</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">tiers</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nx">succ</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="nx">reach</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nx">t</span><span class="p">.</span><span class="nx">Success</span><span class="w"> </span><span class="c1">// 最后一级不验证，对就是对，错就是错</span>
+<span class="w">            </span><span class="k">break</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="nx">acceptCorrect</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">t</span><span class="p">.</span><span class="nx">Success</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="mi">1</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nx">falseReject</span><span class="p">)</span>
+<span class="w">        </span><span class="nx">acceptWrong</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="p">(</span><span class="mi">1</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nx">t</span><span class="p">.</span><span class="nx">Success</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nx">falseAccept</span>
+<span class="w">        </span><span class="nx">succ</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="nx">reach</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nx">acceptCorrect</span>
+<span class="w">        </span><span class="nx">reach</span><span class="w"> </span><span class="o">*=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nx">acceptCorrect</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nx">acceptWrong</span><span class="w"> </span><span class="c1">// 被打回的才会走到下一级</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">Expect</span><span class="p">{</span><span class="nx">succ</span><span class="p">,</span><span class="w"> </span><span class="nx">tok</span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>逐行解读</strong></p>
+<ul>
+<li><strong><code>reach</code></strong>：走到这一级的概率。只有前面每一级都“没通过验证”才会到这里。</li>
+<li><strong>通过有两种</strong>：答对且没被误判（<code>acceptCorrect</code>），答错但被放过（<code>acceptWrong</code>）。只有前者计入成功；后者结束了流程，却带着错误答案。</li>
+<li><strong>完美验证器时退化为 <code>Escalate</code></strong>：<code>acceptWrong = 0</code>，<code>acceptCorrect = p</code>，每一级的 <code>reach</code> 乘以 <code>1 - p</code>，和原公式一致；最后一级 <code>succ += reach × p</code> 也一样。</li>
+</ul>
+<p><code>verify_test.go</code>：</p>
+<div class="hl"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nx">reasoning</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="p">(</span>
+<span class="w">    </span><span class="s">"math"</span>
+<span class="w">    </span><span class="s">"testing"</span>
+<span class="p">)</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="nx">TestEscalateVerified</span><span class="p">(</span><span class="nx">t</span><span class="w"> </span><span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">T</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">perfect</span><span class="p">,</span><span class="w"> </span><span class="nx">plain</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">EscalateVerified</span><span class="p">(</span><span class="nx">hard</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">),</span><span class="w"> </span><span class="nx">Escalate</span><span class="p">(</span><span class="nx">hard</span><span class="p">)</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">math</span><span class="p">.</span><span class="nx">Abs</span><span class="p">(</span><span class="nx">perfect</span><span class="p">.</span><span class="nx">Success</span><span class="o">-</span><span class="nx">plain</span><span class="p">.</span><span class="nx">Success</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">1e-12</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nx">math</span><span class="p">.</span><span class="nx">Abs</span><span class="p">(</span><span class="nx">perfect</span><span class="p">.</span><span class="nx">Tokens</span><span class="o">-</span><span class="nx">plain</span><span class="p">.</span><span class="nx">Tokens</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">1e-9</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">t</span><span class="p">.</span><span class="nx">Fatalf</span><span class="p">(</span><span class="s">"perfect verifier must equal Escalate: %+v %+v"</span><span class="p">,</span><span class="w"> </span><span class="nx">perfect</span><span class="p">,</span><span class="w"> </span><span class="nx">plain</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="nx">sloppy</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">EscalateVerified</span><span class="p">(</span><span class="nx">hard</span><span class="p">,</span><span class="w"> </span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="o">!</span><span class="p">(</span><span class="nx">sloppy</span><span class="p">.</span><span class="nx">Success</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="nx">perfect</span><span class="p">.</span><span class="nx">Success</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">sloppy</span><span class="p">.</span><span class="nx">Tokens</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="nx">perfect</span><span class="p">.</span><span class="nx">Tokens</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">t</span><span class="p">.</span><span class="nx">Fatalf</span><span class="p">(</span><span class="s">"%+v"</span><span class="p">,</span><span class="w"> </span><span class="nx">sloppy</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="nx">paranoid</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">EscalateVerified</span><span class="p">(</span><span class="nx">hard</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.5</span><span class="p">)</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="o">!</span><span class="p">(</span><span class="nx">paranoid</span><span class="p">.</span><span class="nx">Tokens</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="nx">perfect</span><span class="p">.</span><span class="nx">Tokens</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">t</span><span class="p">.</span><span class="nx">Fatalf</span><span class="p">(</span><span class="s">"%+v"</span><span class="p">,</span><span class="w"> </span><span class="nx">paranoid</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>在难题上跑出来的数字：</p>
+<div class="hl"><pre><span></span><code>完美验证      成功率 94.4%，11300 token
+一半错答被放过 成功率 56.6%， 5000 token
+一半对答被打回 成功率 88.1%，18500 token
+</code></pre></div>
+
+<p>两种错误的代价不对称：放过错误答案直接毁掉正确率（94.4% → 56.6%），而且看起来还“更省钱”，在成本看板上甚至像是优化；打回正确答案只是多花钱、多花时间（11300 → 18500 token），正确率也会下降一些，因为本来对的答案被换成了高档重做的结果，而最后一级不验证。所以验证器宁可严一点：<strong>false accept 比 false reject 危险得多</strong>。</p>
+<hr />
+<h2 id="完成标准">完成标准</h2>
+<ul>
+<li>[ ] <code>make test</code> 17 个测试全部通过，能说出每个测试在验证什么；</li>
+<li>[ ] 练习 1：三个问题都算过，能解释难题为主时逐级升级为什么变差；</li>
+<li>[ ] 练习 2：八处改动都做过，尤其能解释第 4、6 条；</li>
+<li>[ ] 练习 3：<code>EscalateVerified</code> 实现完成，<code>verify_test.go</code> 通过 <code>go test -race</code>，能说出为什么 false accept 比 false reject 更危险；</li>
+<li>[ ] 能不看课件写出三家控制推理强度的请求，知道哪些组合会 400；</li>
+<li>[ ] 能对着一次响应的 usage 算出真实成本，并判断是哪种截断；</li>
+<li>[ ] 自测题 15 道都能讲清楚，尤其是第 6、8、9、11、13 题。</li>
+</ul>
+<p>做到以上几条，1.4 就可以勾选。下一课 <strong>1.5 Prompt Caching</strong>：前缀匹配的原理、三家缓存的写法和计费、缓存断点放在哪里，以及本课提到的“推理配置是前缀的一部分”在实际系统里怎么管理。</p>
+    <nav class="pager"><a class="prev" href="01-03-structured-output.html"><span>← 上一课 1.3</span>结构化输出</a></nav>
+    <p class="foot">© 2026 duang777 · 课件源文件：<a href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/notes/01-llm/04-reasoning-models.md">notes/01-llm/04-reasoning-models.md</a></p>
+  </article>
+</div>
+<script>
+document.querySelectorAll('article pre').forEach(function(pre){
+  var b=document.createElement('button');b.className='code__copy';b.textContent='复制';
+  b.onclick=function(){navigator.clipboard.writeText(pre.innerText).then(function(){b.textContent='已复制';setTimeout(function(){b.textContent='复制'},1200)})};
+  pre.parentNode.insertBefore(b,pre);
+});
+var links=[].slice.call(document.querySelectorAll('.toc a')),map={};
+links.forEach(function(a){map[decodeURIComponent(a.getAttribute('href').slice(1))]=a});
+var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting&&map[e.target.id]){links.forEach(function(l){l.classList.remove('on')});map[e.target.id].classList.add('on')}})},{rootMargin:'-80px 0px -70% 0px'});
+document.querySelectorAll('article h1[id],article h2[id]').forEach(function(h){io.observe(h)});
+</script>
+</body>
+</html>

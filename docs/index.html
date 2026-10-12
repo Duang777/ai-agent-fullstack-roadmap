@@ -208,14 +208,14 @@
         <section class="stats" data-reveal>
           <div class="stat"><span class="stat__fig x-mono">14</span><span class="stat__label">模块</span></div>
           <div class="stat"><span class="stat__fig x-mono">84</span><span class="stat__label">知识点</span></div>
-          <div class="stat"><span class="stat__fig x-mono">Day 5</span><span class="stat__label">今天</span></div>
+          <div class="stat"><span class="stat__fig x-mono">Day 6</span><span class="stat__label">今天</span></div>
           <div class="stat"><span class="stat__fig x-mono">5/84</span><span class="stat__label">已完成</span></div>
         </section>
 
         <section class="section" id="progress" data-nav="进度">
           <div class="head" data-reveal>
             <p class="head__eyebrow x-kicker">当前进度</p>
-            <h2 class="x-h2">01 LLM 原理与使用：1.1 采样、1.2 主流模型 API、1.3 结构化输出已上线；练习收尾中。</h2>
+            <h2 class="x-h2">01 LLM 原理与使用：1.1 采样、1.2 主流模型 API、1.3 结构化输出、1.4 推理模型已上线；练习收尾中。</h2>
             <p class="head__sub">学完且有笔记或代码产出，才在 ROADMAP 里打勾。</p>
           </div>
           <div class="x-progress" data-reveal>
@@ -394,6 +394,25 @@
                 <dd><span class="chip x-chip x-chip--live">进行中</span></dd>
               </dl>
             </article>
+            <article class="step">
+              <div class="step__intro">
+                <p class="step__num x-step-num">1.4</p>
+                <p class="step__eyebrow">进行中 · 01 LLM 原理与使用</p>
+              </div>
+              <div>
+                <h3>推理模型：reasoning effort、thinking 与成本权衡</h3>
+                <p class="sub">推理 token 看不见、按输出计费；三家推理旋钮与会 400 的组合；用 HMAC 模拟思考块签名，验证改一个字就失效；用“每个正确答案花多少 token”判断什么时候值得多想。</p>
+                <div class="links" style="margin-top: 16px">
+                  <a class="x-btn x-btn--primary" href="notes/01-04-reasoning-models.html">在线阅读</a>
+                </div>
+              </div>
+              <dl class="step__panel">
+                <dt>课件</dt>
+                <dd><span class="chip x-chip x-chip--done">已完成</span></dd>
+                <dt>练习</dt>
+                <dd><span class="chip x-chip x-chip--live">进行中</span></dd>
+              </dl>
+            </article>
           </div>
         </section>
 
@@ -404,6 +423,21 @@
           </div>
           <ol class="timeline" data-reveal>
             <li class="is-current">
+              <p class="timeline__when"><span class="x-mono">Day 6 · 2026-10-13</span></p>
+              <div class="timeline__what">
+                <p><strong>推理模型：effort、thinking 与成本</strong></p>
+                <ul>
+                  <li>可见输出一模一样，多了 8000 推理 token，成本是 21 倍</li>
+                  <li>Gemini 的 total_output_tokens 不含思考：照字段算，成本只算到 38%</li>
+                  <li>用 HMAC 模拟思考块签名：改摘要一个标点就 400；改一个工具结果，之后的思考全部失效</li>
+                  <li>逐级升级 low→medium→high：98.3% 正确、4064 token/题；永远 high 是 92.6%、12300 token/题</li>
+                  <li>验证器放过一半错答，成功率从 94.4% 掉到 56.6%，账面上还更省钱</li>
+                </ul>
+                <p class="x-think">思考：你的 Agent 里哪些步骤有可靠的验证器？没有的那些，还值得逐级升级吗？</p>
+              </div>
+              <p><a class="x-btn x-btn--ghost" href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/logs/2026-10-13.md" target="_blank" rel="noopener">日志</a></p>
+            </li>
+            <li>
               <p class="timeline__when"><span class="x-mono">Day 5 · 2026-10-12</span></p>
               <div class="timeline__what">
                 <p><strong>Transformer、Tokenizer 与采样；主流模型 API；结构化输出</strong></p>
