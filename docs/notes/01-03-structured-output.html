@@ -1,0 +1,1392 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>1.3 结构化输出：JSON Schema、strict 模式与约束解码 · AI Agent 全栈</title>
+<meta name="description" content="1.3 结构化输出：JSON Schema、strict 模式与约束解码。duang777 的 AI Agent 全栈公开学习课件。" />
+<style>
+:root{
+  --bg:#0a0a0a;--surface:#111;--text:#ededed;--text-2:#a1a1a1;--text-3:rgb(255 255 255/.4);
+  --line:rgb(255 255 255/.1);--line-2:rgb(255 255 255/.06);
+  --sans:Inter,-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei","Helvetica Neue",sans-serif;
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+}
+*{box-sizing:border-box}
+html{color-scheme:dark}
+.toc{scrollbar-width:none}.toc::-webkit-scrollbar{display:none}
+html{scrollbar-width:thin;scrollbar-color:#333 transparent}
+::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#2a2a2a;border-radius:8px}::-webkit-scrollbar-thumb:hover{background:#3a3a3a}
+html{scroll-behavior:smooth;scroll-padding-top:80px}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;line-height:1.8;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+.nav{position:sticky;top:0;z-index:10;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;border-bottom:1px solid var(--line);background:rgb(10 10 10/.8);backdrop-filter:blur(12px)}
+.nav__brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-size:14px;font-weight:500}
+.nav__dot{width:10px;height:10px;border-radius:3px;background:var(--text)}
+.nav__links{display:flex;gap:20px;font-size:14px;color:var(--text-2)}
+.nav__links a{text-decoration:none}.nav__links a:hover{color:var(--text)}
+.wrap{max-width:1200px;margin:0 auto;padding:0 24px;display:grid;grid-template-columns:220px minmax(0,1fr);gap:56px}
+.toc{position:sticky;top:80px;align-self:start;max-height:calc(100vh - 100px);overflow:auto;padding:40px 0 40px;font-size:13px;line-height:1.6}
+.toc__label{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--text-3);text-transform:uppercase;margin-bottom:12px}
+.toc ul{list-style:none;margin:0;padding:0}
+.toc li{margin:0}
+.toc a{display:block;padding:4px 0 4px 12px;border-left:1px solid var(--line);color:var(--text-2);text-decoration:none}
+.toc a:hover,.toc a.on{color:var(--text);border-left-color:var(--text)}
+.toc ul ul a{padding-left:24px;font-size:12.5px;color:var(--text-3)}
+.toc ul ul a:hover,.toc ul ul a.on{color:var(--text)}
+article{min-width:0;max-width:760px;padding:48px 0 96px}
+.meta{font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--text-3);margin-bottom:16px}
+article h1.title{font-size:40px;line-height:1.2;letter-spacing:-.02em;font-weight:600;margin:0 0 24px}
+article h1{font-size:28px;line-height:1.3;letter-spacing:-.01em;font-weight:600;margin:72px 0 20px;padding-top:32px;border-top:1px solid var(--line)}
+article h2{font-size:22px;line-height:1.4;font-weight:600;margin:48px 0 16px}
+article h3{font-size:18px;font-weight:600;margin:36px 0 12px}
+article h4{font-size:16px;font-weight:600;margin:28px 0 8px}
+article p{margin:0 0 18px;color:#d4d4d4}
+article strong{color:var(--text);font-weight:600}
+article ul,article ol{padding-left:22px;margin:0 0 18px;color:#d4d4d4}
+article li{margin:4px 0}
+article a{text-decoration:underline;text-decoration-color:var(--text-3);text-underline-offset:3px}
+article a:hover{text-decoration-color:var(--text)}
+article hr{border:0;border-top:1px solid var(--line);margin:48px 0}
+article blockquote{margin:0 0 20px;padding:12px 18px;border-left:2px solid var(--text-2);background:var(--surface);border-radius:0 8px 8px 0;color:var(--text-2)}
+article blockquote p{margin:6px 0;color:var(--text-2)}
+article code{font-family:var(--mono);font-size:.88em;background:#1a1a1a;border:1px solid var(--line-2);border-radius:5px;padding:1px 6px}
+article pre{position:relative;margin:0 0 22px;padding:16px 18px;background:#0f0f0f;border:1px solid var(--line);border-radius:10px;overflow:auto;font-size:13.5px;line-height:1.65}
+article pre code{background:none;border:0;padding:0;font-size:inherit}
+.code{position:relative}
+.code__lang{position:absolute;top:8px;right:46px;font-family:var(--mono);font-size:11px;color:var(--text-3);z-index:1}
+.code__copy{position:absolute;top:6px;right:8px;z-index:1;font:11px var(--mono);color:var(--text-2);background:#1a1a1a;border:1px solid var(--line);border-radius:6px;padding:2px 7px;cursor:pointer}
+.code__copy:hover{color:var(--text)}
+.tbl{overflow-x:auto;margin:0 0 22px;border:1px solid var(--line);border-radius:10px}
+article table{border-collapse:collapse;width:100%;font-size:14px}
+article th,article td{padding:10px 14px;border-bottom:1px solid var(--line-2);text-align:left;vertical-align:top}
+article th{font-weight:600;background:var(--surface);color:var(--text)}
+article tr:last-child td{border-bottom:0}
+article details{margin:0 0 18px;border:1px solid var(--line);border-radius:10px;padding:10px 16px;background:var(--surface)}
+article summary{cursor:pointer;font-weight:500}
+.pager{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:72px;padding-top:32px;border-top:1px solid var(--line)}
+.pager a{display:block;padding:16px 18px;border:1px solid var(--line);border-radius:10px;text-decoration:none}
+.pager a:hover{border-color:var(--text-2)}
+.pager span{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--text-3)}
+.pager .next{text-align:right;grid-column:2}
+.foot{margin-top:40px;font-size:13px;color:var(--text-3)}
+/* 代码高亮：黑白灰为主 */
+.hl .c,.hl .c1,.hl .cm,.hl .ch,.hl .cs,.hl .cp,.hl .cpf{color:#6b6b6b;font-style:italic}
+.hl .k,.hl .kd,.hl .kn,.hl .kr,.hl .kt,.hl .kc,.hl .kp,.hl .ow{color:#ffffff;font-weight:600}
+.hl .s,.hl .s1,.hl .s2,.hl .sb,.hl .sc,.hl .sd,.hl .se,.hl .sh,.hl .si,.hl .sx,.hl .sr,.hl .ss,.hl .dl,.hl .sa{color:#86efac}
+.hl .m,.hl .mi,.hl .mf,.hl .mh,.hl .mo,.hl .il{color:#fcd34d}
+.hl .nf,.hl .fm,.hl .nc,.hl .nn{color:#e5e5e5;font-weight:500}
+.hl .nb,.hl .bp,.hl .nd,.hl .na,.hl .nt{color:#bdbdbd}
+.hl .o,.hl .p{color:#9a9a9a}
+.hl .gd{color:#fca5a5}.hl .gi{color:#86efac}
+.hl{color:#d4d4d4}
+@media (max-width:960px){.wrap{grid-template-columns:1fr;gap:0}.toc{display:none}article h1.title{font-size:30px}.nav__links a.hide-sm{display:none}}
+</style>
+</head>
+<body>
+<header class="nav">
+  <a class="nav__brand" href="../index.html"><span class="nav__dot"></span>AI Agent 全栈</a>
+  <nav class="nav__links">
+    <a href="../index.html#progress">课件</a>
+    <a class="hide-sm" href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/ROADMAP.md">路线图</a>
+    <a href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/notes/01-llm/03-structured-output.md">在 GitHub 上查看</a>
+  </nav>
+</header>
+<div class="wrap">
+  <aside class="toc"><div class="toc__label">本课目录</div><ul>
+<li><a href="#读前说明">读前说明</a></li>
+<li><a href="#第一部分为什么需要结构化输出">第一部分：为什么需要结构化输出</a><ul>
+<li><a href="#1-三个层次">1. 三个层次</a></li>
+<li><a href="#2-两个入口响应格式-vs-工具参数">2. 两个入口：响应格式 vs 工具参数</a></li>
+</ul>
+</li>
+<li><a href="#第二部分原理约束解码">第二部分：原理：约束解码</a><ul>
+<li><a href="#3-回到采样把不合法的-token-屏蔽掉">3. 回到采样：把不合法的 token 屏蔽掉</a></li>
+<li><a href="#4-手写前缀检查器">4. 手写前缀检查器</a></li>
+<li><a href="#5-解码循环和-token-边界">5. 解码循环和 token 边界</a></li>
+<li><a href="#6-跑起来看不加约束-vs-加约束">6. 跑起来看：不加约束 vs 加约束</a></li>
+<li><a href="#7-代价约束会扭曲输出分布">7. 代价：约束会扭曲输出分布</a></li>
+<li><a href="#8-语法只管结构不管语义">8. 语法只管结构，不管语义</a></li>
+<li><a href="#9-保证失效的四种情况">9. 保证失效的四种情况</a></li>
+</ul>
+</li>
+<li><a href="#第三部分三家写法">第三部分：三家写法</a><ul>
+<li><a href="#10-openaitextformat">10. OpenAI：text.format</a></li>
+<li><a href="#11-anthropicoutput_configformat">11. Anthropic：output_config.format</a></li>
+<li><a href="#12-geminiresponse_format">12. Gemini：response_format</a></li>
+<li><a href="#13-三家对比">13. 三家对比</a></li>
+</ul>
+</li>
+<li><a href="#第四部分工程实践">第四部分：工程实践</a><ul>
+<li><a href="#14-设计对模型友好的-schema">14. 设计对模型友好的 schema</a></li>
+<li><a href="#15-抽取循环校验错误驱动重试">15. 抽取循环：校验错误驱动重试</a></li>
+<li><a href="#16-流式结构化输出">16. 流式结构化输出</a></li>
+<li><a href="#17-什么时候用哪个">17. 什么时候用哪个</a></li>
+<li><a href="#本课小结">本课小结</a></li>
+<li><a href="#练习今天做完">练习（今天做完）</a></li>
+<li><a href="#自测题">自测题</a></li>
+</ul>
+</li>
+<li><a href="#参考答案与详解">参考答案与详解</a><ul>
+<li><a href="#自测题答案">自测题答案</a></li>
+<li><a href="#练习参考答案">练习参考答案</a></li>
+<li><a href="#完成标准">完成标准</a></li>
+</ul>
+</li>
+</ul>
+</aside>
+  <article>
+    <div class="meta">模块 01 · LLM 原理与使用 · 第 1.3 课</div>
+    <h1 class="title">1.3 结构化输出：JSON Schema、strict 模式与约束解码</h1>
+    <blockquote>
+<p>第 1 部分 · 第 3 课 ｜ 预计 5–6 小时 ｜ 前置：1.1 采样（logits、logit bias）、1.2 主流模型 API</p>
+<p>配套练习：<code>projects/08-structured-output/</code>（纯 Go 标准库，20 个测试）。手写 JSON Schema 校验器、一个真正能跑的约束解码器（把不合法 token 的 logit 设成 -∞）、三家 strict 规则的检查与转换，以及“解析 → 校验 → 带错误重试”的抽取循环。</p>
+</blockquote>
+<h2 id="读前说明">读前说明</h2>
+<p>Agent 的每一步几乎都要把模型的输出交给程序：工具参数、路由决策、抽取出的字段、评测打分。程序要的是<strong>能直接解析、字段齐全、类型正确</strong>的数据，模型天生输出的却是文本。这一课解决的就是两者之间的缝。</p>
+<p>先看几个你迟早会遇到的问题：</p>
+<ul>
+<li>提示词里写了“只输出 JSON”，为什么模型还是会在前面加一句“好的，结果如下：”？</li>
+<li>开了 strict 模式，官方说“保证符合 schema”，为什么线上还是会解析失败？</li>
+<li>为什么 OpenAI 要求所有字段都 <code>required</code>，而 Anthropic 不支持 <code>minimum</code>？</li>
+<li>为什么同一个 schema，第一次请求明显更慢？</li>
+<li>为什么把 <code>reasoning</code> 字段放在 <code>answer</code> 前面，结果会更准？</li>
+<li>强制模型只能在 <code>["yes", "no"]</code> 里选，它真的“不知道”的时候会发生什么？</li>
+</ul>
+<p>这一课分四部分：<strong>为什么 → 原理（约束解码）→ 三家写法 → 工程实践</strong>。第二部分是重点：我们会自己写一个约束解码器，亲眼看到“格式保证”是怎么来的，以及它保证不了什么。</p>
+<p>本课结束时你能：</p>
+<ol>
+<li>区分三种层次的“让模型输出 JSON”：提示词、JSON mode、Structured Outputs（strict），说清各自保证什么；</li>
+<li>讲清约束解码的原理：schema → 语法 → 每一步屏蔽不合法 token，并能手写一个前缀检查器；</li>
+<li>说出约束解码的三个代价：首次编译延迟、对模型输出分布的扭曲、只管结构不管语义；</li>
+<li>写出 OpenAI、Anthropic、Gemini 三家结构化输出的请求，知道各自支持的 schema 子集和限制；</li>
+<li>设计对模型友好的 schema（字段顺序、描述、可空字段、enum），并把一个普通 schema 转换成各家 strict 能接受的形状；</li>
+<li>写出生产可用的抽取循环：处理拒答、截断、enum 大小写，用校验错误驱动重试。</li>
+</ol>
+<p><strong>关于时效</strong>：本课核对的是 2026 年 10 月三家的官方文档。三家对 JSON Schema 的支持范围变化很快，以官方文档的“支持的 schema”一节为准；练习里的检查规则就是照着那几节写的，文档变了，改规则表即可。</p>
+<hr />
+<h1 id="第一部分为什么需要结构化输出">第一部分：为什么需要结构化输出</h1>
+<h2 id="1-三个层次">1. 三个层次</h2>
+<p><strong>层次一：只靠提示词。</strong>“请只输出 JSON，格式如下……”。模型大多数时候会照做，但你会遇到：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>现象</th>
+<th>例子</th>
+<th>原因</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>前后有废话</td>
+<td><code>好的，结果如下：{...}</code></td>
+<td>模型被训练得“有礼貌”</td>
+</tr>
+<tr>
+<td>代码围栏</td>
+<td><code>```json\n{...}\n```</code></td>
+<td>训练数据里 JSON 常出现在 Markdown 里</td>
+</tr>
+<tr>
+<td>语法错误</td>
+<td>尾逗号、单引号、注释、没转义的换行</td>
+<td>模型在“像 JSON”，不是在“解析 JSON”</td>
+</tr>
+<tr>
+<td>字段错</td>
+<td>少字段、多字段、<code>"age": "30"</code></td>
+<td>没有任何机制强制</td>
+</tr>
+<tr>
+<td>半截</td>
+<td>撞上 max tokens</td>
+<td>生成被截断</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>层次二：JSON mode。</strong> OpenAI 的 <code>text.format: {type: "json_object"}</code>。它保证输出<strong>是合法的 JSON</strong>，但不保证符合你的结构。官方文档还有一个重要提醒：开 JSON mode 时必须在对话里明确要求输出 JSON，否则模型可能输出一串没完没了的空白，直到撞上 token 上限。现在官方建议能用 Structured Outputs 就别用 JSON mode。</p>
+<p><strong>层次三：Structured Outputs（strict 模式）。</strong> 你给一个 JSON Schema，服务端用<strong>约束解码</strong>保证输出符合它（在 schema 的支持范围内）。三家现在都有：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>厂商</th>
+<th>参数</th>
+<th>2026 年 10 月的状态</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OpenAI</td>
+<td>Responses 的 <code>text.format: {type: "json_schema", name, schema, strict: true}</code></td>
+<td>GA；也用于函数调用的 <code>strict: true</code></td>
+</tr>
+<tr>
+<td>Anthropic</td>
+<td><code>output_config.format: {type: "json_schema", schema}</code>；工具上的 <code>strict: true</code></td>
+<td>GA，不再需要 beta 头；旧的 <code>output_format</code> 参数已弃用</td>
+</tr>
+<tr>
+<td>Gemini</td>
+<td>Interactions 的 <code>response_format: {type: "text", mime_type: "application/json", schema}</code></td>
+<td>GA；Gemini 3 系列可以和内置工具组合（预览）</td>
+</tr>
+</tbody>
+</table></div>
+<p>这一课的核心论点：<strong>strict 模式把“格式错误”从一个概率问题变成了一个工程问题</strong>。它解决的是层次一表格里的前四行；第五行（截断）和另外几种情况它解决不了，第 9 节专门讲。</p>
+<h2 id="2-两个入口响应格式-vs-工具参数">2. 两个入口：响应格式 vs 工具参数</h2>
+<p>结构化输出有两个地方可以用：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th></th>
+<th>响应格式（response format）</th>
+<th>严格工具（strict tool）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>约束的是</td>
+<td>模型的<strong>最终回答</strong></td>
+<td>模型<strong>调用工具时的参数</strong></td>
+</tr>
+<tr>
+<td>典型用途</td>
+<td>抽取、分类、生成结构化报告、评测打分</td>
+<td>Agent 调用你的函数</td>
+</tr>
+<tr>
+<td>OpenAI</td>
+<td><code>text.format</code></td>
+<td>函数定义上 <code>strict: true</code></td>
+</tr>
+<tr>
+<td>Anthropic</td>
+<td><code>output_config.format</code></td>
+<td>工具定义上 <code>strict: true</code></td>
+</tr>
+<tr>
+<td>Gemini</td>
+<td><code>response_format</code></td>
+<td>函数调用（参数本身有 schema）</td>
+</tr>
+</tbody>
+</table></div>
+<p>Gemini 文档的说法很清楚：<strong>想要模型的回答是某种格式，用结构化输出；想要模型在对话过程中让你去做一件事，用函数调用。</strong> 两者可以同时用：Agent 用严格工具调你的函数，最后用结构化输出返回一个可解析的总结。Anthropic 的文档专门给了同时使用的例子。</p>
+<p>一个常见的反模式：为了拿到结构化结果，定义一个假工具 <code>return_result(result: {...})</code>，再用 <code>tool_choice</code> 强制模型调用它。在没有原生结构化输出的年代这是标准做法，现在直接用响应格式更清楚，也不会和真正的工具调用混在一起。</p>
+<hr />
+<h1 id="第二部分原理约束解码">第二部分：原理：约束解码</h1>
+<h2 id="3-回到采样把不合法的-token-屏蔽掉">3. 回到采样：把不合法的 token 屏蔽掉</h2>
+<p>1.1 课讲过，模型每一步输出整个词表上的 logits，采样器从中选一个 token。我们还讲了 logit bias：给某些 token 的 logit 加一个数，提高或降低它被选中的概率。</p>
+<p>约束解码就是 logit bias 的极端形式：</p>
+<div class="hl"><pre><span></span><code>每一步：
+  logits = model(已生成的文本)
+  对词表里每个 token t：
+      如果 “已生成的文本 + t” 不可能被续写成一个符合 schema 的 JSON：
+          logits[t] = -∞          ← 概率严格为 0，不是“很小”
+  按正常的采样规则（温度、top-p……）从剩下的 token 里选
+</code></pre></div>
+
+<p>因为每一步选出来的 token 都“还有救”，所以只要生成正常结束，结果一定符合语法。不需要提示词恳求，不需要事后修复。</p>
+<p>举个例子。schema 要求 <code>{"age": integer}</code>，已经生成了 <code>{"age":</code>。这时：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>候选 token</th>
+<th>拼起来</th>
+<th>还有救吗</th>
+<th>处理</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>3</code></td>
+<td><code>{"age":3</code></td>
+<td>有，后面可以是 <code>0}</code></td>
+<td>保留</td>
+</tr>
+<tr>
+<td><code>"</code></td>
+<td><code>{"age":"</code></td>
+<td>没有，integer 不能以引号开头</td>
+<td>-∞</td>
+</tr>
+<tr>
+<td><code></code></td>
+<td><code>{"age":</code></td>
+<td>本课的语法不允许空白</td>
+<td>-∞</td>
+</tr>
+<tr>
+<td><code>-</code></td>
+<td><code>{"age":-</code></td>
+<td>有，后面可以是数字</td>
+<td>保留</td>
+</tr>
+<tr>
+<td><code>}</code></td>
+<td><code>{"age":}</code></td>
+<td>没有</td>
+<td>-∞</td>
+</tr>
+</tbody>
+</table></div>
+<p>关键在于“还有救吗”这个判断。它叫<strong>前缀检查</strong>：给定一段前缀，它是不是某个合法文档的开头？</p>
+<h2 id="4-手写前缀检查器">4. 手写前缀检查器</h2>
+<p>练习的 <code>grammar.go</code> 用一个递归下降解析器来做前缀检查。它和普通 JSON 解析器只有两点不同：</p>
+<ol>
+<li><strong>输入提前用完不是错误</strong>，而是“到这里为止没错”，返回 <code>Prefix</code>；</li>
+<li><strong>遇到分支就每条路都试</strong>（anyOf、可选字段、<code>true</code>/<code>false</code>），取最好的结果。</li>
+</ol>
+<p>为了支持第 2 点，用了一个叫“续体传递”（continuation-passing）的写法：每个解析函数多接收一个回调 <code>k</code>，意思是“我解析完之后，从这个位置接着做什么”。</p>
+<div class="hl"><pre><span></span><code><span class="kd">type</span><span class="w"> </span><span class="nx">Status</span><span class="w"> </span><span class="kt">int</span>
+
+<span class="kd">const</span><span class="w"> </span><span class="p">(</span>
+<span class="w">    </span><span class="nx">Invalid</span><span class="w">  </span><span class="nx">Status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">iota</span><span class="w"> </span><span class="c1">// 无论再接什么都不可能合法</span>
+<span class="w">    </span><span class="nx">Prefix</span><span class="w">                 </span><span class="c1">// 合法前缀，还没结束</span>
+<span class="w">    </span><span class="nx">Complete</span><span class="w">               </span><span class="c1">// 已经是一个完整、合法的值</span>
+<span class="p">)</span>
+
+<span class="kd">type</span><span class="w"> </span><span class="nx">cont</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="nx">Status</span><span class="w"> </span><span class="c1">// 续体：从位置 i 开始接着解析</span>
+
+<span class="c1">// lit 匹配一段固定文本。前缀在中途用完也算合法。</span>
+<span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">c</span><span class="w"> </span><span class="o">*</span><span class="nx">checker</span><span class="p">)</span><span class="w"> </span><span class="nx">lit</span><span class="p">(</span><span class="nx">i</span><span class="w"> </span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="nx">s</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">k</span><span class="w"> </span><span class="nx">cont</span><span class="p">)</span><span class="w"> </span><span class="nx">Status</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">r</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">s</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">c</span><span class="p">.</span><span class="nx">eof</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="nx">Prefix</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">c</span><span class="p">.</span><span class="nx">s</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="nx">r</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="nx">Invalid</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="nx">i</span><span class="o">++</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">k</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>逐行解读</strong></p>
+<ul>
+<li><strong><code>Status</code> 三种状态</strong>：<code>Prefix</code> 和 <code>Complete</code> 的区别决定了 EOS（结束 token）能不能被选：只有 <code>Complete</code> 时才允许结束。</li>
+<li><strong><code>lit</code></strong>：匹配固定文本，比如 <code>true</code>、<code>null</code>、<code>"name":</code>。匹配到一半输入用完（前缀是 <code>tr</code>），返回 <code>Prefix</code>；有一个字符对不上，返回 <code>Invalid</code>；全部匹配，交给续体 <code>k</code> 处理后面的部分。</li>
+<li><strong>为什么需要续体</strong>：考虑可选字段。<code>{"a":"x"</code> 后面可以接 <code>,"b":...</code> 也可以直接接 <code>}</code>。普通解析器要么向前看、要么回溯；续体写法里，两条路都是一次函数调用，结果取较好的那个：</li>
+</ul>
+<div class="hl"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">c</span><span class="w"> </span><span class="o">*</span><span class="nx">checker</span><span class="p">)</span><span class="w"> </span><span class="nx">fields</span><span class="p">(</span><span class="nx">i</span><span class="w"> </span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="nx">sc</span><span class="w"> </span><span class="o">*</span><span class="nx">Schema</span><span class="p">,</span><span class="w"> </span><span class="nx">idx</span><span class="w"> </span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="nx">first</span><span class="w"> </span><span class="kt">bool</span><span class="p">,</span><span class="w"> </span><span class="nx">k</span><span class="w"> </span><span class="nx">cont</span><span class="p">)</span><span class="w"> </span><span class="nx">Status</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">idx</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">sc</span><span class="p">.</span><span class="nx">Props</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">c</span><span class="p">.</span><span class="nx">lit</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span><span class="w"> </span><span class="s">"}"</span><span class="p">,</span><span class="w"> </span><span class="nx">k</span><span class="p">)</span><span class="w"> </span><span class="c1">// 字段都处理完了，必须是 }</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="nx">p</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">sc</span><span class="p">.</span><span class="nx">Props</span><span class="p">[</span><span class="nx">idx</span><span class="p">]</span>
+<span class="w">    </span><span class="nx">key</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">json</span><span class="p">.</span><span class="nx">Marshal</span><span class="p">(</span><span class="nx">p</span><span class="p">.</span><span class="nx">Name</span><span class="p">)</span>
+<span class="w">    </span><span class="nx">sep</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="s">","</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">first</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">sep</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">""</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="nx">take</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">c</span><span class="p">.</span><span class="nx">lit</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span><span class="w"> </span><span class="nx">sep</span><span class="o">+</span><span class="kt">string</span><span class="p">(</span><span class="nx">key</span><span class="p">)</span><span class="o">+</span><span class="s">":"</span><span class="p">,</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">j</span><span class="w"> </span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="nx">Status</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1">// 路线 1：输出这个字段</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">c</span><span class="p">.</span><span class="nx">value</span><span class="p">(</span><span class="nx">j</span><span class="p">,</span><span class="w"> </span><span class="nx">p</span><span class="p">.</span><span class="nx">Schema</span><span class="p">,</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">m</span><span class="w"> </span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="nx">Status</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="nx">c</span><span class="p">.</span><span class="nx">fields</span><span class="p">(</span><span class="nx">m</span><span class="p">,</span><span class="w"> </span><span class="nx">sc</span><span class="p">,</span><span class="w"> </span><span class="nx">idx</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="nx">k</span><span class="p">)</span>
+<span class="w">        </span><span class="p">})</span>
+<span class="w">    </span><span class="p">})</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">sc</span><span class="p">.</span><span class="nx">Required</span><span class="p">[</span><span class="nx">p</span><span class="p">.</span><span class="nx">Name</span><span class="p">]</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nx">take</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nx">Complete</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">take</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">best</span><span class="p">(</span><span class="nx">take</span><span class="p">,</span><span class="w"> </span><span class="nx">c</span><span class="p">.</span><span class="nx">fields</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span><span class="w"> </span><span class="nx">sc</span><span class="p">,</span><span class="w"> </span><span class="nx">idx</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nx">first</span><span class="p">,</span><span class="w"> </span><span class="nx">k</span><span class="p">))</span><span class="w"> </span><span class="c1">// 路线 2：可选字段，跳过</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<ul>
+<li><strong>字段顺序固定</strong>：键必须按 schema 里的顺序出现，而且不允许空白。这让语法变得简单、确定。OpenAI strict 模式的行为也是这样：输出按 schema 的键顺序生成。</li>
+<li><strong>不允许额外字段</strong>：语法里根本没有“其他键”这条路，所以 <code>additionalProperties: false</code> 是自然的结果。这也解释了为什么 OpenAI 和 Anthropic 都<strong>要求</strong>对象设 <code>additionalProperties: false</code>：允许任意额外字段，语法就要接受任意键名和任意值，约束就失去了意义。</li>
+</ul>
+<p>数字是一个有意思的例子：它没有结束符。<code>12</code> 已经完整，但还可以继续变成 <code>123</code>。</p>
+<div class="hl"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">c</span><span class="w"> </span><span class="o">*</span><span class="nx">checker</span><span class="p">)</span><span class="w"> </span><span class="nx">number</span><span class="p">(</span><span class="nx">i</span><span class="w"> </span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="nx">frac</span><span class="w"> </span><span class="kt">bool</span><span class="p">,</span><span class="w"> </span><span class="nx">k</span><span class="w"> </span><span class="nx">cont</span><span class="p">)</span><span class="w"> </span><span class="nx">Status</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">c</span><span class="p">.</span><span class="nx">s</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="sc">'-'</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">i</span><span class="o">++</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">c</span><span class="p">.</span><span class="nx">eof</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="nx">Prefix</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="o">!</span><span class="nx">isDigit</span><span class="p">(</span><span class="nx">c</span><span class="p">.</span><span class="nx">s</span><span class="p">[</span><span class="nx">i</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">Invalid</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">c</span><span class="p">.</span><span class="nx">s</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="sc">'0'</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">i</span><span class="o">++</span><span class="w"> </span><span class="c1">// 0 后面不能再跟数字：01 不合法</span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="o">!</span><span class="nx">c</span><span class="p">.</span><span class="nx">eof</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">isDigit</span><span class="p">(</span><span class="nx">c</span><span class="p">.</span><span class="nx">s</span><span class="p">[</span><span class="nx">i</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nx">i</span><span class="o">++</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="c1">// ……小数部分省略……</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">k</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>这里贪心地吃完所有数字再交给续体，因为数字后面不可能紧跟另一个数字。前缀恰好停在数字中间（比如 <code>{"age":3</code>）时，续体会在末尾返回 <code>Prefix</code>（后面还能接 <code>,</code>、<code>}</code>），顶层的数字则返回 <code>Complete</code>。两种都不是 <code>Invalid</code>，正好表达“可以结束、也可以继续”。</p>
+<p>整个检查的入口：</p>
+<div class="hl"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">sc</span><span class="w"> </span><span class="o">*</span><span class="nx">Schema</span><span class="p">)</span><span class="w"> </span><span class="nx">Check</span><span class="p">(</span><span class="nx">text</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="nx">Status</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">c</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">checker</span><span class="p">{</span><span class="nx">s</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="kt">rune</span><span class="p">(</span><span class="nx">text</span><span class="p">),</span><span class="w"> </span><span class="nx">budget</span><span class="p">:</span><span class="w"> </span><span class="mi">200000</span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">c</span><span class="p">.</span><span class="nx">value</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="nx">sc</span><span class="p">,</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">i</span><span class="w"> </span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="nx">Status</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">c</span><span class="p">.</span><span class="nx">s</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="nx">Complete</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">Invalid</span><span class="w"> </span><span class="c1">// 值后面不允许再有任何字符</span>
+<span class="w">    </span><span class="p">})</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><code>budget</code> 是一个保险：anyOf 套 anyOf、大量可选字段，分支数会指数增长。这正是 Anthropic 限制“可选参数最多 24 个、联合类型最多 16 个”的原因（第 11 节），它们的文档原话是：每个可选参数大约会让语法状态空间的一部分翻倍。</p>
+<h2 id="5-解码循环和-token-边界">5. 解码循环和 token 边界</h2>
+<p>有了前缀检查，解码循环就很直接（<code>decode.go</code>）：</p>
+<div class="hl"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nx">mask</span><span class="p">(</span><span class="nx">logits</span><span class="w"> </span><span class="p">[]</span><span class="kt">float64</span><span class="p">,</span><span class="w"> </span><span class="nx">vocab</span><span class="w"> </span><span class="p">[]</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">text</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">sc</span><span class="w"> </span><span class="o">*</span><span class="nx">Schema</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">done</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">sc</span><span class="p">.</span><span class="nx">Check</span><span class="p">(</span><span class="nx">text</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nx">Complete</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">id</span><span class="p">,</span><span class="w"> </span><span class="nx">tok</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">vocab</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">tok</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nx">EOS</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="o">!</span><span class="nx">done</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="nx">logits</span><span class="p">[</span><span class="nx">id</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">math</span><span class="p">.</span><span class="nx">Inf</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="c1">// 没写完不许结束</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">            </span><span class="k">continue</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">sc</span><span class="p">.</span><span class="nx">Check</span><span class="p">(</span><span class="nx">text</span><span class="o">+</span><span class="nx">tok</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nx">Invalid</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nx">logits</span><span class="p">[</span><span class="nx">id</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">math</span><span class="p">.</span><span class="nx">Inf</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>逐行解读</strong></p>
+<ul>
+<li><strong>EOS 也要管</strong>：没写完就结束，得到的是半截 JSON。练习 2 第 3 条会让你删掉这几行，看看随机抽样测试里会出现多少半截输出。</li>
+<li><strong>按“文本 + token”检查，而不是按 token 检查</strong>：真实分词器的 token 经常跨越 JSON 结构，比如 <code>",</code>、<code>":"</code>、<code>"}</code>（1.1 课讲过 BPE 会把高频组合合并）。一个 token 可能同时结束一个字符串、加一个逗号、开始下一个键。在拼接后的文本上检查，这些跨结构的 token 就自然被正确处理了。<code>TestConstrainedOutputAlwaysMatchesStructure</code> 的词表里专门加了这类 token。</li>
+<li><strong>复杂度</strong>：这个实现每一步对整个词表各做一次完整检查，开销是“词表大小 × 文本长度”。真实词表有 20 万个 token，这样做太慢。</li>
+</ul>
+<p><strong>生产实现怎么做</strong>：把 schema <strong>编译</strong>成一个在 token 上运行的状态机（下推自动机），预先算好“在每个状态下哪些 token 合法”，解码时每步只是查表和更新状态。开源实现有 Outlines、XGrammar、llguidance，vLLM、SGLang 等推理引擎都集成了它们。这带来两个你在 API 上能观察到的现象：</p>
+<ol>
+<li><strong>第一次用某个 schema 时明显更慢</strong>：服务端在编译语法。OpenAI 文档说第一次请求会有额外延迟，之后同一个 schema 就没有了；Anthropic 文档说编译好的语法缓存 24 小时（从最后一次使用算起），改 schema 结构或者改工具集合会让缓存失效，只改 <code>name</code> 或 <code>description</code> 不会；</li>
+<li><strong>schema 太复杂会被拒绝</strong>：语法太大、编译太久。Anthropic 会返回 400 “Schema is too complex for compilation”，编译超时上限是 180 秒。</li>
+</ol>
+<h2 id="6-跑起来看不加约束-vs-加约束">6. 跑起来看：不加约束 vs 加约束</h2>
+<p>练习用一个玩具模型 <code>ScriptModel</code> 模拟“格式不听话”的模型：它一心想输出</p>
+<div class="hl"><pre><span></span><code>{"name": "Ann", "age": "30", "role": "Admin", "nickname": "A"}
+</code></pre></div>
+
+<p>这段文本是合法 JSON，但违反了 schema 的五处（有空格不算违规，校验器只看值）：<code>age</code> 是字符串、<code>role</code> 大小写不对、多了 <code>nickname</code>、少了 <code>email</code> 和 <code>tags</code>。</p>
+<div class="hl"><pre><span></span><code>$ go test -run 'Unconstrained|Constrained' -v
+    不加约束：JSON 合法，但有 5 处不符合 schema
+    加约束：{"name":"","age":-0,"role":"admin","email":", ","tags":[" ","}"]}
+    模型想说 unsure，被迫输出 {"answer":"no"}：格式保证了，意思可能被扭曲
+</code></pre></div>
+
+<p>第二行值得多看几眼。输出<strong>完全符合 schema</strong>，但内容一塌糊涂：名字是空的、年龄是 <code>-0</code>、邮箱是 <code>", "</code>。原因是这个玩具模型只会照着自己的目标文本逐字符对齐，一旦被约束逼着偏离（比如不许输出空格），后面就全乱了。</p>
+<p>真实模型比它聪明得多，会根据已经生成的内容调整，但<strong>同样的力量在起作用</strong>：模型想走的路被堵死时，它只能在剩下的路里选一条，而那条路未必是好的。这引出约束解码的代价。</p>
+<h2 id="7-代价约束会扭曲输出分布">7. 代价：约束会扭曲输出分布</h2>
+<p><strong>例子一：被迫选择。</strong><code>TestConstrainedForcesAChoice</code> 里，schema 要求 <code>answer</code> 只能是 <code>yes</code> 或 <code>no</code>，模型想说 <code>unsure</code>。约束解码不会报错，只会让它在 <code>yes</code> 和 <code>no</code> 里挑一个。你拿到的结果格式完美，但它是被逼出来的。</p>
+<p><strong>对策</strong>：给模型一条“合法的退路”。</p>
+<div class="hl"><pre><span></span><code><span class="p">{</span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"string"</span><span class="p">,</span><span class="w"> </span><span class="nt">"enum"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"yes"</span><span class="p">,</span><span class="w"> </span><span class="s2">"no"</span><span class="p">,</span><span class="w"> </span><span class="s2">"unknown"</span><span class="p">]}</span>
+</code></pre></div>
+
+<p>或者用可空字段 <code>{"type": ["string", "null"]}</code>，在描述里说明“信息不足时填 null”。schema 不给退路，模型就只能编。</p>
+<p><strong>例子二：字段顺序就是思考顺序。</strong>模型是自回归的（1.1 课第 2 节）：先生成的内容会影响后生成的内容，反过来不行。</p>
+<div class="hl"><pre><span></span><code><span class="p">{</span><span class="nt">"answer"</span><span class="p">:</span><span class="w"> </span><span class="s2">"B"</span><span class="p">,</span><span class="w"> </span><span class="nt">"reasoning"</span><span class="p">:</span><span class="w"> </span><span class="s2">"因为……"</span><span class="p">}</span><span class="w">     </span><span class="err">←</span><span class="w"> </span><span class="err">先给答案，再编理由</span>
+<span class="p">{</span><span class="nt">"reasoning"</span><span class="p">:</span><span class="w"> </span><span class="s2">"因为……"</span><span class="p">,</span><span class="w"> </span><span class="nt">"answer"</span><span class="p">:</span><span class="w"> </span><span class="s2">"B"</span><span class="p">}</span><span class="w">     </span><span class="err">←</span><span class="w"> </span><span class="err">先推理，再给答案</span>
+</code></pre></div>
+
+<p>第一种写法里，<code>reasoning</code> 只能为已经定下来的答案找补。所以<strong>需要推理的字段放在结论字段前面</strong>。OpenAI 的 strict 模式按 schema 的键顺序输出，所以你在 schema 里怎么排，它就怎么生成。</p>
+<p>两个相关的坑：</p>
+<ul>
+<li><strong>Anthropic 会调整顺序</strong>：文档说输出保持 schema 里的顺序，但有一个例外：<strong>必填字段在前，可选字段在后</strong>。想让推理字段排在最前面，就把它设为必填。</li>
+<li><strong>别要“完整推理过程”</strong>：Anthropic 文档提醒，要求输出模型思考过程或逐步推理的字段可能触发 <code>reasoning_extraction</code> 类型的拒答，建议改为要一段“简短的解释”。推理模型的思考应该留在 thinking 块里（1.4 课）。</li>
+</ul>
+<p><strong>例子三：格式本身会影响能力。</strong>有研究报告过，强制严格格式时某些推理任务的准确率会下降（模型的“注意力”被格式占用了一部分）。工程上的常见做法是<strong>分两步</strong>：先让模型自由回答（可以开推理），再用一个便宜的调用把回答抽取成结构化数据。是否值得，用 Eval（第 06 模块）说话。</p>
+<h2 id="8-语法只管结构不管语义">8. 语法只管结构，不管语义</h2>
+<div class="hl"><pre><span></span><code><span class="c1">// 语法只管结构。minimum 这种语义约束，约束解码不管，要靠校验。</span>
+<span class="kd">func</span><span class="w"> </span><span class="nx">TestGrammarDoesNotEnforceSemantics</span><span class="p">(</span><span class="nx">t</span><span class="w"> </span><span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">T</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">sc</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">MustCompileJSON</span><span class="p">(</span><span class="s">`{"type":"object","properties":{"age":{"type":"integer","minimum":0}},...}`</span><span class="p">)</span>
+<span class="w">    </span><span class="nx">out</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">Generate</span><span class="p">(</span><span class="nx">ScriptModel</span><span class="p">{</span><span class="s">`{"age":-5}`</span><span class="p">},</span><span class="w"> </span><span class="nx">ByteVocab</span><span class="p">(),</span><span class="w"> </span><span class="nx">sc</span><span class="p">,</span><span class="w"> </span><span class="mi">50</span><span class="p">,</span><span class="w"> </span><span class="kc">nil</span><span class="p">)</span>
+<span class="w">    </span><span class="c1">// out == {"age":-5}：语法上完全合法</span>
+<span class="w">    </span><span class="c1">// sc.Validate(...) 报错：$.age: must be &gt;= 0</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>我们的语法没有实现 <code>minimum</code>。原则上可以做（数字范围也能写成语法，只是很别扭），但大多数生产实现也不做，或者只做一部分：</p>
+<ul>
+<li><strong>Anthropic</strong>：不支持 <code>minimum</code>、<code>maximum</code>、<code>multipleOf</code>、<code>minLength</code>、<code>maxLength</code>，<code>minItems</code> 只支持 0 和 1。传了直接 400。SDK 的做法是把这些约束删掉、写进字段描述里（“<code>{minimum: 100}</code>”），拿到结果后再按原 schema 校验；</li>
+<li><strong>OpenAI</strong>：支持 <code>minimum</code>、<code>maximum</code>、<code>pattern</code>、<code>format</code>、<code>minItems</code>、<code>maxItems</code> 等（微调模型除外）；</li>
+<li><strong>Gemini</strong>：支持 <code>minimum</code>、<code>maximum</code>、<code>minItems</code>、<code>maxItems</code>、<code>enum</code>、<code>format</code>，没有列出字符串长度。</li>
+</ul>
+<p>而像“<code>end_date</code> 必须晚于 <code>start_date</code>”、“<code>total</code> 等于各项之和”、“这个 SKU 必须存在于数据库”这种约束，<strong>任何语法都表达不了</strong>。Gemini 文档的最佳实践里写得很直白：输出在语法上是正确的 JSON，但仍然要在应用里校验值。</p>
+<p>结论：<strong>约束解码负责“能解析、结构对”，校验器负责“值对不对”，两者缺一不可。</strong>练习 3 会让你把 <code>maxLength</code> 也加进语法，体会一下哪些约束适合放在语法层。</p>
+<h2 id="9-保证失效的四种情况">9. 保证失效的四种情况</h2>
+<p>strict 模式“保证符合 schema”有前提。下面四种情况，你仍然会拿到不符合 schema 的东西：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>情况</th>
+<th>现象</th>
+<th>怎么识别</th>
+<th>怎么处理</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>拒答</strong></td>
+<td>输出是一段拒绝说明，不是 JSON</td>
+<td>Anthropic：<code>stop_reason: "refusal"</code>（HTTP 200）；OpenAI：输出里出现 <code>refusal</code> 内容</td>
+<td>不要解析；展示提示，或者换模型、改请求</td>
+</tr>
+<tr>
+<td><strong>截断</strong></td>
+<td>半截 JSON</td>
+<td>Anthropic：<code>max_tokens</code>；OpenAI：<code>status: "incomplete"</code>；Gemini：<code>incomplete</code></td>
+<td>调大上限重发；同样的上限重试没用</td>
+</tr>
+<tr>
+<td><strong>enum 大小写</strong></td>
+<td><code>"Conversation Topic 3"</code> 而 enum 里是 <code>"Conversation topic 3"</code></td>
+<td>校验失败，但 stop 正常</td>
+<td>Anthropic 文档明说不保证 enum / const 的大小写，常出现在空格后单词的首字母。比较时忽略大小写，并避免只有大小写不同的 enum 值</td>
+</tr>
+<tr>
+<td><strong>schema 被放宽了</strong></td>
+<td>结果违反了你“真正的” schema</td>
+<td>只能靠用原 schema 校验</td>
+<td>SDK 转换时删掉的约束、你自己为了兼容放宽的地方，都要事后校验</td>
+</tr>
+</tbody>
+</table></div>
+<p><code>TestConstrainedTruncatedByMaxTokens</code> 演示第二种：把 max tokens 设成 15，输出是一个<strong>合法前缀</strong>（<code>Check</code> 返回 <code>Prefix</code>），但解析失败。约束解码保证的是“每一步都还有救”，没保证“一定能写完”。</p>
+<p>练习里的 <code>NormalizeEnums</code> 处理第三种。注意它只修“只差大小写”的情况，修了几处要记录下来：它是一个信号，说明 schema 设计可能有问题。</p>
+<hr />
+<h1 id="第三部分三家写法">第三部分：三家写法</h1>
+<h2 id="10-openaitextformat">10. OpenAI：text.format</h2>
+<div class="hl"><pre><span></span><code>curl<span class="w"> </span>https://api.openai.com/v1/responses<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Authorization: Bearer </span><span class="nv">$OPENAI_API_KEY</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Content-Type: application/json"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-d<span class="w"> </span><span class="s1">'{</span>
+<span class="s1">    "model": "gpt-6-astra",</span>
+<span class="s1">    "input": [</span>
+<span class="s1">      {"role": "system", "content": "从用户的文本里抽取联系人信息。"},</span>
+<span class="s1">      {"role": "user", "content": "张三，邮箱 zhang@example.com，想了解企业版，下周二要演示。"}</span>
+<span class="s1">    ],</span>
+<span class="s1">    "text": {</span>
+<span class="s1">      "format": {</span>
+<span class="s1">        "type": "json_schema",</span>
+<span class="s1">        "name": "contact",</span>
+<span class="s1">        "strict": true,</span>
+<span class="s1">        "schema": {</span>
+<span class="s1">          "type": "object",</span>
+<span class="s1">          "properties": {</span>
+<span class="s1">            "name": {"type": "string"},</span>
+<span class="s1">            "email": {"type": ["string", "null"]},</span>
+<span class="s1">            "plan": {"type": "string", "enum": ["free", "pro", "enterprise", "unknown"]},</span>
+<span class="s1">            "demo_requested": {"type": "boolean"}</span>
+<span class="s1">          },</span>
+<span class="s1">          "required": ["name", "email", "plan", "demo_requested"],</span>
+<span class="s1">          "additionalProperties": false</span>
+<span class="s1">        }</span>
+<span class="s1">      }</span>
+<span class="s1">    }</span>
+<span class="s1">  }'</span>
+</code></pre></div>
+
+<p><strong>逐行解读</strong></p>
+<ul>
+<li><strong>位置</strong>：Responses API 里是 <code>text.format</code>；Chat Completions 里是 <code>response_format</code>。迁移时最容易写错的就是这个位置。</li>
+<li><strong><code>name</code></strong>：必填，给这个格式起个名字。</li>
+<li><strong><code>strict: true</code></strong>：打开约束解码。不写就只是“参考 schema”，不保证。</li>
+<li><strong>结果在哪</strong>：和普通文本回答一样，在 <code>type: "message"</code> 的 output item 的 <code>output_text</code> 里（1.2 课第 4 节），是一个 JSON <strong>字符串</strong>，你要自己解析。SDK 的 <code>responses.parse()</code> 会帮你解析成 Pydantic / Zod 对象。</li>
+</ul>
+<p><strong>strict 模式的规则</strong>（官方文档“Supported schemas”一节）：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>规则</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>根必须是 object，且不能是 anyOf</td>
+<td>Zod 的 <code>discriminatedUnion</code> 生成的就是根 anyOf，直接用会报错。把联合放到一个字段里</td>
+</tr>
+<tr>
+<td><strong>所有字段都必须在 <code>required</code> 里</strong></td>
+<td>想表达“可选”，用 <code>"type": ["string", "null"]</code>，模型必须输出这个键，没有就填 <code>null</code></td>
+</tr>
+<tr>
+<td>每个对象都必须 <code>additionalProperties: false</code></td>
+<td>第 4 节解释过原因</td>
+</tr>
+<tr>
+<td>支持的类型</td>
+<td>string、number、boolean、integer、object、array、enum、anyOf</td>
+</tr>
+<tr>
+<td>支持的约束</td>
+<td>string：<code>pattern</code>、<code>format</code>（date-time、time、date、duration、email、hostname、ipv4、ipv6、uuid）；number：<code>multipleOf</code>、<code>maximum</code>、<code>exclusiveMaximum</code>、<code>minimum</code>、<code>exclusiveMinimum</code>；array：<code>minItems</code>、<code>maxItems</code></td>
+</tr>
+<tr>
+<td>不支持</td>
+<td><code>allOf</code>、<code>not</code>、<code>dependentRequired</code>、<code>dependentSchemas</code>、<code>if</code>/<code>then</code>/<code>else</code>；微调模型还不支持字符串、数字、数组的那些约束和 <code>patternProperties</code></td>
+</tr>
+<tr>
+<td>递归</td>
+<td>支持，用 <code>"$ref": "#"</code> 引用根，或者引用 <code>$defs</code> 里的定义</td>
+</tr>
+<tr>
+<td>规模</td>
+<td>最多 5000 个对象属性、10 层嵌套；所有属性名、定义名、enum 值、const 值加起来不超过 12 万字符；enum 值总数不超过 1000 个</td>
+</tr>
+<tr>
+<td>键顺序</td>
+<td>输出按 schema 里的键顺序生成</td>
+</tr>
+</tbody>
+</table></div>
+<p>“所有字段都必须 required”是 OpenAI 最特别的一条。为什么？可选字段让语法里多出“跳过”这条分支（第 4 节的 <code>fields</code>），状态数成倍增长。OpenAI 选择让你用 <code>null</code> 显式表达“没有”，语法里就只剩一条路。练习的 <code>ForOpenAI</code> 把普通 schema 里的可选字段自动改成“必填 + 可空”。</p>
+<p><strong>拒答</strong>：OpenAI 的拒答不遵循你的 schema，output 里的内容类型是 <code>refusal</code>（1.2 课的统一客户端已经把它映射成 <code>StopRefusal</code>）。</p>
+<p><strong>函数调用的 strict</strong>：函数定义上加 <code>"strict": true</code>，参数 schema 的规则和上面完全一样。</p>
+<h2 id="11-anthropicoutput_configformat">11. Anthropic：output_config.format</h2>
+<div class="hl"><pre><span></span><code>curl<span class="w"> </span>https://api.anthropic.com/v1/messages<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"x-api-key: </span><span class="nv">$ANTHROPIC_API_KEY</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"anthropic-version: 2023-06-01"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Content-Type: application/json"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-d<span class="w"> </span><span class="s1">'{</span>
+<span class="s1">    "model": "claude-opus-5-5",</span>
+<span class="s1">    "max_tokens": 1024,</span>
+<span class="s1">    "messages": [{"role": "user", "content": "从这段文本抽取联系人：张三，邮箱 zhang@example.com……"}],</span>
+<span class="s1">    "output_config": {</span>
+<span class="s1">      "format": {</span>
+<span class="s1">        "type": "json_schema",</span>
+<span class="s1">        "schema": {</span>
+<span class="s1">          "type": "object",</span>
+<span class="s1">          "properties": {</span>
+<span class="s1">            "name": {"type": "string"},</span>
+<span class="s1">            "email": {"type": "string"},</span>
+<span class="s1">            "plan": {"type": "string"},</span>
+<span class="s1">            "demo_requested": {"type": "boolean"}</span>
+<span class="s1">          },</span>
+<span class="s1">          "required": ["name", "email", "plan", "demo_requested"],</span>
+<span class="s1">          "additionalProperties": false</span>
+<span class="s1">        }</span>
+<span class="s1">      }</span>
+<span class="s1">    }</span>
+<span class="s1">  }'</span>
+</code></pre></div>
+
+<p><strong>逐行解读</strong></p>
+<ul>
+<li><strong>位置</strong>：<code>output_config.format</code>。早期 beta 用的是顶层 <code>output_format</code> 参数加 <code>structured-outputs-2025-11-13</code> beta 头，现在已弃用；新代码不需要任何 beta 头。</li>
+<li><strong>结果在哪</strong>：响应的 text 块里，是一个 JSON 字符串。</li>
+<li><strong>严格工具</strong>：工具定义上 <code>"strict": true</code>，用同一套语法约束工具名和参数。</li>
+</ul>
+<p><strong>规则和限制</strong>（官方文档“JSON Schema limitations”和“Schema complexity limits”）：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>类别</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>支持</td>
+<td>全部基本类型；<code>enum</code>（只能是字符串、数字、布尔、null）；<code>const</code>；<code>anyOf</code>、<code>allOf</code>（<code>allOf</code> 不能配 <code>$ref</code>）；<code>$ref</code>、<code>$defs</code>、<code>definitions</code>（不支持外部引用）；<code>default</code>；<code>required</code>；<code>additionalProperties</code>（<strong>必须是 false</strong>）；字符串 format：date-time、time、date、duration、email、hostname、uri、ipv4、ipv6、uuid；<code>minItems</code> 只支持 0 和 1</td>
+</tr>
+<tr>
+<td>不支持（传了返回 400）</td>
+<td><strong>递归 schema</strong>；数字约束（<code>minimum</code>、<code>maximum</code>、<code>multipleOf</code>）；字符串长度（<code>minLength</code>、<code>maxLength</code>）；<code>minItems</code> 大于 1 等数组约束；<code>additionalProperties</code> 不是 false</td>
+</tr>
+<tr>
+<td>正则 <code>pattern</code></td>
+<td>支持简单的：<code>^...$</code>、<code>*</code> <code>+</code> <code>?</code>、简单的 <code>{n,m}</code>、<code>[]</code> <code>.</code> <code>\d</code> <code>\w</code> <code>\s</code>、分组；不支持反向引用、前后断言、<code>\b</code>、大范围的 <code>{n,m}</code></td>
+</tr>
+<tr>
+<td>单请求复杂度上限</td>
+<td>strict 工具最多 20 个；所有 strict schema 里的可选参数合计最多 24 个；使用联合类型（<code>anyOf</code> 或类型数组）的参数合计最多 16 个</td>
+</tr>
+<tr>
+<td>键顺序</td>
+<td>保持 schema 顺序，但<strong>必填字段在前、可选字段在后</strong></td>
+</tr>
+<tr>
+<td>不兼容</td>
+<td>Citations（引用）；预填充 assistant 消息（prefill）</td>
+</tr>
+</tbody>
+</table></div>
+<p>注意复杂度上限是<strong>整个请求的合计</strong>：4 个 strict 工具各有 6 个可选参数，就到了 24 的上限。文档给的降复杂度建议依次是：只把关键工具设为 strict、能必填就必填、拍平嵌套、拆成多个请求。</p>
+<p><strong>Token 成本和缓存</strong>：开启结构化输出时，服务端会自动注入一段系统提示说明格式要求，所以输入 token 会略多；修改 <code>output_config.format</code> 会让这段对话的 Prompt Cache 失效（1.5 课）。</p>
+<p><strong>语法的作用范围</strong>：语法只约束模型的直接输出，不约束 thinking 块、工具调用和工具结果。所以开扩展思考时，模型可以先自由思考，最终回答再受 schema 约束。这正好解决了第 7 节“格式影响推理”的问题。</p>
+<p><strong>SDK 的转换</strong>：Python 的 <code>client.messages.parse()</code> 和 <code>transform_schema()</code> 会把不支持的约束删掉、写进描述、给每个对象加 <code>additionalProperties: false</code>，然后<strong>用原 schema 校验响应</strong>。练习的 <code>ForAnthropic</code> 照这个思路实现，<code>TestAnthropicCheckAndTransform</code> 验证了一个关键点：<code>score: 9</code> 能通过发出去的（放宽后的）schema，但必须被原 schema 拒绝。</p>
+<h2 id="12-geminiresponse_format">12. Gemini：response_format</h2>
+<div class="hl"><pre><span></span><code>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span><span class="s2">"https://generativelanguage.googleapis.com/v1beta/interactions"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"x-goog-api-key: </span><span class="nv">$GEMINI_API_KEY</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Content-Type: application/json"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-d<span class="w"> </span><span class="s1">'{</span>
+<span class="s1">    "model": "gemini-3.8-flash",</span>
+<span class="s1">    "input": "从这段文本抽取联系人：张三，邮箱 zhang@example.com……",</span>
+<span class="s1">    "response_format": {</span>
+<span class="s1">      "type": "text",</span>
+<span class="s1">      "mime_type": "application/json",</span>
+<span class="s1">      "schema": {</span>
+<span class="s1">        "type": "object",</span>
+<span class="s1">        "properties": {</span>
+<span class="s1">          "name": {"type": "string"},</span>
+<span class="s1">          "email": {"type": ["string", "null"]},</span>
+<span class="s1">          "plan": {"type": "string", "enum": ["free", "pro", "enterprise"]}</span>
+<span class="s1">        },</span>
+<span class="s1">        "required": ["name", "plan"]</span>
+<span class="s1">      }</span>
+<span class="s1">    }</span>
+<span class="s1">  }'</span>
+</code></pre></div>
+
+<p><strong>逐行解读</strong></p>
+<ul>
+<li><strong>位置</strong>：Interactions API 的顶层 <code>response_format</code>，<code>type: "text"</code> + <code>mime_type: "application/json"</code> + <code>schema</code>。<code>response_format</code> 也可以是数组，用来同时要多种输出模态。</li>
+<li><strong>历史包袱</strong>：2026 年 5 月的破坏性变更之前，写法是 <code>response_mime_type</code> + <code>response_format</code>（直接放 schema）；老的 <code>generateContent</code> 接口用的是 <code>generationConfig.responseMimeType</code> + <code>responseSchema</code>，而且早期的 <code>responseSchema</code> 用的是大写类型名（<code>"type": "OBJECT"</code>）的 OpenAPI 子集。网上的示例三种写法都有，看清楚是哪个接口、哪个版本。</li>
+<li><strong>结果在哪</strong>：<code>model_output</code> step 的文本里（SDK 的 <code>interaction.output_text</code>）。</li>
+<li><strong>流式</strong>：文档说流式返回的片段是合法的部分 JSON 字符串，拼起来就是最终对象。</li>
+</ul>
+<p><strong>支持的 schema 子集</strong>（官方文档“JSON schema support”）：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>类型</th>
+<th>支持的关键字</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>通用</td>
+<td><code>type</code>（含 <code>null</code>，用类型数组表达可空）、<code>title</code>、<code>description</code></td>
+</tr>
+<tr>
+<td>object</td>
+<td><code>properties</code>、<code>required</code>、<code>additionalProperties</code>（布尔<strong>或 schema</strong>）</td>
+</tr>
+<tr>
+<td>string</td>
+<td><code>enum</code>、<code>format</code>（如 date-time、date、time）</td>
+</tr>
+<tr>
+<td>number / integer</td>
+<td><code>enum</code>、<code>minimum</code>、<code>maximum</code></td>
+</tr>
+<tr>
+<td>array</td>
+<td><code>items</code>、<code>prefixItems</code>（元组）、<code>minItems</code>、<code>maxItems</code></td>
+</tr>
+<tr>
+<td>组合</td>
+<td><code>anyOf</code>；递归用 <code>$ref</code>（文档示例里有组织架构树）</td>
+</tr>
+</tbody>
+</table></div>
+<p>和另外两家相比，Gemini <strong>不要求</strong> <code>additionalProperties: false</code>，也<strong>不要求</strong>所有字段必填，可选字段可以真正地省略。文档的限制一节只写了两条：不是所有 JSON Schema 特性都支持；特别大或嵌套特别深的 schema 可能被拒绝。</p>
+<p><strong>和工具组合</strong>：Gemini 3 系列（预览功能）可以把结构化输出和 Google 搜索、URL Context、代码执行、文件搜索、函数调用组合使用，比如“搜索之后按 schema 返回比赛结果”。</p>
+<h2 id="13-三家对比">13. 三家对比</h2>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th></th>
+<th>OpenAI</th>
+<th>Anthropic</th>
+<th>Gemini</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>参数位置</td>
+<td><code>text.format</code></td>
+<td><code>output_config.format</code></td>
+<td><code>response_format</code></td>
+</tr>
+<tr>
+<td>必须 <code>additionalProperties: false</code></td>
+<td>是</td>
+<td>是</td>
+<td>否</td>
+</tr>
+<tr>
+<td>所有字段必须 required</td>
+<td><strong>是</strong>（可选用 null 表达）</td>
+<td>否（但上限 24 个可选参数）</td>
+<td>否</td>
+</tr>
+<tr>
+<td>数字范围</td>
+<td>支持</td>
+<td><strong>不支持</strong></td>
+<td>支持</td>
+</tr>
+<tr>
+<td>字符串长度</td>
+<td>未列入支持（<code>pattern</code>、<code>format</code> 支持）</td>
+<td><strong>不支持</strong></td>
+<td>未列出</td>
+</tr>
+<tr>
+<td>数组长度</td>
+<td><code>minItems</code>、<code>maxItems</code></td>
+<td><code>minItems</code> 仅 0 / 1</td>
+<td><code>minItems</code>、<code>maxItems</code></td>
+</tr>
+<tr>
+<td>递归</td>
+<td>支持</td>
+<td><strong>不支持</strong></td>
+<td>支持</td>
+</tr>
+<tr>
+<td>根是 anyOf</td>
+<td>不允许</td>
+<td>未禁止</td>
+<td>未禁止</td>
+</tr>
+<tr>
+<td>输出键顺序</td>
+<td>schema 顺序</td>
+<td>必填在前，然后 schema 顺序</td>
+<td>未明确</td>
+</tr>
+<tr>
+<td>首次编译延迟</td>
+<td>有</td>
+<td>有（缓存 24 小时）</td>
+<td>未说明</td>
+</tr>
+<tr>
+<td>已知坑</td>
+<td>拒答不遵循 schema</td>
+<td>enum 大小写不保证；拒答；与 Citations 不兼容</td>
+<td>文档自己说“仍要校验值”</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>结论</strong>：没有一个 schema 能原样同时满足三家的 strict 规则（比如 OpenAI 要求全部 required，Anthropic 不支持递归和数字范围）。所以统一客户端需要<strong>一份“真正的” schema，加上按厂商转换的函数</strong>，发出去的是转换后的，校验用的是原始的。这就是练习的 <code>CheckOpenAI</code> / <code>ForOpenAI</code> / <code>CheckAnthropic</code> / <code>ForAnthropic</code>。</p>
+<hr />
+<h1 id="第四部分工程实践">第四部分：工程实践</h1>
+<h2 id="14-设计对模型友好的-schema">14. 设计对模型友好的 schema</h2>
+<p>schema 既是给程序的类型定义，也是给模型的提示词。模型能看到字段名、描述、enum 值，它们都会影响输出质量。</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>原则</th>
+<th>不好</th>
+<th>好</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>字段名自解释</td>
+<td><code>{"v": number}</code></td>
+<td><code>{"price_cny": number}</code></td>
+</tr>
+<tr>
+<td>写 <code>description</code></td>
+<td>没有描述</td>
+<td><code>"description": "含税总价，单位人民币元"</code></td>
+</tr>
+<tr>
+<td>推理在结论前</td>
+<td><code>answer</code>, <code>reason</code></td>
+<td><code>reason</code>, <code>answer</code></td>
+</tr>
+<tr>
+<td>给退路</td>
+<td><code>enum: ["yes", "no"]</code></td>
+<td><code>enum: ["yes", "no", "unknown"]</code> 或可空</td>
+</tr>
+<tr>
+<td>用 enum 不用自由文本</td>
+<td><code>"category": string</code></td>
+<td><code>"category": {"enum": [...]}</code></td>
+</tr>
+<tr>
+<td>避免只差大小写的 enum</td>
+<td><code>"Topic 1"</code>, <code>"topic 1"</code></td>
+<td>改成不同的词</td>
+</tr>
+<tr>
+<td>少用可选、少用联合</td>
+<td>十几个可选字段、到处 <code>anyOf</code></td>
+<td>能必填就必填；联合放到最需要的地方</td>
+</tr>
+<tr>
+<td>拍平</td>
+<td>五层嵌套</td>
+<td>两三层</td>
+</tr>
+<tr>
+<td>敏感信息别放进 schema</td>
+<td>enum 里列病人姓名</td>
+<td>schema 会被单独缓存，Anthropic 文档明确说 PHI 不能出现在属性名、enum、const、pattern 里</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>schema 从类型生成，别手写两份</strong>。Python 用 Pydantic，TypeScript 用 Zod，Go 可以从 struct tag 生成。手写的 JSON Schema 和代码里的类型迟早会不一致。OpenAI 文档也建议：从类型定义自动生成 schema，或者加一个 CI 步骤检查两者一致。</p>
+<p>TypeScript 里用 Zod 定义一次，同时得到 schema 和类型：</p>
+<div class="hl"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">z</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">"zod"</span><span class="p">;</span>
+
+<span class="kd">const</span><span class="w"> </span><span class="nx">Contact</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">z</span><span class="p">.</span><span class="nx">object</span><span class="p">({</span>
+<span class="w">  </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="kt">z.string</span><span class="p">().</span><span class="nx">describe</span><span class="p">(</span><span class="s2">"姓名"</span><span class="p">),</span>
+<span class="w">  </span><span class="nx">email</span><span class="o">:</span><span class="w"> </span><span class="kt">z.string</span><span class="p">().</span><span class="nx">nullable</span><span class="p">(),</span><span class="w">                       </span><span class="c1">// 可空，适配 OpenAI 的“全部必填”</span>
+<span class="w">  </span><span class="nx">plan</span><span class="o">:</span><span class="w"> </span><span class="kt">z.enum</span><span class="p">([</span><span class="s2">"free"</span><span class="p">,</span><span class="w"> </span><span class="s2">"pro"</span><span class="p">,</span><span class="w"> </span><span class="s2">"enterprise"</span><span class="p">,</span><span class="w"> </span><span class="s2">"unknown"</span><span class="p">]),</span>
+<span class="w">  </span><span class="nx">demo_requested</span><span class="o">:</span><span class="w"> </span><span class="kt">z.boolean</span><span class="p">(),</span>
+<span class="p">});</span>
+<span class="kr">type</span><span class="w"> </span><span class="nx">Contact</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">z</span><span class="p">.</span><span class="nx">infer</span><span class="o">&lt;</span><span class="ow">typeof</span><span class="w"> </span><span class="nx">Contact</span><span class="o">&gt;</span><span class="p">;</span><span class="w">               </span><span class="c1">// 从 schema 推导出 TS 类型</span>
+
+<span class="kd">const</span><span class="w"> </span><span class="nx">schema</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">z</span><span class="p">.</span><span class="nx">toJSONSchema</span><span class="p">(</span><span class="nx">Contact</span><span class="p">);</span><span class="w">               </span><span class="c1">// 发给 API 的 JSON Schema</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">parsed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Contact</span><span class="p">.</span><span class="nx">parse</span><span class="p">(</span><span class="nb">JSON</span><span class="p">.</span><span class="nx">parse</span><span class="p">(</span><span class="nx">text</span><span class="p">));</span><span class="w">       </span><span class="c1">// 拿到结果后校验，失败会抛错</span>
+</code></pre></div>
+
+<p>对照 Go：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>TypeScript（Zod）</th>
+<th>Go（本课练习）</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>z.object({...})</code></td>
+<td>schema JSON + <code>MustCompileJSON</code></td>
+<td>Go 没有运行时类型构造器，练习直接写 JSON Schema 再编译</td>
+</tr>
+<tr>
+<td><code>.describe("姓名")</code></td>
+<td><code>"description": "姓名"</code></td>
+<td>给模型看的说明</td>
+</tr>
+<tr>
+<td><code>z.string().nullable()</code></td>
+<td><code>{"type": ["string", "null"]}</code></td>
+<td>可空</td>
+</tr>
+<tr>
+<td><code>z.enum([...])</code></td>
+<td><code>{"enum": [...]}</code></td>
+<td>枚举</td>
+</tr>
+<tr>
+<td><code>z.infer&lt;typeof Contact&gt;</code></td>
+<td>手写对应的 <code>struct</code></td>
+<td>TS 能从 schema 推导类型，Go 做不到，只能反过来从 struct 生成 schema（反射或代码生成）</td>
+</tr>
+<tr>
+<td><code>z.toJSONSchema(Contact)</code></td>
+<td><code>Compact(doc)</code></td>
+<td>得到发给 API 的 schema</td>
+</tr>
+<tr>
+<td><code>Contact.parse(obj)</code> 抛 <code>ZodError</code></td>
+<td><code>sc.Validate(v)</code> 返回 <code>[]ValidationError</code></td>
+<td>一个抛异常，一个返回错误列表；两边都带出错路径</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="15-抽取循环校验错误驱动重试">15. 抽取循环：校验错误驱动重试</h2>
+<div class="hl"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nx">Extract</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">g</span><span class="w"> </span><span class="nx">Generator</span><span class="p">,</span><span class="w"> </span><span class="nx">sc</span><span class="w"> </span><span class="o">*</span><span class="nx">Schema</span><span class="p">,</span><span class="w"> </span><span class="nx">maxAttempts</span><span class="w"> </span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="kt">any</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nx">feedback</span><span class="w"> </span><span class="p">[]</span><span class="kt">string</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">attempt</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="nx">attempt</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="nx">maxAttempts</span><span class="p">;</span><span class="w"> </span><span class="nx">attempt</span><span class="o">++</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">text</span><span class="p">,</span><span class="w"> </span><span class="nx">stop</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">g</span><span class="p">.</span><span class="nx">Generate</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">feedback</span><span class="p">)</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="nx">attempt</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">switch</span><span class="w"> </span><span class="nx">stop</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="s">"refusal"</span><span class="p">:</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="nx">attempt</span><span class="p">,</span><span class="w"> </span><span class="nx">ErrRefusal</span><span class="w">   </span><span class="c1">// ① 拒答不重试</span>
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="s">"length"</span><span class="p">:</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="nx">attempt</span><span class="p">,</span><span class="w"> </span><span class="nx">ErrTruncated</span><span class="w"> </span><span class="c1">// ② 同样的上限重试还是会截断</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="nx">v</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">ParseOrdered</span><span class="p">([]</span><span class="kt">byte</span><span class="p">(</span><span class="nx">stripFence</span><span class="p">(</span><span class="nx">text</span><span class="p">)))</span><span class="w"> </span><span class="c1">// ③ 去掉 ```json 围栏</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nx">feedback</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[]</span><span class="kt">string</span><span class="p">{</span><span class="s">"输出不是合法 JSON："</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">err</span><span class="p">.</span><span class="nx">Error</span><span class="p">()}</span>
+<span class="w">            </span><span class="k">continue</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="nx">errs</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">sc</span><span class="p">.</span><span class="nx">Validate</span><span class="p">(</span><span class="nx">v</span><span class="p">)</span><span class="w"> </span><span class="c1">// ④ 用“原始” schema 校验</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">errs</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="nx">v</span><span class="p">,</span><span class="w"> </span><span class="nx">attempt</span><span class="p">,</span><span class="w"> </span><span class="kc">nil</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="nx">feedback</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">feedback</span><span class="p">[:</span><span class="mi">0</span><span class="p">]</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">e</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">errs</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nx">feedback</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">feedback</span><span class="p">,</span><span class="w"> </span><span class="nx">e</span><span class="p">.</span><span class="nx">Error</span><span class="p">())</span><span class="w"> </span><span class="c1">// ⑤ 带路径的错误原样喂回去</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="nx">maxAttempts</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">ExtractError</span><span class="p">{</span><span class="nx">Attempts</span><span class="p">:</span><span class="w"> </span><span class="nx">maxAttempts</span><span class="p">,</span><span class="w"> </span><span class="nx">Last</span><span class="p">:</span><span class="w"> </span><span class="nx">feedback</span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>逐行解读</strong></p>
+<ul>
+<li><strong>① 拒答</strong>：模型拒绝了，换个格式重问一般没用，而且会浪费钱。交给上层决定：提示用户、换模型（Anthropic 提供服务端的模型回退）、或者记录下来做 Eval。</li>
+<li><strong>② 截断</strong>：输出写到一半就停了。用同样的 <code>max_tokens</code> 重试，大概率还是截断，正确做法是调大上限，或者让 schema 产生更短的输出（比如限制数组长度）。</li>
+<li><strong>③ 围栏</strong>：没开 strict 的模型、或者用 OpenAI 兼容接口的国产模型，经常会包一层 Markdown。顺手去掉比让模型重来便宜。</li>
+<li><strong>④ 原始 schema</strong>：哪怕开了 strict，发出去的 schema 可能被你或 SDK 放宽过（第 11 节），所以必须用真正的 schema 再校验一次。</li>
+<li><strong>⑤ 错误带路径</strong>：<code>$.items[2].price: must be &gt;= 0</code> 比“格式不对，请重试”有用得多，模型通常一次就能改对。<code>Validate</code> 返回<strong>全部</strong>错误而不是第一个，这样模型一次能改完。</li>
+</ul>
+<p><code>TestExtractRetriesWithFeedback</code> 模拟了一个典型过程：第一次输出前面带了一句废话、JSON 半截；第二次包了代码围栏、<code>age</code> 是 -1；第三次正确。断言第二次和第三次调用收到的反馈分别是“不是合法 JSON”和 <code>$.age: must be &gt;= 0</code>。</p>
+<p><strong>重试几次合适？</strong>一般 2–3 次。每次重试都要再付一次完整输入的钱（重试时历史更长），到第三次还不对，通常是 schema 或提示词有问题，继续重试只是烧钱。</p>
+<h2 id="16-流式结构化输出">16. 流式结构化输出</h2>
+<p>结构化输出也可以流式。好处是能逐字段展示（比如生成一个长报告，先显示标题），坏处是中途的 JSON 是不完整的，不能直接 <code>JSON.parse</code>。</p>
+<p>两种做法：</p>
+<ol>
+<li><strong>部分 JSON 解析</strong>：把当前前缀“补全”成合法 JSON 再解析（补上未闭合的引号、括号），得到一个字段不全的对象，前端只渲染已经确定的字段。OpenAI 文档建议流式结构化输出交给 SDK 处理；Anthropic 文档在流式工具参数一节推荐用 Pydantic 的部分 JSON 解析或 SDK 的流式辅助函数；</li>
+<li><strong>按字段边界推送</strong>：用本课的前缀检查器的思路，追踪“当前在哪个字段里”，一个字段完成时推一次。</li>
+</ol>
+<p>不管哪种，<strong>最终结果只在流正常结束后、按完整 JSON 校验一次</strong>才算数。中途展示的东西都是临时的，和 0.4 课“EOF 不等于业务成功”是同一个道理。</p>
+<h2 id="17-什么时候用哪个">17. 什么时候用哪个</h2>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>场景</th>
+<th>选择</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>从文本或图片里抽取字段、分类、打标签</td>
+<td>结构化输出（响应格式）</td>
+</tr>
+<tr>
+<td>LLM 当评委打分（第 06 模块）</td>
+<td>结构化输出，<code>reason</code> 在 <code>score</code> 前面</td>
+</tr>
+<tr>
+<td>Agent 调用你的函数</td>
+<td>工具调用，关键工具开 strict</td>
+</tr>
+<tr>
+<td>路由（选择下一步走哪个分支）</td>
+<td>结构化输出，用 enum</td>
+</tr>
+<tr>
+<td>需要深度推理的任务，结果还要结构化</td>
+<td>推理模型自由思考（thinking 不受约束），最终回答用结构化输出；或者两步：先回答、再抽取</td>
+</tr>
+<tr>
+<td>模型或兼容接口不支持 strict</td>
+<td>提示词 + 示例 + <code>Extract</code> 循环兜底</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="本课小结">本课小结</h2>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>知识点</th>
+<th>一句话</th>
+<th>练习里的代码</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>三个层次</td>
+<td>提示词不保证；JSON mode 只保证是 JSON；strict 保证符合 schema（在支持范围内）</td>
+<td><code>TestUnconstrainedModelBreaksSchema</code></td>
+</tr>
+<tr>
+<td>约束解码</td>
+<td>每一步把“接上就没救”的 token 的 logit 设成 -∞</td>
+<td><code>mask</code></td>
+</tr>
+<tr>
+<td>前缀检查</td>
+<td>输入用完返回 Prefix；分支每条都试；续体传递</td>
+<td><code>grammar.go</code>、<code>TestCheckPrefixes</code></td>
+</tr>
+<tr>
+<td>EOS</td>
+<td>只有 Complete 时才允许结束</td>
+<td><code>TestConstrainedRandomSamplingProperty</code></td>
+</tr>
+<tr>
+<td>token 边界</td>
+<td>在“文本 + token”上检查，跨结构的 token 自然处理</td>
+<td><code>TestConstrainedOutputAlwaysMatchesStructure</code></td>
+</tr>
+<tr>
+<td>编译与缓存</td>
+<td>首次请求有延迟；Anthropic 缓存 24 小时；太复杂会 400</td>
+<td>第 5 节</td>
+</tr>
+<tr>
+<td>分布扭曲</td>
+<td>不给退路就只能编；推理字段放前面</td>
+<td><code>TestConstrainedForcesAChoice</code></td>
+</tr>
+<tr>
+<td>结构 vs 语义</td>
+<td>语法管结构，校验器管值</td>
+<td><code>TestGrammarDoesNotEnforceSemantics</code></td>
+</tr>
+<tr>
+<td>保证失效</td>
+<td>拒答、截断、enum 大小写、schema 被放宽</td>
+<td><code>TestConstrainedTruncatedByMaxTokens</code>、<code>NormalizeEnums</code></td>
+</tr>
+<tr>
+<td>三家规则</td>
+<td>OpenAI 全部 required；Anthropic 无数字范围、无递归；Gemini 最宽松</td>
+<td><code>CheckOpenAI</code>、<code>CheckAnthropic</code></td>
+</tr>
+<tr>
+<td>转换</td>
+<td>一份真正的 schema，按厂商转换，用原 schema 校验</td>
+<td><code>ForOpenAI</code>、<code>ForAnthropic</code></td>
+</tr>
+<tr>
+<td>抽取循环</td>
+<td>拒答截断不重试；带路径的错误喂回去；2–3 次为限</td>
+<td><code>Extract</code></td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="练习今天做完">练习（今天做完）</h2>
+<p>练习目录：<code>projects/08-structured-output/</code>。</p>
+<div class="hl"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>projects/08-structured-output
+make<span class="w"> </span><span class="nb">test</span><span class="w">      </span><span class="c1"># go vet + go test -race -v，20 个测试</span>
+</code></pre></div>
+
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>文件</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ordered.go</code></td>
+<td>保序的 JSON 对象 <code>Obj</code>、<code>ParseOrdered</code>（数字保留为 <code>json.Number</code>）</td>
+</tr>
+<tr>
+<td><code>schema.go</code></td>
+<td>JSON Schema 子集的编译与校验，返回带路径的全部错误</td>
+</tr>
+<tr>
+<td><code>grammar.go</code></td>
+<td>前缀检查器：约束解码的“语法”</td>
+</tr>
+<tr>
+<td><code>decode.go</code></td>
+<td>解码循环、<code>mask</code>、玩具模型 <code>ScriptModel</code>、词表</td>
+</tr>
+<tr>
+<td><code>strict.go</code></td>
+<td>三家 strict 规则检查，<code>ForOpenAI</code>、<code>ForAnthropic</code> 转换</td>
+</tr>
+<tr>
+<td><code>extract.go</code></td>
+<td><code>Extract</code> 抽取循环、<code>NormalizeEnums</code></td>
+</tr>
+<tr>
+<td><code>structured_test.go</code></td>
+<td>20 个测试</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="练习-1读输出做两个实验">练习 1：读输出，做两个实验</h3>
+<ol>
+<li>运行 <code>make test</code>，找到四行 <code>t.Logf</code>。用一句话分别说明：为什么“JSON 合法”不等于“符合 schema”；为什么加了约束的输出内容会变成乱码；模型想说 <code>unsure</code> 时发生了什么；随机抽样测试证明了什么。</li>
+<li>在 <code>TestConstrainedForcesAChoice</code> 的 enum 里加上 <code>"unknown"</code>，再把模型的目标改成 <code>{"answer":"unknown"}</code>，观察输出。再把目标改回 <code>unsure</code>，输出变成了什么？为什么？</li>
+<li>把 <code>TestConstrainedOutputAlwaysMatchesStructure</code> 里的模型目标去掉所有空格、把 <code>age</code> 改成数字 <code>30</code>、<code>role</code> 改成 <code>admin</code>、删掉 <code>nickname</code>、补上 <code>"email":null,"tags":[]</code>，再看输出。对比原来的乱码，说明“模型的意图和语法一致时”约束解码几乎没有代价。</li>
+</ol>
+<h3 id="练习-2改坏它看哪个测试失败">练习 2：改坏它，看哪个测试失败</h3>
+<p>每次只改一处，跑 <code>go test</code>，记录失败的测试名和原因，然后改回来：</p>
+<ol>
+<li><code>grammar.go</code> 的 <code>str</code> 里删掉 <code>case r &lt; 0x20: return Invalid</code>；</li>
+<li><code>fields</code> 里把最后四行（可选字段的跳过分支）改成只有 <code>return take</code>；</li>
+<li><code>mask</code> 里删掉对 EOS 的限制（把 <code>if !done { ... }</code> 换成 <code>_ = done</code>）。为什么连 <code>TestConstrainedDeadEnd</code> 也失败了？</li>
+<li><code>Extract</code> 里把 <code>errs := sc.Validate(v)</code> 改成 <code>errs := []ValidationError(nil)</code>；</li>
+<li><code>ForOpenAI</code> 里把 <code>props[i].Val = nullable(kv.Val)</code> 改成 <code>props[i].Val = kv.Val</code>；</li>
+<li><code>schema.go</code> 的对象校验里删掉对 <code>AdditionalAllowed</code> 的检查；</li>
+<li><code>Extract</code> 里不调用 <code>stripFence</code>；</li>
+<li><code>number</code> 里把处理前导零的 <code>if c.s[i] == '0' {...} else {...}</code> 换成只有那个 <code>for</code> 循环。</li>
+</ol>
+<h3 id="练习-3把-maxlength-和-minlength-放进语法">练习 3：把 maxLength 和 minLength 放进语法</h3>
+<p>现在 <code>str</code> 里有一个变量 <code>n</code> 记录已经生成的字符数，但没用上。修改 <code>str</code>，让：</p>
+<ul>
+<li>字符数已经达到 <code>MaxLength</code> 时，下一个字符只能是结束引号；</li>
+<li>字符数还没到 <code>MinLength</code> 时，不许输出结束引号；</li>
+<li>转义序列（<code>\n</code>、<code>\u00e9</code>）算一个字符。</li>
+</ul>
+<p>新建 <code>maxlen_test.go</code>，写两个测试：</p>
+<ul>
+<li><code>TestCheckStringLength</code>：schema 是 <code>{"type":"string","minLength":2,"maxLength":3}</code>，断言 <code>"a"</code> 是 Invalid、<code>"ab"</code> 和 <code>"abc"</code> 是 Complete、<code>"abcd</code> 是 Invalid、<code>"中文字"</code> 是 Complete、<code>"\n\t"</code> 是 Complete、四个 <code>\u00e9</code> 是 Invalid；</li>
+<li><code>TestConstrainedRespectsMaxLength</code>：<code>title</code> 的 <code>maxLength</code> 是 5，模型想输出 <code>{"title":"a very long title"}</code>，断言约束解码的结果正好是 <code>{"title":"a ver"}</code>。</li>
+</ul>
+<p>做完想一想：为什么 Anthropic 选择不在语法里支持 <code>maxLength</code>？（提示：想想 <code>maxLength: 10000</code> 会让状态机变成什么样。）</p>
+<h3 id="选做增量检查">选做：增量检查</h3>
+<p>现在每一步、每个候选 token 都从头重新解析整个前缀，开销是 O(词表 × 长度)，一次生成就是 O(词表 × 长度²)。给 <code>checker</code> 加一个“可恢复的状态”：先把已生成的前缀解析一次，得到一组“下一步可能的解析状态”，再只在这些状态上尝试每个 token。写一个 benchmark，对比 200 个 token 的输出两种实现的耗时。这就是 Outlines、XGrammar 预编译状态机要解决的问题。</p>
+<hr />
+<h2 id="自测题">自测题</h2>
+<ol>
+<li>提示词要求“只输出 JSON”、JSON mode、strict 模式，三者分别保证什么？各举一个它们防不住的失败。</li>
+<li>约束解码在每一步具体做了什么？它和 1.1 课的 logit bias 有什么关系？</li>
+<li>前缀检查返回 Prefix 和 Complete 的区别是什么？这个区别在解码循环里用在哪？</li>
+<li>为什么要在“已生成文本 + token”上做检查，而不是单独检查 token？举一个跨结构 token 的例子。</li>
+<li>为什么同一个 schema 第一次请求更慢？Anthropic 的语法缓存在什么情况下会失效？</li>
+<li>为什么 OpenAI 和 Anthropic 都要求 <code>additionalProperties: false</code>？OpenAI 为什么还要求所有字段都 required？想表达“可选”怎么办？</li>
+<li>schema 是 <code>{"answer": {"enum": ["yes","no"]}}</code>，模型其实不知道答案。会发生什么？怎么改 schema？</li>
+<li>下面两个 schema 哪个更好？为什么？在 Anthropic 上还要注意什么？
+   <code>{"answer": string, "reasoning": string}</code> 和 <code>{"reasoning": string, "answer": string}</code></li>
+<li>strict 模式下，哪四种情况仍然会拿到不符合 schema 的结果？分别怎么识别、怎么处理？</li>
+<li>schema 里有 <code>"age": {"type": "integer", "minimum": 0}</code>，发给 Anthropic 会怎样？SDK 是怎么处理的？你的代码还要做什么？</li>
+<li>统一客户端为什么需要“一份真正的 schema + 按厂商转换”，而不是写一份三家都能用的 schema？</li>
+<li><code>Extract</code> 循环里，拒答和截断为什么不重试？校验错误为什么要带 JSON 路径、而且要返回全部错误？</li>
+<li>推理模型需要深度思考，结果又要结构化，有哪两种做法？</li>
+<li>Zod 的 <code>z.infer</code> 能从 schema 推导出 TS 类型，Go 为什么做不到？Go 里通常怎么保证 schema 和 struct 一致？</li>
+</ol>
+<hr />
+<h1 id="参考答案与详解">参考答案与详解</h1>
+<h2 id="自测题答案">自测题答案</h2>
+<p><strong>1.</strong> 提示词：什么都不保证，常见失败是前面加一句“好的”、包代码围栏、尾逗号。JSON mode：保证输出是合法 JSON，但不保证结构，常见失败是少字段、类型错（<code>"age": "30"</code>）、多字段；而且忘了在提示词里要求 JSON 时可能输出无尽的空白。strict 模式：在 schema 的支持范围内保证结构正确，防不住的是拒答、截断、enum 大小写（Anthropic），以及所有语义约束（<code>end_date</code> 晚于 <code>start_date</code>）。</p>
+<p><strong>2.</strong> 每一步拿到模型给整个词表的 logits 后，对每个候选 token 判断“已生成文本 + 这个 token”是否还能被续写成合法文档，不能的就把 logit 设成 -∞，然后照常采样。它是 logit bias 的极端形式：logit bias 是加一个有限的数，概率变小但不为 0；约束解码加的是 -∞，概率严格为 0。</p>
+<p><strong>3.</strong> Prefix：合法但还没结束，后面必须继续写；Complete：已经是完整合法的值（有时还能继续，比如顶层数字）。解码循环用它控制 EOS：只有当前文本是 Complete 时才允许选结束 token。不加这条限制，模型可能在中途结束，得到半截 JSON（练习 2 第 3 条）。</p>
+<p><strong>4.</strong> 真实分词器的 token 经常跨越 JSON 结构，比如 <code>",</code> 同时结束一个字符串并输出逗号，<code>":"</code> 包含键的结束、冒号和下一个字符串的开始。单独看 token 无法判断它是否合法，必须放在上下文里。在拼接后的文本上检查，所有跨结构的 token 都自然被正确处理。</p>
+<p><strong>5.</strong> 服务端要把 schema 编译成一个在 token 上运行的状态机（预先算好每个状态下哪些 token 合法），编译需要时间，之后会缓存。Anthropic 的缓存从最后一次使用起保留 24 小时，修改 schema 结构、或者修改请求里的工具集合（同时用结构化输出和工具时）会让缓存失效，只改 <code>name</code> 或 <code>description</code> 不会。</p>
+<p><strong>6.</strong> 允许额外属性，语法就要接受任意键名和任意类型的值，约束就形同虚设，而且状态空间会爆炸。OpenAI 要求全部 required，是因为每个可选字段都会让语法多一条“跳过”的分支，组合起来状态数指数增长；全部必填后语法只有一条路。表达“可选”的方法是可空：<code>"type": ["string", "null"]</code>，模型必须输出这个键，没有值就填 <code>null</code>。读结果的代码要能处理 <code>null</code>。</p>
+<p><strong>7.</strong> 约束解码不会报错，模型只能在 <code>yes</code> 和 <code>no</code> 里选一个，你得到一个格式完美但可能是瞎猜的答案，而且没有任何信号告诉你它是猜的。改法：给退路，<code>enum</code> 里加 <code>"unknown"</code>，或者用可空类型并在 <code>description</code> 里说明“信息不足时填 null”；需要的话再加一个 <code>confidence</code> 字段。</p>
+<p><strong>8.</strong> 第二个更好。模型是自回归的，先生成的内容影响后生成的内容。先写 <code>answer</code> 再写 <code>reasoning</code>，推理只能为已定的答案找补；先写 <code>reasoning</code>，答案才能建立在推理之上。OpenAI strict 按 schema 的键顺序输出，所以顺序直接生效。Anthropic 上要注意：输出是“必填字段在前、可选字段在后”，所以 <code>reasoning</code> 要设为必填才能保证排在前面；另外不要要求“完整的逐步推理过程”，可能触发 <code>reasoning_extraction</code> 拒答，改为要“简短解释”。</p>
+<p><strong>9.</strong> 拒答：Anthropic 是 <code>stop_reason: "refusal"</code>（HTTP 200），OpenAI 是 <code>refusal</code> 类型的内容，不解析，交给上层处理。截断：<code>max_tokens</code> / <code>incomplete</code>，输出是合法前缀但不完整，调大上限重发。enum 大小写：Anthropic 文档说明不保证，校验失败但 stop 正常，忽略大小写比较、用 <code>NormalizeEnums</code> 修正并记录、避免只差大小写的 enum 值。schema 被放宽：发出去的是转换后的 schema，结果可能违反原 schema，只能用原 schema 校验发现。</p>
+<p><strong>10.</strong> Anthropic 不支持数字约束，原样发送会返回 400。SDK 的做法：从发送的 schema 里删掉 <code>minimum</code>，在字段描述里写上 <code>{minimum: 0}</code> 提示模型，拿到响应后用原 schema 校验。你的代码（如果不用 SDK 的 parse 辅助）必须自己用原 schema 再校验一次：<code>-5</code> 能通过发出去的 schema，但不符合你的业务要求。</p>
+<p><strong>11.</strong> 三家的规则互相冲突：OpenAI 要求全部 required（可选要用可空表达），Anthropic 不支持递归和数字范围，Gemini 允许真正的可选字段。写一份“三家都能用”的 schema，只能取三者的交集：没有递归、没有数字范围、全部必填……表达力损失太大，而且你真正的业务约束就丢了。正确做法是一份完整的、表达业务含义的 schema，按厂商转换成它能接受的形状（<code>ForOpenAI</code>、<code>ForAnthropic</code>），校验永远用原始那份。</p>
+<p><strong>12.</strong> 拒答：换格式重问一般改变不了结果，还要再付一次钱；应该交给上层（提示、换模型、记录）。截断：用同样的上限重试，大概率还是截断，要调大上限或缩短输出。错误带路径，模型才知道改哪里（<code>$.items[2].price: must be &gt;= 0</code> 比“格式错误”精确得多）；返回全部错误，模型一次能改完，不用一个错误重试一轮。</p>
+<p><strong>13.</strong> 一：用推理模型，让它在 thinking 里自由思考，最终回答受 schema 约束（Anthropic 文档明确说语法不约束 thinking 块）。二：分两步，先让模型自由回答，再用一个便宜的模型把回答抽取成结构化数据。哪种更好、值不值得多一次调用，用 Eval 决定。</p>
+<p><strong>14.</strong> TypeScript 的类型系统是结构化的，Zod 的 schema 对象在类型层面携带了完整的结构信息，<code>z.infer</code> 在编译期把它“读”出来。Go 的类型必须在编译前写出来，运行时构造的值无法变成一个新类型。Go 里通常反过来：以 struct 为准，用反射（读 struct 字段和 tag）或代码生成从 struct 生成 JSON Schema，再加一个测试保证生成结果和提交的 schema 文件一致。</p>
+<h2 id="练习参考答案">练习参考答案</h2>
+<h3 id="练习-1">练习 1</h3>
+<p>第 2 题：加了 <code>"unknown"</code> 且目标是 <code>unknown</code> 时，输出就是 <code>{"answer":"unknown"}</code>，模型的意图和语法一致。目标改回 <code>unsure</code> 时，输出变成 <code>{"answer":"unknown"}</code>：<code>u</code> 开头的候选只剩 <code>unknown</code>，<code>un</code> 两个字符对上了目标，模型一路被引导进了“unknown”。这正是“给退路”的效果：模型不知道时，有一个诚实的出口。</p>
+<p>第 3 题：目标改成符合 schema 的紧凑 JSON 后，加约束的输出和目标完全一样。约束解码的代价只在“模型想走的路被堵住”时出现；模型本来就想输出合法结果时，mask 掉的都是它本来就不会选的 token。</p>
+<h3 id="练习-2">练习 2</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>改动</th>
+<th>失败的测试</th>
+<th>原因</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. 删掉控制字符检查</td>
+<td><code>TestCheckOptionalFieldsAndStrings</code></td>
+<td>字符串里的裸换行被当成合法，实际 JSON 不允许</td>
+</tr>
+<tr>
+<td>2. 删掉可选字段的跳过分支</td>
+<td><code>TestCheckOptionalFieldsAndStrings</code></td>
+<td><code>{"a":"x","c":true}</code> 跳过了可选的 <code>b</code>，被判成 Invalid</td>
+</tr>
+<tr>
+<td>3. EOS 不受限制</td>
+<td><code>TestConstrainedOutputAlwaysMatchesStructure</code>、<code>TestConstrainedRandomSamplingProperty</code>、<code>TestConstrainedDeadEnd</code></td>
+<td>前两个：模型可以在中途结束，得到半截 JSON。第三个：词表里没有能表达 <code>é</code> 的 token，本来所有候选都被屏蔽、返回 <code>ErrDeadEnd</code>；现在 EOS 总是可选，于是“正常结束”了，返回了一个不完整的结果，错误被掩盖</td>
+</tr>
+<tr>
+<td>4. 不校验</td>
+<td><code>TestExtractRetriesWithFeedback</code>、<code>TestExtractRefusalTruncationAndGiveUp</code></td>
+<td><code>age: -1</code> 和缺字段的结果被直接接受</td>
+</tr>
+<tr>
+<td>5. 可选字段不改成可空</td>
+<td><code>TestForOpenAI</code></td>
+<td><code>summary</code> 变成必填但不可空，模型被迫编造一个值；测试断言它必须是 <code>["string","null"]</code></td>
+</tr>
+<tr>
+<td>6. 不检查额外属性</td>
+<td><code>TestValidateCollectsAllErrors</code></td>
+<td><code>extra</code> 没被报出来</td>
+</tr>
+<tr>
+<td>7. 不去围栏</td>
+<td><code>TestExtractRetriesWithFeedback</code></td>
+<td>第二次回复被当成不合法 JSON，反馈内容和断言不符</td>
+</tr>
+<tr>
+<td>8. 不处理前导零</td>
+<td><code>TestCheckPrefixes</code>、<code>TestConstrainedRandomSamplingProperty</code></td>
+<td><code>01</code> 被判为合法前缀；随机抽样里出现 <code>"id":00</code> 这样的输出，<code>ParseOrdered</code> 解析失败</td>
+</tr>
+</tbody>
+</table></div>
+<p>第 3 条值得多想一下：一个“兜底”式的放宽（总允许结束）不仅产生错误结果，还会把本来能被检测出来的错误（<code>ErrDeadEnd</code>）藏起来。</p>
+<h3 id="练习-3">练习 3</h3>
+<p><code>grammar.go</code> 的 <code>str</code> 里，在循环的 <code>switch</code> 开头加两处判断：</p>
+<div class="hl"><pre><span></span><code><span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="nx">r</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="sc">'"'</span><span class="p">:</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="nx">sc</span><span class="p">.</span><span class="nx">MinLength</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">n</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="o">*</span><span class="nx">sc</span><span class="p">.</span><span class="nx">MinLength</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="nx">Invalid</span><span class="w"> </span><span class="c1">// 还没到最短长度，不许收尾</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="nx">k</span><span class="p">(</span><span class="nx">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span>
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="nx">sc</span><span class="p">.</span><span class="nx">MaxLength</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">n</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="o">*</span><span class="nx">sc</span><span class="p">.</span><span class="nx">MaxLength</span><span class="p">:</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="nx">Invalid</span><span class="w"> </span><span class="c1">// 已经够长了，只能收尾</span>
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="nx">r</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mh">0x20</span><span class="p">:</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="nx">Invalid</span>
+</code></pre></div>
+
+<p><strong>逐行解读</strong></p>
+<ul>
+<li><strong>判断放在读到字符的时候</strong>：<code>n</code> 是已经接受的字符数。读到结束引号时检查下限；读到任何其他字符（包括转义序列的开头 <code>\</code>）时检查上限：<code>n &gt;= max</code> 说明再加一个就超了。</li>
+<li><strong>转义算一个字符</strong>：转义分支吃掉 <code>\n</code> 两个字节或 <code>\u00e9</code> 六个字节，最后统一 <code>n++</code> 一次，所以按“解码后的字符”计数，和 <code>Validate</code> 里 <code>utf8.RuneCountInString</code> 的口径一致。</li>
+<li><strong>case 的顺序</strong>：结束引号的判断必须在上限判断之前，否则字符数正好等于上限时，连结束引号都会被拒绝，进入死胡同。</li>
+</ul>
+<p><code>maxlen_test.go</code>：</p>
+<div class="hl"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nx">structured</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="s">"testing"</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="nx">TestCheckStringLength</span><span class="p">(</span><span class="nx">t</span><span class="w"> </span><span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">T</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">sc</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">MustCompileJSON</span><span class="p">(</span><span class="s">`{"type":"string","minLength":2,"maxLength":3}`</span><span class="p">)</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">in</span><span class="p">,</span><span class="w"> </span><span class="nx">want</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="kt">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="nx">Status</span><span class="p">{</span>
+<span class="w">        </span><span class="s">`"a"`</span><span class="p">:</span><span class="w"> </span><span class="nx">Invalid</span><span class="p">,</span><span class="w"> </span><span class="s">`"ab"`</span><span class="p">:</span><span class="w"> </span><span class="nx">Complete</span><span class="p">,</span><span class="w"> </span><span class="s">`"abc"`</span><span class="p">:</span><span class="w"> </span><span class="nx">Complete</span><span class="p">,</span><span class="w"> </span><span class="s">`"abcd`</span><span class="p">:</span><span class="w"> </span><span class="nx">Invalid</span><span class="p">,</span>
+<span class="w">        </span><span class="s">`"中文字"`</span><span class="p">:</span><span class="w"> </span><span class="nx">Complete</span><span class="p">,</span><span class="w"> </span><span class="s">`"\n\t"`</span><span class="p">:</span><span class="w"> </span><span class="nx">Complete</span><span class="p">,</span><span class="w"> </span><span class="s">`"\u00e9\u00e9\u00e9\u00e9`</span><span class="p">:</span><span class="w"> </span><span class="nx">Invalid</span><span class="p">,</span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">got</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">sc</span><span class="p">.</span><span class="nx">Check</span><span class="p">(</span><span class="nx">in</span><span class="p">);</span><span class="w"> </span><span class="nx">got</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="nx">want</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nx">t</span><span class="p">.</span><span class="nx">Errorf</span><span class="p">(</span><span class="s">"Check(%s) = %s, want %s"</span><span class="p">,</span><span class="w"> </span><span class="nx">in</span><span class="p">,</span><span class="w"> </span><span class="nx">got</span><span class="p">,</span><span class="w"> </span><span class="nx">want</span><span class="p">)</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="nx">TestConstrainedRespectsMaxLength</span><span class="p">(</span><span class="nx">t</span><span class="w"> </span><span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">T</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">sc</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">MustCompileJSON</span><span class="p">(</span><span class="s">`{"type":"object","properties":{"title":{"type":"string","maxLength":5}},"required":["title"],"additionalProperties":false}`</span><span class="p">)</span>
+<span class="w">    </span><span class="nx">out</span><span class="p">,</span><span class="w"> </span><span class="nx">finish</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">Generate</span><span class="p">(</span><span class="nx">ScriptModel</span><span class="p">{</span><span class="s">`{"title":"a very long title"}`</span><span class="p">},</span><span class="w"> </span><span class="nx">ByteVocab</span><span class="p">(),</span><span class="w"> </span><span class="nx">sc</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="kc">nil</span><span class="p">)</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nx">finish</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="s">"stop"</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nx">out</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="s">`{"title":"a ver"}`</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">t</span><span class="p">.</span><span class="nx">Fatalf</span><span class="p">(</span><span class="s">"out=%s finish=%s err=%v"</span><span class="p">,</span><span class="w"> </span><span class="nx">out</span><span class="p">,</span><span class="w"> </span><span class="nx">finish</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>第二个测试的结果说明了语法层长度约束的副作用：模型的标题被<strong>硬截断</strong>在第 5 个字符，而不是写一个更短的标题。语义上更好的做法往往是在描述里写“不超过 5 个字”，让模型自己规划，再用校验兜底。</p>
+<p><strong>为什么 Anthropic 不在语法里支持 maxLength</strong>：长度上限要求状态机“数数”。<code>maxLength: 10000</code> 意味着字符串内部要区分 10001 种状态，和其他字段组合后，编译出的状态机会非常大，编译时间和缓存成本都受不了。把它降级成描述加事后校验，是一个工程取舍。</p>
+<hr />
+<h2 id="完成标准">完成标准</h2>
+<ul>
+<li>[ ] <code>make test</code> 20 个测试全部通过，能说出每个测试在验证什么；</li>
+<li>[ ] 练习 1：三个实验都做了，能解释“意图和语法冲突”与“意图和语法一致”时输出的差别；</li>
+<li>[ ] 练习 2：八处改动都做过，尤其能解释第 3 条为什么会让 <code>TestConstrainedDeadEnd</code> 失败；</li>
+<li>[ ] 练习 3：<code>maxLength</code> / <code>minLength</code> 进了语法，<code>maxlen_test.go</code> 两个测试通过 <code>go test -race</code>；</li>
+<li>[ ] 能不看课件写出三家结构化输出的请求（参数位置、<code>strict</code>、schema 规则）；</li>
+<li>[ ] 能把一个带可选字段和 <code>minimum</code> 的 schema 手动转换成 OpenAI 和 Anthropic 能接受的形状；</li>
+<li>[ ] 自测题 14 道都能讲清楚，尤其是第 3、6、7、9、11 题。</li>
+</ul>
+<p>做到以上几条，1.3 就可以勾选。下一课 <strong>1.4 推理模型</strong>：reasoning effort、thinking budget、推理 token 的成本，什么任务值得开推理，以及推理块在多轮工具调用里的生命周期。</p>
+    <nav class="pager"><a class="prev" href="01-02-mainstream-apis.html"><span>← 上一课 1.2</span>主流模型 API</a></nav>
+    <p class="foot">© 2026 duang777 · 课件源文件：<a href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/notes/01-llm/03-structured-output.md">notes/01-llm/03-structured-output.md</a></p>
+  </article>
+</div>
+<script>
+document.querySelectorAll('article pre').forEach(function(pre){
+  var b=document.createElement('button');b.className='code__copy';b.textContent='复制';
+  b.onclick=function(){navigator.clipboard.writeText(pre.innerText).then(function(){b.textContent='已复制';setTimeout(function(){b.textContent='复制'},1200)})};
+  pre.parentNode.insertBefore(b,pre);
+});
+var links=[].slice.call(document.querySelectorAll('.toc a')),map={};
+links.forEach(function(a){map[decodeURIComponent(a.getAttribute('href').slice(1))]=a});
+var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting&&map[e.target.id]){links.forEach(function(l){l.classList.remove('on')});map[e.target.id].classList.add('on')}})},{rootMargin:'-80px 0px -70% 0px'});
+document.querySelectorAll('article h1[id],article h2[id]').forEach(function(h){io.observe(h)});
+</script>
+</body>
+</html>

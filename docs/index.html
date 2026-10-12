@@ -215,7 +215,7 @@
         <section class="section" id="progress" data-nav="进度">
           <div class="head" data-reveal>
             <p class="head__eyebrow x-kicker">当前进度</p>
-            <h2 class="x-h2">01 LLM 原理与使用：1.1 采样与 1.2 主流模型 API 已上线；0.6、1.1 练习收尾中。</h2>
+            <h2 class="x-h2">01 LLM 原理与使用：1.1 采样、1.2 主流模型 API、1.3 结构化输出已上线；练习收尾中。</h2>
             <p class="head__sub">学完且有笔记或代码产出，才在 ROADMAP 里打勾。</p>
           </div>
           <div class="x-progress" data-reveal>
@@ -375,6 +375,25 @@
                 <dd><span class="chip x-chip x-chip--live">进行中</span></dd>
               </dl>
             </article>
+            <article class="step">
+              <div class="step__intro">
+                <p class="step__num x-step-num">1.3</p>
+                <p class="step__eyebrow">进行中 · 01 LLM 原理与使用</p>
+              </div>
+              <div>
+                <h3>结构化输出：JSON Schema、strict 模式与约束解码</h3>
+                <p class="sub">手写约束解码器，把不合法 token 的 logit 设成 -∞；看清它保证什么、扭曲什么、管不了什么；三家 schema 子集的规则检查与转换，以及校验驱动的重试循环。</p>
+                <div class="links" style="margin-top: 16px">
+                  <a class="x-btn x-btn--primary" href="notes/01-03-structured-output.html">在线阅读</a>
+                </div>
+              </div>
+              <dl class="step__panel">
+                <dt>课件</dt>
+                <dd><span class="chip x-chip x-chip--done">已完成</span></dd>
+                <dt>练习</dt>
+                <dd><span class="chip x-chip x-chip--live">进行中</span></dd>
+              </dl>
+            </article>
           </div>
         </section>
 
@@ -387,8 +406,9 @@
             <li class="is-current">
               <p class="timeline__when"><span class="x-mono">Day 5 · 2026-10-12</span></p>
               <div class="timeline__what">
-                <p><strong>Transformer、Tokenizer 与采样；主流模型 API</strong></p>
+                <p><strong>Transformer、Tokenizer 与采样；主流模型 API；结构化输出</strong></p>
                 <ul>
+                  <li>1.3：手写约束解码器，100 次随机抽样全部通过校验；但模型想说 unsure 时，enum 只给 yes/no，它只能编一个</li>
                   <li>1.2：三家 API 手写统一客户端，20 个测试；推理块（encrypted_content / signature）必须原样回传，不传不报错，只会变笨变贵</li>
                   <li>Anthropic 的 input_tokens 不含缓存：字段写 30，真实输入 1030</li>
                   <li>Gemini 官方文档对工具参数增量有两种写法，解析器两种都认，用测试钉住</li>
