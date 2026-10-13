@@ -32,6 +32,7 @@ LESSONS = [
     ("notes/01-llm/02-mainstream-apis.md", "01-02-mainstream-apis", "1.2", "主流模型 API", "5–6 小时"),
     ("notes/01-llm/03-structured-output.md", "01-03-structured-output", "1.3", "结构化输出", "5–6 小时"),
     ("notes/01-llm/04-reasoning-models.md", "01-04-reasoning-models", "1.4", "推理模型", "5–6 小时"),
+    ("notes/01-llm/05-prompt-caching.md", "01-05-prompt-caching", "1.5", "Prompt Caching", "5–6 小时"),
 ]
 
 CSS = r"""
