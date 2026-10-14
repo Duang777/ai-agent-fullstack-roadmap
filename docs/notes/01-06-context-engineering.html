@@ -1,0 +1,797 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>1.6 上下文工程：窗口预算、长上下文退化与提示词的系统方法 · AI Agent 全栈</title>
+<meta name="description" content="1.6 上下文工程：窗口预算、长上下文退化与提示词的系统方法。duang777 的 AI Agent 全栈公开学习课件。" />
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("x-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
+<style>
+:root{
+  --bg:#0a0a0a;--surface:#111;--text:#ededed;--text-2:#a1a1a1;--text-3:rgb(255 255 255/.4);
+  --line:rgb(255 255 255/.1);--line-2:rgb(255 255 255/.06);
+  --body:#d4d4d4;--code-bg:#1a1a1a;--pre-bg:#0f0f0f;--nav-bg:rgb(10 10 10/.8);--sb:#2a2a2a;--sb-h:#3a3a3a;
+  --sans:Inter,-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei","Helvetica Neue",sans-serif;
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+}
+*{box-sizing:border-box}
+html{color-scheme:dark}
+:root[data-theme="light"]{--bg:#fff;--surface:#fafafa;--text:#0a0a0a;--text-2:#555;--text-3:rgb(0 0 0/.42);--line:rgb(0 0 0/.1);--line-2:rgb(0 0 0/.06);--body:#333;--code-bg:#f2f2f2;--pre-bg:#fafafa;--nav-bg:rgb(255 255 255/.85);--sb:#d4d4d4;--sb-h:#bdbdbd}
+:root[data-theme="light"]{color-scheme:light}
+.toc{scrollbar-width:none}.toc::-webkit-scrollbar{display:none}
+html{scrollbar-width:thin;scrollbar-color:var(--sb) transparent}
+::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--sb);border-radius:8px}::-webkit-scrollbar-thumb:hover{background:var(--sb-h)}
+html{scroll-behavior:smooth;scroll-padding-top:80px}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;line-height:1.8;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+.nav{position:sticky;top:0;z-index:10;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;border-bottom:1px solid var(--line);background:var(--nav-bg);backdrop-filter:blur(12px)}
+.nav__brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-size:14px;font-weight:500}
+.nav__dot{width:10px;height:10px;border-radius:3px;background:var(--text)}
+.nav__links{display:flex;gap:20px;font-size:14px;color:var(--text-2)}
+.nav__links a{text-decoration:none}.nav__links a:hover{color:var(--text)}
+.wrap{max-width:1200px;margin:0 auto;padding:0 24px;display:grid;grid-template-columns:220px minmax(0,1fr);gap:56px}
+.toc{position:sticky;top:80px;align-self:start;max-height:calc(100vh - 100px);overflow:auto;padding:40px 0 40px;font-size:13px;line-height:1.6}
+.toc__label{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--text-3);text-transform:uppercase;margin-bottom:12px}
+.toc ul{list-style:none;margin:0;padding:0}
+.toc li{margin:0}
+.toc a{display:block;padding:4px 0 4px 12px;border-left:1px solid var(--line);color:var(--text-2);text-decoration:none}
+.toc a:hover,.toc a.on{color:var(--text);border-left-color:var(--text)}
+.toc ul ul a{padding-left:24px;font-size:12.5px;color:var(--text-3)}
+.toc ul ul a:hover,.toc ul ul a.on{color:var(--text)}
+article{min-width:0;max-width:760px;padding:48px 0 96px}
+.meta{font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--text-3);margin-bottom:16px}
+article h1.title{font-size:40px;line-height:1.2;letter-spacing:-.02em;font-weight:600;margin:0 0 24px}
+article h1{font-size:28px;line-height:1.3;letter-spacing:-.01em;font-weight:600;margin:72px 0 20px;padding-top:32px;border-top:1px solid var(--line)}
+article h2{font-size:22px;line-height:1.4;font-weight:600;margin:48px 0 16px}
+article h3{font-size:18px;font-weight:600;margin:36px 0 12px}
+article h4{font-size:16px;font-weight:600;margin:28px 0 8px}
+article p{margin:0 0 18px;color:var(--body)}
+article strong{color:var(--text);font-weight:600}
+article ul,article ol{padding-left:22px;margin:0 0 18px;color:var(--body)}
+article li{margin:4px 0}
+article a{text-decoration:underline;text-decoration-color:var(--text-3);text-underline-offset:3px}
+article a:hover{text-decoration-color:var(--text)}
+article hr{border:0;border-top:1px solid var(--line);margin:48px 0}
+article blockquote{margin:0 0 20px;padding:12px 18px;border-left:2px solid var(--text-2);background:var(--surface);border-radius:0 8px 8px 0;color:var(--text-2)}
+article blockquote p{margin:6px 0;color:var(--text-2)}
+article code{font-family:var(--mono);font-size:.88em;background:var(--code-bg);border:1px solid var(--line-2);border-radius:5px;padding:1px 6px}
+article pre{position:relative;margin:0 0 22px;padding:16px 18px;background:var(--pre-bg);border:1px solid var(--line);border-radius:10px;overflow:auto;font-size:13.5px;line-height:1.65}
+article pre code{background:none;border:0;padding:0;font-size:inherit}
+.code{position:relative}
+.code__lang{position:absolute;top:8px;right:46px;font-family:var(--mono);font-size:11px;color:var(--text-3);z-index:1}
+.code__copy{position:absolute;top:6px;right:8px;z-index:1;font:11px var(--mono);color:var(--text-2);background:var(--code-bg);border:1px solid var(--line);border-radius:6px;padding:2px 7px;cursor:pointer}
+.code__copy:hover{color:var(--text)}
+.tbl{overflow-x:auto;margin:0 0 22px;border:1px solid var(--line);border-radius:10px}
+article table{border-collapse:collapse;width:100%;font-size:14px}
+article th,article td{padding:10px 14px;border-bottom:1px solid var(--line-2);text-align:left;vertical-align:top}
+article th{font-weight:600;background:var(--surface);color:var(--text)}
+article tr:last-child td{border-bottom:0}
+article details{margin:0 0 18px;border:1px solid var(--line);border-radius:10px;padding:10px 16px;background:var(--surface)}
+article summary{cursor:pointer;font-weight:500}
+.pager{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:72px;padding-top:32px;border-top:1px solid var(--line)}
+.pager a{display:block;padding:16px 18px;border:1px solid var(--line);border-radius:10px;text-decoration:none}
+.pager a:hover{border-color:var(--text-2)}
+.pager span{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--text-3)}
+.pager .next{text-align:right;grid-column:2}
+.foot{margin-top:40px;font-size:13px;color:var(--text-3)}
+/* 代码高亮：黑白灰为主 */
+.hl .c,.hl .c1,.hl .cm,.hl .ch,.hl .cs,.hl .cp,.hl .cpf{color:#6b6b6b;font-style:italic}
+.hl .k,.hl .kd,.hl .kn,.hl .kr,.hl .kt,.hl .kc,.hl .kp,.hl .ow{color:#ffffff;font-weight:600}
+.hl .s,.hl .s1,.hl .s2,.hl .sb,.hl .sc,.hl .sd,.hl .se,.hl .sh,.hl .si,.hl .sx,.hl .sr,.hl .ss,.hl .dl,.hl .sa{color:#86efac}
+.hl .m,.hl .mi,.hl .mf,.hl .mh,.hl .mo,.hl .il{color:#fcd34d}
+.hl .nf,.hl .fm,.hl .nc,.hl .nn{color:#e5e5e5;font-weight:500}
+.hl .nb,.hl .bp,.hl .nd,.hl .na,.hl .nt{color:#bdbdbd}
+.hl .o,.hl .p{color:#9a9a9a}
+.hl .gd{color:#fca5a5}.hl .gi{color:#86efac}
+.hl{color:#d4d4d4}
+:root[data-theme="light"] .hl{color:#262626}
+:root[data-theme="light"] .hl .c,:root[data-theme="light"] .hl .c1,:root[data-theme="light"] .hl .cm,:root[data-theme="light"] .hl .ch,:root[data-theme="light"] .hl .cs,:root[data-theme="light"] .hl .cp,:root[data-theme="light"] .hl .cpf{color:#8a8a8a}
+:root[data-theme="light"] .hl .k,:root[data-theme="light"] .hl .kd,:root[data-theme="light"] .hl .kn,:root[data-theme="light"] .hl .kr,:root[data-theme="light"] .hl .kt,:root[data-theme="light"] .hl .kc,:root[data-theme="light"] .hl .kp,:root[data-theme="light"] .hl .ow{color:#000}
+:root[data-theme="light"] .hl .s,:root[data-theme="light"] .hl .s1,:root[data-theme="light"] .hl .s2,:root[data-theme="light"] .hl .sb,:root[data-theme="light"] .hl .sc,:root[data-theme="light"] .hl .sd,:root[data-theme="light"] .hl .se,:root[data-theme="light"] .hl .sh,:root[data-theme="light"] .hl .si,:root[data-theme="light"] .hl .sx,:root[data-theme="light"] .hl .sr,:root[data-theme="light"] .hl .ss,:root[data-theme="light"] .hl .dl,:root[data-theme="light"] .hl .sa{color:#15803d}
+:root[data-theme="light"] .hl .m,:root[data-theme="light"] .hl .mi,:root[data-theme="light"] .hl .mf,:root[data-theme="light"] .hl .mh,:root[data-theme="light"] .hl .mo,:root[data-theme="light"] .hl .il{color:#b45309}
+:root[data-theme="light"] .hl .nf,:root[data-theme="light"] .hl .fm,:root[data-theme="light"] .hl .nc,:root[data-theme="light"] .hl .nn{color:#171717}
+:root[data-theme="light"] .hl .nb,:root[data-theme="light"] .hl .bp,:root[data-theme="light"] .hl .nd,:root[data-theme="light"] .hl .na,:root[data-theme="light"] .hl .nt{color:#525252}
+:root[data-theme="light"] .hl .o,:root[data-theme="light"] .hl .p{color:#6b6b6b}
+:root[data-theme="light"] .hl .gd{color:#b91c1c}:root[data-theme="light"] .hl .gi{color:#15803d}
+.nav__right{display:flex;align-items:center;gap:20px}
+.theme-toggle{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--text);cursor:pointer}
+.theme-toggle:hover{border-color:var(--text-2)}
+.theme-toggle svg{width:15px;height:15px}
+.theme-toggle .i-moon,:root[data-theme="light"] .theme-toggle .i-sun{display:none}
+:root[data-theme="light"] .theme-toggle .i-moon{display:block}
+@media (max-width:960px){.wrap{grid-template-columns:1fr;gap:0}.toc{display:none}article h1.title{font-size:30px}.nav__links a.hide-sm{display:none}}
+</style>
+</head>
+<body>
+<header class="nav">
+  <a class="nav__brand" href="../index.html"><span class="nav__dot"></span>AI Agent 全栈</a>
+  <div class="nav__right">
+  <nav class="nav__links">
+    <a href="../index.html#progress">课件</a>
+    <a class="hide-sm" href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/ROADMAP.md">路线图</a>
+    <a href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/notes/01-llm/06-context-engineering.md">在 GitHub 上查看</a>
+  </nav>
+  <button class="theme-toggle" id="theme-toggle" type="button" aria-label="切换浅色 / 深色" title="切换浅色 / 深色"><svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg><svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
+  </div>
+</header>
+<div class="wrap">
+  <aside class="toc"><div class="toc__label">本课目录</div><ul>
+<li><a href="#读前说明">读前说明</a></li>
+<li><a href="#第一部分上下文窗口">第一部分：上下文窗口</a><ul>
+<li><a href="#1-什么算进窗口">1. 什么算进窗口</a></li>
+<li><a href="#2-窗口有多大超了会怎样">2. 窗口有多大，超了会怎样</a></li>
+<li><a href="#3-发请求之前就知道">3. 发请求之前就知道</a></li>
+</ul>
+</li>
+<li><a href="#第二部分长上下文退化">第二部分：长上下文退化</a><ul>
+<li><a href="#4-两种现象">4. 两种现象</a></li>
+<li><a href="#5-用一个玩具模型看清形状">5. 用一个玩具模型看清形状</a></li>
+</ul>
+</li>
+<li><a href="#第三部分单次请求的上下文组装">第三部分：单次请求的上下文组装</a><ul>
+<li><a href="#6-上下文由哪些部分组成">6. 上下文由哪些部分组成</a></li>
+<li><a href="#7-在预算内挑选">7. 在预算内挑选</a></li>
+<li><a href="#8-工具输出保留头尾按需读取">8. 工具输出：保留头尾，按需读取</a></li>
+</ul>
+</li>
+<li><a href="#第四部分长任务的上下文管理">第四部分：长任务的上下文管理</a><ul>
+<li><a href="#9-三种工具清理压缩笔记">9. 三种工具：清理、压缩、笔记</a></li>
+<li><a href="#10-四种策略的模拟">10. 四种策略的模拟</a></li>
+<li><a href="#11-跨会话状态写在上下文之外">11. 跨会话：状态写在上下文之外</a></li>
+</ul>
+</li>
+<li><a href="#第五部分提示词的系统方法">第五部分：提示词的系统方法</a><ul>
+<li><a href="#12-结构把不同的东西分开">12. 结构：把不同的东西分开</a></li>
+<li><a href="#13-规则怎么写合适的高度">13. 规则怎么写：合适的“高度”</a></li>
+<li><a href="#14-把提示词当代码管">14. 把提示词当代码管</a></li>
+<li><a href="#本课小结">本课小结</a></li>
+<li><a href="#练习今天做完">练习（今天做完）</a></li>
+<li><a href="#自测题">自测题</a></li>
+</ul>
+</li>
+<li><a href="#参考答案与详解">参考答案与详解</a><ul>
+<li><a href="#自测题答案">自测题答案</a></li>
+<li><a href="#练习参考答案">练习参考答案</a></li>
+<li><a href="#完成标准">完成标准</a></li>
+</ul>
+</li>
+</ul>
+</aside>
+  <article>
+    <div class="meta">模块 01 · LLM 原理与使用 · 第 1.6 课</div>
+    <h1 class="title">1.6 上下文工程：窗口预算、长上下文退化与提示词的系统方法</h1>
+    <blockquote>
+<p>第 1 部分 · 第 6 课 ｜ 预计 5–6 小时 ｜ 前置：1.2 主流模型 API（用量口径）、1.4 推理模型（思考块保留）、1.5 Prompt Caching（前缀与断点）</p>
+<p>配套练习：<code>projects/11-context/</code>（纯 Go 标准库，12 个测试）。判断一次请求会放得下、中途截断还是直接 400；用一个玩具模型看清“越长越差”和“中间最差”的形状；在预算内组装上下文（必需项、优先级、去重、稳定内容在前）；模拟 60 轮长任务 Agent 的四种上下文管理策略，算出谁会撑爆窗口、谁会丢事实、谁最省钱；最后用一个小的回归评测看清“改一句提示词，修好一个用例，弄坏两个”。</p>
+</blockquote>
+<h2 id="读前说明">读前说明</h2>
+<p>这是模块 01 的最后一课。前五课讲的都是“一次调用”：采样、API、结构化输出、推理、缓存。这一课往上走一层，讲<strong>每次调用之前，你往模型里放什么</strong>。</p>
+<p>Anthropic 的文档把这件事叫 context engineering：上下文是一种有限的资源，而且边际收益递减，放进去的每一个 token 都在和别的 token 抢模型的注意力。所以问题不是“窗口有多大”，而是“在这一步，最少放哪些 token，能让模型最可能做对”。</p>
+<p>这一课分四块：</p>
+<ol>
+<li><strong>窗口</strong>：什么算进窗口、超了会怎样、怎么在发请求前就知道；</li>
+<li><strong>退化</strong>：为什么 100 万 token 的窗口不等于能用好 100 万 token；</li>
+<li><strong>组装与管理</strong>：单次请求怎么挑内容、怎么排顺序；长任务里怎么清理、压缩、记笔记；</li>
+<li><strong>提示词的系统方法</strong>：结构怎么写、规则怎么写，以及最重要的，怎么像管代码一样管提示词。</li>
+</ol>
+<p>先看几个你会遇到的问题：</p>
+<ul>
+<li>输入只有 95 万 token，窗口是 100 万，<code>max_tokens</code> 设了 128k，请求会被拒吗？</li>
+<li>把 200 篇文档全塞进 100 万的窗口，和先检索出 8 篇再放进去，哪个答得更准？</li>
+<li>一次 <code>grep</code> 返回了 3000 行，只保留前 200 行有什么问题？</li>
+<li>长任务跑到第 26 轮撑爆了窗口。把旧的工具结果清掉，为什么后面又开始“忘事”？</li>
+<li>开了工具结果清理之后，为什么缓存命中率掉得厉害？</li>
+<li>在提示词里加了一句“只回答数字”，修好了一个用例，为什么另外两个坏了，而你很久以后才发现？</li>
+</ul>
+<p>本课结束时你能：</p>
+<ol>
+<li>说清什么算进上下文窗口，判断一次请求是放得下、可能中途截断还是直接 400；</li>
+<li>解释长度退化和位置效应，并据此决定“塞满”还是“检索”、关键信息放在哪里；</li>
+<li>在预算内组装上下文：必需项、优先级、去重、稳定内容在前、工具输出保留头尾；</li>
+<li>为长任务选择清理、压缩、笔记的组合，并考虑它们和缓存的相互影响；</li>
+<li>写结构清晰的系统提示词，用回归评测管理提示词的每一次修改。</li>
+</ol>
+<p><strong>关于时效</strong>：本课按 2026 年 10 月 Anthropic 和 OpenAI 的官方文档核对。压缩和上下文编辑都还在 beta，参数名和 beta 头变化很快，写代码前一定以文档为准。第二部分的退化模型是<strong>玩具模型</strong>，参数是编的，只用来讲清形状，不代表任何模型的实测数字。</p>
+<hr />
+<h1 id="第一部分上下文窗口">第一部分：上下文窗口</h1>
+<h2 id="1-什么算进窗口">1. 什么算进窗口</h2>
+<p>上下文窗口是模型生成回答时能“看到”的全部内容，<strong>包括它正在生成的回答</strong>。Anthropic 文档列得很清楚，下面这些全部算数：</p>
+<ul>
+<li>系统提示词；</li>
+<li><code>messages</code> 里的每一条消息，包括工具结果、图片、文档；</li>
+<li>工具定义；</li>
+<li>本轮生成的输出，<strong>包括思考 token</strong>。</li>
+</ul>
+<p>有三个容易算错的地方：</p>
+<ul>
+<li><strong>缓存过的 token 照样占窗口</strong>。1.5 课的三个字段 <code>input_tokens</code>、<code>cache_read_input_tokens</code>、<code>cache_creation_input_tokens</code> 都算进窗口。缓存改变的是价钱，不是占用；</li>
+<li><strong>历史思考块占不占，看模型</strong>。1.4 课讲过：Opus 4.5 及以后、Sonnet 4.6 及以后、Haiku 5.5 等默认保留之前的思考块，它们会作为输入占窗口；更早的模型会自动去掉；</li>
+<li><strong>工具定义本身也很大</strong>。几十个工具的定义可能就有上万 token。Anthropic 和 OpenAI 都提供了工具搜索（<code>defer_loading</code>），用到时再加载定义。</li>
+</ul>
+<h2 id="2-窗口有多大超了会怎样">2. 窗口有多大，超了会怎样</h2>
+<p>2026 年 10 月的 Anthropic 文档：Fable 5.1、Mythos 5.1、Opus 5.5、Opus 5、Opus 4.6 到 4.8、Sonnet 5.5、Sonnet 5、Sonnet 4.6、Haiku 5.5 等是 <strong>100 万 token</strong> 窗口，单次最多输出 128k；其他模型（包括已弃用的 Sonnet 4.5）是 20 万。100 万窗口默认开启，不需要 beta 头，Haiku 5.5 的提示词超过 10 万 token 以后单价更高。单个请求最多 600 张图片或 PDF 页（20 万窗口的模型是 100 张），塞很多图片时可能先碰到请求大小限制。</p>
+<p>超了会怎样，分两种情况：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>情况</th>
+<th>Anthropic 4.5 及以后的行为</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>输入本身超过窗口</td>
+<td>直接 400，<code>prompt is too long</code></td>
+</tr>
+<tr>
+<td>输入没超，但输入 + <code>max_tokens</code> 超了</td>
+<td>请求被接受；生成碰到窗口上限时停下，<code>stop_reason</code> 是 <code>model_context_window_exceeded</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>练习的 <code>Window.Check</code> 就是这张表：</p>
+<div class="hl"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">w</span><span class="w"> </span><span class="nx">Window</span><span class="p">)</span><span class="w"> </span><span class="nx">Check</span><span class="p">(</span><span class="nx">input</span><span class="p">,</span><span class="w"> </span><span class="nx">maxTokens</span><span class="w"> </span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="nx">Outcome</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">switch</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="nx">input</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="nx">w</span><span class="p">.</span><span class="nx">Size</span><span class="p">:</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">Rejected</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="nx">input</span><span class="o">+</span><span class="nx">maxTokens</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="nx">w</span><span class="p">.</span><span class="nx">Size</span><span class="p">:</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">MayTruncate</span>
+<span class="w">    </span><span class="k">default</span><span class="p">:</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">Fits</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>所以开头那个问题的答案是：95 万输入 + 128k <code>max_tokens</code> 不会被拒，但最多只能生成大约 5 万 token 就会停下。如果这是一个要输出长文件的任务，你会拿到一个写了一半的文件。更早的模型在这种情况下直接返回校验错误。</p>
+<h2 id="3-发请求之前就知道">3. 发请求之前就知道</h2>
+<p>不要等 400 了才知道超了。两种办法：</p>
+<ul>
+<li><strong>精确</strong>：Anthropic 和 OpenAI 都有 token counting 接口（Anthropic 的 <code>count_tokens</code>，OpenAI 的 <code>POST /v1/responses/input_tokens</code>），把整个请求发过去，返回会占多少 token。Anthropic 的计数接口还支持带上 <code>context_management</code>，告诉你清理之后剩多少；</li>
+<li><strong>粗估</strong>：做预算时可以用经验比例。练习的 <code>EstimateTokens</code> 按“ASCII 约 4 个字符 1 个 token，中文约 1 个字 1 个 token”估算。这只能用来做预算和报警，不能用来计费。</li>
+</ul>
+<p>一个 Agent 的窗口预算大致这样分：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>部分</th>
+<th>典型占比</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>工具定义 + 系统提示</td>
+<td>5–15%</td>
+<td>稳定，放最前面，缓存</td>
+</tr>
+<tr>
+<td>记忆、检索结果</td>
+<td>10–30%</td>
+<td>每步按需挑选</td>
+</tr>
+<tr>
+<td>对话和工具历史</td>
+<td>剩下的大部分</td>
+<td>会增长，要管理</td>
+</tr>
+<tr>
+<td>输出预留（含思考）</td>
+<td><code>max_tokens</code></td>
+<td>必须预留，否则会被截断</td>
+</tr>
+</tbody>
+</table></div>
+<p>预算的意义不只是“别超”。下一部分会讲，<strong>放得下不等于用得好</strong>。</p>
+<hr />
+<h1 id="第二部分长上下文退化">第二部分：长上下文退化</h1>
+<h2 id="4-两种现象">4. 两种现象</h2>
+<p>Anthropic 的上下文窗口文档里有一句很重要的话：更多的上下文并不自动更好，随着 token 数增长，准确率和召回会下降，这个现象叫 <strong>context rot</strong>。所以“上下文里放什么”和“窗口有多大”同样重要。</p>
+<p>长上下文退化主要有两种形状：</p>
+<ul>
+<li><strong>长度退化</strong>：同一条关键信息，放在 2 万 token 的上下文里和放在 80 万 token 的上下文里，后者更容易被忽略或用错；</li>
+<li><strong>位置效应</strong>：2023 年的论文 <em>Lost in the Middle</em>（Liu 等）发现，多文档问答里答案在开头或结尾时最准，在中间时最差，准确率随位置呈 U 形。后来的模型改善了很多，但“中间更容易被忽略”的倾向在很多评测里仍然能看到。</li>
+</ul>
+<p>不同模型、不同任务退化的程度差别很大。简单的“大海捞针”（在长文里找一句原话）很多模型已经接近满分，但需要推理、需要综合多处信息、或者干扰项和答案很像的任务，退化明显得多。<strong>你自己的任务退化多少，只能靠自己的评测测出来。</strong></p>
+<h2 id="5-用一个玩具模型看清形状">5. 用一个玩具模型看清形状</h2>
+<p>练习的 <code>RecallModel</code> 把两种现象写成一个公式（参数是编的）：</p>
+<div class="hl"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">m</span><span class="w"> </span><span class="nx">RecallModel</span><span class="p">)</span><span class="w"> </span><span class="nx">Recall</span><span class="p">(</span><span class="nx">pos</span><span class="p">,</span><span class="w"> </span><span class="nx">n</span><span class="w"> </span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="kt">float64</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">base</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="mi">1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">math</span><span class="p">.</span><span class="nx">Pow</span><span class="p">(</span><span class="kt">float64</span><span class="p">(</span><span class="nx">n</span><span class="p">)</span><span class="o">/</span><span class="nx">m</span><span class="p">.</span><span class="nx">HalfAt</span><span class="p">,</span><span class="w"> </span><span class="nx">m</span><span class="p">.</span><span class="nx">Steep</span><span class="p">))</span><span class="w"> </span><span class="c1">// 越长越低</span>
+<span class="w">    </span><span class="nx">x</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="p">(</span><span class="kt">float64</span><span class="p">(</span><span class="nx">pos</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">0.5</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="kt">float64</span><span class="p">(</span><span class="nx">n</span><span class="p">)</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">base</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="mi">1</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nx">m</span><span class="p">.</span><span class="nx">Middle</span><span class="o">*</span><span class="mi">4</span><span class="o">*</span><span class="nx">x</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="nx">x</span><span class="p">))</span><span class="w">                   </span><span class="c1">// 中间最低</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>用默认参数（总长 40 万时整体召回降到一半，中间比两端少 30%），<code>TestRecallShape</code> 和 <code>TestStuffVsRetrieve</code> 的输出：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>场景</th>
+<th>召回</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2 万 token，信息在开头</td>
+<td>0.989</td>
+</tr>
+<tr>
+<td>20 万 token，开头 / 中间 / 结尾</td>
+<td>0.739 / 0.517 / 0.739</td>
+</tr>
+<tr>
+<td>80 万 token，信息在开头</td>
+<td>0.261</td>
+</tr>
+<tr>
+<td>200 篇文档全塞（80 万），答案在中间</td>
+<td>0.183</td>
+</tr>
+<tr>
+<td>200 篇文档全塞（80 万），答案在最后</td>
+<td>0.260</td>
+</tr>
+<tr>
+<td>先检索 8 篇（3.2 万，检索器召回 0.9），最相关的放最后</td>
+<td>0.818</td>
+</tr>
+<tr>
+<td>资料只有 5 万 token，全塞，答案在最后</td>
+<td>0.946</td>
+</tr>
+<tr>
+<td>资料只有 5 万 token，用召回 0.6 的检索器</td>
+<td>0.556</td>
+</tr>
+</tbody>
+</table></div>
+<p>再强调一次，这些数字是玩具模型算出来的。要记住的是结论的方向：</p>
+<ol>
+<li><strong>资料很多时，先检索再放进去，比全塞更好</strong>。检索把长度从 80 万降到 3 万，长度退化的损失远大于检索漏掉的那 10%；</li>
+<li><strong>资料不多时，全塞可能比一个烂检索器更好</strong>。检索不是免费的，它有自己的召回率。5 万 token 的资料全塞进去几乎不退化，而一个只有 0.6 召回率的检索器直接丢掉了四成；</li>
+<li><strong>关键信息放两端</strong>。指令和问题放在最后、离生成最近；最重要的资料放在开头或紧挨着问题，不要埋在中间；</li>
+<li><strong>长度本身就是成本</strong>。即使放得下，也要问：这些 token 每一个都有用吗？</li>
+</ol>
+<p>模块 05 讲 RAG 时会细讲检索器的召回怎么测。这里先记住：“塞满”还是“检索”，取决于资料总量和检索器质量，要用评测决定，不要凭感觉。</p>
+<hr />
+<h1 id="第三部分单次请求的上下文组装">第三部分：单次请求的上下文组装</h1>
+<h2 id="6-上下文由哪些部分组成">6. 上下文由哪些部分组成</h2>
+<p>一次 Agent 请求里通常有这些部分：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>部分</th>
+<th>稳定还是动态</th>
+<th>是否必需</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>工具定义</td>
+<td>稳定</td>
+<td>必需</td>
+</tr>
+<tr>
+<td>系统提示（角色、规则、示例、输出格式）</td>
+<td>稳定</td>
+<td>必需</td>
+</tr>
+<tr>
+<td>长期记忆（用户偏好、项目约定）</td>
+<td>较稳定</td>
+<td>按需</td>
+</tr>
+<tr>
+<td>检索结果</td>
+<td>动态</td>
+<td>按需</td>
+</tr>
+<tr>
+<td>对话和工具历史</td>
+<td>只追加</td>
+<td>大部分需要</td>
+</tr>
+<tr>
+<td>当前时间、环境信息</td>
+<td>动态</td>
+<td>必需</td>
+</tr>
+<tr>
+<td>本次问题</td>
+<td>动态</td>
+<td>必需</td>
+</tr>
+</tbody>
+</table></div>
+<p>排列顺序有两个原则，而且它们恰好一致：</p>
+<ul>
+<li><strong>缓存</strong>（1.5 课）：稳定的放前面，变化的放后面；</li>
+<li><strong>注意力</strong>（第 5 节）：最关键的指令和问题放在最后，离生成最近。</li>
+</ul>
+<h2 id="7-在预算内挑选">7. 在预算内挑选</h2>
+<p>练习的 <code>Assemble</code> 做了四件事：</p>
+<ol>
+<li>必需项全部保留；必需项本身就超预算，直接报错（说明系统提示或工具定义太大了，要从设计上解决，不能靠截断）；</li>
+<li>其他内容按优先级从高到低，放得下就放；</li>
+<li>完全相同的文本只放一份（同一段文档被两个检索器同时召回是很常见的事）；</li>
+<li>输出时稳定内容在前、动态内容在后，组内保持原来的顺序。</li>
+</ol>
+<p><code>TestAssemble</code> 的例子：预算 11000，必需项（规则 3000、工具 2000、时间 20、问题 100）占 5120，剩下的按优先级放入记忆 800、检索 A 2500、检索 B 2500；检索 A 的副本因为重复被丢掉，检索 C 优先级最低放不下。最终用了 10920。</p>
+<p>真实系统里“优先级”从哪里来？常见的来源：检索的相关度分数、内容的新旧、是否被用户明确提到过、上一步模型是否引用过。重要的是<strong>丢掉了什么要记录下来</strong>，出了问题才能查。</p>
+<h2 id="8-工具输出保留头尾按需读取">8. 工具输出：保留头尾，按需读取</h2>
+<p>工具结果是 Agent 上下文增长最快的部分。一次 <code>grep</code>、一次 <code>ls -R</code>、一个网页、一份日志，动不动就是几千行。</p>
+<p>最常见的错误是只保留开头：</p>
+<ul>
+<li>编译错误、测试失败的汇总、命令的退出信息，通常在<strong>结尾</strong>；</li>
+<li>只截开头，模型看到的是一堆正常输出，看不到真正的错误。</li>
+</ul>
+<p>练习的 <code>TrimLines</code> 保留头 head 行和尾 tail 行，中间换成一句说明：</p>
+<div class="hl"><pre><span></span><code>line 1
+line 2
+line 3
+……省略 95 行（完整输出已保存，可按需读取）……
+line 99
+line 100
+</code></pre></div>
+
+<p>说明里那半句“完整输出已保存，可按需读取”很重要。更好的做法是：把完整输出写进文件，上下文里只放摘要和文件路径，模型需要时再用工具读取具体的行。这就是 Anthropic 文章里说的 <strong>just-in-time</strong> 思路：上下文里放<strong>引用</strong>（路径、ID、查询），而不是把所有内容都预先塞进去。Claude Code 这类编码 Agent 就是这样工作的：它不会一开始把整个仓库读进来，而是按需 <code>grep</code>、<code>head</code>、读文件。</p>
+<hr />
+<h1 id="第四部分长任务的上下文管理">第四部分：长任务的上下文管理</h1>
+<h2 id="9-三种工具清理压缩笔记">9. 三种工具：清理、压缩、笔记</h2>
+<p>一个跑几十上百轮的 Agent，迟早会碰到窗口上限，或者在碰到上限之前就因为退化开始变差。有三种办法：</p>
+<p><strong>清理（clearing）</strong>：把已经用过的旧内容删掉，换成一个占位符。最典型的是旧的工具结果：文件内容、搜索结果，模型处理过以后通常不再需要原文。Anthropic 的 context editing（beta，<code>context-management-2025-06-27</code> 头）提供两种服务端策略：</p>
+<ul>
+<li><code>clear_tool_uses_20250919</code>：超过 <code>trigger</code>（默认 10 万输入 token）后，按时间从旧到新清理工具结果，保留最近 <code>keep</code> 个（默认 3 个），可以用 <code>exclude_tools</code> 保护某些工具，用 <code>clear_at_least</code> 要求一次至少清掉多少 token；</li>
+<li><code>clear_thinking_20251015</code>：控制保留最近几轮的思考块。</li>
+</ul>
+<p>清理在服务端进行，你本地的历史保持完整，不需要同步。</p>
+<p><strong>压缩（compaction）</strong>：把旧的对话压成一段摘要，替换原文。</p>
+<ul>
+<li>Anthropic：服务端压缩（beta）。按需压缩（<code>compact-2026-09-04</code> 头 + 顶层 <code>compaction</code> 参数）由你决定什么时候压，可以保留最近几轮原文、可以在后台跑；按阈值压缩由 API 在输入达到阈值时自动执行；</li>
+<li>OpenAI：在 Responses 请求里设置 <code>context_management: [{type: "compaction", compact_threshold: ...}]</code>，超过阈值时服务端自动压缩，返回一个加密的 compaction 项，下一轮原样带上；也可以单独调 <code>/responses/compact</code> 接口，它返回一个新的、压缩过的上下文窗口，原样作为下一次请求的输入。</li>
+</ul>
+<p>两家的压缩结果都是给模型看的：OpenAI 的 compaction 项是加密的，不能人读；Anthropic 的默认摘要提示词要求写清任务目标、当前状态、重要发现（包括试过但失败的方法）、下一步和需要保留的偏好。</p>
+<p><strong>笔记（memory / notes）</strong>：让 Agent 把重要的东西写到上下文之外（文件、数据库、记忆工具），需要时再读回来。Anthropic 的 memory 工具可以和清理配合：上下文快到清理阈值时，模型会收到提醒，先把重要信息写进记忆文件。</p>
+<h2 id="10-四种策略的模拟">10. 四种策略的模拟</h2>
+<p>练习的 <code>Sim</code> 模拟一个长任务：基础上下文 8000 token，每轮追加用户 200、工具调用 100、工具结果 3000、回答 300，窗口 10 万，清理/压缩阈值 6 万，保留最近 5 轮。每个工具结果里有一条事实，从第 12 轮起每 4 轮要用到 12 轮之前的事实。60 轮的结果（<code>TestCompactionStrategies</code>）：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>策略</th>
+<th>结果</th>
+<th>峰值</th>
+<th>改写历史</th>
+<th>需要的事实丢失</th>
+<th>输入当量（按 1.5 课缓存倍率）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>全部保留</td>
+<td>第 26 轮撑爆</td>
+<td>98000</td>
+<td>0</td>
+<td>0/4</td>
+<td>249700（只跑了 25 轮）</td>
+</tr>
+<tr>
+<td>清旧工具结果</td>
+<td>跑完</td>
+<td>59550</td>
+<td>15</td>
+<td><strong>11/12</strong></td>
+<td>1359425</td>
+</tr>
+<tr>
+<td>清除前先记笔记</td>
+<td>跑完</td>
+<td>61750</td>
+<td>17</td>
+<td>0/12</td>
+<td>1509188</td>
+</tr>
+<tr>
+<td>摘要压缩（能记 10 条事实）</td>
+<td>跑完</td>
+<td>58400</td>
+<td>6</td>
+<td>0/12</td>
+<td>668560</td>
+</tr>
+</tbody>
+</table></div>
+<p>还有两个变体：</p>
+<ul>
+<li>摘要只能记住 2 条事实时（<code>TestSummaryCapacity</code>），丢失 7/12；</li>
+<li>清理加上“至少清 2 万 token 才动手”（<code>TestClearAtLeast</code>），改写从 15 次降到 7 次，输入当量从 1359425 降到 894814。</li>
+</ul>
+<p>读这张表：</p>
+<ol>
+<li><strong>什么都不管，一定会撑爆</strong>，而且在撑爆之前就已经在退化区间里了；</li>
+<li><strong>只清理不记录，会忘事</strong>。模型后面需要的事实恰好在被清掉的工具结果里。这就是开头那个问题“为什么后面又开始忘事”的答案。修复办法是清理之前把关键信息写进笔记（或者把重要工具加入 <code>exclude_tools</code>）；</li>
+<li><strong>摘要的质量就是上限</strong>。摘要能记住的事实有限，记不住的就丢了。真实的摘要还会出现“记错”，比模拟更糟。所以要为压缩写专门的摘要提示词，并且测它；</li>
+<li><strong>每次改写历史都在打掉缓存</strong>。清理和压缩都会从改写点开始让缓存失效，下一轮要重新写入。阈值一过就每轮清一点，等于每轮都付一次 1.25× 的写入费。Anthropic 的 <code>clear_at_least</code> 就是为这个设计的：攒够了再清，一次清一大块。</li>
+</ol>
+<p>这四点合起来，就是长任务上下文管理的基本原则：<strong>少改写、一次改够、改之前先把要紧的记下来</strong>。</p>
+<h2 id="11-跨会话状态写在上下文之外">11. 跨会话：状态写在上下文之外</h2>
+<p>有些任务一个上下文窗口装不下，要跨多个会话（比如一个写了几天的编码任务）。这时可靠的状态不能只存在对话里：</p>
+<ul>
+<li>进度文件（做完了什么、下一步是什么）；</li>
+<li>测试和 git 提交（代码状态本身就是最可靠的记录）；</li>
+<li>结构化的决策记录（为什么这么做、试过什么不行）。</li>
+</ul>
+<p>Anthropic 的文档和工程文章都建议：设计这些状态文件，让新会话能<strong>快速恢复上下文</strong>。这和人类工程师交接工作是一回事。我们这门课的仓库其实也在这么做：每课的日志、ROADMAP 的勾选、README 的进度表，都是给“下一个会话”看的状态。</p>
+<hr />
+<h1 id="第五部分提示词的系统方法">第五部分：提示词的系统方法</h1>
+<h2 id="12-结构把不同的东西分开">12. 结构：把不同的东西分开</h2>
+<p>一份好的系统提示词，通常有这几块，用 XML 标签或 Markdown 标题分开：</p>
+<div class="hl"><pre><span></span><code>&lt;role&gt;你是一个代码审查助手，服务于一个 Go 后端团队。&lt;/role&gt;
+&lt;task&gt;审查用户给出的 diff，找出会导致线上问题的缺陷。&lt;/task&gt;
+&lt;rules&gt;
+- 只报告会影响正确性、安全或性能的问题；风格问题交给 linter，不要报。
+- 每个问题给出文件和行号、为什么是问题、建议怎么改。
+- 不确定的问题标注“需要确认”，而不是当成确定的结论。
+&lt;/rules&gt;
+&lt;examples&gt;
+……两三个有代表性的输入和期望输出……
+&lt;/examples&gt;
+&lt;output_format&gt;Markdown 列表，按严重程度从高到低。&lt;/output_format&gt;
+&lt;context&gt;
+当前时间：2026-10-14
+仓库：……
+&lt;/context&gt;
+</code></pre></div>
+
+<p>几个要点：</p>
+<ul>
+<li><strong>分开写</strong>：角色、任务、规则、示例、输出格式、动态上下文各占一块。标签让模型和你自己都更容易分辨“这是指令”还是“这是资料”。用户给的资料尤其要放在标签里，和指令分开，这也是防提示词注入的第一步（模块 09 会细讲）；</li>
+<li><strong>稳定在前、动态在后</strong>：时间、用户信息放在最后的 <code>context</code> 里，不要插进规则中间（1.5 课的缓存，和第 6 节的注意力，两个理由）；</li>
+<li><strong>示例要少而准</strong>：两三个覆盖典型情况和边界情况的例子，比十个相似的例子更有用。示例会被模型强烈模仿，包括你不想让它模仿的细节（长度、语气、格式）。</li>
+</ul>
+<h2 id="13-规则怎么写合适的高度">13. 规则怎么写：合适的“高度”</h2>
+<p>Anthropic 的文章把这叫找到合适的 <strong>altitude</strong>（高度）：</p>
+<ul>
+<li><strong>太低</strong>：把提示词写成一堆 if-else，“如果用户问 A 就回答 B，如果出现 C 就做 D”。规则写不全，而且越写越脆，任何没覆盖的情况都会出错；</li>
+<li><strong>太高</strong>：只有一句“你是一个有帮助的助手，请认真回答”。模型拿不到判断的依据；</li>
+<li><strong>合适</strong>：给出目标、原则和理由，让模型能在没写到的情况里自己做出合理的判断。</li>
+</ul>
+<p>具体的写法建议：</p>
+<ol>
+<li><strong>说清为什么</strong>。“不要报风格问题，因为团队用 golangci-lint 自动检查，人工审查只看正确性”比“不要报风格问题”效果好。模型知道了原因，就能推广到你没列出来的情况；</li>
+<li><strong>说要做什么，而不只是不要做什么</strong>。“不要输出客套话”不如“直接从结论开始写”。只有禁止的规则，模型知道哪里不能走，但不知道该往哪走；</li>
+<li><strong>一条规则说一件事</strong>，冲突的规则要写明优先级；</li>
+<li><strong>对现代模型不要过度强调</strong>。全大写、“必须”“绝对”“CRITICAL”，在较早的模型上能提高遵循度，在 2026 年的模型上往往导致过度执行（比如让它“一定要调用搜索工具”，它会在不需要的时候也去搜）。OpenAI 和 Anthropic 针对新模型的提示词指南都提到过这一点；</li>
+<li><strong>工具描述也是提示词</strong>。工具名、描述、参数说明，决定了模型什么时候调、怎么调。描述要写清这个工具做什么、什么时候该用、什么时候不该用、参数的格式和例子。两个功能重叠、描述含糊的工具，是 Agent 选错工具的头号原因（模块 02 会细讲）。</li>
+</ol>
+<h2 id="14-把提示词当代码管">14. 把提示词当代码管</h2>
+<p>这是整个“系统方法”里最重要的一条：<strong>提示词的每一次修改，都要跑评测</strong>。</p>
+<p>原因很简单：提示词的影响是全局的。你为了修一个问题加的一句话，会影响所有的输入。练习的 <code>TestEvalDiff</code> 用一个确定性的假模型演示了这一点：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>版本</th>
+<th>提示词</th>
+<th>通过</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>v1</td>
+<td>你是助手。</td>
+<td>3/4</td>
+</tr>
+<tr>
+<td>v2</td>
+<td>你是助手。用中文。只回答数字。</td>
+<td>2/4</td>
+</tr>
+</tbody>
+</table></div>
+<p>v2 修好了一个用例（不知道的问题现在会回答“我不知道”），但弄坏了两个（“约 1200 公里”变成了“1200”，“100 摄氏度”变成了“100”，单位丢了）。如果你只看修好的那个用例，或者只抽查几个，很容易以为 v2 更好。</p>
+<p><code>Diff</code> 的价值就在这里：</p>
+<div class="hl"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nx">Diff</span><span class="p">(</span><span class="nx">cases</span><span class="w"> </span><span class="p">[]</span><span class="nx">Case</span><span class="p">,</span><span class="w"> </span><span class="nx">base</span><span class="p">,</span><span class="w"> </span><span class="nx">next</span><span class="w"> </span><span class="nx">Result</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="nx">fixed</span><span class="p">,</span><span class="w"> </span><span class="nx">broke</span><span class="w"> </span><span class="p">[]</span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">c</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">cases</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">switch</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="o">!</span><span class="nx">base</span><span class="p">.</span><span class="nx">Passed</span><span class="p">[</span><span class="nx">c</span><span class="p">.</span><span class="nx">ID</span><span class="p">]</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">next</span><span class="p">.</span><span class="nx">Passed</span><span class="p">[</span><span class="nx">c</span><span class="p">.</span><span class="nx">ID</span><span class="p">]:</span>
+<span class="w">            </span><span class="nx">fixed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">fixed</span><span class="p">,</span><span class="w"> </span><span class="nx">c</span><span class="p">.</span><span class="nx">ID</span><span class="p">)</span>
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="nx">base</span><span class="p">.</span><span class="nx">Passed</span><span class="p">[</span><span class="nx">c</span><span class="p">.</span><span class="nx">ID</span><span class="p">]</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">!</span><span class="nx">next</span><span class="p">.</span><span class="nx">Passed</span><span class="p">[</span><span class="nx">c</span><span class="p">.</span><span class="nx">ID</span><span class="p">]:</span>
+<span class="w">            </span><span class="nx">broke</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">broke</span><span class="p">,</span><span class="w"> </span><span class="nx">c</span><span class="p">.</span><span class="nx">ID</span><span class="p">)</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>即使两个版本通过率一样，也可能是“修好三个、弄坏三个”。<strong>只看总通过率会掩盖回归</strong>，必须逐个用例比较。</p>
+<p>一个可以直接用的工作流：</p>
+<ol>
+<li><strong>提示词放进仓库</strong>，和代码一起版本管理，每次修改有提交记录和理由；</li>
+<li><strong>维护一个评测集</strong>：每发现一个线上问题，就把它变成一个用例加进去。评测集只增不减；</li>
+<li><strong>每次修改都跑全量评测</strong>，看通过率，更要看 <code>fixed</code> 和 <code>broke</code> 两个列表；</li>
+<li><strong>真实模型有随机性</strong>，同一个用例要跑多次，看通过的比例，而不是一次的对错（模块 10 讲 Eval 时会细讲统计方法）；</li>
+<li><strong>换模型时也要跑</strong>。同一份提示词在新模型上的表现可能不同，1.5 课提到的缓存最小长度、1.4 课的推理参数，换模型时都可能变。</li>
+</ol>
+<hr />
+<h2 id="本课小结">本课小结</h2>
+<ol>
+<li>上下文窗口包括输入和本轮输出（含思考）；缓存过的 token 照样占窗口；输入超窗口直接 400，输入加 <code>max_tokens</code> 超窗口会在生成中途停下。</li>
+<li>放得下不等于用得好：上下文越长整体越差，中间的信息最容易被忽略。资料多时先检索，资料少时全塞可能更好，关键信息放两端。</li>
+<li>单次请求按“必需项、优先级、去重、稳定在前”组装；工具输出保留头尾，完整内容放到上下文之外按需读取。</li>
+<li>长任务用清理、压缩、笔记管理上下文：只清不记会忘事，摘要的质量就是上限，每次改写都打掉缓存，所以要少改写、一次改够、改之前先记下来。</li>
+<li>提示词结构分块、稳定在前；规则写目标和理由，说该做什么；工具描述也是提示词。</li>
+<li>提示词当代码管：版本管理、评测集只增不减、每次修改逐个用例看修好和弄坏了什么。</li>
+</ol>
+<p>模块 01 到这里结束。下一个模块讲工具调用与协议：Function Calling 的机制、并行调用、MCP 和 A2A。</p>
+<hr />
+<h2 id="练习今天做完">练习（今天做完）</h2>
+<h3 id="练习-1跑通并读懂实验输出">练习 1：跑通并读懂实验输出</h3>
+<div class="hl"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>projects/11-context
+make<span class="w"> </span><span class="nb">test</span>
+</code></pre></div>
+
+<p>对照第 5 节和第 10 节的表，在测试日志里找到这些数字，并回答：</p>
+<ol>
+<li>把 <code>DefaultRecall</code> 的 <code>Middle</code> 改成 0，“200 篇全塞、答案在中间”和“答案在最后”还有区别吗？剩下的差距来自哪里？</li>
+<li>把 <code>DefaultSim</code> 的 <code>Keep</code> 从 5 改成 15，“清旧工具结果”策略丢失的事实会变少吗？峰值会怎样？为什么？</li>
+<li>摘要压缩的输入当量为什么比“清除前记笔记”低一半多？</li>
+</ol>
+<h3 id="练习-2结构化渲染系统提示词">练习 2：结构化渲染系统提示词</h3>
+<p>写一个类型和函数：</p>
+<div class="hl"><pre><span></span><code><span class="kd">type</span><span class="w"> </span><span class="nx">PromptSpec</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">Role</span><span class="p">,</span><span class="w"> </span><span class="nx">Task</span><span class="w"> </span><span class="kt">string</span>
+<span class="w">    </span><span class="nx">Rules</span><span class="w">      </span><span class="p">[]</span><span class="kt">string</span>
+<span class="w">    </span><span class="nx">Examples</span><span class="w">   </span><span class="p">[]</span><span class="kt">string</span>
+<span class="w">    </span><span class="nx">Output</span><span class="w">     </span><span class="kt">string</span>
+<span class="w">    </span><span class="nx">Dynamic</span><span class="w">    </span><span class="kt">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">string</span><span class="w"> </span><span class="c1">// 每次请求都会变的内容</span>
+<span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="nx">Render</span><span class="p">(</span><span class="nx">p</span><span class="w"> </span><span class="nx">PromptSpec</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="p">[]</span><span class="kt">string</span><span class="p">)</span>
+</code></pre></div>
+
+<p>要求：</p>
+<ol>
+<li>按 <code>role</code>、<code>task</code>、<code>rules</code>、<code>example</code>、<code>output_format</code>、<code>context</code> 的顺序渲染成 XML 标签，<code>Dynamic</code> 放在最后的 <code>context</code> 里，键按字母排序（输出必须稳定，否则缓存失效）；</li>
+<li>返回三类警告：稳定区出现了模板变量（形如两个花括号包住的变量名）；没有写输出格式；规则以“不要”开头，但没有写该做什么（没有“而是”或“改为”）。</li>
+</ol>
+<p>测试：一个三类问题都有的 spec 返回 3 条警告；改正之后返回 0 条。</p>
+<h3 id="练习-3什么时候该压缩">练习 3：什么时候该压缩</h3>
+<p>写一个函数，根据一次 Anthropic 响应的用量判断还剩多少空间、要不要压缩：</p>
+<div class="hl"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nx">Remaining</span><span class="p">(</span><span class="nx">window</span><span class="p">,</span><span class="w"> </span><span class="nx">read</span><span class="p">,</span><span class="w"> </span><span class="nx">write</span><span class="p">,</span><span class="w"> </span><span class="nx">input</span><span class="p">,</span><span class="w"> </span><span class="nx">maxTokens</span><span class="w"> </span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="nx">left</span><span class="w"> </span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="nx">compact</span><span class="w"> </span><span class="kt">bool</span><span class="p">)</span>
+</code></pre></div>
+
+<p>剩余 = 窗口 - (read + write + input) - maxTokens；剩余少于窗口的 10% 时建议压缩。用“窗口 100 万、读缓存 80 万、写缓存 5 万、普通输入 2 万、<code>max_tokens</code> 64000”验证：剩余 66000，建议压缩。想一想：为什么这里必须把缓存的两个字段也加进去？</p>
+<hr />
+<h2 id="自测题">自测题</h2>
+<ol>
+<li>上下文窗口里包括哪些东西？缓存命中的 token 算不算？</li>
+<li>窗口 100 万，输入 95 万，<code>max_tokens</code> 128k，在 Anthropic 4.5 以后的模型上会发生什么？在更早的模型上呢？</li>
+<li>“长度退化”和“位置效应”分别是什么？对你排列上下文有什么影响？</li>
+<li>什么情况下“把资料全塞进去”比“先检索”更好？</li>
+<li>为什么工具输出不能只保留开头？更好的做法是什么？</li>
+<li>只清理旧工具结果、不做别的，会带来什么问题？怎么修？</li>
+<li>为什么上下文清理和压缩会影响缓存？<code>clear_at_least</code> 解决的是什么问题？</li>
+<li>规则“不要输出客套话”有什么问题？怎么改写？</li>
+<li>为什么对 2026 年的模型，不建议在提示词里大量使用“必须”“CRITICAL”这样的强调？</li>
+<li>两个提示词版本通过率一样，能说明修改没有影响吗？应该看什么？</li>
+</ol>
+<hr />
+<h1 id="参考答案与详解">参考答案与详解</h1>
+<h2 id="自测题答案">自测题答案</h2>
+<p><strong>1.</strong> 系统提示、所有消息（包括工具结果、图片、文档）、工具定义，以及本轮生成的输出（包括思考 token）。缓存命中的 token 照样算，缓存只改变价格，不改变占用。保留下来的历史思考块也算。</p>
+<p><strong>2.</strong> 4.5 以后：请求被接受，因为输入本身没超；生成到大约 5 万 token 时碰到窗口上限，以 <code>model_context_window_exceeded</code> 停止。更早的模型：直接返回校验错误（除非加了对应的 beta 头）。</p>
+<p><strong>3.</strong> 长度退化：上下文越长，模型整体越容易忽略或用错信息。位置效应：开头和结尾的信息比中间的更容易被用上。影响：控制总长度，只放有用的；关键指令和问题放在最后，最重要的资料放在开头或紧挨着问题。</p>
+<p><strong>4.</strong> 资料总量不大（远低于退化明显的长度），而检索器召回率不高的时候。全塞几乎不退化，检索器却会直接漏掉一部分答案。具体要用评测决定。</p>
+<p><strong>5.</strong> 错误信息、测试失败汇总、命令结论通常在结尾，只留开头会丢掉最关键的信息。更好的做法是保留头尾，中间写明省略了多少行；完整输出存到上下文之外，上下文里放路径，模型需要时按需读取。</p>
+<p><strong>6.</strong> 后面的步骤需要的事实可能恰好在被清掉的工具结果里，模型会“忘事”，要么重新调用工具（浪费），要么编一个答案（危险）。修法：清理之前把关键信息写进笔记或记忆文件；对重要工具用 <code>exclude_tools</code> 保护；或者改用能保留关键事实的摘要压缩。</p>
+<p><strong>7.</strong> 清理和压缩都是改写历史，改写点之后的前缀全部变化，缓存从那里失效，下一轮要按 1.25× 重新写入。如果每轮只清一点，等于每轮都打掉缓存。<code>clear_at_least</code> 要求一次至少清掉一定数量的 token，攒够了再清，减少改写次数。</p>
+<p><strong>8.</strong> 只说了不要做什么，没说该做什么，模型知道哪里不能走，但不知道往哪走。改成“直接从结论开始写，第一句就回答问题”。</p>
+<p><strong>9.</strong> 较早的模型遵循度不够，需要强调；2026 年的模型对指令很敏感，过度强调会导致过度执行，比如在不需要的时候也去调工具，或者把一条规则用到不该用的地方。用正常的语气写清规则和理由就够了。</p>
+<p><strong>10.</strong> 不能。可能是修好了几个、又弄坏了同样多个。应该逐个用例比较，看修好了哪些、弄坏了哪些；真实模型还要多次运行看比例。</p>
+<h2 id="练习参考答案">练习参考答案</h2>
+<h3 id="练习-1">练习 1</h3>
+<ol>
+<li><code>Middle</code> 改成 0 后位置效应消失，答案在中间和在最后的召回一样（都是 0.261，也就是 80 万长度下的整体召回）。剩下的差距（和检索 8 篇的 0.818 相比）完全来自长度退化。</li>
+<li>会，丢失从 11/12 降到 0/12：需要的事实来自 12 轮之前，现在最近 15 轮的工具结果都保留着。但代价很大：峰值从 59550 涨到 89450，离 10 万的窗口很近，退化也更明显；而且保留得多，上下文一直贴着 6 万的阈值，几乎每一轮都要清一个工具结果，改写从 15 次涨到 45 次，输入当量从 1359425 涨到 4403188。这就是“保留多少”的权衡：留得多，忘得少，但更长、更贵，还更频繁地打掉缓存（配合 <code>ClearAtLeast</code> 能缓解后一个问题）。</li>
+<li>两个原因：摘要压缩把旧轮次整个换成 2000 token 的摘要，之后每轮的上下文都更短；而且它只改写了 6 次历史，其余轮次都能命中缓存。“清除前记笔记”每次清理只换掉工具结果，上下文仍然较长，而且改写了 17 次，每次都按 1.25× 重新写入整个上下文。</li>
+</ol>
+<h3 id="练习-2">练习 2</h3>
+<div class="hl"><pre><span></span><code><span class="kd">var</span><span class="w"> </span><span class="nx">placeholder</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">regexp</span><span class="p">.</span><span class="nx">MustCompile</span><span class="p">(</span><span class="s">`\{\{\s*\w+\s*\}\}`</span><span class="p">)</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="nx">Render</span><span class="p">(</span><span class="nx">p</span><span class="w"> </span><span class="nx">PromptSpec</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="p">[]</span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nx">warns</span><span class="w"> </span><span class="p">[]</span><span class="kt">string</span>
+<span class="w">    </span><span class="nx">stable</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">strings</span><span class="p">.</span><span class="nx">Join</span><span class="p">(</span><span class="nb">append</span><span class="p">([]</span><span class="kt">string</span><span class="p">{</span><span class="nx">p</span><span class="p">.</span><span class="nx">Role</span><span class="p">,</span><span class="w"> </span><span class="nx">p</span><span class="p">.</span><span class="nx">Task</span><span class="p">,</span><span class="w"> </span><span class="nx">p</span><span class="p">.</span><span class="nx">Output</span><span class="p">},</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">p</span><span class="p">.</span><span class="nx">Rules</span><span class="p">,</span><span class="w"> </span><span class="nx">p</span><span class="p">.</span><span class="nx">Examples</span><span class="p">...)...),</span><span class="w"> </span><span class="s">"\n"</span><span class="p">)</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">placeholder</span><span class="p">.</span><span class="nx">MatchString</span><span class="p">(</span><span class="nx">stable</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">warns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">warns</span><span class="p">,</span><span class="w"> </span><span class="s">"稳定区里有模板变量：每次渲染结果不同，缓存失效"</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">strings</span><span class="p">.</span><span class="nx">TrimSpace</span><span class="p">(</span><span class="nx">p</span><span class="p">.</span><span class="nx">Output</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s">""</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">warns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">warns</span><span class="p">,</span><span class="w"> </span><span class="s">"没有写输出格式"</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">r</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">p</span><span class="p">.</span><span class="nx">Rules</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">strings</span><span class="p">.</span><span class="nx">HasPrefix</span><span class="p">(</span><span class="nx">r</span><span class="p">,</span><span class="w"> </span><span class="s">"不要"</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">!</span><span class="nx">strings</span><span class="p">.</span><span class="nx">Contains</span><span class="p">(</span><span class="nx">r</span><span class="p">,</span><span class="w"> </span><span class="s">"而是"</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">!</span><span class="nx">strings</span><span class="p">.</span><span class="nx">Contains</span><span class="p">(</span><span class="nx">r</span><span class="p">,</span><span class="w"> </span><span class="s">"改为"</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nx">warns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">warns</span><span class="p">,</span><span class="w"> </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Sprintf</span><span class="p">(</span><span class="s">"规则“%s”只说了不要做什么，没说该做什么"</span><span class="p">,</span><span class="w"> </span><span class="nx">r</span><span class="p">))</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nx">b</span><span class="w"> </span><span class="nx">strings</span><span class="p">.</span><span class="nx">Builder</span>
+<span class="w">    </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Fprintf</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">b</span><span class="p">,</span><span class="w"> </span><span class="s">"&lt;role&gt;%s&lt;/role&gt;\n&lt;task&gt;%s&lt;/task&gt;\n&lt;rules&gt;\n"</span><span class="p">,</span><span class="w"> </span><span class="nx">p</span><span class="p">.</span><span class="nx">Role</span><span class="p">,</span><span class="w"> </span><span class="nx">p</span><span class="p">.</span><span class="nx">Task</span><span class="p">)</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">r</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">p</span><span class="p">.</span><span class="nx">Rules</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Fprintf</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">b</span><span class="p">,</span><span class="w"> </span><span class="s">"- %s\n"</span><span class="p">,</span><span class="w"> </span><span class="nx">r</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="nx">b</span><span class="p">.</span><span class="nx">WriteString</span><span class="p">(</span><span class="s">"&lt;/rules&gt;\n"</span><span class="p">)</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="p">,</span><span class="w"> </span><span class="nx">e</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">p</span><span class="p">.</span><span class="nx">Examples</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Fprintf</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">b</span><span class="p">,</span><span class="w"> </span><span class="s">"&lt;example index=\"%d\"&gt;%s&lt;/example&gt;\n"</span><span class="p">,</span><span class="w"> </span><span class="nx">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nx">e</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Fprintf</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">b</span><span class="p">,</span><span class="w"> </span><span class="s">"&lt;output_format&gt;%s&lt;/output_format&gt;\n"</span><span class="p">,</span><span class="w"> </span><span class="nx">p</span><span class="p">.</span><span class="nx">Output</span><span class="p">)</span>
+<span class="w">    </span><span class="nx">keys</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">make</span><span class="p">([]</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">p</span><span class="p">.</span><span class="nx">Dynamic</span><span class="p">))</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">k</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">p</span><span class="p">.</span><span class="nx">Dynamic</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">keys</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">keys</span><span class="p">,</span><span class="w"> </span><span class="nx">k</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="nx">sort</span><span class="p">.</span><span class="nx">Strings</span><span class="p">(</span><span class="nx">keys</span><span class="p">)</span><span class="w"> </span><span class="c1">// map 遍历顺序随机，必须排序</span>
+<span class="w">    </span><span class="nx">b</span><span class="p">.</span><span class="nx">WriteString</span><span class="p">(</span><span class="s">"&lt;context&gt;\n"</span><span class="p">)</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">k</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">keys</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Fprintf</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">b</span><span class="p">,</span><span class="w"> </span><span class="s">"%s: %s\n"</span><span class="p">,</span><span class="w"> </span><span class="nx">k</span><span class="p">,</span><span class="w"> </span><span class="nx">p</span><span class="p">.</span><span class="nx">Dynamic</span><span class="p">[</span><span class="nx">k</span><span class="p">])</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="nx">b</span><span class="p">.</span><span class="nx">WriteString</span><span class="p">(</span><span class="s">"&lt;/context&gt;"</span><span class="p">)</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">b</span><span class="p">.</span><span class="nx">String</span><span class="p">(),</span><span class="w"> </span><span class="nx">warns</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>测试：</p>
+<div class="hl"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nx">TestRender</span><span class="p">(</span><span class="nx">t</span><span class="w"> </span><span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">T</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">p</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">PromptSpec</span><span class="p">{</span>
+<span class="w">        </span><span class="nx">Role</span><span class="p">:</span><span class="w">    </span><span class="s">"你是代码审查助手"</span><span class="p">,</span>
+<span class="w">        </span><span class="nx">Task</span><span class="p">:</span><span class="w">    </span><span class="s">"审查 {{diff}}"</span><span class="p">,</span>
+<span class="w">        </span><span class="nx">Rules</span><span class="p">:</span><span class="w">   </span><span class="p">[]</span><span class="kt">string</span><span class="p">{</span><span class="s">"不要输出客套话"</span><span class="p">,</span><span class="w"> </span><span class="s">"不要直接改代码，而是给出建议"</span><span class="p">},</span>
+<span class="w">        </span><span class="nx">Dynamic</span><span class="p">:</span><span class="w"> </span><span class="kt">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">string</span><span class="p">{</span><span class="s">"time"</span><span class="p">:</span><span class="w"> </span><span class="s">"2026-10-14"</span><span class="p">,</span><span class="w"> </span><span class="s">"user"</span><span class="p">:</span><span class="w"> </span><span class="s">"duang777"</span><span class="p">},</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="nx">out</span><span class="p">,</span><span class="w"> </span><span class="nx">w</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">Render</span><span class="p">(</span><span class="nx">p</span><span class="p">)</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">w</span><span class="p">)</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">3</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">t</span><span class="p">.</span><span class="nx">Fatal</span><span class="p">(</span><span class="nx">w</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="o">!</span><span class="nx">strings</span><span class="p">.</span><span class="nx">HasSuffix</span><span class="p">(</span><span class="nx">out</span><span class="p">,</span><span class="w"> </span><span class="s">"&lt;context&gt;\ntime: 2026-10-14\nuser: duang777\n&lt;/context&gt;"</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">t</span><span class="p">.</span><span class="nx">Fatal</span><span class="p">(</span><span class="nx">out</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="nx">p</span><span class="p">.</span><span class="nx">Task</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"审查用户给出的 diff"</span>
+<span class="w">    </span><span class="nx">p</span><span class="p">.</span><span class="nx">Output</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"Markdown 列表"</span>
+<span class="w">    </span><span class="nx">p</span><span class="p">.</span><span class="nx">Rules</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"不要输出客套话，改为直接给结论"</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">w</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">Render</span><span class="p">(</span><span class="nx">p</span><span class="p">);</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">w</span><span class="p">)</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">t</span><span class="p">.</span><span class="nx">Fatal</span><span class="p">(</span><span class="nx">w</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>讨论：第三条检查是一个很粗的启发式，只能发现最明显的写法。它的意义不在于准确，而在于把“提示词审查”变成可以在 CI 里自动跑的东西。团队踩过的坑，都可以变成这样一条检查。</p>
+<h3 id="练习-3">练习 3</h3>
+<div class="hl"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nx">Remaining</span><span class="p">(</span><span class="nx">window</span><span class="p">,</span><span class="w"> </span><span class="nx">read</span><span class="p">,</span><span class="w"> </span><span class="nx">write</span><span class="p">,</span><span class="w"> </span><span class="nx">input</span><span class="p">,</span><span class="w"> </span><span class="nx">maxTokens</span><span class="w"> </span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="nx">left</span><span class="w"> </span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="nx">compact</span><span class="w"> </span><span class="kt">bool</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">left</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">window</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="p">(</span><span class="nx">read</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">write</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">input</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nx">maxTokens</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">left</span><span class="p">,</span><span class="w"> </span><span class="nx">left</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="nx">window</span><span class="o">/</span><span class="mi">10</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>验证：1000000 - (800000 + 50000 + 20000) - 64000 = 66000，小于 100000，建议压缩。</p>
+<p>必须加上缓存字段，是因为 Anthropic 的 <code>input_tokens</code> 只是最后一个缓存断点之后的部分（1.5 课），缓存读写的 token 同样占窗口。只看 <code>input_tokens</code>，你会以为只用了 2 万，实际上已经用了 87 万。Anthropic 文档提到 SDK 的客户端压缩也是用这四项之和判断阈值的；同时提醒了一个例外：用服务端工具（比如网页搜索）时，<code>cache_read_input_tokens</code> 可能累计了服务端工具多次内部调用的读取，会高估真实长度，这时要用 token counting 接口拿准确的数字。</p>
+<hr />
+<h2 id="完成标准">完成标准</h2>
+<ul>
+<li><code>make test</code> 全部通过（12 个测试），能在日志里找到第 5 节和第 10 节表格里的数字；</li>
+<li>练习 1 的三个问题能用“长度退化”“保留窗口”“改写次数与缓存”解释清楚；</li>
+<li>练习 2 的 <code>Render</code> 和测试写完并通过；</li>
+<li>练习 3 的 <code>Remaining</code> 通过验证，能说清为什么要加上缓存字段；</li>
+<li>自测题 10 道能不看答案讲出来，尤其是第 2、6、7、10 题。</li>
+</ul>
+    <nav class="pager"><a class="prev" href="01-05-prompt-caching.html"><span>← 上一课 1.5</span>Prompt Caching</a></nav>
+    <p class="foot">© 2026 duang777 · 课件源文件：<a href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/notes/01-llm/06-context-engineering.md">notes/01-llm/06-context-engineering.md</a></p>
+  </article>
+</div>
+<script>
+document.getElementById("theme-toggle").addEventListener("click",function(){var r=document.documentElement,n=r.getAttribute("data-theme")==="light"?"dark":"light";r.setAttribute("data-theme",n);try{localStorage.setItem("x-theme",n)}catch(e){}});
+document.querySelectorAll('article pre').forEach(function(pre){
+  var b=document.createElement('button');b.className='code__copy';b.textContent='复制';
+  b.onclick=function(){navigator.clipboard.writeText(pre.innerText).then(function(){b.textContent='已复制';setTimeout(function(){b.textContent='复制'},1200)})};
+  pre.parentNode.insertBefore(b,pre);
+});
+var links=[].slice.call(document.querySelectorAll('.toc a')),map={};
+links.forEach(function(a){map[decodeURIComponent(a.getAttribute('href').slice(1))]=a});
+var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting&&map[e.target.id]){links.forEach(function(l){l.classList.remove('on')});map[e.target.id].classList.add('on')}})},{rootMargin:'-80px 0px -70% 0px'});
+document.querySelectorAll('article h1[id],article h2[id]').forEach(function(h){io.observe(h)});
+</script>
+</body>
+</html>

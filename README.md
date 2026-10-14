@@ -67,6 +67,7 @@
 | 1.3 | 结构化输出 | 提示词 / JSON mode / strict 三个层次；约束解码原理与手写前缀检查器；分布扭曲与字段顺序；三家 schema 子集、规则检查与转换；校验驱动的重试循环 | [课件](notes/01-llm/03-structured-output.md) | [`08-structured-output`](projects/08-structured-output) | ✅ 完成 |
 | 1.4 | 推理模型 | 推理 token 的四个特点；三家 effort / thinking / thinking_level 的写法与 400 组合；用量口径与两种截断；思考块签名绑定模型与前缀、只追加不修改；逐级升级、多数投票与“每个正确答案的 token” | [课件](notes/01-llm/04-reasoning-models.md) | [`09-reasoning`](projects/09-reasoning) | ✅ 完成 |
 | 1.5 | Prompt Caching | KV 前缀复用与累计哈希；Anthropic 自动缓存 / 显式断点 / 20 块回看、OpenAI implicit 与 explicit、Gemini 隐式与 cachedContents；读写倍率统一、最小长度盈亏平衡、TTL 选择；按变化频率放断点、只追加不修改、分叉诊断 | [课件](notes/01-llm/05-prompt-caching.md) | [`10-prompt-cache`](projects/10-prompt-cache) | 📖 学习中 |
+| 1.6 | 上下文工程 | 什么算进窗口与超窗口的两种结果；长度退化与位置效应、全塞与检索的取舍；预算内组装、去重、稳定在前、工具输出保留头尾；清理 / 笔记 / 压缩与缓存的权衡；提示词结构与回归评测 | [课件](notes/01-llm/06-context-engineering.md) | [`11-context`](projects/11-context) | 📖 学习中 |
 
 ### 全部模块
 
@@ -133,6 +134,9 @@ cd projects/09-reasoning && make test
 
 # 1.5 Prompt Caching
 cd projects/10-prompt-cache && make test
+
+# 1.6 上下文工程
+cd projects/11-context && make test
 ```
 
 推荐学习方式：先读课件 → 关掉参考答案自己写练习 → 跑测试 → 再对照参考实现。

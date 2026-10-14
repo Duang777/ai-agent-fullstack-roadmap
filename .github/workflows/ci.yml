@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        project: [00-stream-proxy, 04-ship, 05-store, 06-llm-basics, 07-llm-api, 08-structured-output, 09-reasoning, 10-prompt-cache]
+        project: [00-stream-proxy, 04-ship, 05-store, 06-llm-basics, 07-llm-api, 08-structured-output, 09-reasoning, 10-prompt-cache, 11-context]
     services:
       postgres:
         image: postgres:17

@@ -504,7 +504,7 @@ article summary{cursor:pointer;font-weight:500}
 </code></pre></div>
 
 <p>或者用可空字段 <code>{"type": ["string", "null"]}</code>，在描述里说明“信息不足时填 null”。schema 不给退路，模型就只能编。</p>
-<p><strong>例子二：字段顺序就是思考顺序。</strong>模型是自回归的（1.1 课第 2 节）：先生成的内容会影响后生成的内容，反过来不行。</p>
+<p>**例子二：字段顺序就是思考顺序。**模型是自回归的（1.1 课第 2 节）：先生成的内容会影响后生成的内容，反过来不行。</p>
 <div class="hl"><pre><span></span><code><span class="p">{</span><span class="nt">"answer"</span><span class="p">:</span><span class="w"> </span><span class="s2">"B"</span><span class="p">,</span><span class="w"> </span><span class="nt">"reasoning"</span><span class="p">:</span><span class="w"> </span><span class="s2">"因为……"</span><span class="p">}</span><span class="w">     </span><span class="err">←</span><span class="w"> </span><span class="err">先给答案，再编理由</span>
 <span class="p">{</span><span class="nt">"reasoning"</span><span class="p">:</span><span class="w"> </span><span class="s2">"因为……"</span><span class="p">,</span><span class="w"> </span><span class="nt">"answer"</span><span class="p">:</span><span class="w"> </span><span class="s2">"B"</span><span class="p">}</span><span class="w">     </span><span class="err">←</span><span class="w"> </span><span class="err">先推理，再给答案</span>
 </code></pre></div>
@@ -515,7 +515,7 @@ article summary{cursor:pointer;font-weight:500}
 <li><strong>Anthropic 会调整顺序</strong>：文档说输出保持 schema 里的顺序，但有一个例外：<strong>必填字段在前，可选字段在后</strong>。想让推理字段排在最前面，就把它设为必填。</li>
 <li><strong>别要“完整推理过程”</strong>：Anthropic 文档提醒，要求输出模型思考过程或逐步推理的字段可能触发 <code>reasoning_extraction</code> 类型的拒答，建议改为要一段“简短的解释”。推理模型的思考应该留在 thinking 块里（1.4 课）。</li>
 </ul>
-<p><strong>例子三：格式本身会影响能力。</strong>有研究报告过，强制严格格式时某些推理任务的准确率会下降（模型的“注意力”被格式占用了一部分）。工程上的常见做法是<strong>分两步</strong>：先让模型自由回答（可以开推理），再用一个便宜的调用把回答抽取成结构化数据。是否值得，用 Eval（第 06 模块）说话。</p>
+<p><strong>例子三：格式本身会影响能力。<strong>有研究报告过，强制严格格式时某些推理任务的准确率会下降（模型的“注意力”被格式占用了一部分）。工程上的常见做法是</strong>分两步</strong>：先让模型自由回答（可以开推理），再用一个便宜的调用把回答抽取成结构化数据。是否值得，用 Eval（第 06 模块）说话。</p>
 <h2 id="8-语法只管结构不管语义">8. 语法只管结构，不管语义</h2>
 <div class="hl"><pre><span></span><code><span class="c1">// 语法只管结构。minimum 这种语义约束，约束解码不管，要靠校验。</span>
 <span class="kd">func</span><span class="w"> </span><span class="nx">TestGrammarDoesNotEnforceSemantics</span><span class="p">(</span><span class="nx">t</span><span class="w"> </span><span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">T</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
@@ -533,7 +533,7 @@ article summary{cursor:pointer;font-weight:500}
 <li><strong>Gemini</strong>：支持 <code>minimum</code>、<code>maximum</code>、<code>minItems</code>、<code>maxItems</code>、<code>enum</code>、<code>format</code>，没有列出字符串长度。</li>
 </ul>
 <p>而像“<code>end_date</code> 必须晚于 <code>start_date</code>”、“<code>total</code> 等于各项之和”、“这个 SKU 必须存在于数据库”这种约束，<strong>任何语法都表达不了</strong>。Gemini 文档的最佳实践里写得很直白：输出在语法上是正确的 JSON，但仍然要在应用里校验值。</p>
-<p>结论：<strong>约束解码负责“能解析、结构对”，校验器负责“值对不对”，两者缺一不可。</strong>练习 3 会让你把 <code>maxLength</code> 也加进语法，体会一下哪些约束适合放在语法层。</p>
+<p>结论：**约束解码负责“能解析、结构对”，校验器负责“值对不对”，两者缺一不可。**练习 3 会让你把 <code>maxLength</code> 也加进语法，体会一下哪些约束适合放在语法层。</p>
 <h2 id="9-保证失效的四种情况">9. 保证失效的四种情况</h2>
 <p>strict 模式“保证符合 schema”有前提。下面四种情况，你仍然会拿到不符合 schema 的东西：</p>
 <div class="tbl"><table>
@@ -1048,7 +1048,7 @@ article summary{cursor:pointer;font-weight:500}
 <li><strong>⑤ 错误带路径</strong>：<code>$.items[2].price: must be &gt;= 0</code> 比“格式不对，请重试”有用得多，模型通常一次就能改对。<code>Validate</code> 返回<strong>全部</strong>错误而不是第一个，这样模型一次能改完。</li>
 </ul>
 <p><code>TestExtractRetriesWithFeedback</code> 模拟了一个典型过程：第一次输出前面带了一句废话、JSON 半截；第二次包了代码围栏、<code>age</code> 是 -1；第三次正确。断言第二次和第三次调用收到的反馈分别是“不是合法 JSON”和 <code>$.age: must be &gt;= 0</code>。</p>
-<p><strong>重试几次合适？</strong>一般 2–3 次。每次重试都要再付一次完整输入的钱（重试时历史更长），到第三次还不对，通常是 schema 或提示词有问题，继续重试只是烧钱。</p>
+<p>**重试几次合适？**一般 2–3 次。每次重试都要再付一次完整输入的钱（重试时历史更长），到第三次还不对，通常是 schema 或提示词有问题，继续重试只是烧钱。</p>
 <h2 id="16-流式结构化输出">16. 流式结构化输出</h2>
 <p>结构化输出也可以流式。好处是能逐字段展示（比如生成一个长报告，先显示标题），坏处是中途的 JSON 是不完整的，不能直接 <code>JSON.parse</code>。</p>
 <p>两种做法：</p>

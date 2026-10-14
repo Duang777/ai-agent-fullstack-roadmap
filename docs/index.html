@@ -263,14 +263,14 @@
         <section class="stats" data-reveal>
           <div class="stat"><span class="stat__fig x-mono">14</span><span class="stat__label">模块</span></div>
           <div class="stat"><span class="stat__fig x-mono">84</span><span class="stat__label">知识点</span></div>
-          <div class="stat"><span class="stat__fig x-mono">Day 6</span><span class="stat__label">今天</span></div>
+          <div class="stat"><span class="stat__fig x-mono">Day 7</span><span class="stat__label">今天</span></div>
           <div class="stat"><span class="stat__fig x-mono">10/84</span><span class="stat__label">已完成</span></div>
         </section>
 
         <section class="section" id="progress" data-nav="进度">
           <div class="head" data-reveal>
             <p class="head__eyebrow x-kicker">当前进度</p>
-            <h2 class="x-h2">01 LLM 原理与使用：1.1 采样、1.2 主流模型 API、1.3 结构化输出、1.4 推理模型已完成；1.5 Prompt Caching 已上线，练习进行中。</h2>
+            <h2 class="x-h2">01 LLM 原理与使用：1.1 采样、1.2 主流模型 API、1.3 结构化输出、1.4 推理模型已完成；1.5 Prompt Caching、1.6 上下文工程已上线，练习进行中。模块 01 课件全部完成。</h2>
             <p class="head__sub">学完且有笔记或代码产出，才在 ROADMAP 里打勾。</p>
           </div>
           <div class="x-progress" data-reveal>
@@ -487,6 +487,25 @@
                 <dd><span class="chip x-chip x-chip--live">进行中</span></dd>
               </dl>
             </article>
+            <article class="step">
+              <div class="step__intro">
+                <p class="step__num x-step-num">1.6</p>
+                <p class="step__eyebrow">进行中 · 01 LLM 原理与使用</p>
+              </div>
+              <div>
+                <h3>上下文工程：窗口预算、长上下文退化与提示词的系统方法</h3>
+                <p class="sub">什么算进窗口、超了会怎样；越长越差、中间最差；预算内组装上下文；60 轮长任务里清理、笔记、压缩各自的代价；把提示词当代码管，逐个用例看修好和弄坏了什么。</p>
+                <div class="links" style="margin-top: 16px">
+                  <a class="x-btn x-btn--primary" href="notes/01-06-context-engineering.html">在线阅读</a>
+                </div>
+              </div>
+              <dl class="step__panel">
+                <dt>课件</dt>
+                <dd><span class="chip x-chip x-chip--done">已完成</span></dd>
+                <dt>练习</dt>
+                <dd><span class="chip x-chip x-chip--live">进行中</span></dd>
+              </dl>
+            </article>
           </div>
         </section>
 
@@ -497,6 +516,21 @@
           </div>
           <ol class="timeline" data-reveal>
             <li class="is-current">
+              <p class="timeline__when"><span class="x-mono">Day 7 · 2026-10-14</span></p>
+              <div class="timeline__what">
+                <p><strong>上下文工程：窗口、退化、组装与压缩</strong></p>
+                <ul>
+                  <li>输入 95 万、窗口 100 万、max_tokens 128k：不会 400，但只能写大约 5 万 token 就停</li>
+                  <li>玩具模型：80 万 token 全塞，答案在中间召回 0.18；先检索 8 篇再放，0.82</li>
+                  <li>60 轮长任务：什么都不管第 26 轮撑爆；只清旧工具结果能跑完，但 12 次回查丢了 11 次</li>
+                  <li>清理攒够 2 万再动手：改写从 15 次降到 7 次，输入当量少 34%</li>
+                  <li>提示词加一句“只回答数字”：修好 1 个用例，弄坏 2 个</li>
+                </ul>
+                <p class="x-think">思考：你的 Agent 跑到第 50 轮时，上下文里有多少 token 是这一步真正用得上的？</p>
+              </div>
+              <p><a class="x-btn x-btn--ghost" href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/logs/2026-10-14.md" target="_blank" rel="noopener">日志</a></p>
+            </li>
+            <li>
               <p class="timeline__when"><span class="x-mono">Day 6 · 2026-10-13</span></p>
               <div class="timeline__what">
                 <p><strong>推理模型：effort、thinking 与成本；Prompt Caching</strong></p>
