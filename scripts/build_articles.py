@@ -35,6 +35,7 @@ LESSONS = [
     ("notes/01-llm/05-prompt-caching.md", "01-05-prompt-caching", "1.5", "Prompt Caching", "5–6 小时"),
     ("notes/01-llm/06-context-engineering.md", "01-06-context-engineering", "1.6", "上下文工程", "5–6 小时"),
     ("notes/02-tools/01-function-calling.md", "02-01-function-calling", "2.1", "Function Calling / Tool Use", "5–6 小时"),
+    ("notes/02-tools/02-mcp.md", "02-02-mcp", "2.2", "MCP", "5–6 小时"),
 ]
 
 CSS = r"""

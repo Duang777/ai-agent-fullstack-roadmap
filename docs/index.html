@@ -270,7 +270,7 @@
         <section class="section" id="progress" data-nav="进度">
           <div class="head" data-reveal>
             <p class="head__eyebrow x-kicker">当前进度</p>
-            <h2 class="x-h2">01 LLM 原理与使用：1.1 采样、1.2 主流模型 API、1.3 结构化输出、1.4 推理模型已完成；1.5 Prompt Caching、1.6 上下文工程练习进行中；02 工具调用与协议开始：2.1 Function Calling 已上线。</h2>
+            <h2 class="x-h2">01 LLM 原理与使用：1.1 采样、1.2 主流模型 API、1.3 结构化输出、1.4 推理模型已完成；1.5 Prompt Caching、1.6 上下文工程练习进行中；02 工具调用与协议：2.1 Function Calling、2.2 MCP 已上线。</h2>
             <p class="head__sub">学完且有笔记或代码产出，才在 ROADMAP 里打勾。</p>
           </div>
           <div class="x-progress" data-reveal>
@@ -525,6 +525,25 @@
                 <dd><span class="chip x-chip x-chip--live">进行中</span></dd>
               </dl>
             </article>
+            <article class="step">
+              <div class="step__intro">
+                <p class="step__num x-step-num">2.2</p>
+                <p class="step__eyebrow">进行中 · 02 工具调用与协议</p>
+              </div>
+              <div>
+                <h3>MCP：Server / Client、Tools / Resources / Prompts</h3>
+                <p class="sub">按 2026-07-28 规范：模型不知道 MCP；三种能力由谁控制；没有握手和会话、每请求带 _meta；协议错误与工具执行错误；多轮请求请用户确认、requestState 签名防篡改；stdio 与 Streamable HTTP；多 Server 聚合与安全。</p>
+                <div class="links" style="margin-top: 16px">
+                  <a class="x-btn x-btn--primary" href="notes/02-02-mcp.html">在线阅读</a>
+                </div>
+              </div>
+              <dl class="step__panel">
+                <dt>课件</dt>
+                <dd><span class="chip x-chip x-chip--done">已完成</span></dd>
+                <dt>练习</dt>
+                <dd><span class="chip x-chip x-chip--live">进行中</span></dd>
+              </dl>
+            </article>
           </div>
         </section>
 
@@ -545,7 +564,14 @@
                   <li>create_branch → write_file 失败 → commit 不执行，返回“未执行”</li>
                   <li>拼错的工具名、缺参数、超时、panic：全部变成错误结果回给模型</li>
                 </ul>
-                <p class="x-think">思考：你的 Agent 里哪些工具是有副作用的？它们被并发执行过吗？</p>
+                <p><strong>MCP（2026-07-28）：没有握手，没有会话</strong></p>
+                <ul>
+                  <li>每个请求在 _meta 里自带版本和能力；任何一台机器都能处理任何一个请求</li>
+                  <li>Server 要用户确认：返回 input_required，客户端带着回答用新 id 重发</li>
+                  <li>requestState 不绑定参数：一次无害的确认就能删掉另一个仓库</li>
+                  <li>网关按头放行 get_weather、Server 按 body 执行 delete_repo：头和 body 必须一致</li>
+                </ul>
+                <p class="x-think">思考：你的 Agent 里哪些工具是有副作用的？你接的第三方 MCP Server，它的工具描述你读过吗？</p>
               </div>
               <p><a class="x-btn x-btn--ghost" href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/logs/2026-10-15.md" target="_blank" rel="noopener">日志</a></p>
             </li>
