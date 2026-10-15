@@ -69,6 +69,12 @@
 | 1.5 | Prompt Caching | KV 前缀复用与累计哈希；Anthropic 自动缓存 / 显式断点 / 20 块回看、OpenAI implicit 与 explicit、Gemini 隐式与 cachedContents；读写倍率统一、最小长度盈亏平衡、TTL 选择；按变化频率放断点、只追加不修改、分叉诊断 | [课件](notes/01-llm/05-prompt-caching.md) | [`10-prompt-cache`](projects/10-prompt-cache) | 📖 学习中 |
 | 1.6 | 上下文工程 | 什么算进窗口与超窗口的两种结果；长度退化与位置效应、全塞与检索的取舍；预算内组装、去重、稳定在前、工具输出保留头尾；清理 / 笔记 / 压缩与缓存的权衡；提示词结构与回归评测 | [课件](notes/01-llm/06-context-engineering.md) | [`11-context`](projects/11-context) | 📖 学习中 |
 
+### 02 · 工具调用与协议
+
+
+| # | 主题 | 核心内容 | 课件 | 练习 | 状态 |
+| 2.1 | Function Calling / Tool Use | 五步流程；两家的定义、调用与结果格式（arguments 字符串 vs input 对象、call_id vs tool_use_id）；strict 与 tool_choice；并行调用的回传规则；只读并发、去重、副作用串行失败即停；错误变结果；流式参数按 index 拼接；工具设计 | [课件](notes/02-tools/01-function-calling.md) | [`12-tools`](projects/12-tools) | 📖 学习中 |
+
 ### 全部模块
 
 四个阶段：**A 打地基** → **B 能做出来** → **C 上生产** → **D 深入与实战**。阶段 C 是 Demo 和生产系统的分水岭：Eval 回答“有多准”，Tracing 回答“哪里坏了”，高可用回答“挂了怎么办”，性能与成本回答“为什么慢、为什么贵”。
@@ -137,6 +143,9 @@ cd projects/10-prompt-cache && make test
 
 # 1.6 上下文工程
 cd projects/11-context && make test
+
+# 2.1 Function Calling
+cd projects/12-tools && make test
 ```
 
 推荐学习方式：先读课件 → 关掉参考答案自己写练习 → 跑测试 → 再对照参考实现。
