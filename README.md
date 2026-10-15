@@ -71,8 +71,8 @@
 
 ### 02 · 工具调用与协议
 
-
 | # | 主题 | 核心内容 | 课件 | 练习 | 状态 |
+|---|---|---|---|---|---|
 | 2.1 | Function Calling / Tool Use | 五步流程；两家的定义、调用与结果格式（arguments 字符串 vs input 对象、call_id vs tool_use_id）；strict 与 tool_choice；并行调用的回传规则；只读并发、去重、副作用串行失败即停；错误变结果；流式参数按 index 拼接；工具设计 | [课件](notes/02-tools/01-function-calling.md) | [`12-tools`](projects/12-tools) | 📖 学习中 |
 
 ### 全部模块
