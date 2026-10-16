@@ -263,14 +263,14 @@
         <section class="stats" data-reveal>
           <div class="stat"><span class="stat__fig x-mono">14</span><span class="stat__label">模块</span></div>
           <div class="stat"><span class="stat__fig x-mono">84</span><span class="stat__label">知识点</span></div>
-          <div class="stat"><span class="stat__fig x-mono">Day 8</span><span class="stat__label">今天</span></div>
+          <div class="stat"><span class="stat__fig x-mono">Day 9</span><span class="stat__label">今天</span></div>
           <div class="stat"><span class="stat__fig x-mono">10/84</span><span class="stat__label">已完成</span></div>
         </section>
 
         <section class="section" id="progress" data-nav="进度">
           <div class="head" data-reveal>
             <p class="head__eyebrow x-kicker">当前进度</p>
-            <h2 class="x-h2">01 LLM 原理与使用：1.1 采样、1.2 主流模型 API、1.3 结构化输出、1.4 推理模型已完成；1.5 Prompt Caching、1.6 上下文工程练习进行中；02 工具调用与协议：2.1 Function Calling、2.2 MCP 已上线。</h2>
+            <h2 class="x-h2">01 LLM 原理与使用：1.1 采样、1.2 主流模型 API、1.3 结构化输出、1.4 推理模型已完成；1.5 Prompt Caching、1.6 上下文工程练习进行中；02 工具调用与协议：2.1 Function Calling、2.2 MCP、2.3 A2A 已上线。</h2>
             <p class="head__sub">学完且有笔记或代码产出，才在 ROADMAP 里打勾。</p>
           </div>
           <div class="x-progress" data-reveal>
@@ -544,6 +544,25 @@
                 <dd><span class="chip x-chip x-chip--live">进行中</span></dd>
               </dl>
             </article>
+            <article class="step">
+              <div class="step__intro">
+                <p class="step__num x-step-num">2.3</p>
+                <p class="step__eyebrow">进行中 · 02 工具调用与协议</p>
+              </div>
+              <div>
+                <h3>A2A（Agent-to-Agent）协议</h3>
+                <p class="sub">按 A2A 1.0：Agent 内部用 MCP，Agent 之间用 A2A；Agent Card 发现；任务的终态与中断态；contextId 与 taskId；input-required 多轮；阻塞、轮询、流式、推送四种拿结果的方式；把远程 Agent 包装成工具。</p>
+                <div class="links" style="margin-top: 16px">
+                  <a class="x-btn x-btn--primary" href="notes/02-03-a2a.html">在线阅读</a>
+                </div>
+              </div>
+              <dl class="step__panel">
+                <dt>课件</dt>
+                <dd><span class="chip x-chip x-chip--done">已完成</span></dd>
+                <dt>练习</dt>
+                <dd><span class="chip x-chip x-chip--live">进行中</span></dd>
+              </dl>
+            </article>
           </div>
         </section>
 
@@ -554,6 +573,21 @@
           </div>
           <ol class="timeline" data-reveal>
             <li class="is-current">
+              <p class="timeline__when"><span class="x-mono">Day 9 · 2026-10-16</span></p>
+              <div class="timeline__what">
+                <p><strong>A2A 1.0：Agent 之间委托任务</strong></p>
+                <ul>
+                  <li>远程 Agent 不是函数：会跑很久、会反问、会要授权，结果分块产出</li>
+                  <li>任务执行用请求的 context：returnImmediately 一返回，任务就被杀掉</li>
+                  <li>取消时先 cancel 再写状态：Executor 抢先返回，CANCELED 变成 FAILED</li>
+                  <li>同一个 messageId 重发“扣款 100 元”：只执行一次</li>
+                  <li>远程 Agent 反问“从哪里出发”：不是错误，把问题和 task_id 交给模型</li>
+                </ul>
+                <p class="x-think">思考：你的 Agent 把任务交给别人时，对方能看到多少你的对话？</p>
+              </div>
+              <p><a class="x-btn x-btn--ghost" href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/logs/2026-10-16.md" target="_blank" rel="noopener">日志</a></p>
+            </li>
+            <li>
               <p class="timeline__when"><span class="x-mono">Day 8 · 2026-10-15</span></p>
               <div class="timeline__what">
                 <p><strong>Function Calling：模型不执行工具，你的代码执行</strong></p>

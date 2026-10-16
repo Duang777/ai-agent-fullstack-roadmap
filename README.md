@@ -75,6 +75,7 @@
 |---|---|---|---|---|---|
 | 2.1 | Function Calling / Tool Use | 五步流程；两家的定义、调用与结果格式（arguments 字符串 vs input 对象、call_id vs tool_use_id）；strict 与 tool_choice；并行调用的回传规则；只读并发、去重、副作用串行失败即停；错误变结果；流式参数按 index 拼接；工具设计 | [课件](notes/02-tools/01-function-calling.md) | [`12-tools`](projects/12-tools) | 📖 学习中 |
 | 2.2 | MCP（Model Context Protocol） | Host / Client / Server 与 Function Calling 的分工；Tools / Resources / Prompts 由谁控制；2026-07-28 无状态设计（每请求 `_meta`、`server/discover`、显式句柄）；协议错误 vs 工具执行错误；多轮请求与 requestState 签名；stdio 与 Streamable HTTP（镜像头、Origin）；多 Server 聚合与安全 | [课件](notes/02-tools/02-mcp.md) | [`13-mcp`](projects/13-mcp) | 📖 学习中 |
+| 2.3 | A2A（Agent-to-Agent）协议 | 与 MCP、Function Calling 的分层；Agent Card 发现与接口选择；任务状态机（终态 / 中断态）；contextId 与 taskId 规则、input-required 多轮；messageId 幂等；阻塞、returnImmediately、SSE 流、推送；版本头；把远程 Agent 包装成工具 | [课件](notes/02-tools/03-a2a.md) | [`14-a2a`](projects/14-a2a) | 📖 学习中 |
 
 ### 全部模块
 
@@ -150,6 +151,9 @@ cd projects/12-tools && make test
 
 # 2.2 MCP
 cd projects/13-mcp && make test
+
+# 2.3 A2A
+cd projects/14-a2a && make test
 ```
 
 推荐学习方式：先读课件 → 关掉参考答案自己写练习 → 跑测试 → 再对照参考实现。
