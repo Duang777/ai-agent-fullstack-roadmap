@@ -9,7 +9,7 @@
 用 Go / TypeScript 写 Agent 运行时，用 Python 读懂模型生态。<br/>
 每一课都有课件、可运行练习、测试和参考答案。
 
-[![Progress](https://img.shields.io/badge/progress-5%2F84-111111?style=flat-square)](ROADMAP.md)
+[![Progress](https://img.shields.io/badge/progress-15%2F84-111111?style=flat-square)](ROADMAP.md)
 [![CI](https://github.com/Duang777/ai-agent-fullstack-roadmap/actions/workflows/ci.yml/badge.svg)](https://github.com/Duang777/ai-agent-fullstack-roadmap/actions/workflows/ci.yml)
 [![Go](https://img.shields.io/badge/Go-1.23+-111111?style=flat-square&logo=go&logoColor=white)](projects/00-stream-proxy)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-111111?style=flat-square&logo=typescript&logoColor=white)](projects/01-ts-agent-core)
@@ -66,16 +66,16 @@
 | 1.2 | 主流模型 API | OpenAI Responses、Anthropic Messages、Gemini Interactions 的消息结构、工具调用、流式事件、用量口径；推理块回传；同家无损、跨家降级的 Go 统一客户端与工具循环 | [课件](notes/01-llm/02-mainstream-apis.md) | [`07-llm-api`](projects/07-llm-api) | ✅ 完成 |
 | 1.3 | 结构化输出 | 提示词 / JSON mode / strict 三个层次；约束解码原理与手写前缀检查器；分布扭曲与字段顺序；三家 schema 子集、规则检查与转换；校验驱动的重试循环 | [课件](notes/01-llm/03-structured-output.md) | [`08-structured-output`](projects/08-structured-output) | ✅ 完成 |
 | 1.4 | 推理模型 | 推理 token 的四个特点；三家 effort / thinking / thinking_level 的写法与 400 组合；用量口径与两种截断；思考块签名绑定模型与前缀、只追加不修改；逐级升级、多数投票与“每个正确答案的 token” | [课件](notes/01-llm/04-reasoning-models.md) | [`09-reasoning`](projects/09-reasoning) | ✅ 完成 |
-| 1.5 | Prompt Caching | KV 前缀复用与累计哈希；Anthropic 自动缓存 / 显式断点 / 20 块回看、OpenAI implicit 与 explicit、Gemini 隐式与 cachedContents；读写倍率统一、最小长度盈亏平衡、TTL 选择；按变化频率放断点、只追加不修改、分叉诊断 | [课件](notes/01-llm/05-prompt-caching.md) | [`10-prompt-cache`](projects/10-prompt-cache) | 📖 学习中 |
-| 1.6 | 上下文工程 | 什么算进窗口与超窗口的两种结果；长度退化与位置效应、全塞与检索的取舍；预算内组装、去重、稳定在前、工具输出保留头尾；清理 / 笔记 / 压缩与缓存的权衡；提示词结构与回归评测 | [课件](notes/01-llm/06-context-engineering.md) | [`11-context`](projects/11-context) | 📖 学习中 |
+| 1.5 | Prompt Caching | KV 前缀复用与累计哈希；Anthropic 自动缓存 / 显式断点 / 20 块回看、OpenAI implicit 与 explicit、Gemini 隐式与 cachedContents；读写倍率统一、最小长度盈亏平衡、TTL 选择；按变化频率放断点、只追加不修改、分叉诊断 | [课件](notes/01-llm/05-prompt-caching.md) | [`10-prompt-cache`](projects/10-prompt-cache) | ✅ 完成 |
+| 1.6 | 上下文工程 | 什么算进窗口与超窗口的两种结果；长度退化与位置效应、全塞与检索的取舍；预算内组装、去重、稳定在前、工具输出保留头尾；清理 / 笔记 / 压缩与缓存的权衡；提示词结构与回归评测 | [课件](notes/01-llm/06-context-engineering.md) | [`11-context`](projects/11-context) | ✅ 完成 |
 
 ### 02 · 工具调用与协议
 
 | # | 主题 | 核心内容 | 课件 | 练习 | 状态 |
 |---|---|---|---|---|---|
-| 2.1 | Function Calling / Tool Use | 五步流程；两家的定义、调用与结果格式（arguments 字符串 vs input 对象、call_id vs tool_use_id）；strict 与 tool_choice；并行调用的回传规则；只读并发、去重、副作用串行失败即停；错误变结果；流式参数按 index 拼接；工具设计 | [课件](notes/02-tools/01-function-calling.md) | [`12-tools`](projects/12-tools) | 📖 学习中 |
-| 2.2 | MCP（Model Context Protocol） | Host / Client / Server 与 Function Calling 的分工；Tools / Resources / Prompts 由谁控制；2026-07-28 无状态设计（每请求 `_meta`、`server/discover`、显式句柄）；协议错误 vs 工具执行错误；多轮请求与 requestState 签名；stdio 与 Streamable HTTP（镜像头、Origin）；多 Server 聚合与安全 | [课件](notes/02-tools/02-mcp.md) | [`13-mcp`](projects/13-mcp) | 📖 学习中 |
-| 2.3 | A2A（Agent-to-Agent）协议 | 与 MCP、Function Calling 的分层；Agent Card 发现与接口选择；任务状态机（终态 / 中断态）；contextId 与 taskId 规则、input-required 多轮；messageId 幂等；阻塞、returnImmediately、SSE 流、推送；版本头；把远程 Agent 包装成工具 | [课件](notes/02-tools/03-a2a.md) | [`14-a2a`](projects/14-a2a) | 📖 学习中 |
+| 2.1 | Function Calling / Tool Use | 五步流程；两家的定义、调用与结果格式（arguments 字符串 vs input 对象、call_id vs tool_use_id）；strict 与 tool_choice；并行调用的回传规则；只读并发、去重、副作用串行失败即停；错误变结果；流式参数按 index 拼接；工具设计 | [课件](notes/02-tools/01-function-calling.md) | [`12-tools`](projects/12-tools) | ✅ 完成 |
+| 2.2 | MCP（Model Context Protocol） | Host / Client / Server 与 Function Calling 的分工；Tools / Resources / Prompts 由谁控制；2026-07-28 无状态设计（每请求 `_meta`、`server/discover`、显式句柄）；协议错误 vs 工具执行错误；多轮请求与 requestState 签名；stdio 与 Streamable HTTP（镜像头、Origin）；多 Server 聚合与安全 | [课件](notes/02-tools/02-mcp.md) | [`13-mcp`](projects/13-mcp) | ✅ 完成 |
+| 2.3 | A2A（Agent-to-Agent）协议 | 与 MCP、Function Calling 的分层；Agent Card 发现与接口选择；任务状态机（终态 / 中断态）；contextId 与 taskId 规则、input-required 多轮；messageId 幂等；阻塞、returnImmediately、SSE 流、推送；版本头；把远程 Agent 包装成工具 | [课件](notes/02-tools/03-a2a.md) | [`14-a2a`](projects/14-a2a) | ✅ 完成 |
 
 ### 全部模块
 
@@ -83,9 +83,9 @@
 
 | 阶段 | 模块 | 内容 | 进度 |
 |---|---|---|---|
-| A | 00 基础功底 | Go / TS / Python、流式协议、工程基础、数据库与缓存 | `█████░` 5/6 |
-| A | 01 LLM 原理与使用 | Transformer、主流 API、结构化输出、推理模型、Prompt Caching | `░░░░░░` 0/6 |
-| A | 02 工具调用与协议 | Function Calling、MCP、A2A、Computer Use、代码沙箱 | `░░░░░` 0/5 |
+| A | 00 基础功底 | Go / TS / Python、流式协议、工程基础、数据库与缓存 | `██████` 6/6 |
+| A | 01 LLM 原理与使用 | Transformer、主流 API、结构化输出、推理模型、Prompt Caching | `██████` 6/6 |
+| A | 02 工具调用与协议 | Function Calling、MCP、A2A、Computer Use、代码沙箱 | `███░░` 3/5 |
 | B | 03 Agent 架构 | ReAct、Agent Loop、多智能体、长任务、状态与数据模型、Coding / Deep Research Agent | `░░░░░░░` 0/7 |
 | B | 04 框架与 SDK | LangGraph、OpenAI / Claude Agent SDK、Eino、Vercel AI SDK、Mastra | `░░░░░░` 0/6 |
 | B | 05 记忆与检索 | 向量库、混合检索、Rerank、GraphRAG、记忆、检索评测 | `░░░░░` 0/5 |

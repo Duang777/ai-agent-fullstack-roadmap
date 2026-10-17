@@ -30,13 +30,13 @@
 - [x] 主流 API：OpenAI Responses、Anthropic Messages、Gemini
 - [x] 结构化输出：JSON Schema、constrained decoding
 - [x] 推理模型（reasoning / thinking budget）与成本权衡
-- [ ] 上下文窗口、Prompt Caching、长上下文退化
-- [ ] Prompt / Context Engineering 系统方法
+- [x] 上下文窗口、Prompt Caching、长上下文退化
+- [x] Prompt / Context Engineering 系统方法
 
 ## 2. 工具调用与协议
-- [ ] Function Calling / Tool Use 机制与并行调用
-- [ ] MCP（Model Context Protocol）：Server/Client、Tools/Resources/Prompts
-- [ ] A2A（Agent-to-Agent）协议
+- [x] Function Calling / Tool Use 机制与并行调用
+- [x] MCP（Model Context Protocol）：Server/Client、Tools/Resources/Prompts
+- [x] A2A（Agent-to-Agent）协议
 - [ ] Computer Use / Browser Use 代理
 - [ ] Code Execution 沙箱（E2B、Docker、gVisor）
 
