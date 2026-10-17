@@ -263,14 +263,14 @@
         <section class="stats" data-reveal>
           <div class="stat"><span class="stat__fig x-mono">14</span><span class="stat__label">模块</span></div>
           <div class="stat"><span class="stat__fig x-mono">84</span><span class="stat__label">知识点</span></div>
-          <div class="stat"><span class="stat__fig x-mono">Day 9</span><span class="stat__label">今天</span></div>
+          <div class="stat"><span class="stat__fig x-mono">Day 10</span><span class="stat__label">今天</span></div>
           <div class="stat"><span class="stat__fig x-mono">15/84</span><span class="stat__label">已完成</span></div>
         </section>
 
         <section class="section" id="progress" data-nav="进度">
           <div class="head" data-reveal>
             <p class="head__eyebrow x-kicker">当前进度</p>
-            <h2 class="x-h2">00 基础功底、01 LLM 原理与使用全部完成；02 工具调用与协议：2.1 Function Calling、2.2 MCP、2.3 A2A 已完成。</h2>
+            <h2 class="x-h2">00 基础功底、01 LLM 原理与使用全部完成；02 工具调用与协议：2.1 Function Calling、2.2 MCP、2.3 A2A 已完成，2.4 Computer Use 练习进行中。</h2>
             <p class="head__sub">学完且有笔记或代码产出，才在 ROADMAP 里打勾。</p>
           </div>
           <div class="x-progress" data-reveal>
@@ -563,6 +563,25 @@
                 <dd><span class="chip x-chip x-chip--done">已完成</span></dd>
               </dl>
             </article>
+            <article class="step">
+              <div class="step__intro">
+                <p class="step__num x-step-num">2.4</p>
+                <p class="step__eyebrow">进行中 · 02 工具调用与协议</p>
+              </div>
+              <div>
+                <h3>Computer Use / Browser Use 代理</h3>
+                <p class="sub">模型只输出动作，点下去的是你的代码：截图缩放与坐标换算、三家接口对照、批量动作失败即停、每个动作执行前重新检查、网址白名单与隐藏文字注入、元素引用、截图历史与缓存、核验真实结果。</p>
+                <div class="links" style="margin-top: 16px">
+                  <a class="x-btn x-btn--primary" href="notes/02-04-computer-use.html">在线阅读</a>
+                </div>
+              </div>
+              <dl class="step__panel">
+                <dt>课件</dt>
+                <dd><span class="chip x-chip x-chip--done">已完成</span></dd>
+                <dt>练习</dt>
+                <dd><span class="chip x-chip x-chip--live">进行中</span></dd>
+              </dl>
+            </article>
           </div>
         </section>
 
@@ -573,6 +592,21 @@
           </div>
           <ol class="timeline" data-reveal>
             <li class="is-current">
+              <p class="timeline__when"><span class="x-mono">Day 10 · 2026-10-17</span></p>
+              <div class="timeline__what">
+                <p><strong>Computer Use：模型只说“点哪里”，点下去的是你的代码</strong></p>
+                <ul>
+                  <li>模型在缩小后的截图上点 (440, 432)：真实屏幕要点 (500, 491)</li>
+                  <li>一轮三个动作，第二个失败：后面的不执行，用规定的原文回复，一个都不能少</li>
+                  <li>执行前检查整批都安全：第一个点击让布局上移 80，第二个点在了“删除账号”上</li>
+                  <li>shop.example.evil.com 不能因为“包含 shop.example”就放行</li>
+                  <li>截图每轮删一张：60 轮里缓存失效 57 次；每 25 轮删一次：2 次</li>
+                </ul>
+                <p class="x-think">思考：你的 Agent 点下“提交”之前，有没有人看过此刻的页面？</p>
+              </div>
+              <p><a class="x-btn x-btn--ghost" href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/logs/2026-10-17.md" target="_blank" rel="noopener">日志</a></p>
+            </li>
+            <li>
               <p class="timeline__when"><span class="x-mono">Day 9 · 2026-10-16</span></p>
               <div class="timeline__what">
                 <p><strong>A2A 1.0：Agent 之间委托任务</strong></p>

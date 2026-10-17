@@ -37,6 +37,7 @@ LESSONS = [
     ("notes/02-tools/01-function-calling.md", "02-01-function-calling", "2.1", "Function Calling / Tool Use", "5–6 小时"),
     ("notes/02-tools/02-mcp.md", "02-02-mcp", "2.2", "MCP", "5–6 小时"),
     ("notes/02-tools/03-a2a.md", "02-03-a2a", "2.3", "A2A（Agent-to-Agent）协议", "4–5 小时"),
+    ("notes/02-tools/04-computer-use.md", "02-04-computer-use", "2.4", "Computer Use / Browser Use 代理", "4–5 小时"),
 ]
 
 CSS = r"""
