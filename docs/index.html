@@ -263,14 +263,14 @@
         <section class="stats" data-reveal>
           <div class="stat"><span class="stat__fig x-mono">14</span><span class="stat__label">模块</span></div>
           <div class="stat"><span class="stat__fig x-mono">84</span><span class="stat__label">知识点</span></div>
-          <div class="stat"><span class="stat__fig x-mono">Day 10</span><span class="stat__label">今天</span></div>
+          <div class="stat"><span class="stat__fig x-mono">Day 11</span><span class="stat__label">今天</span></div>
           <div class="stat"><span class="stat__fig x-mono">15/84</span><span class="stat__label">已完成</span></div>
         </section>
 
         <section class="section" id="progress" data-nav="进度">
           <div class="head" data-reveal>
             <p class="head__eyebrow x-kicker">当前进度</p>
-            <h2 class="x-h2">00 基础功底、01 LLM 原理与使用全部完成；02 工具调用与协议：2.1 Function Calling、2.2 MCP、2.3 A2A 已完成，2.4 Computer Use 练习进行中。</h2>
+            <h2 class="x-h2">00 基础功底、01 LLM 原理与使用全部完成；02 工具调用与协议：2.1 Function Calling、2.2 MCP、2.3 A2A 已完成，2.4 Computer Use、2.5 代码执行沙箱练习进行中。</h2>
             <p class="head__sub">学完且有笔记或代码产出，才在 ROADMAP 里打勾。</p>
           </div>
           <div class="x-progress" data-reveal>
@@ -582,6 +582,25 @@
                 <dd><span class="chip x-chip x-chip--live">进行中</span></dd>
               </dl>
             </article>
+            <article class="step">
+              <div class="step__intro">
+                <p class="step__num x-step-num">2.5</p>
+                <p class="step__eyebrow">进行中 · 02 工具调用与协议</p>
+              </div>
+              <div>
+                <h3>Code Execution 沙箱：E2B、Docker、gVisor</h3>
+                <p class="sub">让 Agent 跑它自己写的代码：三家自带工具与托管沙箱的取舍、四层隔离、加固容器、出站白名单；超时杀进程组、环境变量白名单、资源限制、输出保留头尾、产物只收普通文件。</p>
+                <div class="links" style="margin-top: 16px">
+                  <a class="x-btn x-btn--primary" href="notes/02-05-code-sandbox.html">在线阅读</a>
+                </div>
+              </div>
+              <dl class="step__panel">
+                <dt>课件</dt>
+                <dd><span class="chip x-chip x-chip--done">已完成</span></dd>
+                <dt>练习</dt>
+                <dd><span class="chip x-chip x-chip--live">进行中</span></dd>
+              </dl>
+            </article>
           </div>
         </section>
 
@@ -592,6 +611,21 @@
           </div>
           <ol class="timeline" data-reveal>
             <li class="is-current">
+              <p class="timeline__when"><span class="x-mono">Day 11 · 2026-10-18</span></p>
+              <div class="timeline__what">
+                <p><strong>代码执行沙箱：默认代码是不可信的</strong></p>
+                <ul>
+                  <li>超时只杀了 sh：后台的 sleep 30 还活着，要杀整个进程组</li>
+                  <li>exec 默认继承全部环境变量：代码里一句 env 就看到你的 API Key</li>
+                  <li>不加 set -e：写文件被 SIGXFSZ 杀掉，脚本退出码仍是 0</li>
+                  <li>产物目录里放一个指向 /etc/passwd 的符号链接：收产物要用 Lstat</li>
+                  <li>io.Writer 返回值写错，子进程的输出被直接丢掉</li>
+                </ul>
+                <p class="x-think">思考：你的 Agent 跑的代码，能读到你服务器上的哪些东西？</p>
+              </div>
+              <p><a class="x-btn x-btn--ghost" href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/logs/2026-10-18.md" target="_blank" rel="noopener">日志</a></p>
+            </li>
+            <li>
               <p class="timeline__when"><span class="x-mono">Day 10 · 2026-10-17</span></p>
               <div class="timeline__what">
                 <p><strong>Computer Use：模型只说“点哪里”，点下去的是你的代码</strong></p>

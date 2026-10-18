@@ -1,0 +1,624 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>2.5 Code Execution 沙箱（E2B、Docker、gVisor） · AI Agent 全栈</title>
+<meta name="description" content="2.5 Code Execution 沙箱（E2B、Docker、gVisor）。duang777 的 AI Agent 全栈公开学习课件。" />
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("x-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
+<style>
+:root{
+  --bg:#0a0a0a;--surface:#111;--text:#ededed;--text-2:#a1a1a1;--text-3:rgb(255 255 255/.4);
+  --line:rgb(255 255 255/.1);--line-2:rgb(255 255 255/.06);
+  --body:#d4d4d4;--code-bg:#1a1a1a;--pre-bg:#0f0f0f;--nav-bg:rgb(10 10 10/.8);--sb:#2a2a2a;--sb-h:#3a3a3a;
+  --sans:Inter,-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei","Helvetica Neue",sans-serif;
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+}
+*{box-sizing:border-box}
+html{color-scheme:dark}
+:root[data-theme="light"]{--bg:#fff;--surface:#fafafa;--text:#0a0a0a;--text-2:#555;--text-3:rgb(0 0 0/.42);--line:rgb(0 0 0/.1);--line-2:rgb(0 0 0/.06);--body:#333;--code-bg:#f2f2f2;--pre-bg:#fafafa;--nav-bg:rgb(255 255 255/.85);--sb:#d4d4d4;--sb-h:#bdbdbd}
+:root[data-theme="light"]{color-scheme:light}
+.toc{scrollbar-width:none}.toc::-webkit-scrollbar{display:none}
+html{scrollbar-width:thin;scrollbar-color:var(--sb) transparent}
+::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--sb);border-radius:8px}::-webkit-scrollbar-thumb:hover{background:var(--sb-h)}
+html{scroll-behavior:smooth;scroll-padding-top:80px}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;line-height:1.8;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+.nav{position:sticky;top:0;z-index:10;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;border-bottom:1px solid var(--line);background:var(--nav-bg);backdrop-filter:blur(12px)}
+.nav__brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-size:14px;font-weight:500}
+.nav__dot{width:10px;height:10px;border-radius:3px;background:var(--text)}
+.nav__links{display:flex;gap:20px;font-size:14px;color:var(--text-2)}
+.nav__links a{text-decoration:none}.nav__links a:hover{color:var(--text)}
+.wrap{max-width:1200px;margin:0 auto;padding:0 24px;display:grid;grid-template-columns:220px minmax(0,1fr);gap:56px}
+.toc{position:sticky;top:80px;align-self:start;max-height:calc(100vh - 100px);overflow:auto;padding:40px 0 40px;font-size:13px;line-height:1.6}
+.toc__label{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--text-3);text-transform:uppercase;margin-bottom:12px}
+.toc ul{list-style:none;margin:0;padding:0}
+.toc li{margin:0}
+.toc a{display:block;padding:4px 0 4px 12px;border-left:1px solid var(--line);color:var(--text-2);text-decoration:none}
+.toc a:hover,.toc a.on{color:var(--text);border-left-color:var(--text)}
+.toc ul ul a{padding-left:24px;font-size:12.5px;color:var(--text-3)}
+.toc ul ul a:hover,.toc ul ul a.on{color:var(--text)}
+article{min-width:0;max-width:760px;padding:48px 0 96px}
+.meta{font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--text-3);margin-bottom:16px}
+article h1.title{font-size:40px;line-height:1.2;letter-spacing:-.02em;font-weight:600;margin:0 0 24px}
+article h1{font-size:28px;line-height:1.3;letter-spacing:-.01em;font-weight:600;margin:72px 0 20px;padding-top:32px;border-top:1px solid var(--line)}
+article h2{font-size:22px;line-height:1.4;font-weight:600;margin:48px 0 16px}
+article h3{font-size:18px;font-weight:600;margin:36px 0 12px}
+article h4{font-size:16px;font-weight:600;margin:28px 0 8px}
+article p{margin:0 0 18px;color:var(--body)}
+article strong{color:var(--text);font-weight:600}
+article ul,article ol{padding-left:22px;margin:0 0 18px;color:var(--body)}
+article li{margin:4px 0}
+article a{text-decoration:underline;text-decoration-color:var(--text-3);text-underline-offset:3px}
+article a:hover{text-decoration-color:var(--text)}
+article hr{border:0;border-top:1px solid var(--line);margin:48px 0}
+article blockquote{margin:0 0 20px;padding:12px 18px;border-left:2px solid var(--text-2);background:var(--surface);border-radius:0 8px 8px 0;color:var(--text-2)}
+article blockquote p{margin:6px 0;color:var(--text-2)}
+article code{font-family:var(--mono);font-size:.88em;background:var(--code-bg);border:1px solid var(--line-2);border-radius:5px;padding:1px 6px}
+article pre{position:relative;margin:0 0 22px;padding:16px 18px;background:var(--pre-bg);border:1px solid var(--line);border-radius:10px;overflow:auto;font-size:13.5px;line-height:1.65}
+article pre code{background:none;border:0;padding:0;font-size:inherit}
+.code{position:relative}
+.code__lang{position:absolute;top:8px;right:46px;font-family:var(--mono);font-size:11px;color:var(--text-3);z-index:1}
+.code__copy{position:absolute;top:6px;right:8px;z-index:1;font:11px var(--mono);color:var(--text-2);background:var(--code-bg);border:1px solid var(--line);border-radius:6px;padding:2px 7px;cursor:pointer}
+.code__copy:hover{color:var(--text)}
+.tbl{overflow-x:auto;margin:0 0 22px;border:1px solid var(--line);border-radius:10px}
+article table{border-collapse:collapse;width:100%;font-size:14px}
+article th,article td{padding:10px 14px;border-bottom:1px solid var(--line-2);text-align:left;vertical-align:top}
+article th{font-weight:600;background:var(--surface);color:var(--text)}
+article tr:last-child td{border-bottom:0}
+article details{margin:0 0 18px;border:1px solid var(--line);border-radius:10px;padding:10px 16px;background:var(--surface)}
+article summary{cursor:pointer;font-weight:500}
+.pager{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:72px;padding-top:32px;border-top:1px solid var(--line)}
+.pager a{display:block;padding:16px 18px;border:1px solid var(--line);border-radius:10px;text-decoration:none}
+.pager a:hover{border-color:var(--text-2)}
+.pager span{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--text-3)}
+.pager .next{text-align:right;grid-column:2}
+.foot{margin-top:40px;font-size:13px;color:var(--text-3)}
+/* 代码高亮：黑白灰为主 */
+.hl .c,.hl .c1,.hl .cm,.hl .ch,.hl .cs,.hl .cp,.hl .cpf{color:#6b6b6b;font-style:italic}
+.hl .k,.hl .kd,.hl .kn,.hl .kr,.hl .kt,.hl .kc,.hl .kp,.hl .ow{color:#ffffff;font-weight:600}
+.hl .s,.hl .s1,.hl .s2,.hl .sb,.hl .sc,.hl .sd,.hl .se,.hl .sh,.hl .si,.hl .sx,.hl .sr,.hl .ss,.hl .dl,.hl .sa{color:#86efac}
+.hl .m,.hl .mi,.hl .mf,.hl .mh,.hl .mo,.hl .il{color:#fcd34d}
+.hl .nf,.hl .fm,.hl .nc,.hl .nn{color:#e5e5e5;font-weight:500}
+.hl .nb,.hl .bp,.hl .nd,.hl .na,.hl .nt{color:#bdbdbd}
+.hl .o,.hl .p{color:#9a9a9a}
+.hl .gd{color:#fca5a5}.hl .gi{color:#86efac}
+.hl{color:#d4d4d4}
+:root[data-theme="light"] .hl{color:#262626}
+:root[data-theme="light"] .hl .c,:root[data-theme="light"] .hl .c1,:root[data-theme="light"] .hl .cm,:root[data-theme="light"] .hl .ch,:root[data-theme="light"] .hl .cs,:root[data-theme="light"] .hl .cp,:root[data-theme="light"] .hl .cpf{color:#8a8a8a}
+:root[data-theme="light"] .hl .k,:root[data-theme="light"] .hl .kd,:root[data-theme="light"] .hl .kn,:root[data-theme="light"] .hl .kr,:root[data-theme="light"] .hl .kt,:root[data-theme="light"] .hl .kc,:root[data-theme="light"] .hl .kp,:root[data-theme="light"] .hl .ow{color:#000}
+:root[data-theme="light"] .hl .s,:root[data-theme="light"] .hl .s1,:root[data-theme="light"] .hl .s2,:root[data-theme="light"] .hl .sb,:root[data-theme="light"] .hl .sc,:root[data-theme="light"] .hl .sd,:root[data-theme="light"] .hl .se,:root[data-theme="light"] .hl .sh,:root[data-theme="light"] .hl .si,:root[data-theme="light"] .hl .sx,:root[data-theme="light"] .hl .sr,:root[data-theme="light"] .hl .ss,:root[data-theme="light"] .hl .dl,:root[data-theme="light"] .hl .sa{color:#15803d}
+:root[data-theme="light"] .hl .m,:root[data-theme="light"] .hl .mi,:root[data-theme="light"] .hl .mf,:root[data-theme="light"] .hl .mh,:root[data-theme="light"] .hl .mo,:root[data-theme="light"] .hl .il{color:#b45309}
+:root[data-theme="light"] .hl .nf,:root[data-theme="light"] .hl .fm,:root[data-theme="light"] .hl .nc,:root[data-theme="light"] .hl .nn{color:#171717}
+:root[data-theme="light"] .hl .nb,:root[data-theme="light"] .hl .bp,:root[data-theme="light"] .hl .nd,:root[data-theme="light"] .hl .na,:root[data-theme="light"] .hl .nt{color:#525252}
+:root[data-theme="light"] .hl .o,:root[data-theme="light"] .hl .p{color:#6b6b6b}
+:root[data-theme="light"] .hl .gd{color:#b91c1c}:root[data-theme="light"] .hl .gi{color:#15803d}
+.nav__right{display:flex;align-items:center;gap:20px}
+.theme-toggle{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--text);cursor:pointer}
+.theme-toggle:hover{border-color:var(--text-2)}
+.theme-toggle svg{width:15px;height:15px}
+.theme-toggle .i-moon,:root[data-theme="light"] .theme-toggle .i-sun{display:none}
+:root[data-theme="light"] .theme-toggle .i-moon{display:block}
+@media (max-width:960px){.wrap{grid-template-columns:1fr;gap:0}.toc{display:none}article h1.title{font-size:30px}.nav__links a.hide-sm{display:none}}
+</style>
+</head>
+<body>
+<header class="nav">
+  <a class="nav__brand" href="../index.html"><span class="nav__dot"></span>AI Agent 全栈</a>
+  <div class="nav__right">
+  <nav class="nav__links">
+    <a href="../index.html#progress">课件</a>
+    <a class="hide-sm" href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/ROADMAP.md">路线图</a>
+    <a href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/notes/02-tools/05-code-sandbox.md">在 GitHub 上查看</a>
+  </nav>
+  <button class="theme-toggle" id="theme-toggle" type="button" aria-label="切换浅色 / 深色" title="切换浅色 / 深色"><svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg><svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
+  </div>
+</header>
+<div class="wrap">
+  <aside class="toc"><div class="toc__label">本课目录</div><ul>
+<li><a href="#读前说明">读前说明</a></li>
+<li><a href="#第一部分用谁的沙箱">第一部分：用谁的沙箱</a><ul>
+<li><a href="#1-三家自带的代码执行">1. 三家自带的代码执行</a></li>
+<li><a href="#2-托管沙箱e2b">2. 托管沙箱：E2B</a></li>
+</ul>
+</li>
+<li><a href="#第二部分隔离的层次">第二部分：隔离的层次</a><ul>
+<li><a href="#3-威胁模型">3. 威胁模型</a></li>
+<li><a href="#4-四层隔离">4. 四层隔离</a></li>
+<li><a href="#5-加固容器">5. 加固容器</a></li>
+<li><a href="#6-出站网络">6. 出站网络</a></li>
+</ul>
+</li>
+<li><a href="#第三部分执行端">第三部分：执行端</a><ul>
+<li><a href="#7-超时要杀整个进程组">7. 超时要杀整个进程组</a></li>
+<li><a href="#8-环境变量和工作目录">8. 环境变量和工作目录</a></li>
+<li><a href="#9-资源限制">9. 资源限制</a></li>
+<li><a href="#10-输出">10. 输出</a></li>
+<li><a href="#11-结果怎么回给模型">11. 结果怎么回给模型</a></li>
+<li><a href="#12-生命周期">12. 生命周期</a></li>
+<li><a href="#本课小结">本课小结</a></li>
+<li><a href="#练习今天做完">练习（今天做完）</a></li>
+<li><a href="#自测题">自测题</a></li>
+</ul>
+</li>
+<li><a href="#参考答案与详解">参考答案与详解</a><ul>
+<li><a href="#自测题答案">自测题答案</a></li>
+<li><a href="#练习参考答案">练习参考答案</a></li>
+<li><a href="#完成标准">完成标准</a></li>
+</ul>
+</li>
+</ul>
+</aside>
+  <article>
+    <div class="meta">模块 02 · 工具调用与协议 · 第 2.5 课</div>
+    <h1 class="title">2.5 Code Execution 沙箱（E2B、Docker、gVisor）</h1>
+    <blockquote>
+<p>第 2 部分 · 第 5 课 ｜ 预计 4–5 小时 ｜ 前置：0.5 工程基础（Docker、Linux 信号）、2.1 Function Calling、2.4 Computer Use</p>
+<p>配套练习：<code>projects/16-sandbox/</code>（纯 Go 标准库，12 个测试，会真的启动子进程）。把执行端必须做对的几件事做成可测试的：超时要杀掉整个进程组、环境变量不能带密钥、输出截断保留头尾、CPU 和文件大小限制、产物只收普通文件、代码错误和环境错误分开回给模型、E2B 风格的出站网络规则、加固过的 <code>docker run</code> 参数和危险参数检查、沙箱的暂停和销毁。</p>
+</blockquote>
+<h2 id="读前说明">读前说明</h2>
+<p>2.4 课里模型操作的是屏幕。这一课它直接写代码让你跑：分析一份 CSV、画张图、跑一遍测试、算一道题。代码是模型现场写的，你没审过，而且模型可能被它读到的内容操纵（2.4 课的提示词注入）。所以要把“运行一段不可信代码”当作默认场景来设计。</p>
+<p>先看几个问题：</p>
+<ul>
+<li>三家模型自带的代码执行工具和自己搭沙箱，怎么选？</li>
+<li><code>os/exec</code> 起一个子进程、加个超时，算不算沙箱？</li>
+<li>超时了，你杀掉了 <code>sh</code>，为什么 CPU 还是满的？</li>
+<li>你的服务进程里有 API Key，代码里一句 <code>env</code> 会看到什么？</li>
+<li>Docker 容器为什么不算强隔离？gVisor 和微虚拟机又多隔离了什么？</li>
+<li>代码输出了 200 MB 日志，或者在产物目录里放了一个指向 <code>/etc/passwd</code> 的符号链接，会怎样？</li>
+<li>代码报错和执行超时，回给模型时应该一样吗？</li>
+</ul>
+<p>本课结束时你能：</p>
+<ol>
+<li>对照 Anthropic、OpenAI、Gemini 自带的代码执行工具，以及 E2B 这类托管沙箱；</li>
+<li>讲清进程、容器、gVisor、微虚拟机四层隔离各挡住了什么；</li>
+<li>写一个能正确超时、限制资源、清理环境、截断输出、安全收集产物的执行端；</li>
+<li>配置出站网络规则和加固的容器参数；</li>
+<li>处理沙箱的生命周期：续期、暂停、销毁后重建。</li>
+</ol>
+<p><strong>关于版本</strong>：本课按 2026 年 10 月的官方文档写：Anthropic 的 <code>code_execution_20250825</code> / <code>20260120</code> / <code>20260521</code>，OpenAI Responses 的 <code>code_interpreter</code>，Gemini 的 <code>code_execution</code>，E2B SDK 文档，gVisor 与 Docker 官方文档。限额和价格会变，动手前先核对。</p>
+<hr />
+<h1 id="第一部分用谁的沙箱">第一部分：用谁的沙箱</h1>
+<h2 id="1-三家自带的代码执行">1. 三家自带的代码执行</h2>
+<p>最省事的办法是不自己跑：让模型厂商在它们的服务器上跑。这类工具是<strong>服务端工具</strong>，和 2.1 课你自己执行的函数不同，调用和结果都在同一个响应里出现，你只看结果。</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th></th>
+<th>Anthropic</th>
+<th>OpenAI</th>
+<th>Gemini</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>声明</td>
+<td><code>{"type": "code_execution_20250825", "name": "code_execution"}</code></td>
+<td><code>{"type": "code_interpreter", "container": {"type": "auto"}}</code></td>
+<td><code>{"type": "code_execution"}</code></td>
+</tr>
+<tr>
+<td>能做什么</td>
+<td>Bash 命令和文件操作（子工具 <code>bash_code_execution</code>、<code>text_editor_code_execution</code>）；<code>20260120</code> 起加了 REPL 状态保持和程序化工具调用</td>
+<td>写并运行 Python，处理文件、生成图表</td>
+<td>生成并运行 Python</td>
+</tr>
+<tr>
+<td>资源</td>
+<td>5 GiB 内存、5 GiB 磁盘、1 个 CPU</td>
+<td>内存档位 <code>1g</code>（默认）、<code>4g</code>、<code>16g</code>、<code>64g</code></td>
+<td>单次运行最长 30 秒</td>
+</tr>
+<tr>
+<td>网络</td>
+<td>完全没有，运行时装不了包</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>状态</td>
+<td>把响应里的 <code>container.id</code> 传回去就能复用；闲置约 5 分钟后存档，30 天内可恢复</td>
+<td>容器 20 分钟不用就过期，数据丢弃，不能恢复</td>
+<td>出错时模型最多重新生成 5 次代码</td>
+</tr>
+<tr>
+<td>产物</td>
+<td>写进 <code>$OUTPUT_DIR</code> 顶层的文件作为 <code>file_id</code> 返回</td>
+<td>生成的文件在容器里，要在过期前下载</td>
+<td>输出文件以内联数据返回</td>
+</tr>
+</tbody>
+</table></div>
+<p>几个值得记的细节：</p>
+<ul>
+<li>Anthropic 的三个版本都不需要 beta 头。<code>20260521</code> 和 <code>20260120</code> 是同一个运行环境，区别是工具描述里告诉模型：程序化工具调用里每个 Python 单元有 90 秒的墙钟上限，让它自己安排长任务。计费是每个组织每月 1,550 小时免费，之后每个容器每小时 0.05 美元；和新版 web search / web fetch 一起用时，代码执行不额外收费。它<strong>不在 ZDR（零数据保留）范围内</strong>，容器数据最多保留 30 天。</li>
+<li>OpenAI 的容器可以“自动模式”随响应创建，也可以用 <code>/v1/containers</code> 显式创建再引用。过期规则很严格：20 分钟不用，内存里的 Python 对象和文件全部没了，只能新建一个、重新上传文件。</li>
+<li>Gemini 的环境装不了你自己的库，适合计算和画图这种轻任务。</li>
+</ul>
+<p>什么时候用自带工具：数据分析、计算、画图、处理用户上传的文件，代码不需要访问你的内网和数据库。它们的隔离、资源、清理都由厂商负责。</p>
+<p>什么时候自己搭：代码要访问你的私有依赖、内部服务或者大量数据；要用特定语言和工具链（Go、Node、编译器）；要运行很久；数据不能离开你的环境；或者你在做 Coding Agent，要在仓库里跑测试。这时候可以用托管沙箱（E2B 等），也可以自己用容器和 gVisor 搭。</p>
+<h2 id="2-托管沙箱e2b">2. 托管沙箱：E2B</h2>
+<p>E2B 提供按需创建的 Linux 虚拟机，几行代码就能起一个：</p>
+<div class="hl"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">e2b</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sandbox</span>
+
+<span class="n">sandbox</span> <span class="o">=</span> <span class="n">Sandbox</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span>   <span class="c1"># Python 的单位是秒</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">sandbox</span><span class="o">.</span><span class="n">commands</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="s1">'echo "Hello from E2B Sandbox!"'</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+</code></pre></div>
+
+<p>注意一个坑：JavaScript SDK 的 <code>timeoutMs</code> 单位是<strong>毫秒</strong>，Python 的 <code>timeout</code> 是<strong>秒</strong>，文档里专门用警告标出来了。</p>
+<p>生命周期上，E2B 的几个规则：超时到了可以自动暂停而不是销毁；<code>setTimeout</code> / <code>set_timeout</code> 会把超时重置为“从现在起”的新值，适合每次用户操作时续期；连续运行最长 24 小时（Pro）或 1 小时（Hobby），暂停会重置这个窗口；暂停会保存文件系统<strong>和内存</strong>（运行中的进程、加载的变量），暂停的沙箱永久保留，直到你主动销毁。</p>
+<p>网络上，<strong>E2B 默认允许出站访问</strong>。可以用 <code>allow_internet_access=False</code> 完全关掉，或者用 <code>allow_out</code> / <code>deny_out</code> 做细粒度控制。规则在练习的 <code>netpolicy.go</code> 里实现了，下一部分细讲。</p>
+<hr />
+<h1 id="第二部分隔离的层次">第二部分：隔离的层次</h1>
+<h2 id="3-威胁模型">3. 威胁模型</h2>
+<p>先想清楚要防什么。不可信代码可能做的事：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>威胁</th>
+<th>例子</th>
+<th>靠什么挡</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>逃逸到宿主机</td>
+<td>利用内核漏洞</td>
+<td>隔离层次：容器 &lt; gVisor &lt; 微虚拟机</td>
+</tr>
+<tr>
+<td>耗尽资源</td>
+<td>死循环、fork 炸弹、写满磁盘、吃光内存</td>
+<td>超时、CPU / 内存 / 进程数 / 文件大小限制</td>
+</tr>
+<tr>
+<td>偷密钥</td>
+<td><code>env</code>、读 <code>~/.aws/credentials</code></td>
+<td>干净的环境变量、不挂载宿主机目录</td>
+</tr>
+<tr>
+<td>横向移动</td>
+<td>访问内网服务、<code>169.254.169.254</code> 云元数据</td>
+<td>关网络或出站白名单</td>
+</tr>
+<tr>
+<td>外传数据</td>
+<td>把用户文件 POST 到外部服务器</td>
+<td>出站白名单</td>
+</tr>
+<tr>
+<td>跨用户残留</td>
+<td>上一个用户的文件还在</td>
+<td>一次性环境、用完销毁</td>
+</tr>
+<tr>
+<td>坑执行端</td>
+<td>200 MB 输出、符号链接指向宿主机文件、输出里写着注入指令</td>
+<td>截断输出、只收普通文件、输出当不可信内容</td>
+</tr>
+</tbody>
+</table></div>
+<p>前两类靠隔离和资源限制，后面几类常常是执行端自己写出来的漏洞，和用不用容器无关。</p>
+<h2 id="4-四层隔离">4. 四层隔离</h2>
+<p><strong>第一层：普通进程加 ulimit。</strong> 练习的 <code>Run</code> 就在这一层：子进程、自己的进程组、干净的环境变量、临时目录、<code>ulimit</code> 限制 CPU 时间和文件大小。它能挡住资源耗尽和一部分密钥泄漏，但<strong>不是安全边界</strong>：子进程和你的服务是同一个用户，能读你能读的所有文件，能访问你能访问的所有网络。练习用它是因为它能在任何机器上跑测试，真实系统至少要到下一层。</p>
+<p><strong>第二层：容器。</strong> Linux 命名空间（看不到宿主机的进程、文件、网络）加 cgroups（限资源）加 seccomp（限系统调用）。Docker 的默认 seccomp 配置是一个白名单：默认拒绝，再放行一批具体的系统调用，在 300 多个里禁掉了大约 44 个，官方不建议改它。但容器和宿主机<strong>共享同一个内核</strong>，内核有漏洞就可能逃逸。</p>
+<p><strong>第三层：gVisor。</strong> gVisor 官方文档说它既不是 seccomp 那种系统调用过滤器，也不是普通意义上的虚拟机，而是第三种方式：在用户态拦截应用的系统调用，自己扮演“客户机内核”。应用碰不到宿主机内核的大部分代码，攻击面小很多；代价是兼容性差一些、每次系统调用开销更大。用法是换一个容器运行时：<code>docker run --runtime=runsc ...</code>。</p>
+<p><strong>第四层：微虚拟机。</strong> Firecracker 是 AWS 为 Lambda 和 Fargate 开发的开源虚拟机监控器，基于 KVM 创建“微虚拟机”：只保留最少的设备，内存占用小、启动快，同时有硬件虚拟化的隔离。每个沙箱有自己的内核。Kata Containers 也把这类技术集成进了容器运行时。</p>
+<p>选择上的经验：自己内部的、代码来源可控的任务，加固过的容器就够；运行用户提交的代码、多租户、模型可能被注入的场景，至少用 gVisor，最好是微虚拟机或托管沙箱。</p>
+<h2 id="5-加固容器">5. 加固容器</h2>
+<p>练习的 <code>DockerArgs</code> 生成一组加固参数，每一项都在收窄攻击面：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>参数</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--rm</code></td>
+<td>用完删除，不留残留</td>
+</tr>
+<tr>
+<td><code>--runtime=runsc</code></td>
+<td>用 gVisor</td>
+</tr>
+<tr>
+<td><code>--network=none</code></td>
+<td>没有网络</td>
+</tr>
+<tr>
+<td><code>--read-only</code> + <code>--tmpfs /tmp:...,noexec</code></td>
+<td>根文件系统只读，只有 <code>/tmp</code> 可写且不能执行</td>
+</tr>
+<tr>
+<td><code>--cap-drop=ALL</code></td>
+<td>去掉所有 Linux capabilities</td>
+</tr>
+<tr>
+<td><code>--security-opt=no-new-privileges</code></td>
+<td>setuid 程序也不能提权</td>
+</tr>
+<tr>
+<td><code>--user=65534:65534</code></td>
+<td>用 nobody，不用 root</td>
+</tr>
+<tr>
+<td><code>--memory=512m --memory-swap=512m</code></td>
+<td>内存上限，并且不许用 swap 绕过</td>
+</tr>
+<tr>
+<td><code>--cpus=1</code></td>
+<td>CPU 上限</td>
+</tr>
+<tr>
+<td><code>--pids-limit=128</code></td>
+<td>防 fork 炸弹</td>
+</tr>
+</tbody>
+</table></div>
+<p><code>LintDockerArgs</code> 反过来检查几个“一出现就等于没隔离”的参数：<code>--privileged</code>（访问宿主机全部设备）、<code>--network=host</code>（共享宿主机网络，能访问宿主机上的本地服务）、<code>--pid=host</code>、挂载 <code>/var/run/docker.sock</code>（能控制宿主机的 Docker，等于宿主机 root）、<code>seccomp=unconfined</code>。这些常常是为了“先跑起来”加上去的，然后就忘了删。<code>TestDockerArgs</code> 两个方向都测了。</p>
+<h2 id="6-出站网络">6. 出站网络</h2>
+<p>最安全的是没有网络。但 Agent 常常需要装包（PyPI、npm）或调用某个 API，这时用白名单。</p>
+<p>E2B 的规则（练习的 <code>NetPolicy</code> 照着实现）：</p>
+<ul>
+<li><code>allow_out</code> 和 <code>deny_out</code> 可以写 IP 和 CIDR，<code>allow_out</code> 还可以写域名；</li>
+<li><strong>命中 <code>allow_out</code> 就放行，优先于 <code>deny_out</code></strong>；</li>
+<li>按域名放行时，必须同时在 <code>deny_out</code> 里拒绝全部流量（<code>0.0.0.0/0</code>），<code>deny_out</code> 不支持域名；</li>
+<li>用了域名规则时，默认的 DNS 服务器 <code>8.8.8.8</code> 自动放行，否则域名解析不了；</li>
+<li>什么都不配时，<strong>默认放行</strong>。</li>
+</ul>
+<div class="hl"><pre><span></span><code><span class="nx">d</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">NetPolicy</span><span class="p">{</span><span class="nx">AllowOut</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="kt">string</span><span class="p">{</span><span class="s">"pypi.org"</span><span class="p">},</span><span class="w"> </span><span class="nx">DenyOut</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="kt">string</span><span class="p">{</span><span class="nx">AllTraffic</span><span class="p">}}</span>
+<span class="nx">d</span><span class="p">.</span><span class="nx">Allowed</span><span class="p">(</span><span class="s">"pypi.org"</span><span class="p">,</span><span class="w"> </span><span class="nx">ip</span><span class="p">(</span><span class="s">"151.101.0.223"</span><span class="p">))</span><span class="w">  </span><span class="c1">// true</span>
+<span class="nx">d</span><span class="p">.</span><span class="nx">Allowed</span><span class="p">(</span><span class="s">"evil.example"</span><span class="p">,</span><span class="w"> </span><span class="nx">ip</span><span class="p">(</span><span class="s">"6.6.6.6"</span><span class="p">))</span><span class="w">    </span><span class="c1">// false</span>
+</code></pre></div>
+
+<p><code>TestNetPolicy</code> 覆盖了这几条，<code>Validate</code> 会拒绝“只写域名白名单、不拒绝其他流量”这种看起来有白名单、实际全开的配置。</p>
+<p>即使开了白名单，也要想到：放行的域名本身可能被用来外传数据（比如允许了一个可以上传文件的服务）。白名单越窄越好，按任务开，用完关。</p>
+<hr />
+<h1 id="第三部分执行端">第三部分：执行端</h1>
+<p>这一部分是练习的主体，每一节对应一两个测试。就算你用托管沙箱，这些问题大部分也要你自己处理。</p>
+<h2 id="7-超时要杀整个进程组">7. 超时要杀整个进程组</h2>
+<p>开头第三个问题。</p>
+<div class="hl"><pre><span></span><code><span class="nx">cmd</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">exec</span><span class="p">.</span><span class="nx">Command</span><span class="p">(</span><span class="s">"/bin/sh"</span><span class="p">,</span><span class="w"> </span><span class="s">"-c"</span><span class="p">,</span><span class="w"> </span><span class="nx">prefix</span><span class="p">.</span><span class="nx">String</span><span class="p">()</span><span class="o">+</span><span class="nx">s</span><span class="p">.</span><span class="nx">Code</span><span class="p">)</span>
+<span class="nx">cmd</span><span class="p">.</span><span class="nx">SysProcAttr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">syscall</span><span class="p">.</span><span class="nx">SysProcAttr</span><span class="p">{</span><span class="nx">Setpgid</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">}</span>
+<span class="p">...</span>
+<span class="k">case</span><span class="w"> </span><span class="o">&lt;-</span><span class="nx">ctx</span><span class="p">.</span><span class="nx">Done</span><span class="p">():</span>
+<span class="w">    </span><span class="nx">r</span><span class="p">.</span><span class="nx">TimedOut</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
+<span class="w">    </span><span class="nx">syscall</span><span class="p">.</span><span class="nx">Kill</span><span class="p">(</span><span class="o">-</span><span class="nx">cmd</span><span class="p">.</span><span class="nx">Process</span><span class="p">.</span><span class="nx">Pid</span><span class="p">,</span><span class="w"> </span><span class="nx">syscall</span><span class="p">.</span><span class="nx">SIGKILL</span><span class="p">)</span><span class="w"> </span><span class="c1">// 负号 = 整个进程组</span>
+</code></pre></div>
+
+<p>逐行看：</p>
+<ul>
+<li><code>exec.Command</code> 而不是 <code>exec.CommandContext</code>：后者超时只杀直接子进程 <code>sh</code>；</li>
+<li><code>Setpgid: true</code>：让 <code>sh</code> 自己当一个新进程组的组长，它派生的子进程默认都在这个组里；</li>
+<li><code>syscall.Kill(-pid, SIGKILL)</code>：pid 取负数表示发给整个进程组。0.5 课讲过信号，这里是它的实际用法。</li>
+</ul>
+<p><code>TestTimeoutKillsProcessGroup</code> 的代码是 <code>sleep 30 &amp; echo $! &gt; child.pid; wait</code>：后台起一个 <code>sleep</code>，把它的 pid 写到文件里。300 毫秒后超时，测试检查后台的 <code>sleep</code> 是否也死了（<code>kill(pid, 0)</code> 返回错误说明进程不存在）。如果只杀 <code>sh</code>，后台进程会变成孤儿继续跑。真实场景里那可能是一个训练脚本、一个启动起来的 Web 服务、一个挖矿程序。</p>
+<p>在容器里这一步更简单：杀掉容器就是杀掉里面的一切。但如果你在一个长期存在的沙箱里执行多次命令（E2B、复用的容器），每次命令的超时仍然要杀进程组。</p>
+<h2 id="8-环境变量和工作目录">8. 环境变量和工作目录</h2>
+<p>开头第四个问题。<code>exec.Command</code> 默认<strong>继承父进程的全部环境变量</strong>，你的服务里放着的 API Key、数据库密码、云凭证，代码里一句 <code>env</code> 全部看到。</p>
+<div class="hl"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nx">cleanEnv</span><span class="p">(</span><span class="nx">dir</span><span class="p">,</span><span class="w"> </span><span class="nx">out</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="p">[]</span><span class="kt">string</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="p">[]</span><span class="kt">string</span><span class="p">{</span><span class="s">"PATH=/usr/local/bin:/usr/bin:/bin"</span><span class="p">,</span><span class="w"> </span><span class="s">"HOME="</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">dir</span><span class="p">,</span><span class="w"> </span><span class="s">"LANG=C.UTF-8"</span><span class="p">,</span><span class="w"> </span><span class="s">"OUTPUT_DIR="</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">out</span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>要用<strong>白名单</strong>：只给这几个，而不是继承之后删掉“看起来像密钥”的。<code>TestEnvHasNoSecrets</code> 在测试进程里设了一个令牌，沙箱里读不到，而且环境变量总数不超过 8 个。</p>
+<p>如果代码确实要调用某个 API，不要把密钥放进沙箱：让沙箱通过一个你控制的代理出去，由代理在网络层注入凭证。这样代码能用，但拿不到。</p>
+<p>工作目录用 <code>os.MkdirTemp</code> 建一个新的，<code>HOME</code> 也指向它，跑完 <code>os.RemoveAll</code>（<code>TestTempDirRemoved</code>）。不同任务、不同用户之间不共享目录。</p>
+<h2 id="9-资源限制">9. 资源限制</h2>
+<p><code>ulimit</code> 在 <code>sh</code> 里设置，对它和它的所有子进程生效：</p>
+<ul>
+<li><code>ulimit -t 1</code>：CPU 时间 1 秒。<code>TestCPULimit</code> 跑一个死循环，墙钟超时设了 10 秒，但 1 秒左右就被 CPU 限制杀掉了（信号 SIGXCPU）。墙钟超时防“卡住不动”（等网络、等输入），CPU 限制防“埋头死算”，两个都要；</li>
+<li><code>ulimit -f 100</code>：单个文件最大 100 块，写超了收到 SIGXFSZ。</li>
+</ul>
+<p><code>TestFileSizeLimit</code> 还演示了一个容易忽略的问题：不加 <code>set -e</code> 时，<code>head</code> 被杀掉了，脚本却继续执行 <code>echo after</code>，最后退出码是 0，失败被藏起来了。加上 <code>set -e</code> 后第一处失败就停，退出码和信号都看得到。给模型的执行环境默认开 <code>set -e</code>（或者让模型知道要检查每一步）。</p>
+<p>内存和进程数在进程层面不好可靠地限制（<code>ulimit -u</code> 是按用户算的，同一个用户下的其他进程也算进去），这正是要用容器 cgroups（<code>--memory</code>、<code>--pids-limit</code>）的原因。</p>
+<h2 id="10-输出">10. 输出</h2>
+<p><strong>截断，保留头尾。</strong> 1.6 课讲过：工具输出太长时保留开头和结尾，报错信息通常在最后。练习的 <code>capped</code> 是一个 <code>io.Writer</code>，开头和结尾各留一半，中间写明省略了多少字节：</p>
+<div class="hl"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">c</span><span class="w"> </span><span class="o">*</span><span class="nx">capped</span><span class="p">)</span><span class="w"> </span><span class="nx">Write</span><span class="p">(</span><span class="nx">p</span><span class="w"> </span><span class="p">[]</span><span class="kt">byte</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">n0</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">p</span><span class="p">)</span>
+<span class="w">    </span><span class="nx">c</span><span class="p">.</span><span class="nx">total</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="nx">n0</span>
+<span class="w">    </span><span class="p">...</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">n0</span><span class="p">,</span><span class="w"> </span><span class="kc">nil</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>这里有一个我写练习时真的踩到的坑：<code>Write</code> 必须返回<strong>传进来的</strong> <code>len(p)</code>，哪怕你只保留了一部分。最早的版本返回了累计总数，<code>exec</code> 的拷贝协程认为写入异常（<code>invalid write result</code>），直接停止读取子进程的输出。<code>io.Writer</code> 的约定是：返回值小于 <code>len(p)</code> 时必须同时返回错误。</p>
+<p><strong>产物只收普通文件。</strong> 学 Anthropic 的做法，约定一个 <code>$OUTPUT_DIR</code>，只收它顶层的文件。收集时用 <code>os.Lstat</code>（不跟随符号链接），只要普通文件：</p>
+<div class="hl"><pre><span></span><code><span class="nx">info</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">os</span><span class="p">.</span><span class="nx">Lstat</span><span class="p">(</span><span class="nx">filepath</span><span class="p">.</span><span class="nx">Join</span><span class="p">(</span><span class="nx">out</span><span class="p">,</span><span class="w"> </span><span class="nx">e</span><span class="p">.</span><span class="nx">Name</span><span class="p">()))</span>
+<span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="o">!</span><span class="nx">info</span><span class="p">.</span><span class="nx">Mode</span><span class="p">().</span><span class="nx">IsRegular</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">continue</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>开头第六个问题的后半句：代码可以执行 <code>ln -s /etc/passwd $OUTPUT_DIR/passwd</code>。如果你用 <code>os.ReadFile</code> 收产物，它会跟着链接读到宿主机（或者执行端所在机器）的文件，然后你把它当成产物返回给用户。<code>TestArtifactsOnlyRegularFiles</code> 放了一个普通文件、一个目录外的文件、一个符号链接和一个子目录，只有普通文件被收下。</p>
+<p><strong>输出也是不可信内容。</strong> 代码可以打印“忽略之前的指令……”。2.4 课的结论同样适用：工具结果不能授予权限。</p>
+<h2 id="11-结果怎么回给模型">11. 结果怎么回给模型</h2>
+<p>开头最后一个问题。要区分两种失败：</p>
+<ul>
+<li><strong>代码自己出错</strong>（语法错误、异常、退出码非 0）：这是正常结果。模型需要看到 stderr，去改代码。Gemini 的工具出错时模型会自动重新生成代码，最多 5 次，就是这个思路；</li>
+<li><strong>执行环境层面的失败</strong>（超时、被资源限制杀死）：标成 <code>is_error</code>，并告诉模型怎么调整：缩小数据量、拆成几步、把大输出写进文件。</li>
+</ul>
+<div class="hl"><pre><span></span><code><span class="k">case</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">TimedOut</span><span class="p">:</span>
+<span class="w">    </span><span class="nx">p</span><span class="p">.</span><span class="nx">Note</span><span class="p">,</span><span class="w"> </span><span class="nx">isError</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Sprintf</span><span class="p">(</span><span class="s">"超时（%s）被终止：缩小数据量，或把长任务拆成几步"</span><span class="p">,</span><span class="w"> </span><span class="p">...),</span><span class="w"> </span><span class="kc">true</span>
+<span class="k">case</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">Signal</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="s">""</span><span class="p">:</span>
+<span class="w">    </span><span class="nx">p</span><span class="p">.</span><span class="nx">Note</span><span class="p">,</span><span class="w"> </span><span class="nx">isError</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"被资源限制终止："</span><span class="o">+</span><span class="nx">r</span><span class="p">.</span><span class="nx">Signal</span><span class="p">,</span><span class="w"> </span><span class="kc">true</span>
+<span class="k">case</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">Truncated</span><span class="p">:</span>
+<span class="w">    </span><span class="nx">p</span><span class="p">.</span><span class="nx">Note</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"输出过长已截断：只打印需要的部分，或写入 $OUTPUT_DIR"</span>
+</code></pre></div>
+
+<p>这和 2.1 课的“错误变结果”是一回事：错误要以模型能理解、能行动的方式出现在结果里。Anthropic 的代码执行也是这样区分的：命令的非 0 退出码出现在正常结果的 <code>return_code</code> 里，整个调用超时才返回 <code>execution_time_exceeded</code> 错误。</p>
+<h2 id="12-生命周期">12. 生命周期</h2>
+<p>托管沙箱和复用的容器都有状态：</p>
+<ul>
+<li><strong>续期</strong>：每次使用后把截止时间往后推（E2B 的 <code>set_timeout</code>）；</li>
+<li><strong>超时</strong>：要么暂停（保留文件和内存，下次用时恢复），要么销毁（全丢）。OpenAI 是 20 分钟不用就销毁，E2B 可以配成自动暂停，Anthropic 闲置后存档、30 天内可恢复；</li>
+<li><strong>销毁之后</strong>：明确报错，调用方新建一个、重新上传文件。不要假装它还在，否则模型会以为之前的变量和文件都在，写出依赖它们的代码。</li>
+</ul>
+<p>练习的 <code>Manager</code> 用假时钟测了这几条（<code>TestLifecycle</code>）。实际系统里还要考虑：多个对话复用沙箱时按用户隔离；暂停的沙箱永久保留（E2B）意味着要有自己的清理策略，否则存储费用会一直涨；用户删除对话时，沙箱和里面的文件一起删。</p>
+<hr />
+<h2 id="本课小结">本课小结</h2>
+<ol>
+<li>三家都有自带的服务端代码执行，隔离和清理由厂商负责，适合不需要访问你内部环境的任务；Anthropic 没有网络，OpenAI 容器 20 分钟不用就过期，Gemini 单次 30 秒。</li>
+<li>自己搭时，隔离从弱到强：进程加 ulimit（不是安全边界）、容器（共享内核）、gVisor（用户态内核）、微虚拟机（独立内核）。不可信代码至少用 gVisor。</li>
+<li>加固容器：不给网络、只读根目录、去掉全部 capabilities、不许提权、非 root、限内存（不许 swap）、限 CPU、限进程数；警惕 <code>--privileged</code>、<code>--network=host</code>、挂载 Docker socket。</li>
+<li>出站网络默认关；要开就用白名单，域名白名单必须同时拒绝其他全部流量。</li>
+<li>超时杀整个进程组；环境变量用白名单；工作目录一次性。</li>
+<li>墙钟超时和 CPU 限制都要；脚本默认 <code>set -e</code>，否则失败被藏起来。</li>
+<li>输出截断保留头尾；产物用 <code>Lstat</code> 只收普通文件；输出也是不可信内容。</li>
+<li>代码错误是正常结果，环境失败是 <code>is_error</code>，都要告诉模型怎么改；沙箱销毁后明确报错、重建。</li>
+</ol>
+<hr />
+<h2 id="练习今天做完">练习（今天做完）</h2>
+<h3 id="练习-1跑通并读懂">练习 1：跑通并读懂</h3>
+<div class="hl"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>projects/16-sandbox
+make<span class="w"> </span><span class="nb">test</span>
+</code></pre></div>
+
+<p>回答：</p>
+<ol>
+<li>把 <code>Run</code> 里的 <code>exec.Command</code> 改成 <code>exec.CommandContext(ctx, ...)</code> 并删掉 <code>Setpgid</code> 和 <code>syscall.Kill</code>，哪个测试会失败？为什么？</li>
+<li><code>cleanEnv</code> 为什么用白名单？如果改成“继承全部，再删掉名字里带 KEY、TOKEN、SECRET 的”，会漏掉哪些东西？</li>
+<li><code>TestFileSizeLimit</code> 第一段不加 <code>set -e</code>，退出码是 0。如果你的 Agent 只看退出码判断成功，会发生什么？</li>
+</ol>
+<h3 id="练习-2并发与租户配额">练习 2：并发与租户配额</h3>
+<p>沙箱很贵，一台机器同时能跑的有限，而且不能让一个用户占满所有名额。</p>
+<p>要求：写一个 <code>Pool</code>，构造时给全局并发上限和每个租户的并发上限。<code>Run(ctx, tenant, spec)</code>：该租户已经满了，立即返回 <code>ErrBusy</code>（让模型或用户知道要等）；全局满了，就排队等，直到有空位或 <code>ctx</code> 取消。</p>
+<p>测试：全局 2、每租户 1。租户 a 先跑一个 0.3 秒的任务，50 毫秒后 a 再提交一个，应当得到 <code>ErrBusy</code>；同时租户 b 提交的任务正常完成。用 <code>-race</code> 跑。</p>
+<h3 id="练习-3产物限额">练习 3：产物限额</h3>
+<p>现在 <code>collect</code> 会收下 <code>$OUTPUT_DIR</code> 里任意多、任意大的文件。</p>
+<p>要求：给 <code>Limits</code> 加 <code>MaxFiles</code> 和 <code>MaxFileBytes</code>；超过数量的文件不收，超过大小的文件不收，并在 <code>Result</code> 里记录被拒绝的文件名和原因，<code>ToolResult</code> 把原因告诉模型。文件名只允许字母、数字、点、横线和下划线，其他的拒绝（防止文件名里带换行或路径分隔符，坑到后面处理产物的代码）。</p>
+<hr />
+<h2 id="自测题">自测题</h2>
+<ol>
+<li>三家自带的代码执行工具各有什么限制？什么情况下要自己搭沙箱？</li>
+<li>一个沙箱要防的威胁有哪些？哪些靠隔离层次，哪些靠执行端自己写对？</li>
+<li>容器、gVisor、微虚拟机分别隔离到什么程度？代价是什么？</li>
+<li>说出至少六个加固容器的参数和它们的作用，再说三个危险参数。</li>
+<li>E2B 的出站规则是怎么判定的？为什么“只写域名白名单”是错误配置？</li>
+<li>为什么超时只杀 <code>sh</code> 不够？Go 里怎么杀整个进程组？</li>
+<li>为什么环境变量要用白名单？代码确实需要调用外部 API 时怎么办？</li>
+<li>墙钟超时和 CPU 时间限制分别防什么？为什么默认要 <code>set -e</code>？</li>
+<li>收集产物时有哪些坑？<code>io.Writer</code> 的返回值约定是什么？</li>
+<li>代码报错和执行超时回给模型时有什么区别？沙箱被销毁后应该怎么处理？</li>
+</ol>
+<hr />
+<h1 id="参考答案与详解">参考答案与详解</h1>
+<h2 id="自测题答案">自测题答案</h2>
+<p><strong>1.</strong> Anthropic：没有网络，装不了包，5 GiB 内存和磁盘、1 个 CPU，不在 ZDR 范围内。OpenAI：容器 20 分钟不用就过期且不可恢复，内存按档位计费。Gemini：单次最长 30 秒，不能装自己的库。需要访问私有依赖或内部服务、要特定语言和工具链、要长时间运行、数据不能离开自己的环境、或者要在仓库里跑测试时，自己搭（或用 E2B 这类托管沙箱）。</p>
+<p><strong>2.</strong> 逃逸到宿主机、耗尽资源、偷密钥、横向移动（内网、云元数据）、外传数据、跨用户残留、坑执行端（巨量输出、符号链接、输出里的注入）。逃逸靠隔离层次；资源耗尽靠资源限制；后面几类大多靠执行端写对：干净的环境变量、网络白名单、一次性环境、输出截断、只收普通文件、把输出当不可信内容。</p>
+<p><strong>3.</strong> 容器用命名空间、cgroups、seccomp 隔离，但和宿主机共享内核，内核漏洞可能导致逃逸，开销最小。gVisor 在用户态拦截系统调用、自己充当客户机内核，应用碰不到宿主机内核的大部分代码；代价是兼容性差一些、系统调用开销更大。微虚拟机（Firecracker）有自己的内核和硬件虚拟化隔离，最强；代价是需要 KVM，启动和资源开销比容器大（但比传统虚拟机小得多）。</p>
+<p><strong>4.</strong> <code>--network=none</code> 没有网络；<code>--read-only</code> 根文件系统只读；<code>--tmpfs /tmp:noexec</code> 只有临时目录可写且不能执行；<code>--cap-drop=ALL</code> 去掉所有 capabilities；<code>--security-opt=no-new-privileges</code> 禁止提权；<code>--user=65534:65534</code> 非 root；<code>--memory</code> 加相同的 <code>--memory-swap</code> 限内存且不许 swap；<code>--cpus</code> 限 CPU；<code>--pids-limit</code> 防 fork 炸弹；<code>--rm</code> 用完删除；<code>--runtime=runsc</code> 用 gVisor。危险参数：<code>--privileged</code>、<code>--network=host</code>、<code>--pid=host</code>、挂载 <code>/var/run/docker.sock</code>、<code>seccomp=unconfined</code>。</p>
+<p><strong>5.</strong> 先看 <code>allow_out</code>，命中就放行；没命中再看 <code>deny_out</code>，命中就拒绝；都没命中默认放行。用了域名规则时 DNS 服务器自动放行。默认放行意味着只写 <code>allow_out: ["pypi.org"]</code> 而不写 <code>deny_out: 全部</code>，其他地址照样能访问，白名单形同虚设，所以 E2B 要求按域名放行时必须同时拒绝全部流量。</p>
+<p><strong>6.</strong> <code>sh</code> 派生的子进程（后台进程、它启动的程序）不会因为父进程死了而死，会变成孤儿继续运行，占着 CPU、端口和文件。Go 里设置 <code>SysProcAttr{Setpgid: true}</code> 让子进程成为新进程组的组长，超时时用 <code>syscall.Kill(-pid, syscall.SIGKILL)</code> 给整个进程组发信号。</p>
+<p><strong>7.</strong> 黑名单永远列不全：密钥的变量名千奇百怪（<code>DATABASE_URL</code> 里带密码、<code>GOOGLE_APPLICATION_CREDENTIALS</code> 指向凭证文件、云厂商的各种变量），而且新加的变量默认就会泄漏。白名单默认不给，只给明确需要的。需要调用外部 API 时，不把密钥放进沙箱，让请求经过你控制的代理，由代理注入凭证并限制能访问的地址。</p>
+<p><strong>8.</strong> 墙钟超时防“不动”：等网络、等输入、<code>sleep</code>，CPU 不忙但一直不结束。CPU 时间限制防“死算”：死循环、超大计算，CPU 满载。只有前者，死循环要等到墙钟超时才停，期间占满 CPU 影响别人；只有后者，卡住不动的任务永远不结束。<code>set -e</code> 让脚本在第一处失败时停下并返回非 0 退出码；不加的话，前面的命令失败了，后面的命令照样执行，最后一条成功就返回 0，失败被藏起来。</p>
+<p><strong>9.</strong> 产物数量和大小不受控，可能塞满你的存储；符号链接可能指向宿主机文件，用跟随链接的读法会把它们当产物送出去；子目录、设备文件、命名管道（读它会卡住）都不该收；文件名里可能有换行或路径分隔符。所以用 <code>Lstat</code>、只收普通文件、限数量和大小、校验文件名。<code>io.Writer</code> 的约定是返回写入的字节数，小于 <code>len(p)</code> 时必须同时返回非 nil 的错误；只保留部分数据的 Writer 也要返回 <code>len(p)</code>。</p>
+<p><strong>10.</strong> 代码报错是正常结果：把退出码和 stderr 原样给模型，它会修代码。超时、被资源限制杀死是环境层面的失败：标 <code>is_error</code>，并说明原因和调整方法（缩小数据、拆分任务、把输出写文件）。沙箱被销毁后明确告诉调用方（和模型）环境已经重置，新建沙箱、重新上传文件，不能让模型以为之前的变量和文件还在。</p>
+<h2 id="练习参考答案">练习参考答案</h2>
+<h3 id="练习-1">练习 1</h3>
+<ol>
+<li><code>TestTimeoutKillsProcessGroup</code> 会失败。<code>CommandContext</code> 超时只给直接子进程 <code>sh</code> 发 SIGKILL，后台的 <code>sleep 30</code> 不在被杀的范围里，测试检查它的 pid 还活着。另外，<code>cmd.Wait</code> 要等到所有持有输出管道的进程退出才返回，后台的 <code>sleep</code> 还持有 stdout，<code>Wait</code> 可能一直等到它结束（30 秒），超时形同虚设。</li>
+<li>会漏掉：名字不含这些词的敏感变量（<code>DATABASE_URL</code> 里的密码、<code>PGPASSWORD</code>、<code>GOOGLE_APPLICATION_CREDENTIALS</code> 指向的凭证文件、<code>AWS_PROFILE</code>、<code>KUBECONFIG</code>）；以后新加的变量；还有 <code>LD_PRELOAD</code> 这类会改变程序行为的变量。白名单是唯一可靠的写法。</li>
+<li>Agent 会以为文件写成功了，继续基于一个被截断的文件往下做，最后给用户一个错误的结果，而且日志里看不出任何异常。</li>
+</ol>
+<h3 id="练习-2">练习 2</h3>
+<div class="hl"><pre><span></span><code><span class="kd">var</span><span class="w"> </span><span class="nx">ErrBusy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">errors</span><span class="p">.</span><span class="nx">New</span><span class="p">(</span><span class="s">"该租户并发已满"</span><span class="p">)</span>
+
+<span class="kd">type</span><span class="w"> </span><span class="nx">Pool</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">global</span><span class="w">    </span><span class="kt">chan</span><span class="w"> </span><span class="kd">struct</span><span class="p">{}</span><span class="w"> </span><span class="c1">// 带缓冲的 channel 当信号量</span>
+<span class="w">    </span><span class="nx">perTenant</span><span class="w"> </span><span class="kt">int</span>
+<span class="w">    </span><span class="nx">mu</span><span class="w">        </span><span class="nx">sync</span><span class="p">.</span><span class="nx">Mutex</span>
+<span class="w">    </span><span class="nx">running</span><span class="w">   </span><span class="kt">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">int</span>
+<span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="nx">NewPool</span><span class="p">(</span><span class="nx">global</span><span class="p">,</span><span class="w"> </span><span class="nx">perTenant</span><span class="w"> </span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="nx">Pool</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">Pool</span><span class="p">{</span><span class="nx">global</span><span class="p">:</span><span class="w"> </span><span class="nb">make</span><span class="p">(</span><span class="kt">chan</span><span class="w"> </span><span class="kd">struct</span><span class="p">{},</span><span class="w"> </span><span class="nx">global</span><span class="p">),</span><span class="w"> </span><span class="nx">perTenant</span><span class="p">:</span><span class="w"> </span><span class="nx">perTenant</span><span class="p">,</span><span class="w"> </span><span class="nx">running</span><span class="p">:</span><span class="w"> </span><span class="kt">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">int</span><span class="p">{}}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">p</span><span class="w"> </span><span class="o">*</span><span class="nx">Pool</span><span class="p">)</span><span class="w"> </span><span class="nx">Run</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">tenant</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">s</span><span class="w"> </span><span class="nx">Spec</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="nx">Result</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">p</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nx">Lock</span><span class="p">()</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">p</span><span class="p">.</span><span class="nx">running</span><span class="p">[</span><span class="nx">tenant</span><span class="p">]</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="nx">p</span><span class="p">.</span><span class="nx">perTenant</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">p</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nx">Unlock</span><span class="p">()</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">Result</span><span class="p">{},</span><span class="w"> </span><span class="nx">ErrBusy</span><span class="w"> </span><span class="c1">// 租户满了：立即拒绝，不排队</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="nx">p</span><span class="p">.</span><span class="nx">running</span><span class="p">[</span><span class="nx">tenant</span><span class="p">]</span><span class="o">++</span>
+<span class="w">    </span><span class="nx">p</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nx">Unlock</span><span class="p">()</span>
+<span class="w">    </span><span class="k">defer</span><span class="w"> </span><span class="kd">func</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">p</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nx">Lock</span><span class="p">();</span><span class="w"> </span><span class="nx">p</span><span class="p">.</span><span class="nx">running</span><span class="p">[</span><span class="nx">tenant</span><span class="p">]</span><span class="o">--</span><span class="p">;</span><span class="w"> </span><span class="nx">p</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nx">Unlock</span><span class="p">()</span><span class="w"> </span><span class="p">}()</span>
+
+<span class="w">    </span><span class="k">select</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="nx">p</span><span class="p">.</span><span class="nx">global</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="kd">struct</span><span class="p">{}{}:</span><span class="w"> </span><span class="c1">// 全局满了：排队</span>
+<span class="w">        </span><span class="k">defer</span><span class="w"> </span><span class="kd">func</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="o">&lt;-</span><span class="nx">p</span><span class="p">.</span><span class="nx">global</span><span class="w"> </span><span class="p">}()</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="o">&lt;-</span><span class="nx">ctx</span><span class="p">.</span><span class="nx">Done</span><span class="p">():</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">Result</span><span class="p">{},</span><span class="w"> </span><span class="nx">ctx</span><span class="p">.</span><span class="nx">Err</span><span class="p">()</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">Run</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">s</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>讨论：为什么租户满了立即拒绝、全局满了排队？租户满了说明这个用户自己已经有任务在跑，排队只会让他的任务越积越多；立即拒绝，模型可以等前一个结果。全局满了是大家一起等，排队更公平。生产环境里还要给排队加上限和超时，否则请求会无限堆积；按租户计数也可以放进 Redis（0.6 课），支持多台机器。</p>
+<h3 id="练习-3">练习 3</h3>
+<div class="hl"><pre><span></span><code><span class="c1">// Limits 加两个字段</span>
+<span class="nx">MaxFiles</span><span class="w">     </span><span class="kt">int</span>
+<span class="nx">MaxFileBytes</span><span class="w"> </span><span class="kt">int64</span>
+
+<span class="c1">// Result 加一个字段</span>
+<span class="nx">Rejected</span><span class="w"> </span><span class="p">[]</span><span class="kt">string</span><span class="w"> </span><span class="c1">// "名字：原因"</span>
+
+<span class="kd">var</span><span class="w"> </span><span class="nx">safeName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">regexp</span><span class="p">.</span><span class="nx">MustCompile</span><span class="p">(</span><span class="s">`^[A-Za-z0-9._-]{1,128}$`</span><span class="p">)</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="nx">collect</span><span class="p">(</span><span class="nx">out</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">l</span><span class="w"> </span><span class="nx">Limits</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="nx">fs</span><span class="w"> </span><span class="p">[]</span><span class="nx">File</span><span class="p">,</span><span class="w"> </span><span class="nx">rejected</span><span class="w"> </span><span class="p">[]</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">ents</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">os</span><span class="p">.</span><span class="nx">ReadDir</span><span class="p">(</span><span class="nx">out</span><span class="p">)</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">e</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">ents</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">info</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">os</span><span class="p">.</span><span class="nx">Lstat</span><span class="p">(</span><span class="nx">filepath</span><span class="p">.</span><span class="nx">Join</span><span class="p">(</span><span class="nx">out</span><span class="p">,</span><span class="w"> </span><span class="nx">e</span><span class="p">.</span><span class="nx">Name</span><span class="p">()))</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="o">!</span><span class="nx">info</span><span class="p">.</span><span class="nx">Mode</span><span class="p">().</span><span class="nx">IsRegular</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">continue</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">switch</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="o">!</span><span class="nx">safeName</span><span class="p">.</span><span class="nx">MatchString</span><span class="p">(</span><span class="nx">e</span><span class="p">.</span><span class="nx">Name</span><span class="p">()):</span>
+<span class="w">            </span><span class="nx">rejected</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">rejected</span><span class="p">,</span><span class="w"> </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Sprintf</span><span class="p">(</span><span class="s">"%q：文件名不合法"</span><span class="p">,</span><span class="w"> </span><span class="nx">e</span><span class="p">.</span><span class="nx">Name</span><span class="p">()))</span>
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="nx">l</span><span class="p">.</span><span class="nx">MaxFileBytes</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">info</span><span class="p">.</span><span class="nx">Size</span><span class="p">()</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="nx">l</span><span class="p">.</span><span class="nx">MaxFileBytes</span><span class="p">:</span>
+<span class="w">            </span><span class="nx">rejected</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">rejected</span><span class="p">,</span><span class="w"> </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Sprintf</span><span class="p">(</span><span class="s">"%s：%d 字节，超过上限 %d"</span><span class="p">,</span><span class="w"> </span><span class="nx">e</span><span class="p">.</span><span class="nx">Name</span><span class="p">(),</span><span class="w"> </span><span class="nx">info</span><span class="p">.</span><span class="nx">Size</span><span class="p">(),</span><span class="w"> </span><span class="nx">l</span><span class="p">.</span><span class="nx">MaxFileBytes</span><span class="p">))</span>
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="nx">l</span><span class="p">.</span><span class="nx">MaxFiles</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">fs</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="nx">l</span><span class="p">.</span><span class="nx">MaxFiles</span><span class="p">:</span>
+<span class="w">            </span><span class="nx">rejected</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">rejected</span><span class="p">,</span><span class="w"> </span><span class="nx">e</span><span class="p">.</span><span class="nx">Name</span><span class="p">()</span><span class="o">+</span><span class="s">"：超过文件数上限"</span><span class="p">)</span>
+<span class="w">        </span><span class="k">default</span><span class="p">:</span>
+<span class="w">            </span><span class="nx">fs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">fs</span><span class="p">,</span><span class="w"> </span><span class="nx">File</span><span class="p">{</span><span class="nx">Name</span><span class="p">:</span><span class="w"> </span><span class="nx">e</span><span class="p">.</span><span class="nx">Name</span><span class="p">(),</span><span class="w"> </span><span class="nx">Size</span><span class="p">:</span><span class="w"> </span><span class="nx">info</span><span class="p">.</span><span class="nx">Size</span><span class="p">()})</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">fs</span><span class="p">,</span><span class="w"> </span><span class="nx">rejected</span><span class="p">,</span><span class="w"> </span><span class="kc">nil</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><code>ToolResult</code> 里把 <code>Rejected</code> 放进 <code>note</code>，例如“以下文件没有收下：big.csv：52428800 字节，超过上限 10485760”，模型就知道要压缩或者只输出摘要。文件名的 <code>%q</code> 让带换行的名字在日志里也是一行。</p>
+<hr />
+<h2 id="完成标准">完成标准</h2>
+<ul>
+<li><code>make test</code> 全部通过（12 个测试）；</li>
+<li>练习 1 的三个问题能讲清楚，尤其是第 1 题“为什么要杀进程组”；</li>
+<li>练习 2 的 <code>Pool</code> 写完，<code>-race</code> 下测试通过；</li>
+<li>练习 3 的产物限额写完并有测试（至少覆盖超数量、超大小、文件名不合法三种情况）；</li>
+<li>自测题 10 道能不看答案讲出来，尤其是第 3、5、6、9 题。</li>
+</ul>
+    <nav class="pager"><a class="prev" href="02-04-computer-use.html"><span>← 上一课 2.4</span>Computer Use / Browser Use 代理</a></nav>
+    <p class="foot">© 2026 duang777 · 课件源文件：<a href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/notes/02-tools/05-code-sandbox.md">notes/02-tools/05-code-sandbox.md</a></p>
+  </article>
+</div>
+<script>
+document.getElementById("theme-toggle").addEventListener("click",function(){var r=document.documentElement,n=r.getAttribute("data-theme")==="light"?"dark":"light";r.setAttribute("data-theme",n);try{localStorage.setItem("x-theme",n)}catch(e){}});
+document.querySelectorAll('article pre').forEach(function(pre){
+  var b=document.createElement('button');b.className='code__copy';b.textContent='复制';
+  b.onclick=function(){navigator.clipboard.writeText(pre.innerText).then(function(){b.textContent='已复制';setTimeout(function(){b.textContent='复制'},1200)})};
+  pre.parentNode.insertBefore(b,pre);
+});
+var links=[].slice.call(document.querySelectorAll('.toc a')),map={};
+links.forEach(function(a){map[decodeURIComponent(a.getAttribute('href').slice(1))]=a});
+var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting&&map[e.target.id]){links.forEach(function(l){l.classList.remove('on')});map[e.target.id].classList.add('on')}})},{rootMargin:'-80px 0px -70% 0px'});
+document.querySelectorAll('article h1[id],article h2[id]').forEach(function(h){io.observe(h)});
+</script>
+</body>
+</html>

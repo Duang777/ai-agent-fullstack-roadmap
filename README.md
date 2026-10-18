@@ -77,6 +77,7 @@
 | 2.2 | MCP（Model Context Protocol） | Host / Client / Server 与 Function Calling 的分工；Tools / Resources / Prompts 由谁控制；2026-07-28 无状态设计（每请求 `_meta`、`server/discover`、显式句柄）；协议错误 vs 工具执行错误；多轮请求与 requestState 签名；stdio 与 Streamable HTTP（镜像头、Origin）；多 Server 聚合与安全 | [课件](notes/02-tools/02-mcp.md) | [`13-mcp`](projects/13-mcp) | ✅ 完成 |
 | 2.3 | A2A（Agent-to-Agent）协议 | 与 MCP、Function Calling 的分层；Agent Card 发现与接口选择；任务状态机（终态 / 中断态）；contextId 与 taskId 规则、input-required 多轮；messageId 幂等；阻塞、returnImmediately、SSE 流、推送；版本头；把远程 Agent 包装成工具 | [课件](notes/02-tools/03-a2a.md) | [`14-a2a`](projects/14-a2a) | ✅ 完成 |
 | 2.4 | Computer Use / Browser Use 代理 | API、可访问性树、截图坐标、代码执行四条路线的取舍；三家接口（Anthropic 工具集、OpenAI computer_call、Gemini computer_use）；截图缩放与坐标换算；批量动作顺序执行与中止；每个动作执行前检查（布局移动）；网址白名单与隐藏文字注入；元素引用生命周期；截图历史修剪与缓存；步数上限与结果核验 | [课件](notes/02-tools/04-computer-use.md) | [`15-computer-use`](projects/15-computer-use) | 📖 学习中 |
+| 2.5 | Code Execution 沙箱（E2B、Docker、gVisor） | 三家自带代码执行（Anthropic code_execution、OpenAI code_interpreter、Gemini code_execution）与 E2B 的取舍；威胁模型；进程、容器、gVisor、微虚拟机四层隔离；加固 docker run 与危险参数；出站白名单规则；进程组超时、环境变量白名单、CPU / 文件大小限制与 set -e；输出保留头尾、产物只收普通文件；代码错误与环境失败分开回给模型；沙箱续期、暂停与销毁 | [课件](notes/02-tools/05-code-sandbox.md) | [`16-sandbox`](projects/16-sandbox) | 📖 学习中 |
 
 ### 全部模块
 
@@ -158,6 +159,9 @@ cd projects/14-a2a && make test
 
 # 2.4 Computer Use
 cd projects/15-computer-use && make test
+
+# 2.5 代码执行沙箱
+cd projects/16-sandbox && make test
 ```
 
 推荐学习方式：先读课件 → 关掉参考答案自己写练习 → 跑测试 → 再对照参考实现。

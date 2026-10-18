@@ -38,6 +38,7 @@ LESSONS = [
     ("notes/02-tools/02-mcp.md", "02-02-mcp", "2.2", "MCP", "5–6 小时"),
     ("notes/02-tools/03-a2a.md", "02-03-a2a", "2.3", "A2A（Agent-to-Agent）协议", "4–5 小时"),
     ("notes/02-tools/04-computer-use.md", "02-04-computer-use", "2.4", "Computer Use / Browser Use 代理", "4–5 小时"),
+    ("notes/02-tools/05-code-sandbox.md", "02-05-code-sandbox", "2.5", "Code Execution 沙箱（E2B、Docker、gVisor）", "4–5 小时"),
 ]
 
 CSS = r"""
