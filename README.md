@@ -79,6 +79,12 @@
 | 2.4 | Computer Use / Browser Use 代理 | API、可访问性树、截图坐标、代码执行四条路线的取舍；三家接口（Anthropic 工具集、OpenAI computer_call、Gemini computer_use）；截图缩放与坐标换算；批量动作顺序执行与中止；每个动作执行前检查（布局移动）；网址白名单与隐藏文字注入；元素引用生命周期；截图历史修剪与缓存；步数上限与结果核验 | [课件](notes/02-tools/04-computer-use.md) | [`15-computer-use`](projects/15-computer-use) | 📖 学习中 |
 | 2.5 | Code Execution 沙箱（E2B、Docker、gVisor） | 三家自带代码执行（Anthropic code_execution、OpenAI code_interpreter、Gemini code_execution）与 E2B 的取舍；威胁模型；进程、容器、gVisor、微虚拟机四层隔离；加固 docker run 与危险参数；出站白名单规则；进程组超时、环境变量白名单、CPU / 文件大小限制与 set -e；输出保留头尾、产物只收普通文件；代码错误与环境失败分开回给模型；沙箱续期、暂停与销毁 | [课件](notes/02-tools/05-code-sandbox.md) | [`16-sandbox`](projects/16-sandbox) | 📖 学习中 |
 
+### 03 · Agent 架构
+
+| # | 主题 | 核心内容 | 课件 | 练习 | 状态 |
+|---|---|---|---|---|---|
+| 3.1 | ReAct、Plan-and-Execute、Reflexion | Workflow 与 Agent 的区分；ReAct 循环（取消、调用与结果配对、工具错误变观察、步数上限）与文本格式的坑；Plan-and-Solve、ReWOO 的 #E 引用、LLMCompiler 并行；计划校验、按依赖分波、失败重规划不重跑；Reflexion 的反思记忆与评估信号；三种模式的取舍与组合 | [课件](notes/03-agents/01-react-plan-reflexion.md) | [`17-patterns`](projects/17-patterns) | 📖 学习中 |
+
 ### 全部模块
 
 四个阶段：**A 打地基** → **B 能做出来** → **C 上生产** → **D 深入与实战**。阶段 C 是 Demo 和生产系统的分水岭：Eval 回答“有多准”，Tracing 回答“哪里坏了”，高可用回答“挂了怎么办”，性能与成本回答“为什么慢、为什么贵”。
@@ -162,6 +168,9 @@ cd projects/15-computer-use && make test
 
 # 2.5 代码执行沙箱
 cd projects/16-sandbox && make test
+
+# 3.1 ReAct / Plan-and-Execute / Reflexion
+cd projects/17-patterns && make test
 ```
 
 推荐学习方式：先读课件 → 关掉参考答案自己写练习 → 跑测试 → 再对照参考实现。

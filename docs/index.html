@@ -263,14 +263,14 @@
         <section class="stats" data-reveal>
           <div class="stat"><span class="stat__fig x-mono">14</span><span class="stat__label">模块</span></div>
           <div class="stat"><span class="stat__fig x-mono">84</span><span class="stat__label">知识点</span></div>
-          <div class="stat"><span class="stat__fig x-mono">Day 11</span><span class="stat__label">今天</span></div>
+          <div class="stat"><span class="stat__fig x-mono">Day 12</span><span class="stat__label">今天</span></div>
           <div class="stat"><span class="stat__fig x-mono">15/84</span><span class="stat__label">已完成</span></div>
         </section>
 
         <section class="section" id="progress" data-nav="进度">
           <div class="head" data-reveal>
             <p class="head__eyebrow x-kicker">当前进度</p>
-            <h2 class="x-h2">00 基础功底、01 LLM 原理与使用全部完成；02 工具调用与协议：2.1 Function Calling、2.2 MCP、2.3 A2A 已完成，2.4 Computer Use、2.5 代码执行沙箱练习进行中。</h2>
+            <h2 class="x-h2">00 基础功底、01 LLM 原理与使用全部完成；02 工具调用与协议：2.1 Function Calling、2.2 MCP、2.3 A2A 已完成，2.4、2.5 练习进行中，模块 03 Agent 架构开课。</h2>
             <p class="head__sub">学完且有笔记或代码产出，才在 ROADMAP 里打勾。</p>
           </div>
           <div class="x-progress" data-reveal>
@@ -601,6 +601,25 @@
                 <dd><span class="chip x-chip x-chip--live">进行中</span></dd>
               </dl>
             </article>
+            <article class="step">
+              <div class="step__intro">
+                <p class="step__num x-step-num">3.1</p>
+                <p class="step__eyebrow">进行中 · 03 Agent 架构</p>
+              </div>
+              <div>
+                <h3>ReAct、Plan-and-Execute、Reflexion</h3>
+                <p class="sub">三种基本 Agent 模式：ReAct 循环与工具错误变观察、ReWOO 的 #E 引用与 LLMCompiler 并行、计划校验与失败重规划、Reflexion 的反思记忆与评估信号。</p>
+                <div class="links" style="margin-top: 16px">
+                  <a class="x-btn x-btn--primary" href="notes/03-01-react-plan-reflexion.html">在线阅读</a>
+                </div>
+              </div>
+              <dl class="step__panel">
+                <dt>课件</dt>
+                <dd><span class="chip x-chip x-chip--done">已完成</span></dd>
+                <dt>练习</dt>
+                <dd><span class="chip x-chip x-chip--live">进行中</span></dd>
+              </dl>
+            </article>
           </div>
         </section>
 
@@ -611,6 +630,21 @@
           </div>
           <ol class="timeline" data-reveal>
             <li class="is-current">
+              <p class="timeline__when"><span class="x-mono">Day 12 · 2026-10-20</span></p>
+              <div class="timeline__what">
+                <p><strong>三种 Agent 模式：每一步想、先全想好、做完再想</strong></p>
+                <ul>
+                  <li>ReAct 的工具报错直接 return，模型就失去了自己改正的机会</li>
+                  <li>文本格式的 ReAct：模型会顺手编一段 Observation，必须截断</li>
+                  <li>ReWOO 用 #E1 引用串起计划，依赖一推就能分波并行</li>
+                  <li>模型写的计划先校验：重复 ID、悬空引用、循环、未知工具</li>
+                  <li>Reflexion 的效果取决于评估信号，没有测试就别指望它</li>
+                </ul>
+                <p class="x-think">思考：你的任务里，哪些步骤其实可以事先写死？</p>
+              </div>
+              <p><a class="x-btn x-btn--ghost" href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/logs/2026-10-20.md" target="_blank" rel="noopener">日志</a></p>
+            </li>
+            <li>
               <p class="timeline__when"><span class="x-mono">Day 11 · 2026-10-18</span></p>
               <div class="timeline__what">
                 <p><strong>代码执行沙箱：默认代码是不可信的</strong></p>

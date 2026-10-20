@@ -19,7 +19,7 @@ OUT = ROOT / "docs" / "notes"
 REPO = "https://github.com/Duang777/ai-agent-fullstack-roadmap"
 
 # 课件顺序。新增一课，在这里加一行。
-MODULES = {"00": "00 · 基础功底", "01": "01 · LLM 原理与使用", "02": "02 · 工具调用与协议"}
+MODULES = {"00": "00 · 基础功底", "01": "01 · LLM 原理与使用", "02": "02 · 工具调用与协议", "03": "03 · Agent 架构"}
 
 LESSONS = [
     ("notes/00-foundations/01-go.md", "00-01-go", "0.1", "Go 基础与并发", "5–6 小时"),
@@ -39,6 +39,7 @@ LESSONS = [
     ("notes/02-tools/03-a2a.md", "02-03-a2a", "2.3", "A2A（Agent-to-Agent）协议", "4–5 小时"),
     ("notes/02-tools/04-computer-use.md", "02-04-computer-use", "2.4", "Computer Use / Browser Use 代理", "4–5 小时"),
     ("notes/02-tools/05-code-sandbox.md", "02-05-code-sandbox", "2.5", "Code Execution 沙箱（E2B、Docker、gVisor）", "4–5 小时"),
+    ("notes/03-agents/01-react-plan-reflexion.md", "03-01-react-plan-reflexion", "3.1", "ReAct、Plan-and-Execute、Reflexion", "3–4 小时"),
 ]
 
 CSS = r"""
