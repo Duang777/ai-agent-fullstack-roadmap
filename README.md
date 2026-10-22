@@ -84,6 +84,7 @@
 | # | 主题 | 核心内容 | 课件 | 练习 | 状态 |
 |---|---|---|---|---|---|
 | 3.1 | ReAct、Plan-and-Execute、Reflexion | Workflow 与 Agent 的区分；ReAct 循环（取消、调用与结果配对、工具错误变观察、步数上限）与文本格式的坑；Plan-and-Solve、ReWOO 的 #E 引用、LLMCompiler 并行；计划校验、按依赖分波、失败重规划不重跑；Reflexion 的反思记忆与评估信号；三种模式的取舍与组合 | [课件](notes/03-agents/01-react-plan-reflexion.md) | [`17-patterns`](projects/17-patterns) | 📖 学习中 |
+| 3.2 | Agent Loop 设计：停止条件、预算、重试 | Anthropic stop_reason 与 OpenAI incomplete_details 归一成 7 种；截断续写与半截工具调用、pause_turn 原样发回、拒绝与窗口满；步数 / 工具次数 / token / 费用 / 墙钟五维预算、整数计费、收尾调用；可重试错误分类与额度类 429、全抖动退避、retry-after 下限、总等待上限、SDK 重试叠加；工具超时 | [课件](notes/03-agents/02-agent-loop.md) | [`18-loop`](projects/18-loop) | 📖 学习中 |
 
 ### 全部模块
 
@@ -171,6 +172,9 @@ cd projects/16-sandbox && make test
 
 # 3.1 ReAct / Plan-and-Execute / Reflexion
 cd projects/17-patterns && make test
+
+# 3.2 Agent Loop：停止条件、预算、重试
+cd projects/18-loop && make test
 ```
 
 推荐学习方式：先读课件 → 关掉参考答案自己写练习 → 跑测试 → 再对照参考实现。

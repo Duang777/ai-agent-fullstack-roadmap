@@ -1,0 +1,578 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>3.2 Agent Loop 设计：停止条件、预算、重试 · AI Agent 全栈</title>
+<meta name="description" content="3.2 Agent Loop 设计：停止条件、预算、重试。duang777 的 AI Agent 全栈公开学习课件。" />
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("x-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
+<style>
+:root{
+  --bg:#0a0a0a;--surface:#111;--text:#ededed;--text-2:#a1a1a1;--text-3:rgb(255 255 255/.4);
+  --line:rgb(255 255 255/.1);--line-2:rgb(255 255 255/.06);
+  --body:#d4d4d4;--code-bg:#1a1a1a;--pre-bg:#0f0f0f;--nav-bg:rgb(10 10 10/.8);--sb:#2a2a2a;--sb-h:#3a3a3a;
+  --sans:Inter,-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei","Helvetica Neue",sans-serif;
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+}
+*{box-sizing:border-box}
+html{color-scheme:dark}
+:root[data-theme="light"]{--bg:#fff;--surface:#fafafa;--text:#0a0a0a;--text-2:#555;--text-3:rgb(0 0 0/.42);--line:rgb(0 0 0/.1);--line-2:rgb(0 0 0/.06);--body:#333;--code-bg:#f2f2f2;--pre-bg:#fafafa;--nav-bg:rgb(255 255 255/.85);--sb:#d4d4d4;--sb-h:#bdbdbd}
+:root[data-theme="light"]{color-scheme:light}
+.toc{scrollbar-width:none}.toc::-webkit-scrollbar{display:none}
+html{scrollbar-width:thin;scrollbar-color:var(--sb) transparent}
+::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--sb);border-radius:8px}::-webkit-scrollbar-thumb:hover{background:var(--sb-h)}
+html{scroll-behavior:smooth;scroll-padding-top:80px}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;line-height:1.8;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+.nav{position:sticky;top:0;z-index:10;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;border-bottom:1px solid var(--line);background:var(--nav-bg);backdrop-filter:blur(12px)}
+.nav__brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-size:14px;font-weight:500}
+.nav__dot{width:10px;height:10px;border-radius:3px;background:var(--text)}
+.nav__links{display:flex;gap:20px;font-size:14px;color:var(--text-2)}
+.nav__links a{text-decoration:none}.nav__links a:hover{color:var(--text)}
+.wrap{max-width:1200px;margin:0 auto;padding:0 24px;display:grid;grid-template-columns:220px minmax(0,1fr);gap:56px}
+.toc{position:sticky;top:80px;align-self:start;max-height:calc(100vh - 100px);overflow:auto;padding:40px 0 40px;font-size:13px;line-height:1.6}
+.toc__label{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--text-3);text-transform:uppercase;margin-bottom:12px}
+.toc ul{list-style:none;margin:0;padding:0}
+.toc li{margin:0}
+.toc a{display:block;padding:4px 0 4px 12px;border-left:1px solid var(--line);color:var(--text-2);text-decoration:none}
+.toc a:hover,.toc a.on{color:var(--text);border-left-color:var(--text)}
+.toc ul ul a{padding-left:24px;font-size:12.5px;color:var(--text-3)}
+.toc ul ul a:hover,.toc ul ul a.on{color:var(--text)}
+article{min-width:0;max-width:760px;padding:48px 0 96px}
+.meta{font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--text-3);margin-bottom:16px}
+article h1.title{font-size:40px;line-height:1.2;letter-spacing:-.02em;font-weight:600;margin:0 0 24px}
+article h1{font-size:28px;line-height:1.3;letter-spacing:-.01em;font-weight:600;margin:72px 0 20px;padding-top:32px;border-top:1px solid var(--line)}
+article h2{font-size:22px;line-height:1.4;font-weight:600;margin:48px 0 16px}
+article h3{font-size:18px;font-weight:600;margin:36px 0 12px}
+article h4{font-size:16px;font-weight:600;margin:28px 0 8px}
+article p{margin:0 0 18px;color:var(--body)}
+article strong{color:var(--text);font-weight:600}
+article ul,article ol{padding-left:22px;margin:0 0 18px;color:var(--body)}
+article li{margin:4px 0}
+article a{text-decoration:underline;text-decoration-color:var(--text-3);text-underline-offset:3px}
+article a:hover{text-decoration-color:var(--text)}
+article hr{border:0;border-top:1px solid var(--line);margin:48px 0}
+article blockquote{margin:0 0 20px;padding:12px 18px;border-left:2px solid var(--text-2);background:var(--surface);border-radius:0 8px 8px 0;color:var(--text-2)}
+article blockquote p{margin:6px 0;color:var(--text-2)}
+article code{font-family:var(--mono);font-size:.88em;background:var(--code-bg);border:1px solid var(--line-2);border-radius:5px;padding:1px 6px}
+article pre{position:relative;margin:0 0 22px;padding:16px 18px;background:var(--pre-bg);border:1px solid var(--line);border-radius:10px;overflow:auto;font-size:13.5px;line-height:1.65}
+article pre code{background:none;border:0;padding:0;font-size:inherit}
+.code{position:relative}
+.code__lang{position:absolute;top:8px;right:46px;font-family:var(--mono);font-size:11px;color:var(--text-3);z-index:1}
+.code__copy{position:absolute;top:6px;right:8px;z-index:1;font:11px var(--mono);color:var(--text-2);background:var(--code-bg);border:1px solid var(--line);border-radius:6px;padding:2px 7px;cursor:pointer}
+.code__copy:hover{color:var(--text)}
+.tbl{overflow-x:auto;margin:0 0 22px;border:1px solid var(--line);border-radius:10px}
+article table{border-collapse:collapse;width:100%;font-size:14px}
+article th,article td{padding:10px 14px;border-bottom:1px solid var(--line-2);text-align:left;vertical-align:top}
+article th{font-weight:600;background:var(--surface);color:var(--text)}
+article tr:last-child td{border-bottom:0}
+article details{margin:0 0 18px;border:1px solid var(--line);border-radius:10px;padding:10px 16px;background:var(--surface)}
+article summary{cursor:pointer;font-weight:500}
+.pager{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:72px;padding-top:32px;border-top:1px solid var(--line)}
+.pager a{display:block;padding:16px 18px;border:1px solid var(--line);border-radius:10px;text-decoration:none}
+.pager a:hover{border-color:var(--text-2)}
+.pager span{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--text-3)}
+.pager .next{text-align:right;grid-column:2}
+.foot{margin-top:40px;font-size:13px;color:var(--text-3)}
+/* 代码高亮：黑白灰为主 */
+.hl .c,.hl .c1,.hl .cm,.hl .ch,.hl .cs,.hl .cp,.hl .cpf{color:#6b6b6b;font-style:italic}
+.hl .k,.hl .kd,.hl .kn,.hl .kr,.hl .kt,.hl .kc,.hl .kp,.hl .ow{color:#ffffff;font-weight:600}
+.hl .s,.hl .s1,.hl .s2,.hl .sb,.hl .sc,.hl .sd,.hl .se,.hl .sh,.hl .si,.hl .sx,.hl .sr,.hl .ss,.hl .dl,.hl .sa{color:#86efac}
+.hl .m,.hl .mi,.hl .mf,.hl .mh,.hl .mo,.hl .il{color:#fcd34d}
+.hl .nf,.hl .fm,.hl .nc,.hl .nn{color:#e5e5e5;font-weight:500}
+.hl .nb,.hl .bp,.hl .nd,.hl .na,.hl .nt{color:#bdbdbd}
+.hl .o,.hl .p{color:#9a9a9a}
+.hl .gd{color:#fca5a5}.hl .gi{color:#86efac}
+.hl{color:#d4d4d4}
+:root[data-theme="light"] .hl{color:#262626}
+:root[data-theme="light"] .hl .c,:root[data-theme="light"] .hl .c1,:root[data-theme="light"] .hl .cm,:root[data-theme="light"] .hl .ch,:root[data-theme="light"] .hl .cs,:root[data-theme="light"] .hl .cp,:root[data-theme="light"] .hl .cpf{color:#8a8a8a}
+:root[data-theme="light"] .hl .k,:root[data-theme="light"] .hl .kd,:root[data-theme="light"] .hl .kn,:root[data-theme="light"] .hl .kr,:root[data-theme="light"] .hl .kt,:root[data-theme="light"] .hl .kc,:root[data-theme="light"] .hl .kp,:root[data-theme="light"] .hl .ow{color:#000}
+:root[data-theme="light"] .hl .s,:root[data-theme="light"] .hl .s1,:root[data-theme="light"] .hl .s2,:root[data-theme="light"] .hl .sb,:root[data-theme="light"] .hl .sc,:root[data-theme="light"] .hl .sd,:root[data-theme="light"] .hl .se,:root[data-theme="light"] .hl .sh,:root[data-theme="light"] .hl .si,:root[data-theme="light"] .hl .sx,:root[data-theme="light"] .hl .sr,:root[data-theme="light"] .hl .ss,:root[data-theme="light"] .hl .dl,:root[data-theme="light"] .hl .sa{color:#15803d}
+:root[data-theme="light"] .hl .m,:root[data-theme="light"] .hl .mi,:root[data-theme="light"] .hl .mf,:root[data-theme="light"] .hl .mh,:root[data-theme="light"] .hl .mo,:root[data-theme="light"] .hl .il{color:#b45309}
+:root[data-theme="light"] .hl .nf,:root[data-theme="light"] .hl .fm,:root[data-theme="light"] .hl .nc,:root[data-theme="light"] .hl .nn{color:#171717}
+:root[data-theme="light"] .hl .nb,:root[data-theme="light"] .hl .bp,:root[data-theme="light"] .hl .nd,:root[data-theme="light"] .hl .na,:root[data-theme="light"] .hl .nt{color:#525252}
+:root[data-theme="light"] .hl .o,:root[data-theme="light"] .hl .p{color:#6b6b6b}
+:root[data-theme="light"] .hl .gd{color:#b91c1c}:root[data-theme="light"] .hl .gi{color:#15803d}
+.nav__right{display:flex;align-items:center;gap:20px}
+.theme-toggle{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--text);cursor:pointer}
+.theme-toggle:hover{border-color:var(--text-2)}
+.theme-toggle svg{width:15px;height:15px}
+.theme-toggle .i-moon,:root[data-theme="light"] .theme-toggle .i-sun{display:none}
+:root[data-theme="light"] .theme-toggle .i-moon{display:block}
+@media (max-width:960px){.wrap{grid-template-columns:1fr;gap:0}.toc{display:none}article h1.title{font-size:30px}.nav__links a.hide-sm{display:none}}
+</style>
+</head>
+<body>
+<header class="nav">
+  <a class="nav__brand" href="../index.html"><span class="nav__dot"></span>AI Agent 全栈</a>
+  <div class="nav__right">
+  <nav class="nav__links">
+    <a href="../index.html#progress">课件</a>
+    <a class="hide-sm" href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/ROADMAP.md">路线图</a>
+    <a href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/notes/03-agents/02-agent-loop.md">在 GitHub 上查看</a>
+  </nav>
+  <button class="theme-toggle" id="theme-toggle" type="button" aria-label="切换浅色 / 深色" title="切换浅色 / 深色"><svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg><svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
+  </div>
+</header>
+<div class="wrap">
+  <aside class="toc"><div class="toc__label">本课目录</div><ul>
+<li><a href="#读前说明">读前说明</a></li>
+<li><a href="#1-循环的骨架">1. 循环的骨架</a></li>
+<li><a href="#2-停止原因">2. 停止原因</a></li>
+<li><a href="#3-预算">3. 预算</a></li>
+<li><a href="#4-重试">4. 重试</a></li>
+<li><a href="#5-工具超时">5. 工具超时</a></li>
+<li><a href="#本课小结">本课小结</a></li>
+<li><a href="#练习今天做完">练习（今天做完）</a></li>
+<li><a href="#自测题">自测题</a></li>
+<li><a href="#参考答案与详解">参考答案与详解</a><ul>
+<li><a href="#自测题答案">自测题答案</a></li>
+<li><a href="#练习参考答案">练习参考答案</a></li>
+<li><a href="#完成标准">完成标准</a></li>
+</ul>
+</li>
+</ul>
+</aside>
+  <article>
+    <div class="meta">模块 03 · Agent 架构 · 第 3.2 课</div>
+    <h1 class="title">3.2 Agent Loop 设计：停止条件、预算、重试</h1>
+    <blockquote>
+<p>第 3 部分 · 第 2 课 ｜ 预计 3–4 小时 ｜ 前置：3.1 ReAct、1.4 推理模型、1.5 Prompt Caching</p>
+<p>配套练习：<code>projects/18-loop/</code>（纯 Go 标准库，14 个测试）。在 3.1 的 ReAct 循环外面加上生产需要的三层：把两家的停止原因归一成 7 种并分别处理（续写、原样发回、拒绝、窗口满）；五个维度的预算（步数、工具次数、token、费用、墙钟）和预算用完时的收尾调用；可重试错误的分类、全抖动指数退避、retry-after 下限、总等待上限、等待中可取消；单个工具的超时。</p>
+</blockquote>
+<h2 id="读前说明">读前说明</h2>
+<p>3.1 课的 ReAct 循环只有两个出口：模型不再调用工具（正常结束），或者步数到了上限。真实环境里，一次模型调用可能有七八种结局：</p>
+<ul>
+<li>输出写到一半被 <code>max_tokens</code> 截断；</li>
+<li>服务端工具（网页搜索之类）跑到迭代上限，暂停了；</li>
+<li>模型拒绝回答；</li>
+<li>上下文窗口被撑满；</li>
+<li>请求本身失败：429 限流、529 过载、500、网络断开、额度用完……</li>
+</ul>
+<p>每一种的正确处理都不同。处理错了，轻则浪费钱，重则把半截结果当成答案交给用户，或者对一个“额度用完”的错误无限重试。</p>
+<p>先看几个问题：</p>
+<ul>
+<li><code>stop_reason</code> 是 <code>max_tokens</code> 时，能不能直接把内容当回答？截断的是一个工具调用呢？</li>
+<li>预算只限步数够不够？一个步数很少的任务为什么也可能花掉很多钱？</li>
+<li>预算用完时，直接报错和让模型“总结一下”哪个好？</li>
+<li>同样是 429，为什么有的应该重试，有的重试一万次也没用？</li>
+<li>指数退避为什么要加随机？retry-after 头该怎么用？</li>
+<li>你自己写了重试，SDK 也有自动重试，会发生什么？</li>
+</ul>
+<p>本课结束时你能：</p>
+<ol>
+<li>把各家的停止原因归一，并给每一种写出正确的处理；</li>
+<li>设计多维度的预算，在每次调用前检查，预算用完时让模型收尾；</li>
+<li>区分可重试和不可重试的错误，写出带抖动、带上限、可取消的重试；</li>
+<li>给工具调用加超时，并把超时变成模型能理解的观察结果。</li>
+</ol>
+<p><strong>关于来源</strong>：停止原因来自 Anthropic 文档 <em>Handling stop reasons</em> 和 OpenAI <em>Reasoning</em> 指南（Responses 的 <code>incomplete_details</code>）；错误与重试来自 Anthropic <em>Errors</em>、<em>Rate limits</em>，OpenAI <em>Error codes</em>、<em>Rate limits</em>，Gemini <em>Troubleshooting</em>。均为 2026-10 文档。</p>
+<hr />
+<h2 id="1-循环的骨架">1. 循环的骨架</h2>
+<p>和 3.1 相比，循环的每一轮多了两件事：调用前查预算，调用时包一层重试；调用后不再只看“有没有工具调用”，而是看归一后的停止原因：</p>
+<div class="hl"><pre><span></span><code>for {
+    检查 ctx
+    检查预算 ── 超了 → （可选）收尾调用 → 返回
+    带重试地调用模型 ── 失败 → 返回
+    按停止原因分支：
+        done        → 返回回答
+        tool_use    → 执行工具（带超时），继续
+        paused      → 原样发回，继续
+        truncated   → 续写（有上限），或者报错
+        refused     → 返回拒绝
+        context_full→ 返回，交给压缩（1.6 课）
+        unknown     → 返回错误
+}
+</code></pre></div>
+
+<p>不管从哪个出口离开，都返回 <code>Result</code>：回答、停止原因（<code>done</code>、<code>budget:cost</code>、<code>refused</code> ……）、花了多少（步数、工具次数、token、费用）、完整历史。失败时这些信息比成功时更重要，排查和计费都要用。</p>
+<hr />
+<h2 id="2-停止原因">2. 停止原因</h2>
+<h3 id="21-两家的原始值">2.1 两家的原始值</h3>
+<p><strong>Anthropic Messages API</strong> 的每个成功响应都有 <code>stop_reason</code>，文档的速查表：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>值</th>
+<th>什么时候出现</th>
+<th>怎么处理</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>end_turn</code></td>
+<td>自然结束</td>
+<td>使用回答</td>
+</tr>
+<tr>
+<td><code>max_tokens</code></td>
+<td>撞到你设的 <code>max_tokens</code></td>
+<td>调大，或者续写</td>
+</tr>
+<tr>
+<td><code>stop_sequence</code></td>
+<td>输出了你设的停止序列</td>
+<td>看 <code>stop_sequence</code> 字段是哪个</td>
+</tr>
+<tr>
+<td><code>tool_use</code></td>
+<td>要调用工具</td>
+<td>执行工具，返回结果</td>
+</tr>
+<tr>
+<td><code>pause_turn</code></td>
+<td>服务端工具循环到了迭代上限（默认每个请求 10 次）</td>
+<td>把 assistant 内容原样发回，让它继续</td>
+</tr>
+<tr>
+<td><code>refusal</code></td>
+<td>拒绝回答</td>
+<td>看 <code>stop_details</code>，换备用模型重试</td>
+</tr>
+<tr>
+<td><code>model_context_window_exceeded</code></td>
+<td>回答撑满了上下文窗口</td>
+<td>当作截断处理</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>OpenAI Responses API</strong> 没有一个统一的字段：</p>
+<ul>
+<li><code>status: "completed"</code>，output 里有 <code>function_call</code> → 要调工具；没有 → 正常结束；</li>
+<li><code>status: "incomplete"</code>，看 <code>incomplete_details.reason</code>：<code>max_output_tokens</code> 是截断（推理模型可能<strong>在推理阶段就耗尽</strong>，一个可见字都没有，但输入和推理 token 照样计费，1.4 课），<code>content_filter</code> 是被内容过滤拦下。</li>
+</ul>
+<h3 id="22-归一">2.2 归一</h3>
+<p>循环只认 7 种，供应商差异留在适配层：</p>
+<div class="hl"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nx">FromAnthropic</span><span class="p">(</span><span class="nx">stopReason</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="nx">Stop</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">switch</span><span class="w"> </span><span class="nx">stopReason</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="s">"end_turn"</span><span class="p">,</span><span class="w"> </span><span class="s">"stop_sequence"</span><span class="p">:</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">StopDone</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="s">"tool_use"</span><span class="p">:</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">StopToolUse</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="s">"max_tokens"</span><span class="p">:</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">StopTruncated</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="s">"pause_turn"</span><span class="p">:</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">StopPaused</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="s">"refusal"</span><span class="p">:</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">StopRefused</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="s">"model_context_window_exceeded"</span><span class="p">:</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">StopContextFull</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">StopUnknown</span><span class="w"> </span><span class="c1">// 新增的值不要当成正常结束</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>最后一行最重要。API 会加新的停止原因（<code>pause_turn</code>、<code>refusal</code>、<code>model_context_window_exceeded</code> 都是后来加的）。如果你的 <code>default</code> 分支是“当作正常结束”，新值出现时，半截的或者被拒绝的内容就会被当成答案。未知的值一律当错误，日志里能看到，再补映射（<code>TestStopMapping</code>）。</p>
+<h3 id="23-每种怎么处理">2.3 每种怎么处理</h3>
+<p><strong>截断（开头第一个问题）</strong>：不能直接当回答，内容是不完整的。两种情况：</p>
+<ul>
+<li>截断的是普通文本：可以续写。把半截回答放回历史，再追加一条要求“从断开的地方接着写”的用户消息。续写要有次数上限，否则一个本来就写不完的任务会一直续下去（<code>TestTruncatedLimits</code>）；</li>
+<li>截断时有工具调用：参数 JSON 只写了一半，<strong>既不能执行，也没法续写</strong>，直接报 <code>ErrTruncated</code>。正确的修法是调大 <code>max_tokens</code>。</li>
+</ul>
+<p><strong>暂停</strong>：服务端工具（网页搜索、代码执行）在 Anthropic 那边跑循环，到迭代上限就暂停。把 assistant 消息原样追加到历史，<strong>不加任何用户消息</strong>，再发一次请求，服务端就会接着跑（<code>TestPausedAndTruncated</code> 检查第二次请求的最后一条是 assistant）。暂停也算一步，同样受预算约束。</p>
+<p><strong>拒绝</strong>：返回 <code>ErrRefused</code>。文档建议读 <code>stop_details</code> 后在备用模型上重试，这是练习 3。不要把拒绝的内容当回答展示，也不要在同一个模型上原样重试。</p>
+<p><strong>窗口满</strong>：返回 <code>ErrContextFull</code>，由上层压缩历史（1.6 课的预算内组装、摘要）后再继续。循环自己不应该偷偷截掉历史，那会破坏工具调用和结果的配对。</p>
+<hr />
+<h2 id="3-预算">3. 预算</h2>
+<h3 id="31-为什么要五个维度">3.1 为什么要五个维度</h3>
+<p>开头第二个问题。3.1 只限步数，但步数和花费没有固定关系：</p>
+<ul>
+<li>一步可以很贵：工具返回一个 10 万 token 的网页，之后每一步都要把它发回去（1.6 课），推理模型一步可能想几万 token；</li>
+<li>一步可以很慢：一个工具跑了几分钟；</li>
+<li>一条消息可以有很多个工具调用：步数只算了一次，工具调了二十次，每次都可能有副作用或按次计费。</li>
+</ul>
+<p>所以练习里的预算有五项，任何一项为 0 表示不限：</p>
+<div class="hl"><pre><span></span><code><span class="kd">type</span><span class="w"> </span><span class="nx">Budget</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">MaxSteps</span><span class="w">     </span><span class="kt">int</span><span class="w">           </span><span class="c1">// 模型调用次数</span>
+<span class="w">    </span><span class="nx">MaxToolCalls</span><span class="w"> </span><span class="kt">int</span><span class="w">           </span><span class="c1">// 工具调用次数</span>
+<span class="w">    </span><span class="nx">MaxTokens</span><span class="w">    </span><span class="kt">int</span><span class="w">           </span><span class="c1">// 累计 token</span>
+<span class="w">    </span><span class="nx">MaxCost</span><span class="w">      </span><span class="kt">int64</span><span class="w">         </span><span class="c1">// 累计费用，微美元</span>
+<span class="w">    </span><span class="nx">MaxWall</span><span class="w">      </span><span class="nx">time</span><span class="p">.</span><span class="nx">Duration</span><span class="w"> </span><span class="c1">// 墙钟时间</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3 id="32-费用用整数向上取整">3.2 费用用整数，向上取整</h3>
+<div class="hl"><pre><span></span><code><span class="c1">// Price 每百万 token 的价格，单位微美元（1 美元 = 1e6）</span>
+<span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">p</span><span class="w"> </span><span class="nx">Price</span><span class="p">)</span><span class="w"> </span><span class="nx">Cost</span><span class="p">(</span><span class="nx">u</span><span class="w"> </span><span class="nx">Usage</span><span class="p">)</span><span class="w"> </span><span class="kt">int64</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">n</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="kt">int64</span><span class="p">(</span><span class="nx">u</span><span class="p">.</span><span class="nx">Input</span><span class="p">)</span><span class="o">*</span><span class="nx">p</span><span class="p">.</span><span class="nx">Input</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="kt">int64</span><span class="p">(</span><span class="nx">u</span><span class="p">.</span><span class="nx">CachedInput</span><span class="p">)</span><span class="o">*</span><span class="nx">p</span><span class="p">.</span><span class="nx">CachedInput</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="kt">int64</span><span class="p">(</span><span class="nx">u</span><span class="p">.</span><span class="nx">Output</span><span class="p">)</span><span class="o">*</span><span class="nx">p</span><span class="p">.</span><span class="nx">Output</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="p">(</span><span class="nx">n</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">999_999</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">1_000_000</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<ul>
+<li><strong>整数</strong>：浮点数累加几千次会有误差，账对不上。用微美元（或者更细）存整数是计费系统的常规做法；</li>
+<li><strong>向上取整</strong>：一个 token 也要算钱（<code>TestCostRoundsUp</code>）。向下取整的话，大量小请求加起来可以悄悄突破预算；</li>
+<li><strong>缓存命中的输入单独计价</strong>（1.5 课）。<code>Usage.Input</code> 不含缓存部分，避免重复计算。推理 token 按输出计价，适配层要把它算进 <code>Output</code>（1.4 课）。</li>
+</ul>
+<p>价格表要按模型配置，并且随供应商调价更新。课件里的数字只是测试用。</p>
+<h3 id="33-什么时候检查">3.3 什么时候检查</h3>
+<p><strong>每次调用模型之前</strong>检查：已经超了就不要再发请求（<code>Budget.Check</code>）。这意味着预算是“软上限”：最后一次调用可能让总量略超过上限，因为调用之前不知道它会花多少。要做成硬上限，需要调用前预估这一次最多花多少（输入 token 加上 <code>max_tokens</code>），剩余预算不够就不发，这是练习 2。</p>
+<p>只有<strong>成功</strong>的调用计入步数和用量（<code>TestRetryInLoop</code> 里两次失败一次成功，<code>Steps</code> 是 1）。失败的请求一般不计费；如果你的供应商对某些失败也计费，就要在适配层把那部分用量报上来。</p>
+<p>墙钟时间通过注入的 <code>Now</code> 函数检查，测试里用假时钟推进（<code>TestBudgetWallClock</code>），不用真的等一分钟。</p>
+<h3 id="34-预算用完收尾调用">3.4 预算用完：收尾调用</h3>
+<p>开头第三个问题。直接报错，用户拿到的是“任务失败”，前面九步查到的东西全部丢掉。更好的做法是再做<strong>一次</strong>特殊调用：</p>
+<div class="hl"><pre><span></span><code><span class="k">if</span><span class="w"> </span><span class="nx">cfg</span><span class="p">.</span><span class="nx">Finalize</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">h</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">h</span><span class="p">,</span><span class="w"> </span><span class="nx">Message</span><span class="p">{</span><span class="nx">Role</span><span class="p">:</span><span class="w"> </span><span class="nx">User</span><span class="p">,</span><span class="w"> </span><span class="nx">Content</span><span class="p">:</span><span class="w"> </span><span class="s">"预算已用完，不能再调用工具。请根据目前已有的信息给出最终回答，并说明哪些部分没能完成。"</span><span class="p">})</span>
+<span class="w">    </span><span class="nx">r</span><span class="p">,</span><span class="w"> </span><span class="nx">e</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">call</span><span class="p">(</span><span class="nx">CallOpts</span><span class="p">{</span><span class="nx">NoTools</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">})</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">e</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">Stop</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nx">StopDone</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">h</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">h</span><span class="p">,</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">Message</span><span class="p">)</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">res</span><span class="p">(</span><span class="s">"finalized:"</span><span class="o">+</span><span class="nx">be</span><span class="p">.</span><span class="nx">Dim</span><span class="p">,</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">Message</span><span class="p">.</span><span class="nx">Content</span><span class="p">),</span><span class="w"> </span><span class="nx">err</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>三个要点（<code>TestFinalizeOnBudget</code>）：</p>
+<ul>
+<li><strong>禁用工具</strong>：<code>NoTools</code> 在适配层对应不传 tools，或者设置 <code>tool_choice</code> 为 none，否则模型很可能接着调工具；</li>
+<li><strong>告诉模型为什么停</strong>，并要求它说明哪些部分没完成。否则它可能编出没查到的内容来凑一个完整答案；</li>
+<li><strong>仍然返回预算错误</strong>，<code>Reason</code> 是 <code>finalized:steps</code>。调用方要知道这是一个不完整的结果，界面上可以标出来，也可以让用户选择追加预算继续。</li>
+</ul>
+<p>收尾调用本身也要花钱。它只有一次，而且没有工具，花费有限；对费用非常敏感的场景，可以在预算里预留一小部分给它。</p>
+<hr />
+<h2 id="4-重试">4. 重试</h2>
+<h3 id="41-哪些该重试">4.1 哪些该重试</h3>
+<p>开头第四个问题。三家文档的说法基本一致：</p>
+<ul>
+<li><strong>429 限流</strong>：Anthropic 按每分钟请求数、输入 token、输出 token 限流，超过任何一项返回 429，有 <code>retry-after</code> 头时等那么多秒再试；OpenAI 同样建议遵守 <code>Retry-After</code>；Gemini 是 <code>429 RESOURCE_EXHAUSTED</code>；</li>
+<li><strong>5xx</strong>：Anthropic 的 500 <code>api_error</code>、504 <code>timeout_error</code>、529 <code>overloaded_error</code>；OpenAI 的 503；Gemini 的 <code>503 UNAVAILABLE</code>；</li>
+<li><strong>网络错误</strong>：连接被重置、读超时。</li>
+</ul>
+<p>不该重试的：</p>
+<ul>
+<li><strong>400、401、403、404、413</strong>：请求本身有问题，重试结果一样；</li>
+<li><strong>额度和花费类的 429</strong>：Anthropic 的月度花费上限也返回 429、类型也是 <code>rate_limit_error</code>，但<strong>没有</strong> <code>retry-after</code> 头，<code>error.details.error_code</code> 是 <code>enforced_spend_limit_reached</code>，文档明确说重试（包括 SDK 的自动重试）会一直失败；OpenAI 的 <code>credit_balance_exhausted</code>（预付额度用完）同理。OpenAI 文档的原话是不要重试额度、计费等需要你去处理的错误；</li>
+<li><strong><code>context.Canceled</code></strong>：用户不要了。</li>
+</ul>
+<div class="hl"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nx">Retryable</span><span class="p">(</span><span class="nx">err</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">errors</span><span class="p">.</span><span class="nx">Is</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Canceled</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">false</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nx">ae</span><span class="w"> </span><span class="o">*</span><span class="nx">APIError</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="o">!</span><span class="nx">errors</span><span class="p">.</span><span class="nx">As</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">ae</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="w"> </span><span class="c1">// 连接被重置、读超时之类：重试</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">switch</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="nx">ae</span><span class="p">.</span><span class="nx">Status</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">429</span><span class="p">:</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="o">!</span><span class="nx">notRetryableCodes</span><span class="p">[</span><span class="nx">ae</span><span class="p">.</span><span class="nx">Code</span><span class="p">]</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="nx">ae</span><span class="p">.</span><span class="nx">Status</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">408</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nx">ae</span><span class="p">.</span><span class="nx">Status</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">409</span><span class="p">:</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="nx">ae</span><span class="p">.</span><span class="nx">Status</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">500</span><span class="p">:</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="kc">false</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><code>TestRetryable</code> 列了两组用例。注意判断额度类 429 靠的是错误码，不是“有没有 retry-after”：没有 retry-after 的普通限流也存在，这时退回指数退避。</p>
+<h3 id="42-等多久">4.2 等多久</h3>
+<div class="hl"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">r</span><span class="w"> </span><span class="nx">Retry</span><span class="p">)</span><span class="w"> </span><span class="nx">Delay</span><span class="p">(</span><span class="nx">attempt</span><span class="w"> </span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Duration</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nx">ae</span><span class="w"> </span><span class="o">*</span><span class="nx">APIError</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">errors</span><span class="p">.</span><span class="nx">As</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">ae</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">ae</span><span class="p">.</span><span class="nx">RetryAfter</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">ae</span><span class="p">.</span><span class="nx">RetryAfter</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Duration</span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nx">Rand</span><span class="p">.</span><span class="nx">Int63n</span><span class="p">(</span><span class="kt">int64</span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nx">Base</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="nx">d</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">Base</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="nx">attempt</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">d</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nx">d</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">Cap</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1">// &lt;=0 是移位溢出</span>
+<span class="w">        </span><span class="nx">d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">Cap</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Duration</span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nx">Rand</span><span class="p">.</span><span class="nx">Int63n</span><span class="p">(</span><span class="kt">int64</span><span class="p">(</span><span class="nx">d</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">))</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>开头第五个问题：</p>
+<ul>
+<li><strong>有 retry-after</strong>：OpenAI 文档说把它当作<strong>最小值</strong>，至少等这么久，再加一点随机，免得很多客户端在同一时刻一起重试；</li>
+<li><strong>没有 retry-after</strong>：指数退避加抖动。这里用的是“全抖动”：在 <code>[0, min(Cap, Base·2^attempt)]</code> 里均匀取值。不加抖动的话，同一时刻被限流的一批客户端会在完全相同的时刻重试，再次一起被限流；</li>
+<li><strong>封顶</strong>：<code>Base &lt;&lt; attempt</code> 在 attempt 很大时会溢出成负数或 0，要一并处理（<code>TestRetryDelay</code> 测了 attempt = 70）。</li>
+</ul>
+<p>随机数源和 <code>Sleep</code> 都是注入的，测试里不真的等，也能断言等待时间。</p>
+<h3 id="43-什么时候放弃">4.3 什么时候放弃</h3>
+<div class="hl"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">r</span><span class="w"> </span><span class="nx">Retry</span><span class="p">)</span><span class="w"> </span><span class="nx">Do</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">f</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">)</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="kt">error</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">a</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="nx">a</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">MaxAttempts</span><span class="p">;</span><span class="w"> </span><span class="nx">a</span><span class="o">++</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">f</span><span class="p">(</span><span class="nx">ctx</span><span class="p">);</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="o">!</span><span class="nx">Retryable</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="nx">err</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="p">...</span>
+<span class="w">        </span><span class="nx">d</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">Delay</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="p">)</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">MaxTotal</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">waited</span><span class="o">+</span><span class="nx">d</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">MaxTotal</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">RetryError</span><span class="p">{</span><span class="nx">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">e</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">Sleep</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">d</span><span class="p">);</span><span class="w"> </span><span class="nx">e</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="nx">e</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="nx">waited</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="nx">d</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">RetryError</span><span class="p">{</span><span class="nx">r</span><span class="p">.</span><span class="nx">MaxAttempts</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<ul>
+<li><strong>两个上限</strong>：次数和总等待时间。OpenAI 文档要求同时限制两者。只限次数的话，一个 <code>retry-after: 3600</code> 会让请求挂一个小时（<code>TestRetryMaxTotalAndCancel</code> 第一部分：4 秒加 4 秒之后，再等 4 秒就超过 10 秒总上限，于是放弃）；</li>
+<li><strong>等待可取消</strong>：<code>SleepCtx</code> 用 <code>select</code> 同时等定时器和 <code>ctx.Done()</code>，用户取消时立即返回，而不是睡完一小时再发现（第二部分）；</li>
+<li><strong>保留原始错误</strong>：<code>RetryError</code> 实现了 <code>Unwrap</code>，上层可以 <code>errors.As</code> 拿到最后一次的 <code>APIError</code>，知道是 529 还是 503（<code>TestRetryInLoop</code>）。</li>
+</ul>
+<h3 id="44-别叠两层重试">4.4 别叠两层重试</h3>
+<p>开头最后一个问题。官方 SDK 默认就会重试：Anthropic SDK 对连接错误、限流和 5xx 默认重试 2 次，遵守 <code>retry-after</code>，用 <code>max_retries</code> 配置；OpenAI 的 SDK 自动重试符合条件的 429 和 503；Gemini 的 Python SDK 默认最多重试 4 次，初始约 1 秒、最长 60 秒。</p>
+<p>如果你在外面再包一层 3 次重试，最坏情况是 3 × 3 = 9 次请求，等待时间也成倍增加，限流时还会加重拥堵。OpenAI 文档的建议是：在应用层自己管重试时，要么关掉 SDK 的重试，要么把它算进你的上限。练习里的 <code>Retry</code> 假设 SDK 重试已经关掉。</p>
+<h3 id="45-流式响应中途出错">4.5 流式响应中途出错</h3>
+<p>Anthropic 文档提到，流式响应可能在返回 200 之后才出错（SSE 里的 error 事件），这时不走上面的 HTTP 错误流程。适配层要把这种错误也转成 <code>APIError</code>；而且已经收到的半截内容不能当成完整回答，重试要从头再来（0.4 课的流式协议）。</p>
+<hr />
+<h2 id="5-工具超时">5. 工具超时</h2>
+<p>模型调用有重试，工具调用也需要保护。一个卡住的工具会占满墙钟预算，而模型完全不知道发生了什么：</p>
+<div class="hl"><pre><span></span><code><span class="nx">tctx</span><span class="p">,</span><span class="w"> </span><span class="nx">cancel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">WithTimeout</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">cfg</span><span class="p">.</span><span class="nx">ToolTimeout</span><span class="p">)</span>
+<span class="k">defer</span><span class="w"> </span><span class="nx">cancel</span><span class="p">()</span>
+<span class="nx">out</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">t</span><span class="p">(</span><span class="nx">tctx</span><span class="p">,</span><span class="w"> </span><span class="nx">c</span><span class="p">.</span><span class="nx">Args</span><span class="p">)</span>
+<span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">errors</span><span class="p">.</span><span class="nx">Is</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">DeadlineExceeded</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">ctx</span><span class="p">.</span><span class="nx">Err</span><span class="p">()</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">Message</span><span class="p">{...,</span><span class="w"> </span><span class="nx">IsError</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="nx">Content</span><span class="p">:</span><span class="w"> </span><span class="s">"工具超时（"</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">cfg</span><span class="p">.</span><span class="nx">ToolTimeout</span><span class="p">.</span><span class="nx">String</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">"），可以缩小范围再试"</span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="p">...</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<ul>
+<li>超时和 3.1 的工具错误一样，是<strong>观察结果</strong>，交给模型决定换个做法（<code>TestToolTimeout</code>）；</li>
+<li><code>ctx.Err() == nil</code> 用来区分“工具自己超时”和“整个任务被取消”：后者不应该包装成观察结果；</li>
+<li>工具必须遵守 <code>ctx</code>，否则超时只是不再等它，goroutine 和它占用的资源还在（2.5 课的进程组就是为了这个）。</li>
+</ul>
+<p>工具调用要不要自动重试，取决于它是否<strong>幂等</strong>。查询类工具可以重试，发邮件、下单不行。这个话题在 3.4 长任务和模块 08 高可用里展开。</p>
+<hr />
+<h2 id="本课小结">本课小结</h2>
+<ol>
+<li>一次模型调用有七八种结局，循环要按归一后的停止原因分别处理；未知的原因一律当错误。</li>
+<li>截断的文本可以有限次续写；截断的工具调用既不能执行也不能续写。</li>
+<li><code>pause_turn</code> 原样发回、不加用户消息；拒绝不要原样重试；窗口满交给压缩。</li>
+<li>预算至少五个维度：步数、工具次数、token、费用、墙钟。费用用整数、向上取整，每次调用前检查。</li>
+<li>预算用完时做一次禁用工具的收尾调用，告诉模型为什么停，并仍然向调用方报告预算错误。</li>
+<li>429 限流、5xx、网络错误重试；4xx 和额度类 429 不重试；用户取消不重试。</li>
+<li>retry-after 是下限，没有时用全抖动指数退避；同时限制次数和总等待，等待要可取消，保留原始错误。</li>
+<li>应用层和 SDK 的重试不要叠加；工具要有超时，超时是观察结果。</li>
+</ol>
+<hr />
+<h2 id="练习今天做完">练习（今天做完）</h2>
+<h3 id="练习-1跑通并读懂">练习 1：跑通并读懂</h3>
+<div class="hl"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>projects/18-loop
+make<span class="w"> </span><span class="nb">test</span>
+</code></pre></div>
+
+<p>回答：</p>
+<ol>
+<li>把 <code>FromAnthropic</code> 的 <code>default</code> 改成 <code>return StopDone</code>，哪个测试会失败？在生产里会造成什么问题？</li>
+<li><code>TestRetryInLoop</code> 里为什么 <code>Spent.Steps</code> 是 1 而不是 3？如果把失败的调用也计入步数，会有什么后果？</li>
+<li><code>TestFinalizeOnBudget</code> 里，为什么收尾成功后仍然返回 <code>BudgetError</code>？</li>
+</ol>
+<h3 id="练习-2硬性的费用上限">练习 2：硬性的费用上限</h3>
+<p>现在的预算是软上限：最后一次调用可能让费用超过 <code>MaxCost</code>。</p>
+<p>要求：给 <code>Budget</code> 加一个 <code>Reserve(s Spent, est Usage, p Price) error</code>，用“已花费 + 这次调用的最坏情况”判断。最坏情况的输入用估算的 token 数（1.6 课），输出用这次请求的 <code>max_tokens</code>。在 <code>Run</code> 里每次调用前，先 <code>Check</code> 再 <code>Reserve</code>。</p>
+<p>测试：已花 9000 微美元，上限 10000；估算 1000 输入、4096 输出（$3 / $15 每百万）应拒绝；100 输入、40 输出应放行。</p>
+<h3 id="练习-3备用模型">练习 3：备用模型</h3>
+<p>Anthropic 文档对 <code>refusal</code> 的建议是在备用模型上重试；连续 529 过载时，换一个供应商也比一直等好。</p>
+<p>要求：<code>Config</code> 加 <code>Fallback Model</code>。主模型返回 <code>StopRefused</code>，或者重试用完后最后一个错误是 529/503 时，换成备用模型重新发这一步（历史不变），整个任务最多切换一次。<code>Result</code> 里记录是否切换过。拒绝的那条消息不要放进历史。</p>
+<p>测试：主模型第一步拒绝，备用模型正常回答，<code>Answer</code> 来自备用模型、历史里没有拒绝的消息；主模型连续 3 次 529 后切到备用模型成功；备用模型也拒绝时返回 <code>ErrRefused</code>，不再切换。</p>
+<hr />
+<h2 id="自测题">自测题</h2>
+<ol>
+<li>列出 Anthropic 的 7 种 <code>stop_reason</code> 和各自的处理方式。OpenAI Responses 怎么判断截断和工具调用？</li>
+<li>为什么未知的停止原因不能当作正常结束？</li>
+<li>截断时什么情况可以续写，什么情况不行？续写为什么要有上限？</li>
+<li><code>pause_turn</code> 应该怎么处理？为什么不加用户消息？</li>
+<li>预算为什么不能只限步数？举出三种步数少但代价大的情况。</li>
+<li>费用为什么用整数、为什么向上取整？“每次调用前检查”为什么只是软上限？</li>
+<li>预算用完时的收尾调用要注意哪三点？</li>
+<li>哪些错误该重试，哪些不该？Anthropic 的花费上限 429 和普通限流 429 怎么区分？</li>
+<li>retry-after 怎么用？为什么退避要加随机？为什么要同时限制次数和总时间？</li>
+<li>应用层和 SDK 都重试会怎样？工具超时为什么要变成观察结果，又怎么和“任务被取消”区分？</li>
+</ol>
+<hr />
+<h1 id="参考答案与详解">参考答案与详解</h1>
+<h2 id="自测题答案">自测题答案</h2>
+<p><strong>1.</strong> <code>end_turn</code> 使用回答；<code>max_tokens</code> 调大或续写；<code>stop_sequence</code> 看是哪个停止序列；<code>tool_use</code> 执行工具返回结果；<code>pause_turn</code> 原样发回继续；<code>refusal</code> 读 <code>stop_details</code>、换备用模型；<code>model_context_window_exceeded</code> 当作截断，交给压缩。OpenAI Responses 看 <code>status</code>：<code>incomplete</code> 且 <code>incomplete_details.reason</code> 为 <code>max_output_tokens</code> 是截断（可能在推理阶段就耗尽，没有可见输出但照样计费），<code>content_filter</code> 是被过滤；<code>completed</code> 时看 output 里有没有 <code>function_call</code> 判断是否要调工具。</p>
+<p><strong>2.</strong> API 会新增停止原因。当成正常结束，新出现的截断、暂停或拒绝的内容就会作为答案交给用户，而且没有任何报错，很难发现。当作错误，日志里马上能看到，补上映射即可。</p>
+<p><strong>3.</strong> 截断的是普通文本时可以续写：半截回答放回历史，要求从断点接着写。截断时有工具调用不行：参数 JSON 不完整，不能执行，续写也接不上。上限是因为有的任务在当前 <code>max_tokens</code> 下本来就写不完，无限续写只会一直花钱，正确做法是调大 <code>max_tokens</code> 或拆分任务。</p>
+<p><strong>4.</strong> 把 assistant 内容原样追加到历史，不加任何用户消息，再发一次请求，服务端会接着跑完剩下的服务端工具循环。加了用户消息就变成新的一轮对话，模型可能放弃没完成的搜索，转而回应这条新消息。</p>
+<p><strong>5.</strong> 步数和代价不成比例。工具返回超长内容，之后每一步都要重发；推理模型一步思考几万 token；一个工具卡住几分钟；一条消息里有很多工具调用，每次都有副作用或按次计费。所以要同时限 token、费用、墙钟和工具次数。</p>
+<p><strong>6.</strong> 浮点数累加有误差，账对不上，用微美元整数存储是计费常规做法。向上取整保证每个 token 都计费，大量小请求不会靠舍入悄悄突破预算。调用前检查只知道已经花了多少，不知道这一次会花多少，最后一次调用可能超出上限；要做成硬上限，需要预估这次的最坏情况（练习 2）。</p>
+<p><strong>7.</strong> 禁用工具（不传 tools 或 <code>tool_choice</code> 设为 none），否则模型会接着调用；明确告诉模型预算用完了，并要求说明没完成的部分，避免它编造；仍然向调用方返回预算错误，标记结果不完整，让界面或用户决定下一步。</p>
+<p><strong>8.</strong> 该重试：429 限流、5xx（500、503、504、529）、408/409、网络错误。不该重试：400、401、403、404、413 等请求本身有问题的错误，额度和花费类 429，以及用户取消。Anthropic 的花费上限 429 类型同样是 <code>rate_limit_error</code>，但没有 <code>retry-after</code> 头，<code>error.details.error_code</code> 是 <code>enforced_spend_limit_reached</code>；判断要靠错误码，因为普通限流也可能没有 retry-after。</p>
+<p><strong>9.</strong> retry-after 当作最小等待时间，至少等这么久再加一点随机。不加随机的话，同时被限流的客户端会在同一时刻重试，再次一起被限流。只限次数，一个很长的 retry-after 会让请求挂很久；只限时间，大量快速失败会打出很多请求。两个都要限，等待还要能被 <code>ctx</code> 取消。</p>
+<p><strong>10.</strong> 次数会相乘（应用层 3 次 × SDK 3 次 = 最坏 9 次），等待时间成倍增加，限流时加重拥堵；要么关掉 SDK 重试，要么把它算进上限。工具超时变成观察结果，模型才能换个做法（缩小范围、换工具），而不是让整个任务失败。区分方法是检查外层 <code>ctx</code>：外层 <code>ctx.Err()</code> 为 nil 而工具返回 <code>DeadlineExceeded</code>，说明是工具自己的超时；外层也出错了，说明是整个任务被取消或超时，应该直接结束循环。</p>
+<h2 id="练习参考答案">练习参考答案</h2>
+<h3 id="练习-1">练习 1</h3>
+<ol>
+<li><code>TestStopMapping</code> 的 <code>something_new</code> 用例会失败（<code>TestRefusedContextUnknown</code> 的 <code>StopUnknown</code> 用例走的是另一条路径，不受影响）。生产里，API 新增一种停止原因时，那种情况下的内容会被当成正常回答交给用户：可能是半截的、可能是暂停中的、可能是拒绝，而且没有任何报错或告警。</li>
+<li>前两次请求失败了，没有产生模型输出，一般也不计费；步数代表“模型做了几步决策”。如果失败也计入步数，一次限流高峰就可能把步数预算耗光，任务明明一步都没做就因为“预算用完”而结束；而且失败率高时步数统计和真实工作量对不上，影响排查和成本分析。</li>
+<li>收尾回答是基于不完整信息给出的。返回 <code>BudgetError</code>（以及 <code>Reason</code> 为 <code>finalized:steps</code>）让调用方知道结果不完整：界面上可以标注，可以提示用户追加预算继续，评测和监控里也能把这类结果和真正完成的任务分开统计。只返回回答、不报错，调用方就会把它当成完整结果。</li>
+</ol>
+<h3 id="练习-2">练习 2</h3>
+<div class="hl"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">b</span><span class="w"> </span><span class="nx">Budget</span><span class="p">)</span><span class="w"> </span><span class="nx">Reserve</span><span class="p">(</span><span class="nx">s</span><span class="w"> </span><span class="nx">Spent</span><span class="p">,</span><span class="w"> </span><span class="nx">est</span><span class="w"> </span><span class="nx">Usage</span><span class="p">,</span><span class="w"> </span><span class="nx">p</span><span class="w"> </span><span class="nx">Price</span><span class="p">)</span><span class="w"> </span><span class="kt">error</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">next</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">s</span>
+<span class="w">    </span><span class="nx">next</span><span class="p">.</span><span class="nx">Usage</span><span class="p">.</span><span class="nx">Add</span><span class="p">(</span><span class="nx">est</span><span class="p">)</span>
+<span class="w">    </span><span class="nx">next</span><span class="p">.</span><span class="nx">Cost</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="nx">p</span><span class="p">.</span><span class="nx">Cost</span><span class="p">(</span><span class="nx">est</span><span class="p">)</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">b</span><span class="p">.</span><span class="nx">MaxTokens</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">next</span><span class="p">.</span><span class="nx">Usage</span><span class="p">.</span><span class="nx">Total</span><span class="p">()</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="nx">b</span><span class="p">.</span><span class="nx">MaxTokens</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">BudgetError</span><span class="p">{</span><span class="s">"tokens"</span><span class="p">,</span><span class="w"> </span><span class="kt">int64</span><span class="p">(</span><span class="nx">next</span><span class="p">.</span><span class="nx">Usage</span><span class="p">.</span><span class="nx">Total</span><span class="p">()),</span><span class="w"> </span><span class="kt">int64</span><span class="p">(</span><span class="nx">b</span><span class="p">.</span><span class="nx">MaxTokens</span><span class="p">)}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">b</span><span class="p">.</span><span class="nx">MaxCost</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">next</span><span class="p">.</span><span class="nx">Cost</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="nx">b</span><span class="p">.</span><span class="nx">MaxCost</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">BudgetError</span><span class="p">{</span><span class="s">"cost"</span><span class="p">,</span><span class="w"> </span><span class="nx">next</span><span class="p">.</span><span class="nx">Cost</span><span class="p">,</span><span class="w"> </span><span class="nx">b</span><span class="p">.</span><span class="nx">MaxCost</span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>注意单位：价格是“每百万 token 的微美元”。<code>Price{Input: 3_000_000, Output: 15_000_000}</code> 下，1000 输入、4096 输出的最坏费用是 (1000 × 3e6 + 4096 × 15e6) / 1e6 = 64440 微美元，远超剩余的 1000，拒绝；100 输入、40 输出是 900 微美元，放行。</p>
+<p>在 <code>Run</code> 里，<code>Check</code> 之后、<code>call</code> 之前调用 <code>Reserve</code>。估算的输入 token 可以用 1.6 课的估算函数，或者各家的 token 计数接口；输出用 <code>max_tokens</code>，推理模型要把推理预算算进去。这样做偏保守：模型通常用不满 <code>max_tokens</code>，所以剩余预算较少时会提前停下。可以在预算不够时调小这一次的 <code>max_tokens</code>，而不是直接拒绝。</p>
+<h3 id="练习-3">练习 3</h3>
+<div class="hl"><pre><span></span><code><span class="c1">// Config 增加：</span>
+<span class="nx">Fallback</span><span class="w"> </span><span class="nx">Model</span>
+
+<span class="c1">// Result 增加：</span>
+<span class="nx">UsedFallback</span><span class="w"> </span><span class="kt">bool</span>
+
+<span class="c1">// Run 里，调用模型的地方：</span>
+<span class="nx">model</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">cfg</span><span class="p">.</span><span class="nx">Model</span>
+<span class="nx">switched</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="kc">false</span>
+<span class="p">...</span>
+<span class="nx">r</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">callWith</span><span class="p">(</span><span class="nx">model</span><span class="p">,</span><span class="w"> </span><span class="nx">CallOpts</span><span class="p">{})</span>
+<span class="k">if</span><span class="w"> </span><span class="o">!</span><span class="nx">switched</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">cfg</span><span class="p">.</span><span class="nx">Fallback</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">shouldFallback</span><span class="p">(</span><span class="nx">r</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">switched</span><span class="p">,</span><span class="w"> </span><span class="nx">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="nx">cfg</span><span class="p">.</span><span class="nx">Fallback</span>
+<span class="w">    </span><span class="nx">r</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">callWith</span><span class="p">(</span><span class="nx">model</span><span class="p">,</span><span class="w"> </span><span class="nx">CallOpts</span><span class="p">{})</span><span class="w"> </span><span class="c1">// 历史 h 没变，拒绝的消息没有追加</span>
+<span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="nx">shouldFallback</span><span class="p">(</span><span class="nx">r</span><span class="w"> </span><span class="nx">Response</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">Stop</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nx">StopRefused</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nx">ae</span><span class="w"> </span><span class="o">*</span><span class="nx">APIError</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">errors</span><span class="p">.</span><span class="nx">As</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">ae</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="p">(</span><span class="nx">ae</span><span class="p">.</span><span class="nx">Status</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">529</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nx">ae</span><span class="p">.</span><span class="nx">Status</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">503</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>要点：<code>call</code> 改成接收模型参数；切换后后续步骤都用备用模型（<code>model</code> 变量在循环外）；<code>switched</code> 保证最多切一次，备用模型也拒绝时走正常的 <code>StopRefused</code> 分支返回 <code>ErrRefused</code>。注意两家模型的消息格式不同，跨供应商切换时适配层要把历史转换过去（1.2 课），推理块之类不能跨供应商的内容要去掉；跨模型切换还会让 Prompt Cache 失效（1.5 课），第一次调用的费用会明显偏高。Anthropic 文档有一节专门讲换备用模型时怎样避免缓存费用付两次。</p>
+<hr />
+<h2 id="完成标准">完成标准</h2>
+<ul>
+<li><code>make test</code> 全部通过（14 个测试）；</li>
+<li>练习 1 的三个问题能讲清楚；</li>
+<li>练习 2 的 <code>Reserve</code> 写完并接入 <code>Run</code>，测试覆盖拒绝和放行两种情况；</li>
+<li>练习 3 的备用模型写完，拒绝、过载切换和“最多切一次”三个用例都有测试；</li>
+<li>自测题 10 道能不看答案讲出来，尤其是第 3、6、8、9 题。</li>
+</ul>
+    <nav class="pager"><a class="prev" href="03-01-react-plan-reflexion.html"><span>← 上一课 3.1</span>ReAct、Plan-and-Execute、Reflexion</a></nav>
+    <p class="foot">© 2026 duang777 · 课件源文件：<a href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/notes/03-agents/02-agent-loop.md">notes/03-agents/02-agent-loop.md</a></p>
+  </article>
+</div>
+<script>
+document.getElementById("theme-toggle").addEventListener("click",function(){var r=document.documentElement,n=r.getAttribute("data-theme")==="light"?"dark":"light";r.setAttribute("data-theme",n);try{localStorage.setItem("x-theme",n)}catch(e){}});
+document.querySelectorAll('article pre').forEach(function(pre){
+  var b=document.createElement('button');b.className='code__copy';b.textContent='复制';
+  b.onclick=function(){navigator.clipboard.writeText(pre.innerText).then(function(){b.textContent='已复制';setTimeout(function(){b.textContent='复制'},1200)})};
+  pre.parentNode.insertBefore(b,pre);
+});
+var links=[].slice.call(document.querySelectorAll('.toc a')),map={};
+links.forEach(function(a){map[decodeURIComponent(a.getAttribute('href').slice(1))]=a});
+var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting&&map[e.target.id]){links.forEach(function(l){l.classList.remove('on')});map[e.target.id].classList.add('on')}})},{rootMargin:'-80px 0px -70% 0px'});
+document.querySelectorAll('article h1[id],article h2[id]').forEach(function(h){io.observe(h)});
+</script>
+</body>
+</html>

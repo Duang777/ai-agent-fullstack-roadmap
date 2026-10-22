@@ -263,14 +263,14 @@
         <section class="stats" data-reveal>
           <div class="stat"><span class="stat__fig x-mono">14</span><span class="stat__label">模块</span></div>
           <div class="stat"><span class="stat__fig x-mono">84</span><span class="stat__label">知识点</span></div>
-          <div class="stat"><span class="stat__fig x-mono">Day 12</span><span class="stat__label">今天</span></div>
+          <div class="stat"><span class="stat__fig x-mono">Day 13</span><span class="stat__label">今天</span></div>
           <div class="stat"><span class="stat__fig x-mono">15/84</span><span class="stat__label">已完成</span></div>
         </section>
 
         <section class="section" id="progress" data-nav="进度">
           <div class="head" data-reveal>
             <p class="head__eyebrow x-kicker">当前进度</p>
-            <h2 class="x-h2">00 基础功底、01 LLM 原理与使用全部完成；02 工具调用与协议：2.1 Function Calling、2.2 MCP、2.3 A2A 已完成，2.4、2.5 练习进行中，模块 03 Agent 架构开课。</h2>
+            <h2 class="x-h2">00 基础功底、01 LLM 原理与使用全部完成；02 工具调用与协议：2.1 Function Calling、2.2 MCP、2.3 A2A 已完成，2.4、2.5、3.1 练习进行中，模块 03 进入 Agent Loop。</h2>
             <p class="head__sub">学完且有笔记或代码产出，才在 ROADMAP 里打勾。</p>
           </div>
           <div class="x-progress" data-reveal>
@@ -620,6 +620,25 @@
                 <dd><span class="chip x-chip x-chip--live">进行中</span></dd>
               </dl>
             </article>
+            <article class="step">
+              <div class="step__intro">
+                <p class="step__num x-step-num">3.2</p>
+                <p class="step__eyebrow">进行中 · 03 Agent 架构</p>
+              </div>
+              <div>
+                <h3>Agent Loop 设计：停止条件、预算、重试</h3>
+                <p class="sub">停止原因归一与逐个处理（截断续写、pause_turn、拒绝、窗口满）、五维预算与收尾调用、可重试错误分类、全抖动退避与 retry-after、工具超时。</p>
+                <div class="links" style="margin-top: 16px">
+                  <a class="x-btn x-btn--primary" href="notes/03-02-agent-loop.html">在线阅读</a>
+                </div>
+              </div>
+              <dl class="step__panel">
+                <dt>课件</dt>
+                <dd><span class="chip x-chip x-chip--done">已完成</span></dd>
+                <dt>练习</dt>
+                <dd><span class="chip x-chip x-chip--live">进行中</span></dd>
+              </dl>
+            </article>
           </div>
         </section>
 
@@ -630,6 +649,21 @@
           </div>
           <ol class="timeline" data-reveal>
             <li class="is-current">
+              <p class="timeline__when"><span class="x-mono">Day 13 · 2026-10-22</span></p>
+              <div class="timeline__what">
+                <p><strong>Agent Loop：什么时候停、花多少、失败了怎么办</strong></p>
+                <ul>
+                  <li>未知的 stop_reason 当错误，别当正常结束</li>
+                  <li>截断的文本能续写，截断的工具调用只能报错</li>
+                  <li>只限步数不够：token、费用、墙钟、工具次数都要限</li>
+                  <li>预算用完给一次禁用工具的收尾调用，但仍然报不完整</li>
+                  <li>花费上限的 429 重试一万次也没用，要看错误码</li>
+                </ul>
+                <p class="x-think">思考：你的 SDK 默认重试几次？外面又包了几层？</p>
+              </div>
+              <p><a class="x-btn x-btn--ghost" href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/logs/2026-10-22.md" target="_blank" rel="noopener">日志</a></p>
+            </li>
+            <li>
               <p class="timeline__when"><span class="x-mono">Day 12 · 2026-10-20</span></p>
               <div class="timeline__what">
                 <p><strong>三种 Agent 模式：每一步想、先全想好、做完再想</strong></p>
