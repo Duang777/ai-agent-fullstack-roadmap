@@ -41,6 +41,7 @@ LESSONS = [
     ("notes/02-tools/05-code-sandbox.md", "02-05-code-sandbox", "2.5", "Code Execution 沙箱（E2B、Docker、gVisor）", "4–5 小时"),
     ("notes/03-agents/01-react-plan-reflexion.md", "03-01-react-plan-reflexion", "3.1", "ReAct、Plan-and-Execute、Reflexion", "3–4 小时"),
     ("notes/03-agents/02-agent-loop.md", "03-02-agent-loop", "3.2", "Agent Loop 设计：停止条件、预算、重试", "3–4 小时"),
+    ("notes/03-agents/03-multi-agent.md", "03-03-multi-agent", "3.3", "多智能体：Supervisor、Handoff、Swarm", "3–4 小时"),
 ]
 
 CSS = r"""

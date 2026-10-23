@@ -263,14 +263,14 @@
         <section class="stats" data-reveal>
           <div class="stat"><span class="stat__fig x-mono">14</span><span class="stat__label">模块</span></div>
           <div class="stat"><span class="stat__fig x-mono">84</span><span class="stat__label">知识点</span></div>
-          <div class="stat"><span class="stat__fig x-mono">Day 13</span><span class="stat__label">今天</span></div>
+          <div class="stat"><span class="stat__fig x-mono">Day 14</span><span class="stat__label">今天</span></div>
           <div class="stat"><span class="stat__fig x-mono">15/84</span><span class="stat__label">已完成</span></div>
         </section>
 
         <section class="section" id="progress" data-nav="进度">
           <div class="head" data-reveal>
             <p class="head__eyebrow x-kicker">当前进度</p>
-            <h2 class="x-h2">00 基础功底、01 LLM 原理与使用全部完成；02 工具调用与协议：2.1 Function Calling、2.2 MCP、2.3 A2A 已完成，2.4、2.5、3.1 练习进行中，模块 03 进入 Agent Loop。</h2>
+            <h2 class="x-h2">00 基础功底、01 LLM 原理与使用全部完成；02 工具调用与协议：2.1 Function Calling、2.2 MCP、2.3 A2A 已完成，2.4–3.2 练习进行中，模块 03 进入多智能体。</h2>
             <p class="head__sub">学完且有笔记或代码产出，才在 ROADMAP 里打勾。</p>
           </div>
           <div class="x-progress" data-reveal>
@@ -639,6 +639,25 @@
                 <dd><span class="chip x-chip x-chip--live">进行中</span></dd>
               </dl>
             </article>
+            <article class="step">
+              <div class="step__intro">
+                <p class="step__num x-step-num">3.3</p>
+                <p class="step__eyebrow">进行中 · 03 Agent 架构</p>
+              </div>
+              <div>
+                <h3>多智能体：Supervisor、Handoff、Swarm</h3>
+                <p class="sub">何时值得用多智能体、agents as tools 的上下文隔离与并行、transfer_to_ 转交与历史过滤、来回转交上限、Swarm 跨轮保留活跃 agent、共享预算与按 agent 记账。</p>
+                <div class="links" style="margin-top: 16px">
+                  <a class="x-btn x-btn--primary" href="notes/03-03-multi-agent.html">在线阅读</a>
+                </div>
+              </div>
+              <dl class="step__panel">
+                <dt>课件</dt>
+                <dd><span class="chip x-chip x-chip--done">已完成</span></dd>
+                <dt>练习</dt>
+                <dd><span class="chip x-chip x-chip--live">进行中</span></dd>
+              </dl>
+            </article>
           </div>
         </section>
 
@@ -649,6 +668,21 @@
           </div>
           <ol class="timeline" data-reveal>
             <li class="is-current">
+              <p class="timeline__when"><span class="x-mono">Day 14 · 2026-10-23</span></p>
+              <div class="timeline__what">
+                <p><strong>多智能体：主管派活，还是把对话交出去</strong></p>
+                <ul>
+                  <li>多智能体约 15 倍于聊天的 token，有效主要因为花得起 token</li>
+                  <li>子 agent 只看任务描述：目标、格式、工具来源、边界缺一不可</li>
+                  <li>转交就是 transfer_to_ 工具，一条消息只认第一个</li>
+                  <li>Swarm：下一句话直接给上次接手的 agent</li>
+                  <li>预算共享、按 agent 记账，否则不知道钱花在谁身上</li>
+                </ul>
+                <p class="x-think">思考：你手上的任务，真的能拆成互不依赖的几块吗？</p>
+              </div>
+              <p><a class="x-btn x-btn--ghost" href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/logs/2026-10-23.md" target="_blank" rel="noopener">日志</a></p>
+            </li>
+            <li>
               <p class="timeline__when"><span class="x-mono">Day 13 · 2026-10-22</span></p>
               <div class="timeline__what">
                 <p><strong>Agent Loop：什么时候停、花多少、失败了怎么办</strong></p>
