@@ -86,6 +86,7 @@
 | 3.1 | ReAct、Plan-and-Execute、Reflexion | Workflow 与 Agent 的区分；ReAct 循环（取消、调用与结果配对、工具错误变观察、步数上限）与文本格式的坑；Plan-and-Solve、ReWOO 的 #E 引用、LLMCompiler 并行；计划校验、按依赖分波、失败重规划不重跑；Reflexion 的反思记忆与评估信号；三种模式的取舍与组合 | [课件](notes/03-agents/01-react-plan-reflexion.md) | [`17-patterns`](projects/17-patterns) | ✅ 完成 |
 | 3.2 | Agent Loop 设计：停止条件、预算、重试 | Anthropic stop_reason 与 OpenAI incomplete_details 归一成 7 种；截断续写与半截工具调用、pause_turn 原样发回、拒绝与窗口满；步数 / 工具次数 / token / 费用 / 墙钟五维预算、整数计费、收尾调用；可重试错误分类与额度类 429、全抖动退避、retry-after 下限、总等待上限、SDK 重试叠加；工具超时 | [课件](notes/03-agents/02-agent-loop.md) | [`18-loop`](projects/18-loop) | ✅ 完成 |
 | 3.3 | 多智能体：Supervisor、Handoff、Swarm | 何时值得用多智能体（约 15 倍 token、Anthropic 研究系统 +90.2%）；agents as tools：上下文隔离、任务描述四要素、禁止转交、嵌套深度、并行子 agent；Handoff：transfer_to_ 工具、历史过滤 remove_all_tools、只认第一个转交、来回转交上限；Swarm 活跃 agent 跨轮保留；共享预算与按 agent 记账 | [课件](notes/03-agents/03-multi-agent.md) | [`19-multiagent`](projects/19-multiagent) | ✅ 完成 |
+| 3.4 | 长任务 Agent：检查点、可恢复执行、Human-in-the-loop | 三种“长”：进程崩溃、等人、跨上下文窗口；检查点存什么、何时存、seq 乐观锁与认领；三个崩溃时刻与账本 + 幂等键；LangGraph interrupt / OpenAI needs_approval + RunState / Genkit Go 1.14 可恢复工具；fail closed、拒绝即工具结果、部分决定、过期按拒绝、版本；Anthropic 进度文件 + JSON 功能清单 | [课件](notes/03-agents/04-long-running.md) | [`20-longrun`](projects/20-longrun) | 📖 学习中 |
 
 ### 全部模块
 
@@ -179,6 +180,9 @@ cd projects/18-loop && make test
 
 # 3.3 多智能体：Supervisor、Handoff、Swarm
 cd projects/19-multiagent && make test
+
+# 3.4 长任务 Agent：检查点、可恢复执行、Human-in-the-loop
+cd projects/20-longrun && make test
 ```
 
 推荐学习方式：先读课件 → 关掉参考答案自己写练习 → 跑测试 → 再对照参考实现。

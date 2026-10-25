@@ -263,14 +263,14 @@
         <section class="stats" data-reveal>
           <div class="stat"><span class="stat__fig x-mono">14</span><span class="stat__label">模块</span></div>
           <div class="stat"><span class="stat__fig x-mono">84</span><span class="stat__label">知识点</span></div>
-          <div class="stat"><span class="stat__fig x-mono">Day 14</span><span class="stat__label">今天</span></div>
+          <div class="stat"><span class="stat__fig x-mono">Day 15</span><span class="stat__label">今天</span></div>
           <div class="stat"><span class="stat__fig x-mono">20/84</span><span class="stat__label">已完成</span></div>
         </section>
 
         <section class="section" id="progress" data-nav="进度">
           <div class="head" data-reveal>
             <p class="head__eyebrow x-kicker">当前进度</p>
-            <h2 class="x-h2">00 基础功底、01 LLM 原理与使用、02 工具调用与协议全部完成；03 Agent 架构已完成 3.1–3.3。</h2>
+            <h2 class="x-h2">00 基础功底、01 LLM 原理与使用、02 工具调用与协议全部完成；03 Agent 架构已完成 3.1–3.3，3.4 长任务练习进行中。</h2>
             <p class="head__sub">学完且有笔记或代码产出，才在 ROADMAP 里打勾。</p>
           </div>
           <div class="x-progress" data-reveal>
@@ -658,6 +658,25 @@
                 <dd><span class="chip x-chip x-chip--done">已完成</span></dd>
               </dl>
             </article>
+            <article class="step">
+              <div class="step__intro">
+                <p class="step__num x-step-num">3.4</p>
+                <p class="step__eyebrow">进行中 · 03 Agent 架构</p>
+              </div>
+              <div>
+                <h3>长任务 Agent：检查点、可恢复执行、Human-in-the-loop</h3>
+                <p class="sub">检查点存什么、何时存、seq 乐观锁；三个崩溃时刻与账本加幂等键；LangGraph、OpenAI Agents SDK、Genkit Go 1.14 的暂停与恢复；审批的 fail closed、部分决定、过期与版本；跨上下文窗口的进度文件。</p>
+                <div class="links" style="margin-top: 16px">
+                  <a class="x-btn x-btn--primary" href="notes/03-04-long-running.html">在线阅读</a>
+                </div>
+              </div>
+              <dl class="step__panel">
+                <dt>课件</dt>
+                <dd><span class="chip x-chip x-chip--done">已完成</span></dd>
+                <dt>练习</dt>
+                <dd><span class="chip x-chip x-chip--live">进行中</span></dd>
+              </dl>
+            </article>
           </div>
         </section>
 
@@ -668,6 +687,21 @@
           </div>
           <ol class="timeline" data-reveal>
             <li class="is-current">
+              <p class="timeline__when"><span class="x-mono">Day 15 · 2026-10-25</span></p>
+              <div class="timeline__what">
+                <p><strong>长任务 Agent：崩了能接着跑，停下来等人</strong></p>
+                <ul>
+                  <li>2.4–3.3 练习完成，进度 20/84，模块 02 完成</li>
+                  <li>每次模型调用、每个工具结果后都写检查点，只存数据</li>
+                  <li>Resume 先用 seq 认领，两个“同意”只有一个生效</li>
+                  <li>工具生效了但没收到结果，只有幂等键能防重复</li>
+                  <li>审批解析不了就转人工，过期按拒绝，拒绝也要回给模型</li>
+                </ul>
+                <p class="x-think">思考：你的 agent 现在被 kill -9，哪些工具会被执行两次？</p>
+              </div>
+              <p><a class="x-btn x-btn--ghost" href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/logs/2026-10-25.md" target="_blank" rel="noopener">日志</a></p>
+            </li>
+            <li>
               <p class="timeline__when"><span class="x-mono">Day 14 · 2026-10-23</span></p>
               <div class="timeline__what">
                 <p><strong>多智能体：主管派活，还是把对话交出去</strong></p>
