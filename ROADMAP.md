@@ -37,13 +37,13 @@
 - [x] Function Calling / Tool Use 机制与并行调用
 - [x] MCP（Model Context Protocol）：Server/Client、Tools/Resources/Prompts
 - [x] A2A（Agent-to-Agent）协议
-- [ ] Computer Use / Browser Use 代理
-- [ ] Code Execution 沙箱（E2B、Docker、gVisor）
+- [x] Computer Use / Browser Use 代理
+- [x] Code Execution 沙箱（E2B、Docker、gVisor）
 
 ## 3. Agent 架构
-- [ ] ReAct、Plan-and-Execute、Reflexion
-- [ ] Agent Loop 设计：停止条件、预算、重试
-- [ ] 多智能体：Supervisor、Handoff、Swarm
+- [x] ReAct、Plan-and-Execute、Reflexion
+- [x] Agent Loop 设计：停止条件、预算、重试
+- [x] 多智能体：Supervisor、Handoff、Swarm
 - [ ] 长任务 Agent：检查点、可恢复执行、Human-in-the-loop
 - [ ] Agent 状态与数据模型：会话 / 消息 / run / step / 工具调用的存储设计、事件溯源、完整重放
 - [ ] Coding Agent 架构（Claude Code / Codex / SWE-agent 拆解）

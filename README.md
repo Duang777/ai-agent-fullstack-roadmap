@@ -9,7 +9,7 @@
 用 Go / TypeScript 写 Agent 运行时，用 Python 读懂模型生态。<br/>
 每一课都有课件、可运行练习、测试和参考答案。
 
-[![Progress](https://img.shields.io/badge/progress-15%2F84-111111?style=flat-square)](ROADMAP.md)
+[![Progress](https://img.shields.io/badge/progress-20%2F84-111111?style=flat-square)](ROADMAP.md)
 [![CI](https://github.com/Duang777/ai-agent-fullstack-roadmap/actions/workflows/ci.yml/badge.svg)](https://github.com/Duang777/ai-agent-fullstack-roadmap/actions/workflows/ci.yml)
 [![Go](https://img.shields.io/badge/Go-1.23+-111111?style=flat-square&logo=go&logoColor=white)](projects/00-stream-proxy)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-111111?style=flat-square&logo=typescript&logoColor=white)](projects/01-ts-agent-core)
@@ -76,16 +76,16 @@
 | 2.1 | Function Calling / Tool Use | 五步流程；两家的定义、调用与结果格式（arguments 字符串 vs input 对象、call_id vs tool_use_id）；strict 与 tool_choice；并行调用的回传规则；只读并发、去重、副作用串行失败即停；错误变结果；流式参数按 index 拼接；工具设计 | [课件](notes/02-tools/01-function-calling.md) | [`12-tools`](projects/12-tools) | ✅ 完成 |
 | 2.2 | MCP（Model Context Protocol） | Host / Client / Server 与 Function Calling 的分工；Tools / Resources / Prompts 由谁控制；2026-07-28 无状态设计（每请求 `_meta`、`server/discover`、显式句柄）；协议错误 vs 工具执行错误；多轮请求与 requestState 签名；stdio 与 Streamable HTTP（镜像头、Origin）；多 Server 聚合与安全 | [课件](notes/02-tools/02-mcp.md) | [`13-mcp`](projects/13-mcp) | ✅ 完成 |
 | 2.3 | A2A（Agent-to-Agent）协议 | 与 MCP、Function Calling 的分层；Agent Card 发现与接口选择；任务状态机（终态 / 中断态）；contextId 与 taskId 规则、input-required 多轮；messageId 幂等；阻塞、returnImmediately、SSE 流、推送；版本头；把远程 Agent 包装成工具 | [课件](notes/02-tools/03-a2a.md) | [`14-a2a`](projects/14-a2a) | ✅ 完成 |
-| 2.4 | Computer Use / Browser Use 代理 | API、可访问性树、截图坐标、代码执行四条路线的取舍；三家接口（Anthropic 工具集、OpenAI computer_call、Gemini computer_use）；截图缩放与坐标换算；批量动作顺序执行与中止；每个动作执行前检查（布局移动）；网址白名单与隐藏文字注入；元素引用生命周期；截图历史修剪与缓存；步数上限与结果核验 | [课件](notes/02-tools/04-computer-use.md) | [`15-computer-use`](projects/15-computer-use) | 📖 学习中 |
-| 2.5 | Code Execution 沙箱（E2B、Docker、gVisor） | 三家自带代码执行（Anthropic code_execution、OpenAI code_interpreter、Gemini code_execution）与 E2B 的取舍；威胁模型；进程、容器、gVisor、微虚拟机四层隔离；加固 docker run 与危险参数；出站白名单规则；进程组超时、环境变量白名单、CPU / 文件大小限制与 set -e；输出保留头尾、产物只收普通文件；代码错误与环境失败分开回给模型；沙箱续期、暂停与销毁 | [课件](notes/02-tools/05-code-sandbox.md) | [`16-sandbox`](projects/16-sandbox) | 📖 学习中 |
+| 2.4 | Computer Use / Browser Use 代理 | API、可访问性树、截图坐标、代码执行四条路线的取舍；三家接口（Anthropic 工具集、OpenAI computer_call、Gemini computer_use）；截图缩放与坐标换算；批量动作顺序执行与中止；每个动作执行前检查（布局移动）；网址白名单与隐藏文字注入；元素引用生命周期；截图历史修剪与缓存；步数上限与结果核验 | [课件](notes/02-tools/04-computer-use.md) | [`15-computer-use`](projects/15-computer-use) | ✅ 完成 |
+| 2.5 | Code Execution 沙箱（E2B、Docker、gVisor） | 三家自带代码执行（Anthropic code_execution、OpenAI code_interpreter、Gemini code_execution）与 E2B 的取舍；威胁模型；进程、容器、gVisor、微虚拟机四层隔离；加固 docker run 与危险参数；出站白名单规则；进程组超时、环境变量白名单、CPU / 文件大小限制与 set -e；输出保留头尾、产物只收普通文件；代码错误与环境失败分开回给模型；沙箱续期、暂停与销毁 | [课件](notes/02-tools/05-code-sandbox.md) | [`16-sandbox`](projects/16-sandbox) | ✅ 完成 |
 
 ### 03 · Agent 架构
 
 | # | 主题 | 核心内容 | 课件 | 练习 | 状态 |
 |---|---|---|---|---|---|
-| 3.1 | ReAct、Plan-and-Execute、Reflexion | Workflow 与 Agent 的区分；ReAct 循环（取消、调用与结果配对、工具错误变观察、步数上限）与文本格式的坑；Plan-and-Solve、ReWOO 的 #E 引用、LLMCompiler 并行；计划校验、按依赖分波、失败重规划不重跑；Reflexion 的反思记忆与评估信号；三种模式的取舍与组合 | [课件](notes/03-agents/01-react-plan-reflexion.md) | [`17-patterns`](projects/17-patterns) | 📖 学习中 |
-| 3.2 | Agent Loop 设计：停止条件、预算、重试 | Anthropic stop_reason 与 OpenAI incomplete_details 归一成 7 种；截断续写与半截工具调用、pause_turn 原样发回、拒绝与窗口满；步数 / 工具次数 / token / 费用 / 墙钟五维预算、整数计费、收尾调用；可重试错误分类与额度类 429、全抖动退避、retry-after 下限、总等待上限、SDK 重试叠加；工具超时 | [课件](notes/03-agents/02-agent-loop.md) | [`18-loop`](projects/18-loop) | 📖 学习中 |
-| 3.3 | 多智能体：Supervisor、Handoff、Swarm | 何时值得用多智能体（约 15 倍 token、Anthropic 研究系统 +90.2%）；agents as tools：上下文隔离、任务描述四要素、禁止转交、嵌套深度、并行子 agent；Handoff：transfer_to_ 工具、历史过滤 remove_all_tools、只认第一个转交、来回转交上限；Swarm 活跃 agent 跨轮保留；共享预算与按 agent 记账 | [课件](notes/03-agents/03-multi-agent.md) | [`19-multiagent`](projects/19-multiagent) | 📖 学习中 |
+| 3.1 | ReAct、Plan-and-Execute、Reflexion | Workflow 与 Agent 的区分；ReAct 循环（取消、调用与结果配对、工具错误变观察、步数上限）与文本格式的坑；Plan-and-Solve、ReWOO 的 #E 引用、LLMCompiler 并行；计划校验、按依赖分波、失败重规划不重跑；Reflexion 的反思记忆与评估信号；三种模式的取舍与组合 | [课件](notes/03-agents/01-react-plan-reflexion.md) | [`17-patterns`](projects/17-patterns) | ✅ 完成 |
+| 3.2 | Agent Loop 设计：停止条件、预算、重试 | Anthropic stop_reason 与 OpenAI incomplete_details 归一成 7 种；截断续写与半截工具调用、pause_turn 原样发回、拒绝与窗口满；步数 / 工具次数 / token / 费用 / 墙钟五维预算、整数计费、收尾调用；可重试错误分类与额度类 429、全抖动退避、retry-after 下限、总等待上限、SDK 重试叠加；工具超时 | [课件](notes/03-agents/02-agent-loop.md) | [`18-loop`](projects/18-loop) | ✅ 完成 |
+| 3.3 | 多智能体：Supervisor、Handoff、Swarm | 何时值得用多智能体（约 15 倍 token、Anthropic 研究系统 +90.2%）；agents as tools：上下文隔离、任务描述四要素、禁止转交、嵌套深度、并行子 agent；Handoff：transfer_to_ 工具、历史过滤 remove_all_tools、只认第一个转交、来回转交上限；Swarm 活跃 agent 跨轮保留；共享预算与按 agent 记账 | [课件](notes/03-agents/03-multi-agent.md) | [`19-multiagent`](projects/19-multiagent) | ✅ 完成 |
 
 ### 全部模块
 
@@ -95,8 +95,8 @@
 |---|---|---|---|
 | A | 00 基础功底 | Go / TS / Python、流式协议、工程基础、数据库与缓存 | `██████` 6/6 |
 | A | 01 LLM 原理与使用 | Transformer、主流 API、结构化输出、推理模型、Prompt Caching | `██████` 6/6 |
-| A | 02 工具调用与协议 | Function Calling、MCP、A2A、Computer Use、代码沙箱 | `███░░` 3/5 |
-| B | 03 Agent 架构 | ReAct、Agent Loop、多智能体、长任务、状态与数据模型、Coding / Deep Research Agent | `░░░░░░░` 0/7 |
+| A | 02 工具调用与协议 | Function Calling、MCP、A2A、Computer Use、代码沙箱 | `█████` 5/5 |
+| B | 03 Agent 架构 | ReAct、Agent Loop、多智能体、长任务、状态与数据模型、Coding / Deep Research Agent | `███░░░░` 3/7 |
 | B | 04 框架与 SDK | LangGraph、OpenAI / Claude Agent SDK、Eino、Vercel AI SDK、Mastra | `░░░░░░` 0/6 |
 | B | 05 记忆与检索 | 向量库、混合检索、Rerank、GraphRAG、记忆、检索评测 | `░░░░░` 0/5 |
 | C | 06 评测体系 | 测试工程、任务集构造、pass^k、LLM-as-Judge 校准、SWE-bench / τ²-bench、CI 门禁、模型版本迁移、A/B | `░░░░░░░░░` 0/9 |
