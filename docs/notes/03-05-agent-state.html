@@ -1,0 +1,798 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>3.5 Agent 状态与数据模型：会话、消息、run、step、工具调用，事件溯源与完整重放 · AI Agent 全栈</title>
+<meta name="description" content="3.5 Agent 状态与数据模型：会话、消息、run、step、工具调用，事件溯源与完整重放。duang777 的 AI Agent 全栈公开学习课件。" />
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("x-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
+<style>
+:root{
+  --bg:#0a0a0a;--surface:#111;--text:#ededed;--text-2:#a1a1a1;--text-3:rgb(255 255 255/.4);
+  --line:rgb(255 255 255/.1);--line-2:rgb(255 255 255/.06);
+  --body:#d4d4d4;--code-bg:#1a1a1a;--pre-bg:#0f0f0f;--nav-bg:rgb(10 10 10/.8);--sb:#2a2a2a;--sb-h:#3a3a3a;
+  --sans:Inter,-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei","Helvetica Neue",sans-serif;
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+}
+*{box-sizing:border-box}
+html{color-scheme:dark}
+:root[data-theme="light"]{--bg:#fff;--surface:#fafafa;--text:#0a0a0a;--text-2:#555;--text-3:rgb(0 0 0/.42);--line:rgb(0 0 0/.1);--line-2:rgb(0 0 0/.06);--body:#333;--code-bg:#f2f2f2;--pre-bg:#fafafa;--nav-bg:rgb(255 255 255/.85);--sb:#d4d4d4;--sb-h:#bdbdbd}
+:root[data-theme="light"]{color-scheme:light}
+.toc{scrollbar-width:none}.toc::-webkit-scrollbar{display:none}
+html{scrollbar-width:thin;scrollbar-color:var(--sb) transparent}
+::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--sb);border-radius:8px}::-webkit-scrollbar-thumb:hover{background:var(--sb-h)}
+html{scroll-behavior:smooth;scroll-padding-top:80px}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;line-height:1.8;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+.nav{position:sticky;top:0;z-index:10;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;border-bottom:1px solid var(--line);background:var(--nav-bg);backdrop-filter:blur(12px)}
+.nav__brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-size:14px;font-weight:500}
+.nav__dot{width:10px;height:10px;border-radius:3px;background:var(--text)}
+.nav__links{display:flex;gap:20px;font-size:14px;color:var(--text-2)}
+.nav__links a{text-decoration:none}.nav__links a:hover{color:var(--text)}
+.wrap{max-width:1200px;margin:0 auto;padding:0 24px;display:grid;grid-template-columns:220px minmax(0,1fr);gap:56px}
+.toc{position:sticky;top:80px;align-self:start;max-height:calc(100vh - 100px);overflow:auto;padding:40px 0 40px;font-size:13px;line-height:1.6}
+.toc__label{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--text-3);text-transform:uppercase;margin-bottom:12px}
+.toc ul{list-style:none;margin:0;padding:0}
+.toc li{margin:0}
+.toc a{display:block;padding:4px 0 4px 12px;border-left:1px solid var(--line);color:var(--text-2);text-decoration:none}
+.toc a:hover,.toc a.on{color:var(--text);border-left-color:var(--text)}
+.toc ul ul a{padding-left:24px;font-size:12.5px;color:var(--text-3)}
+.toc ul ul a:hover,.toc ul ul a.on{color:var(--text)}
+article{min-width:0;max-width:760px;padding:48px 0 96px}
+.meta{font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--text-3);margin-bottom:16px}
+article h1.title{font-size:40px;line-height:1.2;letter-spacing:-.02em;font-weight:600;margin:0 0 24px}
+article h1{font-size:28px;line-height:1.3;letter-spacing:-.01em;font-weight:600;margin:72px 0 20px;padding-top:32px;border-top:1px solid var(--line)}
+article h2{font-size:22px;line-height:1.4;font-weight:600;margin:48px 0 16px}
+article h3{font-size:18px;font-weight:600;margin:36px 0 12px}
+article h4{font-size:16px;font-weight:600;margin:28px 0 8px}
+article p{margin:0 0 18px;color:var(--body)}
+article strong{color:var(--text);font-weight:600}
+article ul,article ol{padding-left:22px;margin:0 0 18px;color:var(--body)}
+article li{margin:4px 0}
+article a{text-decoration:underline;text-decoration-color:var(--text-3);text-underline-offset:3px}
+article a:hover{text-decoration-color:var(--text)}
+article hr{border:0;border-top:1px solid var(--line);margin:48px 0}
+article blockquote{margin:0 0 20px;padding:12px 18px;border-left:2px solid var(--text-2);background:var(--surface);border-radius:0 8px 8px 0;color:var(--text-2)}
+article blockquote p{margin:6px 0;color:var(--text-2)}
+article code{font-family:var(--mono);font-size:.88em;background:var(--code-bg);border:1px solid var(--line-2);border-radius:5px;padding:1px 6px}
+article pre{position:relative;margin:0 0 22px;padding:16px 18px;background:var(--pre-bg);border:1px solid var(--line);border-radius:10px;overflow:auto;font-size:13.5px;line-height:1.65}
+article pre code{background:none;border:0;padding:0;font-size:inherit}
+.code{position:relative}
+.code__lang{position:absolute;top:8px;right:46px;font-family:var(--mono);font-size:11px;color:var(--text-3);z-index:1}
+.code__copy{position:absolute;top:6px;right:8px;z-index:1;font:11px var(--mono);color:var(--text-2);background:var(--code-bg);border:1px solid var(--line);border-radius:6px;padding:2px 7px;cursor:pointer}
+.code__copy:hover{color:var(--text)}
+.tbl{overflow-x:auto;margin:0 0 22px;border:1px solid var(--line);border-radius:10px}
+article table{border-collapse:collapse;width:100%;font-size:14px}
+article th,article td{padding:10px 14px;border-bottom:1px solid var(--line-2);text-align:left;vertical-align:top}
+article th{font-weight:600;background:var(--surface);color:var(--text)}
+article tr:last-child td{border-bottom:0}
+article details{margin:0 0 18px;border:1px solid var(--line);border-radius:10px;padding:10px 16px;background:var(--surface)}
+article summary{cursor:pointer;font-weight:500}
+.pager{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:72px;padding-top:32px;border-top:1px solid var(--line)}
+.pager a{display:block;padding:16px 18px;border:1px solid var(--line);border-radius:10px;text-decoration:none}
+.pager a:hover{border-color:var(--text-2)}
+.pager span{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--text-3)}
+.pager .next{text-align:right;grid-column:2}
+.foot{margin-top:40px;font-size:13px;color:var(--text-3)}
+/* 代码高亮：黑白灰为主 */
+.hl .c,.hl .c1,.hl .cm,.hl .ch,.hl .cs,.hl .cp,.hl .cpf{color:#6b6b6b;font-style:italic}
+.hl .k,.hl .kd,.hl .kn,.hl .kr,.hl .kt,.hl .kc,.hl .kp,.hl .ow{color:#ffffff;font-weight:600}
+.hl .s,.hl .s1,.hl .s2,.hl .sb,.hl .sc,.hl .sd,.hl .se,.hl .sh,.hl .si,.hl .sx,.hl .sr,.hl .ss,.hl .dl,.hl .sa{color:#86efac}
+.hl .m,.hl .mi,.hl .mf,.hl .mh,.hl .mo,.hl .il{color:#fcd34d}
+.hl .nf,.hl .fm,.hl .nc,.hl .nn{color:#e5e5e5;font-weight:500}
+.hl .nb,.hl .bp,.hl .nd,.hl .na,.hl .nt{color:#bdbdbd}
+.hl .o,.hl .p{color:#9a9a9a}
+.hl .gd{color:#fca5a5}.hl .gi{color:#86efac}
+.hl{color:#d4d4d4}
+:root[data-theme="light"] .hl{color:#262626}
+:root[data-theme="light"] .hl .c,:root[data-theme="light"] .hl .c1,:root[data-theme="light"] .hl .cm,:root[data-theme="light"] .hl .ch,:root[data-theme="light"] .hl .cs,:root[data-theme="light"] .hl .cp,:root[data-theme="light"] .hl .cpf{color:#8a8a8a}
+:root[data-theme="light"] .hl .k,:root[data-theme="light"] .hl .kd,:root[data-theme="light"] .hl .kn,:root[data-theme="light"] .hl .kr,:root[data-theme="light"] .hl .kt,:root[data-theme="light"] .hl .kc,:root[data-theme="light"] .hl .kp,:root[data-theme="light"] .hl .ow{color:#000}
+:root[data-theme="light"] .hl .s,:root[data-theme="light"] .hl .s1,:root[data-theme="light"] .hl .s2,:root[data-theme="light"] .hl .sb,:root[data-theme="light"] .hl .sc,:root[data-theme="light"] .hl .sd,:root[data-theme="light"] .hl .se,:root[data-theme="light"] .hl .sh,:root[data-theme="light"] .hl .si,:root[data-theme="light"] .hl .sx,:root[data-theme="light"] .hl .sr,:root[data-theme="light"] .hl .ss,:root[data-theme="light"] .hl .dl,:root[data-theme="light"] .hl .sa{color:#15803d}
+:root[data-theme="light"] .hl .m,:root[data-theme="light"] .hl .mi,:root[data-theme="light"] .hl .mf,:root[data-theme="light"] .hl .mh,:root[data-theme="light"] .hl .mo,:root[data-theme="light"] .hl .il{color:#b45309}
+:root[data-theme="light"] .hl .nf,:root[data-theme="light"] .hl .fm,:root[data-theme="light"] .hl .nc,:root[data-theme="light"] .hl .nn{color:#171717}
+:root[data-theme="light"] .hl .nb,:root[data-theme="light"] .hl .bp,:root[data-theme="light"] .hl .nd,:root[data-theme="light"] .hl .na,:root[data-theme="light"] .hl .nt{color:#525252}
+:root[data-theme="light"] .hl .o,:root[data-theme="light"] .hl .p{color:#6b6b6b}
+:root[data-theme="light"] .hl .gd{color:#b91c1c}:root[data-theme="light"] .hl .gi{color:#15803d}
+.nav__right{display:flex;align-items:center;gap:20px}
+.theme-toggle{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--text);cursor:pointer}
+.theme-toggle:hover{border-color:var(--text-2)}
+.theme-toggle svg{width:15px;height:15px}
+.theme-toggle .i-moon,:root[data-theme="light"] .theme-toggle .i-sun{display:none}
+:root[data-theme="light"] .theme-toggle .i-moon{display:block}
+@media (max-width:960px){.wrap{grid-template-columns:1fr;gap:0}.toc{display:none}article h1.title{font-size:30px}.nav__links a.hide-sm{display:none}}
+</style>
+</head>
+<body>
+<header class="nav">
+  <a class="nav__brand" href="../index.html"><span class="nav__dot"></span>AI Agent 全栈</a>
+  <div class="nav__right">
+  <nav class="nav__links">
+    <a href="../index.html#progress">课件</a>
+    <a class="hide-sm" href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/ROADMAP.md">路线图</a>
+    <a href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/notes/03-agents/05-agent-state.md">在 GitHub 上查看</a>
+  </nav>
+  <button class="theme-toggle" id="theme-toggle" type="button" aria-label="切换浅色 / 深色" title="切换浅色 / 深色"><svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg><svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
+  </div>
+</header>
+<div class="wrap">
+  <aside class="toc"><div class="toc__label">本课目录</div><ul>
+<li><a href="#读前说明">读前说明</a></li>
+<li><a href="#1-三种存法">1. 三种存法</a></li>
+<li><a href="#2-实体会话runstep工具调用消息">2. 实体：会话、run、step、工具调用、消息</a></li>
+<li><a href="#3-事件溯源">3. 事件溯源</a></li>
+<li><a href="#4-投影从事件推出读模型">4. 投影：从事件推出读模型</a></li>
+<li><a href="#5-快照与版本演进">5. 快照与版本演进</a></li>
+<li><a href="#6-完整重放">6. 完整重放</a></li>
+<li><a href="#7-三家的存储模型对照">7. 三家的存储模型对照</a></li>
+<li><a href="#8-表结构">8. 表结构</a></li>
+<li><a href="#9-练习代码导读">9. 练习代码导读</a></li>
+<li><a href="#10-常见的坑">10. 常见的坑</a></li>
+<li><a href="#11-练习">11. 练习</a></li>
+<li><a href="#12-自测题">12. 自测题</a></li>
+<li><a href="#13-自测题答案">13. 自测题答案</a></li>
+<li><a href="#14-参考答案">14. 参考答案</a></li>
+<li><a href="#完成标准">完成标准</a></li>
+</ul>
+</aside>
+  <article>
+    <div class="meta">模块 03 · Agent 架构 · 第 3.5 课</div>
+    <h1 class="title">3.5 Agent 状态与数据模型：会话、消息、run、step、工具调用，事件溯源与完整重放</h1>
+    <blockquote>
+<p>第 3 部分 · 第 5 课 ｜ 预计 3–4 小时 ｜ 前置：3.2 Agent Loop、3.4 长任务 Agent、0.6 数据库（事务、唯一约束）</p>
+<p>配套练习：<code>projects/21-state/</code>（纯 Go 标准库，15 个测试）。把 3.2 的 Agent 循环改成“先写事件、再往下走”：run 的全部历史只存在一条只追加的事件流里；运行状态、消息历史、会话下的 run 列表都是从事件折叠出来的投影，随时可以丢掉重建；快照加尾部事件等于全量折叠；旧版本事件在读取时升级；任何一次 run 都能在新代码上用录像完整重放，模型和工具一次都不真调用，代码改动导致请求变化时会精确报告在第几步分叉。</p>
+</blockquote>
+<h2 id="读前说明">读前说明</h2>
+<p>3.4 解决了“run 中途停下来还能接着跑”。用的是检查点：每一步之后把当前状态整体存一份，恢复时读最新那份。</p>
+<p>检查点回答的是“现在是什么状态”。线上跑起来以后，你会更常被问到另外几类问题：</p>
+<ul>
+<li>昨晚第 3812 次 run 失败了，它当时到底给模型发了什么、模型回了什么、哪个工具先出的错？</li>
+<li>我改了系统提示词，上周那 200 个出过问题的 run，现在还会走同样的路吗？</li>
+<li>这个用户的会话里一共有几个 run、花了多少 token、每次调用了哪些工具？</li>
+<li>产品说要加一个“工具调用耗时”字段，过去三个月的数据能补出来吗？</li>
+</ul>
+<p>只存最新状态，这些问题都答不了：中间过程被覆盖掉了。这一课讲另一种存法：不存状态，存“发生过的事”，状态从事件推出来。这就是事件溯源（event sourcing）。</p>
+<p>先想几个问题：</p>
+<ul>
+<li>一条“消息”应该是一张表里的一行，还是从别的东西推出来的？</li>
+<li>事件里应该存“模型的回复”，还是存“发给模型的请求”？都存的话，请求那么大怎么办？</li>
+<li>改了事件的字段，旧数据怎么办？能直接 <code>UPDATE</code> 吗？</li>
+<li>“重放”和“重新运行”有什么区别？</li>
+</ul>
+<hr />
+<h2 id="1-三种存法">1. 三种存法</h2>
+<p>同一个 agent run，常见三种存法：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>存法</th>
+<th>存的是什么</th>
+<th>典型例子</th>
+<th>能回答</th>
+<th>回答不了</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>消息数组</td>
+<td>一个会话一个 <code>[]Message</code>，每轮追加</td>
+<td>大多数聊天应用的 <code>messages</code> 表；OpenAI Conversations API 的 items</td>
+<td>下一轮发给模型什么</td>
+<td>某次工具调用花了多久、哪次 run 失败在哪一步、当时用的哪个版本的提示词</td>
+</tr>
+<tr>
+<td>快照（检查点）</td>
+<td>每一步之后的完整状态</td>
+<td>3.4 的 <code>Checkpoint</code>；LangGraph checkpointer</td>
+<td>当前状态；回到某一步</td>
+<td>两步之间具体发生了什么（除非每个快照都留着并互相对比）</td>
+</tr>
+<tr>
+<td>事件日志</td>
+<td>每件发生过的事，按顺序只追加</td>
+<td>本课的 <code>events</code> 表</td>
+<td>以上全部，以及以后才想到的问题</td>
+<td>需要额外的投影才能快速查询</td>
+</tr>
+</tbody>
+</table></div>
+<p>三者不是互斥的。成熟的系统一般是：<strong>事件日志是唯一的事实来源，消息数组和快照都是从它推出来的投影</strong>。消息数组给模型用，快照给恢复和快速加载用，统计表给看板用。</p>
+<p>LangGraph 其实已经站在中间：它的持久层有两张表，<code>checkpoints</code> 每个超步一行完整状态，<code>writes</code> 每个节点输出一行。<code>writes</code> 本质上就是事件。它新加的 <code>DeltaChannel</code>（beta，<code>langgraph&gt;=1.2</code>）更进一步：对 <code>messages</code> 这种只增长的通道，检查点里不再存完整值，而是存一个占位，加载时沿父检查点链把写入一条条用 reducer 重放出来。这就是“快照 + 事件”的混合。</p>
+<hr />
+<h2 id="2-实体会话runstep工具调用消息">2. 实体：会话、run、step、工具调用、消息</h2>
+<p>先把名词定下来。下面这套划分和 OpenAI Agents API、LangGraph 的概念基本能对上。</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>实体</th>
+<th>含义</th>
+<th>生命周期</th>
+<th>对应概念</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Session（会话）</td>
+<td>一个用户和 agent 的一段长期对话</td>
+<td>天、周</td>
+<td>LangGraph <code>thread</code>；OpenAI <code>conversation</code></td>
+</tr>
+<tr>
+<td>Run</td>
+<td>用户发一次输入，agent 跑到给出最终回复或失败为止</td>
+<td>秒到小时</td>
+<td>LangGraph 一次 <code>invoke</code>；OpenAI 一次 <code>responses.create</code>（带工具时可能多个模型调用）</td>
+</tr>
+<tr>
+<td>Step</td>
+<td>run 里的一次模型调用，以及它触发的工具调用</td>
+<td>秒</td>
+<td>LangGraph 超步（大致）</td>
+</tr>
+<tr>
+<td>Tool call</td>
+<td>一次工具执行，有参数、结果、是否出错、耗时</td>
+<td>毫秒到分钟</td>
+<td>OpenAI <code>function_call</code> / <code>function_call_output</code> item</td>
+</tr>
+<tr>
+<td>Message</td>
+<td>发给模型的历史里的一条</td>
+<td>—</td>
+<td>由上面几个推出来</td>
+</tr>
+</tbody>
+</table></div>
+<p>关系是一对多一路往下：一个会话有多个 run，一个 run 有多个 step，一个 step 有零到多个工具调用。</p>
+<p><strong>消息为什么是推出来的？</strong> 因为模型看到的历史，是 run 里发生的事按某种规则拼出来的：用户输入变成 user 消息，模型回复变成 assistant 消息，工具结果变成 tool 消息。规则会变：比如以后你想把很长的工具结果截断再给模型（1.6 上下文工程），或者把早期轮次压缩成摘要（OpenAI 的 compaction）。如果消息是一张独立的表，你就得维护“原始的”和“给模型的”两份，迟早不一致。从事件推出来，规则改了重新推一遍就行。</p>
+<p>有一个例外要注意：OpenAI Responses API 在 <code>store: false</code> 时，文档要求你把上一次响应的 <code>output</code> 数组<strong>完整</strong>放回下一次的输入里，包括加密的 reasoning item 和 assistant 消息的 <code>phase</code> 字段，否则推理模型会把中间更新当成最终答案。这类厂商私有的、你无法从别处还原的内容，要在事件里原样存下来（<code>raw_output</code> 字段），而不是只存你解析出来的文本。</p>
+<hr />
+<h2 id="3-事件溯源">3. 事件溯源</h2>
+<h3 id="31-基本操作只有两个">3.1 基本操作只有两个</h3>
+<ul>
+<li><strong>追加</strong>：<code>Append(runID, expect, events...)</code>。一个 run 一条流，事件按 <code>seq</code> 编号，从 1 开始连续递增。<code>expect</code> 是调用方以为的“当前最后一个 seq”，和实际不一致就返回冲突。</li>
+<li><strong>读取</strong>：<code>Read(runID, after)</code>，读某个 seq 之后的所有事件。</li>
+</ul>
+<p>没有更新，没有删除。状态是读出所有事件、依次应用得到的：</p>
+<div class="hl"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nx">Fold</span><span class="p">(</span><span class="nx">evs</span><span class="w"> </span><span class="p">[]</span><span class="nx">Event</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="nx">RunView</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nx">v</span><span class="w"> </span><span class="nx">RunView</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">e</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">evs</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">v</span><span class="p">.</span><span class="nx">Apply</span><span class="p">(</span><span class="nx">e</span><span class="p">);</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="nx">v</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">v</span><span class="p">,</span><span class="w"> </span><span class="kc">nil</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><code>expect</code> 就是 3.4 里检查点 <code>seq</code> 的同一个思路：乐观锁。两个 worker 同时以为自己是这个 run 的执行者，都基于 seq=5 追加，只有先到的成功，后到的拿到冲突，知道有人抢先了，应该放弃而不是覆盖。练习里 <code>TestConcurrentAppendOnlyOneWins</code> 用 20 个 goroutine 同时追加验证这一点。数据库里这个约束就是 <code>UNIQUE (run_id, seq)</code>，不需要加锁。</p>
+<h3 id="32-事件是事实不是命令">3.2 事件是事实，不是命令</h3>
+<p>事件名用过去式：<code>model_called</code>、<code>tool_finished</code>，不用 <code>call_model</code>、<code>run_tool</code>。区别不只是语法：</p>
+<ul>
+<li>命令可以被拒绝（“扣款”可能失败）；事件已经发生，不能拒绝（“已扣款”就是已扣款）。</li>
+<li><code>Apply</code> 只能根据事件更新状态，不能再去做事。它不读时钟、不调用外部服务、不生成随机数，同样的事件序列永远得到同样的状态。</li>
+</ul>
+<p>第二条是重放能成立的前提。时间、随机数、模型输出、工具结果这些不确定的东西，都在<strong>产生事件的时候</strong>确定下来写进事件，<code>Apply</code> 只读不算。</p>
+<h3 id="33-一个-run-写哪些事件">3.3 一个 run 写哪些事件</h3>
+<p>练习里的事件类型：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>事件</th>
+<th>什么时候写</th>
+<th>关键字段</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>run_started</code></td>
+<td>run 开始</td>
+<td><code>session_id</code>、<code>input</code>、<code>agent_version</code></td>
+</tr>
+<tr>
+<td><code>model_called</code></td>
+<td>模型返回之后</td>
+<td><code>step</code>、<code>request_hash</code>、<code>response</code>、<code>usage</code></td>
+</tr>
+<tr>
+<td><code>tool_started</code></td>
+<td>执行工具<strong>之前</strong></td>
+<td><code>step</code>、<code>call</code>、<code>idem_key</code></td>
+</tr>
+<tr>
+<td><code>tool_finished</code></td>
+<td>工具返回之后</td>
+<td><code>call_id</code>、<code>result</code>、<code>is_error</code></td>
+</tr>
+<tr>
+<td><code>run_completed</code></td>
+<td>模型给出最终回复</td>
+<td><code>final</code></td>
+</tr>
+<tr>
+<td><code>run_failed</code></td>
+<td>模型报错或步数用完</td>
+<td><code>step</code>、<code>error</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>一次带一个工具调用的 run，事件序列是：</p>
+<div class="hl"><pre><span></span><code>1 run_started
+2 model_called   step=1  response 里有 tool call c1
+3 tool_started   c1
+4 tool_finished  c1
+5 model_called   step=2  response 是最终文本
+6 run_completed
+</code></pre></div>
+
+<p><strong>为什么工具要拆成两个事件？</strong> 和 3.4 的三个崩溃时刻是同一个道理。只有 <code>tool_started</code> 没有 <code>tool_finished</code> 的调用，说明进程在执行途中死了：外部系统可能执行了，也可能没有。恢复时要先处理它们（用幂等键去外部系统查，或者交给人），不能当作没发生。<code>RunView.Open()</code> 就是找这些调用的。<code>idem_key</code> 用 <code>runID/callID</code>，同一个调用无论重试几次键都一样。</p>
+<p><strong>为什么 <code>model_called</code> 存请求指纹而不存完整请求？</strong> 完整请求就是到这一步为止的全部历史，而历史已经能从前面的事件推出来，再存一遍是 O(n²) 的空间。存一个指纹（版本号 + 工具列表 + 历史的哈希）足够做两件事：审计时验证“推出来的历史”和“当时真正发出去的”一致；重放时发现分叉（第 6 节）。如果你的提示词模板会注入时间、检索结果这类每次都变的内容，那些内容本身要作为事件存下来（比如 <code>context_retrieved</code>），否则重放时推不出来。</p>
+<h3 id="34-原子性一次追加的多条事件">3.4 原子性：一次追加的多条事件</h3>
+<p><code>Append</code> 可以一次写多条事件，要求全写或全不写。比如“工具结果 + 下一步开始”需要同时生效时。数据库里就是一个事务。练习里只是一次一条，<code>MemStore.Append</code> 的循环在锁内，满足原子性。</p>
+<hr />
+<h2 id="4-投影从事件推出读模型">4. 投影：从事件推出读模型</h2>
+<h3 id="41-runview单个-run-的状态">4.1 RunView：单个 run 的状态</h3>
+<p><code>RunView</code> 是练习里最主要的投影，<code>Apply</code> 按事件类型更新它：</p>
+<div class="hl"><pre><span></span><code><span class="k">case</span><span class="w"> </span><span class="nx">ModelCalled</span><span class="p">:</span>
+<span class="w">    </span><span class="nx">d</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">decode</span><span class="p">[</span><span class="nx">ModelCalledData</span><span class="p">](</span><span class="nx">e</span><span class="p">)</span>
+<span class="w">    </span><span class="p">...</span>
+<span class="w">    </span><span class="nx">v</span><span class="p">.</span><span class="nx">Steps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">v</span><span class="p">.</span><span class="nx">Steps</span><span class="p">,</span><span class="w"> </span><span class="nx">StepView</span><span class="p">{</span><span class="nx">N</span><span class="p">:</span><span class="w"> </span><span class="nx">d</span><span class="p">.</span><span class="nx">Step</span><span class="p">,</span><span class="w"> </span><span class="nx">RequestHash</span><span class="p">:</span><span class="w"> </span><span class="nx">d</span><span class="p">.</span><span class="nx">RequestHash</span><span class="p">,</span><span class="w"> </span><span class="nx">Response</span><span class="p">:</span><span class="w"> </span><span class="nx">d</span><span class="p">.</span><span class="nx">Response</span><span class="p">,</span><span class="w"> </span><span class="nx">Usage</span><span class="p">:</span><span class="w"> </span><span class="nx">d</span><span class="p">.</span><span class="nx">Usage</span><span class="p">})</span>
+<span class="w">    </span><span class="nx">v</span><span class="p">.</span><span class="nx">Usage</span><span class="p">.</span><span class="nx">Input</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="nx">d</span><span class="p">.</span><span class="nx">Usage</span><span class="p">.</span><span class="nx">Input</span>
+<span class="w">    </span><span class="nx">v</span><span class="p">.</span><span class="nx">Usage</span><span class="p">.</span><span class="nx">Output</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="nx">d</span><span class="p">.</span><span class="nx">Usage</span><span class="p">.</span><span class="nx">Output</span>
+<span class="w">    </span><span class="nx">v</span><span class="p">.</span><span class="nx">Messages</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">v</span><span class="p">.</span><span class="nx">Messages</span><span class="p">,</span><span class="w"> </span><span class="nx">d</span><span class="p">.</span><span class="nx">Response</span><span class="p">)</span>
+</code></pre></div>
+
+<p>它同时维护了几样东西：步骤列表（给调试界面）、累计用量（给计费）、消息历史（给模型）。它们来自同一份事件，不可能互相矛盾。</p>
+<p><code>Apply</code> 开头有两道检查：</p>
+<ul>
+<li><code>e.Seq != v.LastSeq+1</code> 就拒绝：跳号或重复说明读到的数据有问题，宁可报错也不要算出一个错的状态；</li>
+<li><code>upcast</code> 失败就拒绝：遇到不认识的事件类型或版本（比如新代码写的、旧代码在读），同样报错。</li>
+</ul>
+<p>还有一道是业务上的：<code>tool_finished</code> 找不到对应的 <code>tool_started</code> 就报错。这些检查让投影出错时<strong>立刻</strong>失败，而不是带着错误状态继续跑。</p>
+<h3 id="42-跨-run-的投影会话索引">4.2 跨 run 的投影：会话索引</h3>
+<p>“这个会话有哪些 run”需要看所有 run 的事件。做法是给全局事件一个位置号 <code>pos</code>（数据库里就是 <code>bigserial</code> 主键），投影记住自己读到哪里，定期追赶：</p>
+<div class="hl"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">ix</span><span class="w"> </span><span class="o">*</span><span class="nx">SessionIndex</span><span class="p">)</span><span class="w"> </span><span class="nx">CatchUp</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">s</span><span class="w"> </span><span class="nx">EventStore</span><span class="p">)</span><span class="w"> </span><span class="kt">error</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">evs</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">s</span><span class="p">.</span><span class="nx">ReadAll</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">ix</span><span class="p">.</span><span class="nx">Pos</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">)</span>
+<span class="w">        </span><span class="p">...</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">e</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">evs</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="nx">e</span><span class="p">.</span><span class="nx">Type</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nx">RunStarted</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="p">...</span>
+<span class="w">                </span><span class="nx">ix</span><span class="p">.</span><span class="nx">Runs</span><span class="p">[</span><span class="nx">d</span><span class="p">.</span><span class="nx">SessionID</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">ix</span><span class="p">.</span><span class="nx">Runs</span><span class="p">[</span><span class="nx">d</span><span class="p">.</span><span class="nx">SessionID</span><span class="p">],</span><span class="w"> </span><span class="nx">e</span><span class="p">.</span><span class="nx">RunID</span><span class="p">)</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">            </span><span class="nx">ix</span><span class="p">.</span><span class="nx">Pos</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">e</span><span class="p">.</span><span class="nx">Pos</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>两点工程细节：</p>
+<ul>
+<li><strong>位置和投影结果要一起保存</strong>（同一个事务）。先存结果后存位置，中间崩溃就会重复处理；反过来就会漏。练习是内存实现，Postgres 里就是 <code>projection_positions</code> 表和投影表在一个事务里更新。</li>
+<li><strong>投影是最终一致的</strong>。写完事件到投影追上有延迟。需要“读到自己刚写的”时（比如 run 结束立刻展示结果），直接用 <code>Load</code> 从事件流现算，不要读投影表。</li>
+</ul>
+<p>注意 <code>bigserial</code> 有一个坑：并发事务里，pos 小的事务可能比 pos 大的晚提交，追赶时可能跳过它。生产上常见的处理是只读“已经提交了足够久”的事件，或者用逻辑复制 / 单写者分配位置。练习不涉及，知道有这回事即可。</p>
+<h3 id="43-会话历史">4.3 会话历史</h3>
+<p>下一个 run 要看到会话之前的对话，就把该会话所有 run 的 <code>Messages</code> 按顺序拼起来：</p>
+<div class="hl"><pre><span></span><code><span class="nx">prior</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">SessionMessages</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">store</span><span class="p">,</span><span class="w"> </span><span class="nx">ix</span><span class="p">,</span><span class="w"> </span><span class="s">"s1"</span><span class="p">)</span>
+<span class="nx">agent</span><span class="p">.</span><span class="nx">RunWithHistory</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="s">"s1"</span><span class="p">,</span><span class="w"> </span><span class="s">"r2"</span><span class="p">,</span><span class="w"> </span><span class="nx">prior</span><span class="p">,</span><span class="w"> </span><span class="s">"明天呢？"</span><span class="p">)</span>
+</code></pre></div>
+
+<p>这里正是上下文工程（1.6）插手的地方：历史太长就截断或摘要。因为摘要只是“另一种投影”，原始事件不受影响，以后换更好的摘要策略可以重新生成。</p>
+<hr />
+<h2 id="5-快照与版本演进">5. 快照与版本演进</h2>
+<h3 id="51-快照">5.1 快照</h3>
+<p>run 很长时，每次加载都从第 1 条事件折叠太慢。快照就是把某个时刻的 <code>RunView</code> 序列化存起来，加载时从快照开始，只应用之后的事件：</p>
+<div class="hl"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nx">Load</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">s</span><span class="w"> </span><span class="nx">EventStore</span><span class="p">,</span><span class="w"> </span><span class="nx">runID</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">snap</span><span class="w"> </span><span class="o">*</span><span class="nx">RunView</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="nx">RunView</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nx">v</span><span class="w"> </span><span class="nx">RunView</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">snap</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">b</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">json</span><span class="p">.</span><span class="nx">Marshal</span><span class="p">(</span><span class="nx">snap</span><span class="p">)</span><span class="w"> </span><span class="c1">// 深拷贝</span>
+<span class="w">        </span><span class="p">...</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="nx">evs</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">s</span><span class="p">.</span><span class="nx">Read</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">runID</span><span class="p">,</span><span class="w"> </span><span class="nx">v</span><span class="p">.</span><span class="nx">LastSeq</span><span class="p">)</span>
+<span class="w">    </span><span class="p">...</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><code>RunView.LastSeq</code> 记录了快照对应到哪一条事件，所以快照本身就知道从哪里接着读。</p>
+<p>快照和 3.4 的检查点有什么区别？结构上很像，地位完全不同：<strong>检查点是事实来源，丢了就丢了；快照只是缓存，丢了可以从事件重建</strong>。所以快照可以随时删、可以因为投影逻辑改了而整体作废，不需要迁移。</p>
+<p>练习的 <code>TestSnapshotPlusTailEqualsFullFold</code> 验证最重要的性质：快照 + 尾部事件得到的状态，和从头折叠完全相同（序列化后逐字节比较）。</p>
+<h3 id="52-事件的版本演进">5.2 事件的版本演进</h3>
+<p>事件只追加不修改，可业务一定会变。比如 <code>tool_finished</code> 第一版的字段叫 <code>output</code> 和 <code>error</code>，后来想改成 <code>result</code> 和 <code>is_error</code>。</p>
+<p>不能 <code>UPDATE events SET data = ...</code>：那样就破坏了“事件是发生过的事实”，也让重放失去意义。标准做法叫 <strong>upcasting</strong>：每条事件带 <code>schema</code> 版本号，读的时候把旧版本转成新版本，原始数据不动。</p>
+<div class="hl"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nx">upcast</span><span class="p">(</span><span class="nx">e</span><span class="w"> </span><span class="nx">Event</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="nx">Event</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">e</span><span class="p">.</span><span class="nx">Type</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nx">ToolFinished</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">e</span><span class="p">.</span><span class="nx">Schema</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kd">var</span><span class="w"> </span><span class="nx">v1</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nx">CallID</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="s">`json:"call_id"`</span>
+<span class="w">            </span><span class="nx">Output</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="s">`json:"output"`</span>
+<span class="w">            </span><span class="nx">Error</span><span class="w">  </span><span class="kt">bool</span><span class="w">   </span><span class="s">`json:"error"`</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="p">...</span>
+<span class="w">        </span><span class="nx">e</span><span class="p">.</span><span class="nx">Data</span><span class="p">,</span><span class="w"> </span><span class="nx">e</span><span class="p">.</span><span class="nx">Schema</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">b</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">want</span><span class="p">,</span><span class="w"> </span><span class="nx">ok</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">currentSchema</span><span class="p">[</span><span class="nx">e</span><span class="p">.</span><span class="nx">Type</span><span class="p">];</span><span class="w"> </span><span class="o">!</span><span class="nx">ok</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nx">e</span><span class="p">.</span><span class="nx">Schema</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="nx">want</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">e</span><span class="p">,</span><span class="w"> </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Errorf</span><span class="p">(</span><span class="s">"%w：%s v%d"</span><span class="p">,</span><span class="w"> </span><span class="nx">ErrUnknownEvent</span><span class="p">,</span><span class="w"> </span><span class="nx">e</span><span class="p">.</span><span class="nx">Type</span><span class="p">,</span><span class="w"> </span><span class="nx">e</span><span class="p">.</span><span class="nx">Schema</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">e</span><span class="p">,</span><span class="w"> </span><span class="kc">nil</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>规则：</p>
+<ul>
+<li>新增可选字段不用升版本（旧事件解码出零值，要能接受）；</li>
+<li>改名、改类型、改含义要升版本并写升级函数，升级函数是纯函数；</li>
+<li>版本只能往前升，多个版本链式升级（v1→v2→v3）；</li>
+<li><strong>不认识的版本要报错</strong>。灰度发布时新代码先写了 v3，旧代码读到不能假装看懂。</li>
+</ul>
+<p>这和 3.4 的“检查点带版本号”是一回事，只是粒度从整个检查点细化到每条事件。</p>
+<hr />
+<h2 id="6-完整重放">6. 完整重放</h2>
+<h3 id="61-重放重新运行时间旅行">6.1 重放、重新运行、时间旅行</h3>
+<p>三个容易混的概念：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th></th>
+<th>模型和工具</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>重新运行</td>
+<td>真调用</td>
+<td>再跑一次同样的输入。模型输出不确定，结果多半不同</td>
+</tr>
+<tr>
+<td>LangGraph replay / time travel</td>
+<td>检查点之前不调用，之后<strong>真调用</strong></td>
+<td>从某一步重新探索；<code>update_state</code> 改状态后分叉出新路径</td>
+</tr>
+<tr>
+<td>完整重放（本课）</td>
+<td><strong>一次都不调用</strong>，用事件里录下的结果代替</td>
+<td>在新代码上精确复现一次历史 run</td>
+</tr>
+</tbody>
+</table></div>
+<p>LangGraph 文档说得很清楚：从旧的 <code>checkpoint_id</code> 调用图时，之后的节点会重新执行，“包括任何 LLM 调用、API 请求和 interrupt”。这适合做“如果当时选另一条路会怎样”，但不能用来验证“新代码在完全相同的输入下行为是否一致”，因为模型的回复已经变了。</p>
+<h3 id="62-录像替身">6.2 录像替身</h3>
+<p>完整重放的做法是：保留 agent 的全部代码（循环、历史拼接、工具分发、错误处理），只把模型和工具换成“读录像”的替身。</p>
+<div class="hl"><pre><span></span><code><span class="nx">a</span><span class="p">.</span><span class="nx">Model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">ModelFunc</span><span class="p">(</span><span class="kd">func</span><span class="p">(</span><span class="nx">_</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">h</span><span class="w"> </span><span class="p">[]</span><span class="nx">Message</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="nx">Message</span><span class="p">,</span><span class="w"> </span><span class="nx">Usage</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">rec</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">models</span><span class="p">[</span><span class="nx">mi</span><span class="p">]</span>
+<span class="w">    </span><span class="nx">mi</span><span class="o">++</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">got</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">RequestHash</span><span class="p">(</span><span class="nx">a</span><span class="p">.</span><span class="nx">Version</span><span class="p">,</span><span class="w"> </span><span class="nx">a</span><span class="p">.</span><span class="nx">toolNames</span><span class="p">(),</span><span class="w"> </span><span class="nx">h</span><span class="p">);</span><span class="w"> </span><span class="nx">got</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="nx">rec</span><span class="p">.</span><span class="nx">RequestHash</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">div</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">Divergence</span><span class="p">{</span><span class="nx">Step</span><span class="p">:</span><span class="w"> </span><span class="nx">rec</span><span class="p">.</span><span class="nx">Step</span><span class="p">,</span><span class="w"> </span><span class="nx">Want</span><span class="p">:</span><span class="w"> </span><span class="nx">rec</span><span class="p">.</span><span class="nx">RequestHash</span><span class="p">,</span><span class="w"> </span><span class="nx">Got</span><span class="p">:</span><span class="w"> </span><span class="nx">got</span><span class="p">}</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">Message</span><span class="p">{},</span><span class="w"> </span><span class="nx">Usage</span><span class="p">{},</span><span class="w"> </span><span class="nx">div</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">rec</span><span class="p">.</span><span class="nx">Response</span><span class="p">,</span><span class="w"> </span><span class="nx">rec</span><span class="p">.</span><span class="nx">Usage</span><span class="p">,</span><span class="w"> </span><span class="kc">nil</span>
+<span class="p">})</span>
+</code></pre></div>
+
+<p>关键是那个比较：替身在返回录下的回复之前，先计算新代码<strong>此刻</strong>要发给模型的请求指纹，和录制时的比。一致，说明新代码在这一步的行为和当时完全一样，返回录下的回复是合理的；不一致，说明新代码会给模型发不同的东西，录下的回复已经不能代表模型会怎么回答，重放在这里分叉，报告第几步。</p>
+<p>工具替身同样检查名称和参数是否和录像一致，再返回录下的结果；录制时出错的，替身也返回同样的错误。</p>
+<p>重放跑完后，用 <code>SameEvents</code> 逐条比较新产生的事件和录下的事件（忽略时间戳和全局位置）。完全一致，说明新代码对这个 run 是“行为等价”的。</p>
+<h3 id="63-重放用来做什么">6.3 重放用来做什么</h3>
+<ul>
+<li><strong>调试</strong>：线上失败的 run 拉下来本地重放，可以在任意一步打断点，不花一分钱 token，也不会再次触发副作用。<code>FirstToolError()</code> 直接告诉你第一个出错的工具在第几步。</li>
+<li><strong>回归测试</strong>：改提示词、改工具定义、改历史拼接逻辑之前，拿一批历史 run 重放。哪些 run 会分叉、在第几步分叉，一目了然。分叉不一定是 bug，但你应该知道它。没分叉的 run 可以确定行为不变。</li>
+<li><strong>迁移验证</strong>：换存储、重构循环之后，重放全部历史，事件逐条一致才算迁移正确。</li>
+<li><strong>评测数据</strong>：分叉的那一步，正好是把“新请求”发给真模型做对比评测的起点（模块 08 评测会用到）。</li>
+</ul>
+<p><code>TestReplayDetectsDivergence</code> 测了两种分叉：改版本号（相当于改了系统提示词），以及多注册一个工具。两者都会在第 1 步分叉，因为第 1 步的请求就已经不同了。</p>
+<h3 id="64-什么会破坏重放">6.4 什么会破坏重放</h3>
+<ul>
+<li><code>Apply</code> 里读了时钟或随机数；</li>
+<li>拼历史时用了 map 遍历顺序（练习里 <code>toolNames()</code> 必须排序，<code>TestRequestHashStable</code> 专门测这个）；</li>
+<li>请求里有不来自事件的内容（当前时间、实时检索结果），没有作为事件录下来；</li>
+<li>厂商私有的不透明内容（加密 reasoning）没原样存。</li>
+</ul>
+<hr />
+<h2 id="7-三家的存储模型对照">7. 三家的存储模型对照</h2>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th></th>
+<th>状态放在哪</th>
+<th>你自己要存什么</th>
+<th>历史保留</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OpenAI Responses + <code>previous_response_id</code></td>
+<td>OpenAI 服务端，按响应链</td>
+<td>只需最后一个 response id</td>
+<td>响应默认保存 30 天；<code>store: false</code> 关闭</td>
+</tr>
+<tr>
+<td>OpenAI Conversations API</td>
+<td>OpenAI 服务端的 conversation 对象，存 messages、tool calls、tool outputs 等 items</td>
+<td>conversation id</td>
+<td>conversation 里的 items 不受 30 天限制</td>
+</tr>
+<tr>
+<td>OpenAI 手动管理（<code>store: false</code>）</td>
+<td>你自己</td>
+<td>完整的 output items（含加密 reasoning、<code>phase</code>）</td>
+<td>你决定</td>
+</tr>
+<tr>
+<td>LangGraph checkpointer</td>
+<td>你选的后端（Postgres、SQLite、MongoDB 等）</td>
+<td>由 checkpointer 写 <code>checkpoints</code> + <code>writes</code> 两张表</td>
+<td>你决定；可选 <code>EncryptedSerializer</code> 加密</td>
+</tr>
+</tbody>
+</table></div>
+<p>两个提醒：</p>
+<ul>
+<li>用了 <code>previous_response_id</code>，链上所有之前的输入 token 仍然按输入计费，服务端存状态不等于省钱（省钱靠 1.5 的 prompt caching）。</li>
+<li>托管状态省事，但审计、重放、跨厂商迁移都要靠你自己的事件日志。比较稳妥的做法是：托管状态用来降低延迟和请求体大小，自己仍然写一份事件日志作为事实来源。</li>
+</ul>
+<p>LangGraph 的三种持久化模式也值得对照：<code>exit</code> 只在图退出时写，<code>async</code> 在下一步执行时异步写，<code>sync</code> 每一步写完才继续。练习的 Agent 相当于 <code>sync</code>：每个事件 <code>Append</code> 成功才往下走。慢一点，但任何时刻崩溃都不会丢已经发生的事。</p>
+<hr />
+<h2 id="8-表结构">8. 表结构</h2>
+<p>练习目录里的 <code>schema.sql</code> 是 Postgres 版本，分两层：</p>
+<p><strong>事实层</strong>只有一张表：</p>
+<div class="hl"><pre><span></span><code><span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">events</span><span class="w"> </span><span class="p">(</span>
+<span class="w">    </span><span class="n">pos</span><span class="w">         </span><span class="n">bigserial</span><span class="w"> </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="p">,</span>
+<span class="w">    </span><span class="n">run_id</span><span class="w">      </span><span class="nb">text</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span>
+<span class="w">    </span><span class="n">seq</span><span class="w">         </span><span class="nb">int</span><span class="w">  </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span>
+<span class="w">    </span><span class="k">type</span><span class="w">        </span><span class="nb">text</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span>
+<span class="w">    </span><span class="n">schema_ver</span><span class="w">  </span><span class="nb">int</span><span class="w">  </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span>
+<span class="w">    </span><span class="k">data</span><span class="w">        </span><span class="n">jsonb</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span>
+<span class="w">    </span><span class="k">at</span><span class="w">          </span><span class="n">timestamptz</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="n">now</span><span class="p">(),</span>
+<span class="w">    </span><span class="k">UNIQUE</span><span class="w"> </span><span class="p">(</span><span class="n">run_id</span><span class="p">,</span><span class="w"> </span><span class="n">seq</span><span class="p">)</span>
+<span class="p">);</span>
+</code></pre></div>
+
+<p><code>UNIQUE (run_id, seq)</code> 就是乐观锁：追加时写 <code>seq = expect + 1</code>，有人抢先就违反唯一约束。</p>
+<p><strong>投影层</strong>是 <code>runs</code>、<code>steps</code>、<code>tool_calls</code>、<code>projection_positions</code>，全部可以 <code>TRUNCATE</code> 后从 <code>events</code> 重建。几个设计点：</p>
+<ul>
+<li><code>runs.last_seq</code>：投影到哪条了，用来判断投影是否落后；</li>
+<li><code>tool_calls.ended_at IS NULL</code>：开始了没结束的调用，崩溃恢复和告警都查它；</li>
+<li><code>tool_calls.idem_key UNIQUE</code>：外部系统去重用的键，也防止投影重复插入；</li>
+<li><code>CREATE INDEX tool_calls_errors ON tool_calls (name) WHERE is_error</code>：部分索引，“哪个工具最近老出错”这类查询只扫出错的行。</li>
+</ul>
+<p><code>sessions</code> 不是从事件推出来的，是普通的实体表（用户创建、改名、删除会话）。不是所有东西都要事件溯源：<strong>只有需要审计、重放、追溯历史的部分才值得</strong>。会话标题改了就改了，没人需要重放它。</p>
+<h3 id="81-删除与隐私">8.1 删除与隐私</h3>
+<p>只追加和“用户要求删除数据”是冲突的。几种做法：</p>
+<ul>
+<li><strong>按会话整体删</strong>：事件按 <code>run_id</code> 组织，删一个会话就是删它所有 run 的事件和投影。最简单，大多数场景够用；</li>
+<li><strong>加密粉碎</strong>（crypto-shredding）：敏感字段用每个用户一把的密钥加密存储，删除时只删密钥，事件还在但内容永远读不出来；</li>
+<li><strong>保留期</strong>：事件超过 N 天归档到冷存储或删除，快照保留结果。</li>
+</ul>
+<p>无论哪种，事件里本来就不该有密钥、token 这类凭据。工具参数如果可能含个人信息，在写事件之前就要想好怎么处理，而不是事后清洗。</p>
+<hr />
+<h2 id="9-练习代码导读">9. 练习代码导读</h2>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>文件</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>events.go</code></td>
+<td>事件类型和各自的数据结构；<code>EventStore</code> 接口；<code>MemStore</code>（<code>expect</code> 冲突检测、全局 <code>pos</code>）；<code>upcast</code></td>
+</tr>
+<tr>
+<td><code>projection.go</code></td>
+<td><code>RunView.Apply</code>（序号、版本、配对三道检查）；<code>Open</code>、<code>FirstToolError</code>；<code>Fold</code>、<code>Load</code>（快照）；<code>SessionIndex.CatchUp</code>；<code>SessionMessages</code></td>
+</tr>
+<tr>
+<td><code>agent.go</code></td>
+<td><code>Agent.Run</code> / <code>RunWithHistory</code>（每一步先写事件）；<code>RequestHash</code>；<code>Replay</code>（录像替身 + 分叉检测）；<code>SameEvents</code></td>
+</tr>
+<tr>
+<td><code>schema.sql</code></td>
+<td>Postgres 参考表结构，练习 2 用</td>
+</tr>
+<tr>
+<td><code>state_test.go</code></td>
+<td>15 个测试</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="91-run-的结构">9.1 Run 的结构</h3>
+<p>和 3.2 的循环几乎一样，区别是每个动作之后都 <code>emit</code> 一个事件，<code>emit</code> 失败（比如冲突）就立刻返回：</p>
+<div class="hl"><pre><span></span><code><span class="nx">hash</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">RequestHash</span><span class="p">(</span><span class="nx">a</span><span class="p">.</span><span class="nx">Version</span><span class="p">,</span><span class="w"> </span><span class="nx">a</span><span class="p">.</span><span class="nx">toolNames</span><span class="p">(),</span><span class="w"> </span><span class="nx">h</span><span class="p">)</span>
+<span class="nx">m</span><span class="p">,</span><span class="w"> </span><span class="nx">u</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">a</span><span class="p">.</span><span class="nx">Model</span><span class="p">.</span><span class="nx">Next</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">h</span><span class="p">)</span>
+<span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">rec</span><span class="p">.</span><span class="nx">emit</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">RunFailed</span><span class="p">,</span><span class="w"> </span><span class="nx">RunFailedData</span><span class="p">{</span><span class="nx">Step</span><span class="p">:</span><span class="w"> </span><span class="nx">step</span><span class="p">,</span><span class="w"> </span><span class="nx">Error</span><span class="p">:</span><span class="w"> </span><span class="nx">err</span><span class="p">.</span><span class="nx">Error</span><span class="p">()})</span>
+<span class="w">    </span><span class="k">break</span>
+<span class="p">}</span>
+<span class="nx">rec</span><span class="p">.</span><span class="nx">emit</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">ModelCalled</span><span class="p">,</span><span class="w"> </span><span class="nx">ModelCalledData</span><span class="p">{</span><span class="nx">Step</span><span class="p">:</span><span class="w"> </span><span class="nx">step</span><span class="p">,</span><span class="w"> </span><span class="nx">RequestHash</span><span class="p">:</span><span class="w"> </span><span class="nx">hash</span><span class="p">,</span><span class="w"> </span><span class="nx">Response</span><span class="p">:</span><span class="w"> </span><span class="nx">m</span><span class="p">,</span><span class="w"> </span><span class="nx">Usage</span><span class="p">:</span><span class="w"> </span><span class="nx">u</span><span class="p">})</span>
+</code></pre></div>
+
+<p><code>recorder</code> 记着自己最后写到的 <code>seq</code>，下一次 <code>Append</code> 用它做 <code>expect</code>。函数最后返回的不是内存里的 <code>h</code>，而是 <code>Load</code> 从事件重新算出来的 <code>RunView</code>：保证调用方看到的就是存下来的。</p>
+<h3 id="92-replay-的结构">9.2 Replay 的结构</h3>
+<p><code>Replay</code> 先把录下的事件按类型拆成几个队列（模型回复、工具开始、工具结果），然后构造一个新的 <code>Agent</code>：版本和工具名集合来自线上 agent（这样指纹才有可比性），模型和工具实现换成从队列里取。它写入一个全新的 <code>MemStore</code>，跑完读出来就是“新代码在同样输入下产生的事件”。</p>
+<p>录制时模型调用就失败的 run，模型队列在那一步是空的，替身会返回录下的错误，让失败也能原样重现（<code>TestReplayModelFailure</code>）。</p>
+<hr />
+<h2 id="10-常见的坑">10. 常见的坑</h2>
+<ul>
+<li><strong>把消息表当事实来源</strong>。加一个“工具耗时”字段时才发现历史数据里根本没有。</li>
+<li><strong><code>UPDATE</code> 事件修数据</strong>。修完以后重放结果和当时不一样，审计也失去意义。改用补偿事件或 upcast。</li>
+<li><strong><code>Apply</code> 里有副作用</strong>。投影重建一次就发一遍通知、扣一遍费。</li>
+<li><strong>只记 <code>tool_finished</code></strong>。进程在工具执行中崩溃，事件里看不出这个调用存在过。</li>
+<li><strong>投影位置和投影结果分开提交</strong>。崩溃后要么漏要么重。</li>
+<li><strong>投影读不到自己的写</strong>。run 刚结束就去查投影表，状态还是 running。</li>
+<li><strong>map 遍历顺序进了请求</strong>。每次重放指纹都不一样，什么都检测不出来。</li>
+<li><strong>没存厂商的不透明内容</strong>。手动管理状态时丢了加密 reasoning，模型行为变差还找不到原因。</li>
+<li><strong>所有东西都事件溯源</strong>。会话标题、用户设置也做成事件，徒增复杂度。</li>
+</ul>
+<hr />
+<h2 id="11-练习">11. 练习</h2>
+<h3 id="练习-1读懂并跑通必做">练习 1：读懂并跑通（必做）</h3>
+<div class="hl"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>projects/21-state<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>make<span class="w"> </span><span class="nb">test</span>
+</code></pre></div>
+
+<p>读完代码，回答：</p>
+<ol>
+<li><code>TestOpenToolCallAfterCrash</code> 里，工具 panic 之后事件流的最后一条是什么？恢复时应该怎么处理这个调用？</li>
+<li>把 <code>toolNames()</code> 里的 <code>sort.Strings</code> 删掉，哪个测试会失败？为什么不是每次都失败？</li>
+<li><code>Replay</code> 为什么要用线上 agent 的工具<strong>名字</strong>，却不用它的工具<strong>实现</strong>？</li>
+</ol>
+<h3 id="练习-2postgres-事件库必做">练习 2：Postgres 事件库（必做）</h3>
+<p>用 <code>schema.sql</code> 实现 <code>PgStore</code>，满足 <code>EventStore</code> 接口：</p>
+<ul>
+<li><code>Append</code> 在一个事务里插入多条事件，<code>seq</code> 从 <code>expect+1</code> 开始；违反唯一约束时返回包装了 <code>ErrConflict</code> 的错误；</li>
+<li>同一个事务里更新 <code>runs</code>、<code>steps</code>、<code>tool_calls</code> 投影（事件和投影同事务提交，就不存在“投影落后”）；</li>
+<li><code>Read</code> 按 <code>seq</code> 排序，<code>ReadAll</code> 按 <code>pos</code> 排序并支持 <code>limit</code>；</li>
+<li>把现有测试改成表驱动，<code>MemStore</code> 和 <code>PgStore</code> 都跑一遍。并发追加测试在 Postgres 上也必须只有 1 个成功。</li>
+</ul>
+<p>再写一个 <code>Rebuild(ctx)</code>：<code>TRUNCATE</code> 三张投影表，从 <code>events</code> 全量重建，重建前后 <code>runs</code> 表内容一致。</p>
+<h3 id="练习-3从某一步分叉选做">练习 3：从某一步分叉（选做）</h3>
+<p>实现 <code>Fork(ctx, store, srcRun, atSeq, newRun)</code>：把 <code>srcRun</code> 的前 <code>atSeq</code> 条事件复制到 <code>newRun</code>（<code>run_started</code> 的 <code>session_id</code> 不变），然后让 agent 从这个状态接着<strong>真跑</strong>。</p>
+<p>要求：</p>
+<ul>
+<li><code>atSeq</code> 必须落在一个 <code>model_called</code> 或 <code>tool_finished</code> 之后，不能切在 <code>tool_started</code> 和 <code>tool_finished</code> 之间（否则新 run 一开始就有一个未完成的调用）；</li>
+<li>新 run 的 <code>run_started</code> 加一个可选字段 <code>forked_from: {run_id, seq}</code>，不用升版本（想想为什么）；</li>
+<li>写测试：分叉后的 run 前缀和原 run 一致，之后模型拿到的历史就是前缀推出来的历史。</li>
+</ul>
+<p>这就是 LangGraph time travel 的事件溯源版本。</p>
+<hr />
+<h2 id="12-自测题">12. 自测题</h2>
+<ol>
+<li>事件日志、快照、消息数组三种存法，分别能回答什么问题？为什么说事件日志是“以后才想到的问题”也能回答的那一种？</li>
+<li>为什么消息最好从事件推出来，而不是单独一张表？什么内容是例外，必须原样存？</li>
+<li><code>Append</code> 的 <code>expect</code> 参数解决什么问题？在 Postgres 里用什么实现？</li>
+<li>为什么工具调用要写 <code>tool_started</code> 和 <code>tool_finished</code> 两个事件？</li>
+<li><code>Apply</code> 为什么不能读时钟？如果业务确实需要时间，怎么办？</li>
+<li>快照和 3.4 的检查点结构很像，地位有什么不同？</li>
+<li>事件字段改名了，为什么不能直接 <code>UPDATE</code>？upcasting 怎么做？遇到不认识的版本应该怎样？</li>
+<li>“完整重放”和 LangGraph 的 replay 有什么区别？各适合做什么？</li>
+<li>请求指纹在重放里起什么作用？哪些情况会让它在没改代码时也对不上？</li>
+<li>投影的读取位置为什么要和投影结果在同一个事务里提交？</li>
+</ol>
+<h2 id="13-自测题答案">13. 自测题答案</h2>
+<ol>
+<li>消息数组只能回答“下一轮发给模型什么”；快照能回答“当前（或某一步）是什么状态”；事件日志记录了每件发生过的事，任何能从这些事推出来的问题都能回答。以后想加一个统计（比如工具耗时），只要写一个新投影从头折叠一遍，历史数据就有了；另外两种存法在写入时就丢掉了中间过程。</li>
+<li>给模型的历史是按规则从事件拼出来的，规则会变（截断、摘要、过滤）。单独存一张表就得同步维护原始数据和给模型的数据两份。例外是厂商私有、无法还原的内容，比如 OpenAI 的加密 reasoning item 和 <code>phase</code> 字段，要原样存在事件里。</li>
+<li>防止两个写入者基于同一个旧状态各自追加，造成覆盖或交错。<code>expect</code> 不等于当前最后一个 seq 就拒绝。Postgres 里用 <code>UNIQUE (run_id, seq)</code>，第二个插入同一 seq 的事务违反约束失败。</li>
+<li>只有一个事件时，进程在工具执行中崩溃，事件里就完全看不出这个调用存在过，恢复后会当它没发生，可能重复执行有副作用的操作。拆成两个，“有开始没结束”就是需要核对的调用，配合幂等键去外部系统查实际结果。</li>
+<li><code>Apply</code> 必须是确定性的：同样的事件序列永远得到同样的状态，否则投影重建、快照校验、重放都不成立。需要时间就在产生事件时取时间写进事件（事件的 <code>at</code> 字段或数据字段），<code>Apply</code> 只读不取。</li>
+<li>检查点是事实来源，丢了状态就没了，格式变化需要迁移；快照只是事件的缓存，丢了可以重建，投影逻辑改了可以整体作废。</li>
+<li><code>UPDATE</code> 改变了“发生过的事实”，重放结果会和当时不一致，审计也失去依据。upcasting：每条事件带版本号，读取时用纯函数把旧版本转成当前版本，原始数据不动，多个版本链式转换。遇到不认识的版本必须报错，不能假装看懂（比如灰度时新代码写了新版本、旧代码在读）。</li>
+<li>LangGraph 从某个检查点继续时，之后的节点会真的重新执行，包括模型和 API 调用，适合探索“换一条路会怎样”（配合 <code>update_state</code> 分叉）。完整重放一次都不真调用，用录下的结果替代，适合在新代码上精确复现历史 run：调试、回归测试、迁移验证。</li>
+<li>替身在返回录下的模型回复前，先算新代码此刻要发的请求指纹，和录制时的比。一致说明新代码到这一步行为不变；不一致说明会发出不同请求，录下的回复不再可信，重放在此分叉并报告步骤。没改代码也对不上的原因：拼请求时用了 map 遍历顺序、<code>Apply</code> 读了时钟或随机数、请求里有未作为事件录下的内容（当前时间、实时检索结果）。</li>
+<li>分开提交时，先存结果后存位置，中间崩溃会重复处理同一批事件；先存位置后存结果，崩溃就会漏掉。同一个事务要么都提交要么都不提交。（即便如此，投影本身也最好写成幂等的，比如用 <code>idem_key</code> 唯一约束挡住重复插入。）</li>
+</ol>
+<hr />
+<h2 id="14-参考答案">14. 参考答案</h2>
+<h3 id="练习-1">练习 1</h3>
+<ol>
+<li>最后一条是调用 <code>pay</code> 的 <code>tool_started</code>，<code>idem_key</code> 为 <code>r/pay</code>，后面没有对应的 <code>tool_finished</code>。恢复时这个调用出现在 <code>Open()</code> 里。不能直接重新执行：先用幂等键去外部系统查这笔扣款是否已经发生，发生了就补写 <code>tool_finished</code>（结果取外部系统返回的），没发生再重试（仍用同一个幂等键）；查不到或外部系统不支持查询，就交给人决定（3.4 的审批流程）。</li>
+<li><code>TestRequestHashStable</code> 会失败。Go 的 map 遍历顺序是故意随机化的，但三个键时某些顺序会重复出现，50 次里大概率至少有一次和第一次不同，所以几乎总会失败，但理论上可能偶然通过。重放测试一般也会失败，因为录制和重放时的工具名顺序可能不同。</li>
+<li>工具名集合是请求的一部分（模型能看到有哪些工具），影响指纹，所以必须和线上一致，否则无从比较；而工具实现在重放时绝不能真的执行（会产生副作用、花钱、结果还不一样），所以换成读录像的替身。</li>
+</ol>
+<h3 id="练习-2">练习 2</h3>
+<div class="hl"><pre><span></span><code><span class="kd">type</span><span class="w"> </span><span class="nx">PgStore</span><span class="w"> </span><span class="kd">struct</span><span class="p">{</span><span class="w"> </span><span class="nx">DB</span><span class="w"> </span><span class="o">*</span><span class="nx">sql</span><span class="p">.</span><span class="nx">DB</span><span class="w"> </span><span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">s</span><span class="w"> </span><span class="o">*</span><span class="nx">PgStore</span><span class="p">)</span><span class="w"> </span><span class="nx">Append</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">runID</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">expect</span><span class="w"> </span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="nx">evs</span><span class="w"> </span><span class="p">...</span><span class="nx">Event</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">tx</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">s</span><span class="p">.</span><span class="nx">DB</span><span class="p">.</span><span class="nx">BeginTx</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="kc">nil</span><span class="p">)</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">defer</span><span class="w"> </span><span class="nx">tx</span><span class="p">.</span><span class="nx">Rollback</span><span class="p">()</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="p">,</span><span class="w"> </span><span class="nx">e</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">evs</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">tx</span><span class="p">.</span><span class="nx">ExecContext</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span>
+<span class="w">            </span><span class="s">`INSERT INTO events (run_id, seq, type, schema_ver, data) VALUES ($1,$2,$3,$4,$5)`</span><span class="p">,</span>
+<span class="w">            </span><span class="nx">runID</span><span class="p">,</span><span class="w"> </span><span class="nx">expect</span><span class="o">+</span><span class="nx">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nx">e</span><span class="p">.</span><span class="nx">Type</span><span class="p">,</span><span class="w"> </span><span class="nx">e</span><span class="p">.</span><span class="nx">Schema</span><span class="p">,</span><span class="w"> </span><span class="p">[]</span><span class="kt">byte</span><span class="p">(</span><span class="nx">e</span><span class="p">.</span><span class="nx">Data</span><span class="p">))</span>
+<span class="w">        </span><span class="kd">var</span><span class="w"> </span><span class="nx">pgErr</span><span class="w"> </span><span class="o">*</span><span class="nx">pgconn</span><span class="p">.</span><span class="nx">PgError</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">errors</span><span class="p">.</span><span class="nx">As</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">pgErr</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">pgErr</span><span class="p">.</span><span class="nx">Code</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s">"23505"</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1">// unique_violation</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Errorf</span><span class="p">(</span><span class="s">"%w：%s seq %d"</span><span class="p">,</span><span class="w"> </span><span class="nx">ErrConflict</span><span class="p">,</span><span class="w"> </span><span class="nx">runID</span><span class="p">,</span><span class="w"> </span><span class="nx">expect</span><span class="o">+</span><span class="nx">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">project</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">tx</span><span class="p">,</span><span class="w"> </span><span class="nx">runID</span><span class="p">,</span><span class="w"> </span><span class="nx">expect</span><span class="o">+</span><span class="nx">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nx">e</span><span class="p">);</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">expect</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">evs</span><span class="p">),</span><span class="w"> </span><span class="nx">tx</span><span class="p">.</span><span class="nx">Commit</span><span class="p">()</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>要点：</p>
+<ul>
+<li>冲突靠唯一约束，不需要 <code>SELECT ... FOR UPDATE</code>。注意不能先 <code>SELECT max(seq)</code> 再插入，那中间有竞争窗口；</li>
+<li><code>project</code> 按事件类型写投影：<code>run_started</code> 插 <code>runs</code>，<code>model_called</code> 插 <code>steps</code> 并累加 <code>runs</code> 的 token，<code>tool_started</code> 插 <code>tool_calls</code>，<code>tool_finished</code> 更新 <code>result / is_error / ended_at</code>，<code>run_completed / run_failed</code> 更新 <code>runs.status</code>。每次都把 <code>runs.last_seq</code> 更新为当前 seq；</li>
+<li><code>project</code> 里先 <code>upcast</code> 再处理，和 <code>RunView.Apply</code> 用同一套升级逻辑；</li>
+<li>事件和投影在同一个事务，所以这三张表永远不会落后于 <code>events</code>（会话索引这类跨 run 的投影仍可以异步追赶）；</li>
+<li>表驱动测试：</li>
+</ul>
+<div class="hl"><pre><span></span><code><span class="k">for</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">tc</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="p">[]</span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">name</span><span class="w"> </span><span class="kt">string</span>
+<span class="w">    </span><span class="nx">new</span><span class="w">  </span><span class="kd">func</span><span class="p">(</span><span class="nx">t</span><span class="w"> </span><span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">T</span><span class="p">)</span><span class="w"> </span><span class="nx">EventStore</span>
+<span class="p">}{</span>
+<span class="w">    </span><span class="p">{</span><span class="s">"mem"</span><span class="p">,</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">T</span><span class="p">)</span><span class="w"> </span><span class="nx">EventStore</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">MemStore</span><span class="p">{}</span><span class="w"> </span><span class="p">}},</span>
+<span class="w">    </span><span class="p">{</span><span class="s">"pg"</span><span class="p">,</span><span class="w"> </span><span class="nx">newPg</span><span class="p">},</span><span class="w"> </span><span class="c1">// 每个测试建独立 schema 或 TRUNCATE</span>
+<span class="p">}</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div>
+
+<ul>
+<li><code>Rebuild</code>：一个事务里 <code>TRUNCATE runs, steps, tool_calls</code>，然后 <code>SELECT * FROM events ORDER BY pos</code>，每条调用 <code>project</code>。验证方式：重建前 <code>SELECT * FROM runs ORDER BY id</code> 存一份，重建后再查，逐行比较。</li>
+</ul>
+<h3 id="练习-3">练习 3</h3>
+<div class="hl"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nx">Fork</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">s</span><span class="w"> </span><span class="nx">EventStore</span><span class="p">,</span><span class="w"> </span><span class="nx">src</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">at</span><span class="w"> </span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="nx">dst</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="nx">RunView</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">evs</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">s</span><span class="p">.</span><span class="nx">Read</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">src</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">RunView</span><span class="p">{},</span><span class="w"> </span><span class="nx">err</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">at</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nx">at</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">evs</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">RunView</span><span class="p">{},</span><span class="w"> </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Errorf</span><span class="p">(</span><span class="s">"at 超出范围"</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="nx">prefix</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">evs</span><span class="p">[:</span><span class="nx">at</span><span class="p">]</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">v</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">Fold</span><span class="p">(</span><span class="nx">prefix</span><span class="p">);</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">v</span><span class="p">.</span><span class="nx">Open</span><span class="p">())</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">RunView</span><span class="p">{},</span><span class="w"> </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Errorf</span><span class="p">(</span><span class="s">"不能切在工具执行中间"</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="nx">copied</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">make</span><span class="p">([]</span><span class="nx">Event</span><span class="p">,</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">prefix</span><span class="p">))</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="p">,</span><span class="w"> </span><span class="nx">e</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">prefix</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">copied</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Event</span><span class="p">{</span><span class="nx">Type</span><span class="p">:</span><span class="w"> </span><span class="nx">e</span><span class="p">.</span><span class="nx">Type</span><span class="p">,</span><span class="w"> </span><span class="nx">Schema</span><span class="p">:</span><span class="w"> </span><span class="nx">e</span><span class="p">.</span><span class="nx">Schema</span><span class="p">,</span><span class="w"> </span><span class="nx">Data</span><span class="p">:</span><span class="w"> </span><span class="nx">e</span><span class="p">.</span><span class="nx">Data</span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="c1">// 给 run_started 加 forked_from</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nx">d</span><span class="w"> </span><span class="kt">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">any</span>
+<span class="w">    </span><span class="nx">_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">json</span><span class="p">.</span><span class="nx">Unmarshal</span><span class="p">(</span><span class="nx">copied</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">Data</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">d</span><span class="p">)</span>
+<span class="w">    </span><span class="nx">d</span><span class="p">[</span><span class="s">"forked_from"</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">any</span><span class="p">{</span><span class="s">"run_id"</span><span class="p">:</span><span class="w"> </span><span class="nx">src</span><span class="p">,</span><span class="w"> </span><span class="s">"seq"</span><span class="p">:</span><span class="w"> </span><span class="nx">at</span><span class="p">}</span>
+<span class="w">    </span><span class="nx">copied</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">Data</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">json</span><span class="p">.</span><span class="nx">Marshal</span><span class="p">(</span><span class="nx">d</span><span class="p">)</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">s</span><span class="p">.</span><span class="nx">Append</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">dst</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="nx">copied</span><span class="p">...);</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">RunView</span><span class="p">{},</span><span class="w"> </span><span class="nx">err</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">Load</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">s</span><span class="p">,</span><span class="w"> </span><span class="nx">dst</span><span class="p">,</span><span class="w"> </span><span class="kc">nil</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>然后给 <code>Agent</code> 加一个 <code>Continue(ctx, runID)</code>：<code>Load</code> 出 <code>RunView</code>，用 <code>v.Messages</code> 作为 <code>h</code>，<code>step</code> 从 <code>len(v.Steps)+1</code> 开始，<code>recorder.seq</code> 从 <code>v.LastSeq</code> 开始，进入同一个循环。可以把 <code>RunWithHistory</code> 的循环体抽成 <code>loop(ctx, rec, h, step)</code> 两边共用。</p>
+<p><code>forked_from</code> 不用升版本：它是新增的可选字段，旧代码解码 <code>RunStartedData</code> 时会忽略它，新代码读旧事件时得到零值。只有改名、改类型、改含义才需要升版本。</p>
+<p>测试：录一个两步的 run，在第 2 条（<code>model_called</code> 之后）分叉，换一个脚本模型接着跑；检查新 run 前两条事件的类型和数据（除 <code>forked_from</code>）与原 run 一致，新模型第一次被调用时拿到的历史等于原 run 前缀推出的 <code>Messages</code>。再测切在 <code>tool_started</code> 之后会返回错误。</p>
+<hr />
+<h2 id="完成标准">完成标准</h2>
+<ul>
+<li><code>make test</code> 全部通过（15 个测试），<code>go test -race</code> 通过；</li>
+<li>练习 1 的三个问题能讲清楚，尤其是第 3 题“为什么用名字不用实现”；</li>
+<li>练习 2 的 <code>PgStore</code> 写完，<code>MemStore</code> 和 <code>PgStore</code> 都通过表驱动测试，<code>Rebuild</code> 前后 <code>runs</code> 表一致；</li>
+<li>能画出会话、run、step、工具调用、消息的关系，并说清楚哪些是事实、哪些是投影；</li>
+<li>能说出完整重放和 LangGraph replay 的区别，以及请求指纹在什么情况下会误报；</li>
+<li>自测题 10 道能不看答案讲出来，尤其是第 4、5、7、9 题。</li>
+</ul>
+    <nav class="pager"><a class="prev" href="03-04-long-running.html"><span>← 上一课 3.4</span>长任务 Agent：检查点、可恢复执行、Human-in-the-loop</a></nav>
+    <p class="foot">© 2026 duang777 · 课件源文件：<a href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/notes/03-agents/05-agent-state.md">notes/03-agents/05-agent-state.md</a></p>
+  </article>
+</div>
+<script>
+document.getElementById("theme-toggle").addEventListener("click",function(){var r=document.documentElement,n=r.getAttribute("data-theme")==="light"?"dark":"light";r.setAttribute("data-theme",n);try{localStorage.setItem("x-theme",n)}catch(e){}});
+document.querySelectorAll('article pre').forEach(function(pre){
+  var b=document.createElement('button');b.className='code__copy';b.textContent='复制';
+  b.onclick=function(){navigator.clipboard.writeText(pre.innerText).then(function(){b.textContent='已复制';setTimeout(function(){b.textContent='复制'},1200)})};
+  pre.parentNode.insertBefore(b,pre);
+});
+var links=[].slice.call(document.querySelectorAll('.toc a')),map={};
+links.forEach(function(a){map[decodeURIComponent(a.getAttribute('href').slice(1))]=a});
+var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting&&map[e.target.id]){links.forEach(function(l){l.classList.remove('on')});map[e.target.id].classList.add('on')}})},{rootMargin:'-80px 0px -70% 0px'});
+document.querySelectorAll('article h1[id],article h2[id]').forEach(function(h){io.observe(h)});
+</script>
+</body>
+</html>

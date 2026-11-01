@@ -263,14 +263,14 @@
         <section class="stats" data-reveal>
           <div class="stat"><span class="stat__fig x-mono">14</span><span class="stat__label">模块</span></div>
           <div class="stat"><span class="stat__fig x-mono">84</span><span class="stat__label">知识点</span></div>
-          <div class="stat"><span class="stat__fig x-mono">Day 15</span><span class="stat__label">今天</span></div>
+          <div class="stat"><span class="stat__fig x-mono">Day 16</span><span class="stat__label">今天</span></div>
           <div class="stat"><span class="stat__fig x-mono">20/84</span><span class="stat__label">已完成</span></div>
         </section>
 
         <section class="section" id="progress" data-nav="进度">
           <div class="head" data-reveal>
             <p class="head__eyebrow x-kicker">当前进度</p>
-            <h2 class="x-h2">00 基础功底、01 LLM 原理与使用、02 工具调用与协议全部完成；03 Agent 架构已完成 3.1–3.3，3.4 长任务练习进行中。</h2>
+            <h2 class="x-h2">00 基础功底、01 LLM 原理与使用、02 工具调用与协议全部完成；03 Agent 架构已完成 3.1–3.3，3.4、3.5 练习进行中。</h2>
             <p class="head__sub">学完且有笔记或代码产出，才在 ROADMAP 里打勾。</p>
           </div>
           <div class="x-progress" data-reveal>
@@ -677,6 +677,25 @@
                 <dd><span class="chip x-chip x-chip--live">进行中</span></dd>
               </dl>
             </article>
+            <article class="step">
+              <div class="step__intro">
+                <p class="step__num x-step-num">3.5</p>
+                <p class="step__eyebrow">进行中 · 03 Agent 架构</p>
+              </div>
+              <div>
+                <h3>Agent 状态与数据模型：事件溯源与完整重放</h3>
+                <p class="sub">会话、run、step、工具调用、消息怎么分；只追加的事件流与 expect 乐观锁；投影、快照与读时升级；用录像替身完整重放，请求指纹报告第几步分叉；Postgres 表结构与删除策略。</p>
+                <div class="links" style="margin-top: 16px">
+                  <a class="x-btn x-btn--primary" href="notes/03-05-agent-state.html">在线阅读</a>
+                </div>
+              </div>
+              <dl class="step__panel">
+                <dt>课件</dt>
+                <dd><span class="chip x-chip x-chip--done">已完成</span></dd>
+                <dt>练习</dt>
+                <dd><span class="chip x-chip x-chip--live">进行中</span></dd>
+              </dl>
+            </article>
           </div>
         </section>
 
@@ -687,6 +706,20 @@
           </div>
           <ol class="timeline" data-reveal>
             <li class="is-current">
+              <p class="timeline__when"><span class="x-mono">Day 16 · 2026-11-01</span></p>
+              <div class="timeline__what">
+                <p><strong>Agent 状态：存发生过的事，状态从事件推出来</strong></p>
+                <ul>
+                  <li>事件流只追加，expect 冲突挡住并发写入</li>
+                  <li>消息、用量、会话列表都是投影，丢了可以重建</li>
+                  <li>快照只是缓存；旧事件读时升级，不改原始数据</li>
+                  <li>录像替身完整重放，不调模型不调工具，改提示词会报出第几步分叉</li>
+                </ul>
+                <p class="x-think">思考：线上那次失败的 run，你现在能一步不差地复现吗？</p>
+              </div>
+              <p><a class="x-btn x-btn--ghost" href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/logs/2026-11-01.md" target="_blank" rel="noopener">日志</a></p>
+            </li>
+            <li>
               <p class="timeline__when"><span class="x-mono">Day 15 · 2026-10-25</span></p>
               <div class="timeline__what">
                 <p><strong>长任务 Agent：崩了能接着跑，停下来等人</strong></p>

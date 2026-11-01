@@ -43,6 +43,7 @@ LESSONS = [
     ("notes/03-agents/02-agent-loop.md", "03-02-agent-loop", "3.2", "Agent Loop 设计：停止条件、预算、重试", "3–4 小时"),
     ("notes/03-agents/03-multi-agent.md", "03-03-multi-agent", "3.3", "多智能体：Supervisor、Handoff、Swarm", "3–4 小时"),
     ("notes/03-agents/04-long-running.md", "03-04-long-running", "3.4", "长任务 Agent：检查点、可恢复执行、Human-in-the-loop", "3–4 小时"),
+    ("notes/03-agents/05-agent-state.md", "03-05-agent-state", "3.5", "Agent 状态与数据模型：事件溯源与完整重放", "3–4 小时"),
 ]
 
 CSS = r"""
