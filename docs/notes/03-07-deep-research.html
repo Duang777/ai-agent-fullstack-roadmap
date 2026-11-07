@@ -546,7 +546,7 @@ New regions for X1 open next quarter [4]
 <li><code>Lead</code> 增加 <code>TaskTimeout time.Duration</code>：每个子代理用 <code>context.WithTimeout</code> 跑，超时后返回<strong>已经找到的部分证据</strong>（工件照样写），<code>Finding.Errors</code> 里记一条超时；</li>
 <li>测试：<ul>
 <li><code>TotalBudget = 10</code>，端到端研究在第一轮后停止，不派补充任务，<code>StopReason</code> 为 <code>budget</code>；</li>
-<li><code>Web.Delay = 30ms</code>、<code>TaskTimeout = 50ms</code>、<code>MinEvidence = 100</code> 的价格任务，超时返回，<code>Evidence &gt; 0</code>，工件存在，<code>Errors</code> 含超时。</li>
+<li><code>Web.Delay = 30ms</code>、<code>TaskTimeout = 80ms</code>、<code>MinEvidence = 100</code> 的价格任务，超时返回，<code>Evidence &gt; 0</code>，工件存在，<code>Errors</code> 含超时。</li>
 </ul>
 </li>
 </ul>
@@ -636,7 +636,7 @@ New regions for X1 open next quarter [4]
 <span class="p">}</span>
 </code></pre></div>
 
-<p>（<code>enter</code> 需要接收 <code>ctx</code>。）测试里 <code>Delay = 30ms</code>、<code>TaskTimeout = 50ms</code>：第一次搜索 30ms，第一次抓取到 60ms 时超时。为了保证 <code>Evidence &gt; 0</code>，可以让超时发生在第二次抓取：<code>TaskTimeout = 80ms</code>，第一次抓取（论文）在 60ms 完成并拿到 1 条证据。</p>
+<p>（<code>enter</code> 需要接收 <code>ctx</code>。）测试里 <code>Delay = 30ms</code>、<code>TaskTimeout = 80ms</code>：第一次搜索在 30ms 完成，第一次抓取（论文）在 60ms 完成并拿到 1 条证据，第二次抓取在 80ms 被打断。如果把超时设成 50ms，第一次抓取就会被打断，一条证据都没有，测试里的 <code>Evidence &gt; 0</code> 就不成立。</p>
 <p>预算测试：<code>TotalBudget = 10</code>，第一轮三个任务一共 13 次调用（3 + 3 + 7），第二轮开始前检查发现超了，<code>StopReason = "budget"</code>，availability 没有补充任务，<code>Grade</code> 的完整度会是 2/3。这正是预算的意义：宁可交一份不完整但诚实的报告，也不要无限地花下去。</p>
 <h3 id="练习-3">练习 3</h3>
 <div class="hl"><pre><span></span><code><span class="kd">type</span><span class="w"> </span><span class="nx">Proposal</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>

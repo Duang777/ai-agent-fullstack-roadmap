@@ -339,7 +339,7 @@ cd projects/23-research && make test
 - `Lead` 增加 `TaskTimeout time.Duration`：每个子代理用 `context.WithTimeout` 跑，超时后返回**已经找到的部分证据**（工件照样写），`Finding.Errors` 里记一条超时；
 - 测试：
     - `TotalBudget = 10`，端到端研究在第一轮后停止，不派补充任务，`StopReason` 为 `budget`；
-    - `Web.Delay = 30ms`、`TaskTimeout = 50ms`、`MinEvidence = 100` 的价格任务，超时返回，`Evidence > 0`，工件存在，`Errors` 含超时。
+    - `Web.Delay = 30ms`、`TaskTimeout = 80ms`、`MinEvidence = 100` 的价格任务，超时返回，`Evidence > 0`，工件存在，`Errors` 含超时。
 
 ### 练习 3：协作式计划（选做）
 
@@ -436,7 +436,7 @@ case <-ctx.Done():
 }
 ```
 
-（`enter` 需要接收 `ctx`。）测试里 `Delay = 30ms`、`TaskTimeout = 50ms`：第一次搜索 30ms，第一次抓取到 60ms 时超时。为了保证 `Evidence > 0`，可以让超时发生在第二次抓取：`TaskTimeout = 80ms`，第一次抓取（论文）在 60ms 完成并拿到 1 条证据。
+（`enter` 需要接收 `ctx`。）测试里 `Delay = 30ms`、`TaskTimeout = 80ms`：第一次搜索在 30ms 完成，第一次抓取（论文）在 60ms 完成并拿到 1 条证据，第二次抓取在 80ms 被打断。如果把超时设成 50ms，第一次抓取就会被打断，一条证据都没有，测试里的 `Evidence > 0` 就不成立。
 
 预算测试：`TotalBudget = 10`，第一轮三个任务一共 13 次调用（3 + 3 + 7），第二轮开始前检查发现超了，`StopReason = "budget"`，availability 没有补充任务，`Grade` 的完整度会是 2/3。这正是预算的意义：宁可交一份不完整但诚实的报告，也不要无限地花下去。
 
