@@ -89,6 +89,7 @@
 | 3.4 | 长任务 Agent：检查点、可恢复执行、Human-in-the-loop | 三种“长”：进程崩溃、等人、跨上下文窗口；检查点存什么、何时存、seq 乐观锁与认领；三个崩溃时刻与账本 + 幂等键；LangGraph interrupt / OpenAI needs_approval + RunState / Genkit Go 1.14 可恢复工具；fail closed、拒绝即工具结果、部分决定、过期按拒绝、版本；Anthropic 进度文件 + JSON 功能清单 | [课件](notes/03-agents/04-long-running.md) | [`20-longrun`](projects/20-longrun) | 📖 学习中 |
 | 3.5 | Agent 状态与数据模型：会话、消息、run、step、工具调用，事件溯源与完整重放 | 消息数组、快照、事件日志三种存法；会话 / run / step / 工具调用 / 消息的划分，消息由事件推出（加密 reasoning 例外）；只追加事件流与 expect 乐观锁、UNIQUE(run_id, seq)；tool_started / tool_finished 与幂等键；投影、全局位置追赶、读自己的写；快照即缓存；upcasting 读时升级；录像替身完整重放与请求指纹分叉检测，对比 LangGraph replay；OpenAI Conversations / previous_response_id / store:false 与 LangGraph checkpoints + writes、DeltaChannel；Postgres 表结构与删除策略 | [课件](notes/03-agents/05-agent-state.md) | [`21-state`](projects/21-state) | 📖 学习中 |
 | 3.6 | Coding Agent 架构（Claude Code / Codex / SWE-agent 拆解） | agentic harness：收集上下文、行动、验证；Claude Code 五类工具、Edit 三条检查、每命令独立进程、文件检查点、权限模式、按需加载；Codex 的 instructions / tools / input、AGENTS.md 分层 32 KiB、只沙箱 shell、无状态与 ZDR、精确前缀与 cache miss、追加而非修改、compaction；SWE-agent ACI 与消融（100 行窗口、50 条上限、linter、最近 5 条观察）；mini-swe-agent 只用 bash 的反转；编辑格式取舍、权限判断顺序、折叠与缓存冲突、harness 强制验证 | [课件](notes/03-agents/06-coding-agent.md) | [`22-coding`](projects/22-coding) | 📖 学习中 |
+| 3.7 | Deep Research Agent 架构 | 静态检索 vs 多步动态搜索；Anthropic Research：主研究员 + 并行子代理 + CitationAgent、计划存 Memory、token 用量解释 80% 差异、按复杂度分配预算、先宽后窄、LLM 评委五项细则、断点恢复与彩虹部署；OpenAI 专用模型 2026-07-23 关闭，现用推理模型 + web_search + 后台模式；Gemini Deep Research agent：后台执行、流式续传、协作式计划；压缩与工件引用、缺口驱动迭代、引用核对、注入隔离 | [课件](notes/03-agents/07-deep-research.md) | [`23-research`](projects/23-research) | 📖 学习中 |
 
 ### 全部模块
 
@@ -191,6 +192,9 @@ cd projects/21-state && make test
 
 # 3.6 Coding Agent 架构：拆解 Claude Code、Codex、SWE-agent
 cd projects/22-coding && make test
+
+# 3.7 Deep Research Agent 架构：拆解 Anthropic Research、OpenAI、Gemini
+cd projects/23-research && make test
 ```
 
 推荐学习方式：先读课件 → 关掉参考答案自己写练习 → 跑测试 → 再对照参考实现。

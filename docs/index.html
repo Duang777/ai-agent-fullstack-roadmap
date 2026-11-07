@@ -263,14 +263,14 @@
         <section class="stats" data-reveal>
           <div class="stat"><span class="stat__fig x-mono">14</span><span class="stat__label">模块</span></div>
           <div class="stat"><span class="stat__fig x-mono">84</span><span class="stat__label">知识点</span></div>
-          <div class="stat"><span class="stat__fig x-mono">Day 17</span><span class="stat__label">今天</span></div>
+          <div class="stat"><span class="stat__fig x-mono">Day 18</span><span class="stat__label">今天</span></div>
           <div class="stat"><span class="stat__fig x-mono">20/84</span><span class="stat__label">已完成</span></div>
         </section>
 
         <section class="section" id="progress" data-nav="进度">
           <div class="head" data-reveal>
             <p class="head__eyebrow x-kicker">当前进度</p>
-            <h2 class="x-h2">00 基础功底、01 LLM 原理与使用、02 工具调用与协议全部完成；03 Agent 架构已完成 3.1–3.3，3.4–3.6 练习进行中。</h2>
+            <h2 class="x-h2">00 基础功底、01 LLM 原理与使用、02 工具调用与协议全部完成；03 Agent 架构已完成 3.1–3.3，3.4–3.7 练习进行中，模块 03 课件全部完成。</h2>
             <p class="head__sub">学完且有笔记或代码产出，才在 ROADMAP 里打勾。</p>
           </div>
           <div class="x-progress" data-reveal>
@@ -715,6 +715,25 @@
                 <dd><span class="chip x-chip x-chip--live">进行中</span></dd>
               </dl>
             </article>
+            <article class="step">
+              <div class="step__intro">
+                <p class="step__num x-step-num">3.7</p>
+                <p class="step__eyebrow">进行中 · 03 Agent 架构</p>
+              </div>
+              <div>
+                <h3>Deep Research Agent 架构：拆解 Anthropic Research、OpenAI、Gemini</h3>
+                <p class="sub">主研究员拆任务、按复杂度分配预算，子代理并行“先宽后窄”地搜索，按来源质量重排、够了就停；结果写进工件只交回摘要，按缺口追加任务，每轮存检查点；报告写完单独核对引用，网页里的指令一律隔离。</p>
+                <div class="links" style="margin-top: 16px">
+                  <a class="x-btn x-btn--primary" href="notes/03-07-deep-research.html">在线阅读</a>
+                </div>
+              </div>
+              <dl class="step__panel">
+                <dt>课件</dt>
+                <dd><span class="chip x-chip x-chip--done">已完成</span></dd>
+                <dt>练习</dt>
+                <dd><span class="chip x-chip x-chip--live">进行中</span></dd>
+              </dl>
+            </article>
           </div>
         </section>
 
@@ -725,6 +744,20 @@
           </div>
           <ol class="timeline" data-reveal>
             <li class="is-current">
+              <p class="timeline__when"><span class="x-mono">Day 18 · 2026-11-08</span></p>
+              <div class="timeline__what">
+                <p><strong>Deep Research：研究的本质是压缩</strong></p>
+                <ul>
+                  <li>多智能体有效，主要是因为花得起 token：BrowseComp 上 token 用量解释 80% 差异</li>
+                  <li>预算写成规则：查事实 1 个 agent，对比 2–4 个，广泛调研 10 个以上</li>
+                  <li>搜索排名不是可信度：按来源质量重排，农场根本轮不到</li>
+                  <li>OpenAI 专用 deep research 模型已关闭，现在是推理模型 + 搜索 + 后台模式</li>
+                </ul>
+                <p class="x-think">思考：读网页的 agent，手里有没有能把数据发出去的工具？</p>
+              </div>
+              <p><a class="x-btn x-btn--ghost" href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/logs/2026-11-08.md" target="_blank" rel="noopener">日志</a></p>
+            </li>
+            <li>
               <p class="timeline__when"><span class="x-mono">Day 17 · 2026-11-02</span></p>
               <div class="timeline__what">
                 <p><strong>Coding Agent：模型之外的那一层才是产品</strong></p>

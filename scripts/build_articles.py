@@ -45,6 +45,7 @@ LESSONS = [
     ("notes/03-agents/04-long-running.md", "03-04-long-running", "3.4", "长任务 Agent：检查点、可恢复执行、Human-in-the-loop", "3–4 小时"),
     ("notes/03-agents/05-agent-state.md", "03-05-agent-state", "3.5", "Agent 状态与数据模型：事件溯源与完整重放", "3–4 小时"),
     ("notes/03-agents/06-coding-agent.md", "03-06-coding-agent", "3.6", "Coding Agent 架构：拆解 Claude Code、Codex、SWE-agent", "3–4 小时"),
+    ("notes/03-agents/07-deep-research.md", "03-07-deep-research", "3.7", "Deep Research Agent 架构：拆解 Anthropic Research、OpenAI、Gemini", "3–4 小时"),
 ]
 
 CSS = r"""
