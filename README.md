@@ -91,6 +91,12 @@
 | 3.6 | Coding Agent 架构（Claude Code / Codex / SWE-agent 拆解） | agentic harness：收集上下文、行动、验证；Claude Code 五类工具、Edit 三条检查、每命令独立进程、文件检查点、权限模式、按需加载；Codex 的 instructions / tools / input、AGENTS.md 分层 32 KiB、只沙箱 shell、无状态与 ZDR、精确前缀与 cache miss、追加而非修改、compaction；SWE-agent ACI 与消融（100 行窗口、50 条上限、linter、最近 5 条观察）；mini-swe-agent 只用 bash 的反转；编辑格式取舍、权限判断顺序、折叠与缓存冲突、harness 强制验证 | [课件](notes/03-agents/06-coding-agent.md) | [`22-coding`](projects/22-coding) | 📖 学习中 |
 | 3.7 | Deep Research Agent 架构 | 静态检索 vs 多步动态搜索；Anthropic Research：主研究员 + 并行子代理 + CitationAgent、计划存 Memory、token 用量解释 80% 差异、按复杂度分配预算、先宽后窄、LLM 评委五项细则、断点恢复与彩虹部署；OpenAI 专用模型 2026-07-23 关闭，现用推理模型 + web_search + 后台模式；Gemini Deep Research agent：后台执行、流式续传、协作式计划；压缩与工件引用、缺口驱动迭代、引用核对、注入隔离 | [课件](notes/03-agents/07-deep-research.md) | [`23-research`](projects/23-research) | 📖 学习中 |
 
+### 04 · 框架与 SDK
+
+| # | 主题 | 核心内容 | 课件 | 练习 | 状态 |
+|---|---|---|---|---|---|
+| 4.1 | LangGraph（状态图、持久化、interrupt） | 通道与 reducer（覆盖、追加、add_messages、Overwrite）；节点、静态边、条件边、Send 扇出、Command；Pregel super-step（并行看同一快照、步末合并、LastValue 冲突、递归上限）；checkpointer 与 store、每步一个 checkpoint、pending writes、四种继续方式、三种 durability 与首个 checkpoint；interrupt 的抛出 + 从头重跑 + 按序号匹配及四条规则、按 ID 恢复多个 interrupt；time travel、update_state、图迁移；节点 / task / 子图的划分 | [课件](notes/04-frameworks/01-langgraph.md) | [`24-langgraph`](projects/24-langgraph) | 📖 学习中 |
+
 ### 全部模块
 
 四个阶段：**A 打地基** → **B 能做出来** → **C 上生产** → **D 深入与实战**。阶段 C 是 Demo 和生产系统的分水岭：Eval 回答“有多准”，Tracing 回答“哪里坏了”，高可用回答“挂了怎么办”，性能与成本回答“为什么慢、为什么贵”。
@@ -101,7 +107,7 @@
 | A | 01 LLM 原理与使用 | Transformer、主流 API、结构化输出、推理模型、Prompt Caching | `██████` 6/6 |
 | A | 02 工具调用与协议 | Function Calling、MCP、A2A、Computer Use、代码沙箱 | `█████` 5/5 |
 | B | 03 Agent 架构 | ReAct、Agent Loop、多智能体、长任务、状态与数据模型、Coding / Deep Research Agent | `███░░░░` 3/7 |
-| B | 04 框架与 SDK | LangGraph、OpenAI / Claude Agent SDK、Eino、Vercel AI SDK、Mastra | `░░░░░░` 0/6 |
+| B | 04 框架与 SDK | LangGraph、OpenAI / Claude Agent SDK、Eino、Vercel AI SDK、Mastra | `░░░░░░` 0/6（4.1 学习中） |
 | B | 05 记忆与检索 | 向量库、混合检索、Rerank、GraphRAG、记忆、检索评测 | `░░░░░` 0/5 |
 | C | 06 评测体系 | 测试工程、任务集构造、pass^k、LLM-as-Judge 校准、SWE-bench / τ²-bench、CI 门禁、模型版本迁移、A/B | `░░░░░░░░░` 0/9 |
 | C | 07 可观测性 | OpenTelemetry GenAI、Langfuse、TTFT / P99 / 成本指标、会话回放、SLO | `░░░░░` 0/5 |
@@ -195,6 +201,9 @@ cd projects/22-coding && make test
 
 # 3.7 Deep Research Agent 架构：拆解 Anthropic Research、OpenAI、Gemini
 cd projects/23-research && make test
+
+# 4.1 LangGraph：状态图、持久化与 interrupt（Go 重写运行时核心）
+cd projects/24-langgraph && make test
 ```
 
 推荐学习方式：先读课件 → 关掉参考答案自己写练习 → 跑测试 → 再对照参考实现。

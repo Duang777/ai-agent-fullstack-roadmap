@@ -263,14 +263,14 @@
         <section class="stats" data-reveal>
           <div class="stat"><span class="stat__fig x-mono">14</span><span class="stat__label">模块</span></div>
           <div class="stat"><span class="stat__fig x-mono">84</span><span class="stat__label">知识点</span></div>
-          <div class="stat"><span class="stat__fig x-mono">Day 18</span><span class="stat__label">今天</span></div>
+          <div class="stat"><span class="stat__fig x-mono">Day 19</span><span class="stat__label">今天</span></div>
           <div class="stat"><span class="stat__fig x-mono">20/84</span><span class="stat__label">已完成</span></div>
         </section>
 
         <section class="section" id="progress" data-nav="进度">
           <div class="head" data-reveal>
             <p class="head__eyebrow x-kicker">当前进度</p>
-            <h2 class="x-h2">00 基础功底、01 LLM 原理与使用、02 工具调用与协议全部完成；03 Agent 架构已完成 3.1–3.3，3.4–3.7 练习进行中，模块 03 课件全部完成。</h2>
+            <h2 class="x-h2">00 基础功底、01 LLM 原理与使用、02 工具调用与协议全部完成；03 Agent 架构已完成 3.1–3.3，3.4–3.7 练习进行中，模块 03 课件全部完成；04 框架与 SDK 开始，4.1 LangGraph 已发布。</h2>
             <p class="head__sub">学完且有笔记或代码产出，才在 ROADMAP 里打勾。</p>
           </div>
           <div class="x-progress" data-reveal>
@@ -734,6 +734,25 @@
                 <dd><span class="chip x-chip x-chip--live">进行中</span></dd>
               </dl>
             </article>
+            <article class="step">
+              <div class="step__intro">
+                <p class="step__num x-step-num">4.1</p>
+                <p class="step__eyebrow">进行中 · 04 框架与 SDK</p>
+              </div>
+              <div>
+                <h3>LangGraph：状态图、持久化与 interrupt</h3>
+                <p class="sub">用 Go 重写 LangGraph 运行时的核心：通道和 reducer、条件边与 Send、Pregel 风格的 super-step、每步一个 checkpoint 和 pending writes；interrupt 靠“抛出、从头重跑、按序号匹配恢复值”实现，由此推出它的四条使用规则。</p>
+                <div class="links" style="margin-top: 16px">
+                  <a class="x-btn x-btn--primary" href="notes/04-01-langgraph.html">在线阅读</a>
+                </div>
+              </div>
+              <dl class="step__panel">
+                <dt>课件</dt>
+                <dd><span class="chip x-chip x-chip--done">已完成</span></dd>
+                <dt>练习</dt>
+                <dd><span class="chip x-chip x-chip--live">进行中</span></dd>
+              </dl>
+            </article>
           </div>
         </section>
 
@@ -744,6 +763,20 @@
           </div>
           <ol class="timeline" data-reveal>
             <li class="is-current">
+              <p class="timeline__when"><span class="x-mono">Day 19 · 2026-11-10</span></p>
+              <div class="timeline__what">
+                <p><strong>LangGraph：看懂运行时，规则就不用背</strong></p>
+                <ul>
+                  <li>同一个 super-step 的节点并行、看同一份快照，写入在步末按 reducer 合并</li>
+                  <li>每步一个 checkpoint；节点失败时，成功节点的写入作为 pending writes 保留</li>
+                  <li>interrupt = 抛出 + 恢复时节点从头重跑 + 按序号匹配恢复值</li>
+                  <li>所以 interrupt 之前的副作用必须幂等，调用顺序不能变</li>
+                </ul>
+                <p class="x-think">思考：同一个 thread_id，什么时候是“接着跑”，什么时候是“重新开始”？</p>
+              </div>
+              <p><a class="x-btn x-btn--ghost" href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/logs/2026-11-10.md" target="_blank" rel="noopener">日志</a></p>
+            </li>
+            <li>
               <p class="timeline__when"><span class="x-mono">Day 18 · 2026-11-08</span></p>
               <div class="timeline__what">
                 <p><strong>Deep Research：研究的本质是压缩</strong></p>
@@ -1083,7 +1116,7 @@
               </ul>
             </div>
             <div class="x-card">
-              <div class="x-card__top"><span class="x-card__num">04</span><span class="chip x-chip">未开始</span></div>
+              <div class="x-card__top"><span class="x-card__num">04</span><span class="chip x-chip x-chip--live">进行中</span></div>
               <h3>框架与 SDK</h3>
               <ul>
                 <li>LangGraph（状态图、持久化、interrupt）</li>
