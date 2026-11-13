@@ -96,6 +96,7 @@
 | # | 主题 | 核心内容 | 课件 | 练习 | 状态 |
 |---|---|---|---|---|---|
 | 4.1 | LangGraph（状态图、持久化、interrupt） | 通道与 reducer（覆盖、追加、add_messages、Overwrite）；节点、静态边、条件边、Send 扇出、Command；Pregel super-step（并行看同一快照、步末合并、LastValue 冲突、递归上限）；checkpointer 与 store、每步一个 checkpoint、pending writes、四种继续方式、三种 durability 与首个 checkpoint；interrupt 的抛出 + 从头重跑 + 按序号匹配及四条规则、按 ID 恢复多个 interrupt；time travel、update_state、图迁移；节点 / task / 子图的划分 | [课件](notes/04-frameworks/01-langgraph.md) | [`24-langgraph`](projects/24-langgraph) | 📖 学习中 |
+| 4.2 | OpenAI Agents SDK | Runner 循环与最终输出判定、max_turns 与错误处理器；工具并发与限流、tool_use_behavior、找不到工具的两种行为；handoff 即工具（on_handoff、input_type、input_filter、只取第一个）与 agent-as-tool；输入 / 输出 / 工具 guardrail 的边界、并行与阻塞模式、输出 tripwire 与 session；needs_approval、回调 fail closed、RunState 序列化恢复、sticky 决定的作用范围、部分决定、服务端审批与防重放、批准不等于恰好一次；Session 与四种记忆策略 | [课件](notes/04-frameworks/02-openai-agents-sdk.md) | [`25-agents-sdk`](projects/25-agents-sdk) | 📖 学习中 |
 
 ### 全部模块
 
@@ -107,7 +108,7 @@
 | A | 01 LLM 原理与使用 | Transformer、主流 API、结构化输出、推理模型、Prompt Caching | `██████` 6/6 |
 | A | 02 工具调用与协议 | Function Calling、MCP、A2A、Computer Use、代码沙箱 | `█████` 5/5 |
 | B | 03 Agent 架构 | ReAct、Agent Loop、多智能体、长任务、状态与数据模型、Coding / Deep Research Agent | `███░░░░` 3/7 |
-| B | 04 框架与 SDK | LangGraph、OpenAI / Claude Agent SDK、Eino、Vercel AI SDK、Mastra | `░░░░░░` 0/6（4.1 学习中） |
+| B | 04 框架与 SDK | LangGraph、OpenAI / Claude Agent SDK、Eino、Vercel AI SDK、Mastra | `░░░░░░` 0/6（4.1–4.2 学习中） |
 | B | 05 记忆与检索 | 向量库、混合检索、Rerank、GraphRAG、记忆、检索评测 | `░░░░░` 0/5 |
 | C | 06 评测体系 | 测试工程、任务集构造、pass^k、LLM-as-Judge 校准、SWE-bench / τ²-bench、CI 门禁、模型版本迁移、A/B | `░░░░░░░░░` 0/9 |
 | C | 07 可观测性 | OpenTelemetry GenAI、Langfuse、TTFT / P99 / 成本指标、会话回放、SLO | `░░░░░` 0/5 |
@@ -204,6 +205,9 @@ cd projects/23-research && make test
 
 # 4.1 LangGraph：状态图、持久化与 interrupt（Go 重写运行时核心）
 cd projects/24-langgraph && make test
+
+# 4.2 OpenAI Agents SDK：Runner 循环、handoff、guardrail 与 RunState（Go 重写核心）
+cd projects/25-agents-sdk && make test
 ```
 
 推荐学习方式：先读课件 → 关掉参考答案自己写练习 → 跑测试 → 再对照参考实现。

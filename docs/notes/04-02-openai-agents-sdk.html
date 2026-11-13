@@ -1,0 +1,810 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>4.2 OpenAI Agents SDK：Runner 循环、handoff、guardrail 与 RunState · AI Agent 全栈</title>
+<meta name="description" content="4.2 OpenAI Agents SDK：Runner 循环、handoff、guardrail 与 RunState。duang777 的 AI Agent 全栈公开学习课件。" />
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("x-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
+<style>
+:root{
+  --bg:#0a0a0a;--surface:#111;--text:#ededed;--text-2:#a1a1a1;--text-3:rgb(255 255 255/.4);
+  --line:rgb(255 255 255/.1);--line-2:rgb(255 255 255/.06);
+  --body:#d4d4d4;--code-bg:#1a1a1a;--pre-bg:#0f0f0f;--nav-bg:rgb(10 10 10/.8);--sb:#2a2a2a;--sb-h:#3a3a3a;
+  --sans:Inter,-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei","Helvetica Neue",sans-serif;
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+}
+*{box-sizing:border-box}
+html{color-scheme:dark}
+:root[data-theme="light"]{--bg:#fff;--surface:#fafafa;--text:#0a0a0a;--text-2:#555;--text-3:rgb(0 0 0/.42);--line:rgb(0 0 0/.1);--line-2:rgb(0 0 0/.06);--body:#333;--code-bg:#f2f2f2;--pre-bg:#fafafa;--nav-bg:rgb(255 255 255/.85);--sb:#d4d4d4;--sb-h:#bdbdbd}
+:root[data-theme="light"]{color-scheme:light}
+.toc{scrollbar-width:none}.toc::-webkit-scrollbar{display:none}
+html{scrollbar-width:thin;scrollbar-color:var(--sb) transparent}
+::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--sb);border-radius:8px}::-webkit-scrollbar-thumb:hover{background:var(--sb-h)}
+html{scroll-behavior:smooth;scroll-padding-top:80px}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;line-height:1.8;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+.nav{position:sticky;top:0;z-index:10;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;border-bottom:1px solid var(--line);background:var(--nav-bg);backdrop-filter:blur(12px)}
+.nav__brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-size:14px;font-weight:500}
+.nav__dot{width:10px;height:10px;border-radius:3px;background:var(--text)}
+.nav__links{display:flex;gap:20px;font-size:14px;color:var(--text-2)}
+.nav__links a{text-decoration:none}.nav__links a:hover{color:var(--text)}
+.wrap{max-width:1200px;margin:0 auto;padding:0 24px;display:grid;grid-template-columns:220px minmax(0,1fr);gap:56px}
+.toc{position:sticky;top:80px;align-self:start;max-height:calc(100vh - 100px);overflow:auto;padding:40px 0 40px;font-size:13px;line-height:1.6}
+.toc__label{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--text-3);text-transform:uppercase;margin-bottom:12px}
+.toc ul{list-style:none;margin:0;padding:0}
+.toc li{margin:0}
+.toc a{display:block;padding:4px 0 4px 12px;border-left:1px solid var(--line);color:var(--text-2);text-decoration:none}
+.toc a:hover,.toc a.on{color:var(--text);border-left-color:var(--text)}
+.toc ul ul a{padding-left:24px;font-size:12.5px;color:var(--text-3)}
+.toc ul ul a:hover,.toc ul ul a.on{color:var(--text)}
+article{min-width:0;max-width:760px;padding:48px 0 96px}
+.meta{font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--text-3);margin-bottom:16px}
+article h1.title{font-size:40px;line-height:1.2;letter-spacing:-.02em;font-weight:600;margin:0 0 24px}
+article h1{font-size:28px;line-height:1.3;letter-spacing:-.01em;font-weight:600;margin:72px 0 20px;padding-top:32px;border-top:1px solid var(--line)}
+article h2{font-size:22px;line-height:1.4;font-weight:600;margin:48px 0 16px}
+article h3{font-size:18px;font-weight:600;margin:36px 0 12px}
+article h4{font-size:16px;font-weight:600;margin:28px 0 8px}
+article p{margin:0 0 18px;color:var(--body)}
+article strong{color:var(--text);font-weight:600}
+article ul,article ol{padding-left:22px;margin:0 0 18px;color:var(--body)}
+article li{margin:4px 0}
+article a{text-decoration:underline;text-decoration-color:var(--text-3);text-underline-offset:3px}
+article a:hover{text-decoration-color:var(--text)}
+article hr{border:0;border-top:1px solid var(--line);margin:48px 0}
+article blockquote{margin:0 0 20px;padding:12px 18px;border-left:2px solid var(--text-2);background:var(--surface);border-radius:0 8px 8px 0;color:var(--text-2)}
+article blockquote p{margin:6px 0;color:var(--text-2)}
+article code{font-family:var(--mono);font-size:.88em;background:var(--code-bg);border:1px solid var(--line-2);border-radius:5px;padding:1px 6px}
+article pre{position:relative;margin:0 0 22px;padding:16px 18px;background:var(--pre-bg);border:1px solid var(--line);border-radius:10px;overflow:auto;font-size:13.5px;line-height:1.65}
+article pre code{background:none;border:0;padding:0;font-size:inherit}
+.code{position:relative}
+.code__lang{position:absolute;top:8px;right:46px;font-family:var(--mono);font-size:11px;color:var(--text-3);z-index:1}
+.code__copy{position:absolute;top:6px;right:8px;z-index:1;font:11px var(--mono);color:var(--text-2);background:var(--code-bg);border:1px solid var(--line);border-radius:6px;padding:2px 7px;cursor:pointer}
+.code__copy:hover{color:var(--text)}
+.tbl{overflow-x:auto;margin:0 0 22px;border:1px solid var(--line);border-radius:10px}
+article table{border-collapse:collapse;width:100%;font-size:14px}
+article th,article td{padding:10px 14px;border-bottom:1px solid var(--line-2);text-align:left;vertical-align:top}
+article th{font-weight:600;background:var(--surface);color:var(--text)}
+article tr:last-child td{border-bottom:0}
+article details{margin:0 0 18px;border:1px solid var(--line);border-radius:10px;padding:10px 16px;background:var(--surface)}
+article summary{cursor:pointer;font-weight:500}
+.pager{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:72px;padding-top:32px;border-top:1px solid var(--line)}
+.pager a{display:block;padding:16px 18px;border:1px solid var(--line);border-radius:10px;text-decoration:none}
+.pager a:hover{border-color:var(--text-2)}
+.pager span{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--text-3)}
+.pager .next{text-align:right;grid-column:2}
+.foot{margin-top:40px;font-size:13px;color:var(--text-3)}
+/* 代码高亮：黑白灰为主 */
+.hl .c,.hl .c1,.hl .cm,.hl .ch,.hl .cs,.hl .cp,.hl .cpf{color:#6b6b6b;font-style:italic}
+.hl .k,.hl .kd,.hl .kn,.hl .kr,.hl .kt,.hl .kc,.hl .kp,.hl .ow{color:#ffffff;font-weight:600}
+.hl .s,.hl .s1,.hl .s2,.hl .sb,.hl .sc,.hl .sd,.hl .se,.hl .sh,.hl .si,.hl .sx,.hl .sr,.hl .ss,.hl .dl,.hl .sa{color:#86efac}
+.hl .m,.hl .mi,.hl .mf,.hl .mh,.hl .mo,.hl .il{color:#fcd34d}
+.hl .nf,.hl .fm,.hl .nc,.hl .nn{color:#e5e5e5;font-weight:500}
+.hl .nb,.hl .bp,.hl .nd,.hl .na,.hl .nt{color:#bdbdbd}
+.hl .o,.hl .p{color:#9a9a9a}
+.hl .gd{color:#fca5a5}.hl .gi{color:#86efac}
+.hl{color:#d4d4d4}
+:root[data-theme="light"] .hl{color:#262626}
+:root[data-theme="light"] .hl .c,:root[data-theme="light"] .hl .c1,:root[data-theme="light"] .hl .cm,:root[data-theme="light"] .hl .ch,:root[data-theme="light"] .hl .cs,:root[data-theme="light"] .hl .cp,:root[data-theme="light"] .hl .cpf{color:#8a8a8a}
+:root[data-theme="light"] .hl .k,:root[data-theme="light"] .hl .kd,:root[data-theme="light"] .hl .kn,:root[data-theme="light"] .hl .kr,:root[data-theme="light"] .hl .kt,:root[data-theme="light"] .hl .kc,:root[data-theme="light"] .hl .kp,:root[data-theme="light"] .hl .ow{color:#000}
+:root[data-theme="light"] .hl .s,:root[data-theme="light"] .hl .s1,:root[data-theme="light"] .hl .s2,:root[data-theme="light"] .hl .sb,:root[data-theme="light"] .hl .sc,:root[data-theme="light"] .hl .sd,:root[data-theme="light"] .hl .se,:root[data-theme="light"] .hl .sh,:root[data-theme="light"] .hl .si,:root[data-theme="light"] .hl .sx,:root[data-theme="light"] .hl .sr,:root[data-theme="light"] .hl .ss,:root[data-theme="light"] .hl .dl,:root[data-theme="light"] .hl .sa{color:#15803d}
+:root[data-theme="light"] .hl .m,:root[data-theme="light"] .hl .mi,:root[data-theme="light"] .hl .mf,:root[data-theme="light"] .hl .mh,:root[data-theme="light"] .hl .mo,:root[data-theme="light"] .hl .il{color:#b45309}
+:root[data-theme="light"] .hl .nf,:root[data-theme="light"] .hl .fm,:root[data-theme="light"] .hl .nc,:root[data-theme="light"] .hl .nn{color:#171717}
+:root[data-theme="light"] .hl .nb,:root[data-theme="light"] .hl .bp,:root[data-theme="light"] .hl .nd,:root[data-theme="light"] .hl .na,:root[data-theme="light"] .hl .nt{color:#525252}
+:root[data-theme="light"] .hl .o,:root[data-theme="light"] .hl .p{color:#6b6b6b}
+:root[data-theme="light"] .hl .gd{color:#b91c1c}:root[data-theme="light"] .hl .gi{color:#15803d}
+.nav__right{display:flex;align-items:center;gap:20px}
+.theme-toggle{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--text);cursor:pointer}
+.theme-toggle:hover{border-color:var(--text-2)}
+.theme-toggle svg{width:15px;height:15px}
+.theme-toggle .i-moon,:root[data-theme="light"] .theme-toggle .i-sun{display:none}
+:root[data-theme="light"] .theme-toggle .i-moon{display:block}
+@media (max-width:960px){.wrap{grid-template-columns:1fr;gap:0}.toc{display:none}article h1.title{font-size:30px}.nav__links a.hide-sm{display:none}}
+</style>
+</head>
+<body>
+<header class="nav">
+  <a class="nav__brand" href="../index.html"><span class="nav__dot"></span>AI Agent 全栈</a>
+  <div class="nav__right">
+  <nav class="nav__links">
+    <a href="../index.html#progress">课件</a>
+    <a class="hide-sm" href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/ROADMAP.md">路线图</a>
+    <a href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/notes/04-frameworks/02-openai-agents-sdk.md">在 GitHub 上查看</a>
+  </nav>
+  <button class="theme-toggle" id="theme-toggle" type="button" aria-label="切换浅色 / 深色" title="切换浅色 / 深色"><svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg><svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
+  </div>
+</header>
+<div class="wrap">
+  <aside class="toc"><div class="toc__label">本课目录</div><ul>
+<li><a href="#读前说明">读前说明</a></li>
+<li><a href="#1-四个基本概念">1. 四个基本概念</a></li>
+<li><a href="#2-runner-循环">2. Runner 循环</a></li>
+<li><a href="#3-多-agenthandoff-与-agent-as-tool">3. 多 agent：handoff 与 agent-as-tool</a></li>
+<li><a href="#4-guardrail">4. guardrail</a></li>
+<li><a href="#5-人工审批与-runstate">5. 人工审批与 RunState</a></li>
+<li><a href="#6-对话状态">6. 对话状态</a></li>
+<li><a href="#7-其他能力本课不展开">7. 其他能力（本课不展开）</a></li>
+<li><a href="#8-练习代码导读">8. 练习代码导读</a></li>
+<li><a href="#9-常见的坑">9. 常见的坑</a></li>
+<li><a href="#10-练习">10. 练习</a></li>
+<li><a href="#11-自测题">11. 自测题</a></li>
+<li><a href="#12-自测题答案">12. 自测题答案</a></li>
+<li><a href="#13-参考答案">13. 参考答案</a></li>
+<li><a href="#完成标准">完成标准</a></li>
+</ul>
+</aside>
+  <article>
+    <div class="meta">模块 04 · 框架与 SDK · 第 4.2 课</div>
+    <h1 class="title">4.2 OpenAI Agents SDK：Runner 循环、handoff、guardrail 与 RunState</h1>
+    <blockquote>
+<p>第 4 部分 · 第 2 课 ｜ 预计 4–5 小时 ｜ 前置：3.2 Agent Loop、3.3 多智能体、3.4 长任务 Agent、4.1 LangGraph</p>
+<p>配套练习：<code>projects/25-agents-sdk/</code>（纯 Go 标准库，18 个测试）。用 Go 重写 OpenAI Agents SDK 运行时的核心：Runner 循环与“什么算最终输出”；工具并发执行和限流，结果按调用顺序写回；handoff 也是工具（<code>transfer_to_&lt;agent&gt;</code>）、<code>on_handoff</code>、<code>input_filter</code>、多个 handoff 只取第一个；agent-as-tool；输入 guardrail 的阻塞和并行两种模式，以及“只看第一个 agent / 只看最后一个 agent”的边界；输出 tripwire 不把被拒绝的输出写进 session；工具 guardrail；<code>needs_approval</code>、回调 fail closed、<code>RunState</code> 序列化与恢复、按 agent 区分的 sticky 决定、部分决定；<code>tool_use_behavior</code>、<code>max_turns</code> 与错误处理器、找不到工具的两种行为；Session。</p>
+</blockquote>
+<h2 id="读前说明">读前说明</h2>
+<p>上一课的 LangGraph 把一切都摊开成图：节点、边、通道、checkpoint，你自己决定控制流。OpenAI Agents SDK 走的是另一条路：<strong>控制流只有一个固定的循环</strong>，你配置的是 agent，以及循环里几个可插拔的点。</p>
+<p>两者对照：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>问题</th>
+<th>LangGraph</th>
+<th>OpenAI Agents SDK</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>控制流</td>
+<td>你画的图</td>
+<td>固定的 Runner 循环</td>
+</tr>
+<tr>
+<td>换一个“角色”做事</td>
+<td>条件边跳到另一个节点</td>
+<td>handoff：模型调用 <code>transfer_to_xxx</code> 工具</td>
+</tr>
+<tr>
+<td>一次运行的状态</td>
+<td>通道 + reducer，每步一个 checkpoint</td>
+<td>一串 item（消息、函数调用、调用结果）+ 当前 agent</td>
+</tr>
+<tr>
+<td>人工审批</td>
+<td><code>interrupt()</code>，恢复时节点从头重跑</td>
+<td>工具声明 <code>needs_approval</code>，run 停下来，<code>RunState</code> 序列化，决定后从状态继续</td>
+</tr>
+<tr>
+<td>对话记忆</td>
+<td>checkpointer + thread_id</td>
+<td>Session，或服务端的 <code>conversation_id</code> / <code>previous_response_id</code></td>
+</tr>
+<tr>
+<td>防护</td>
+<td>自己写节点</td>
+<td>输入、输出、工具三种 guardrail</td>
+</tr>
+</tbody>
+</table></div>
+<p>本课依据 OpenAI Agents SDK 的 Python 官方文档（openai.github.io/openai-agents-python，2026 年 11 月；PyPI 最新版 0.24.0，2026-10-15 发布）。JS 版的概念一致。</p>
+<p>先想几个问题：</p>
+<ul>
+<li>一次 <code>Runner.run()</code> 里可能调用模型很多次、换好几个 agent，它对应的是用户的“一轮”还是“多轮”？</li>
+<li>模型同时发出一个 handoff 和两个工具调用，SDK 怎么处理？</li>
+<li>输入 guardrail 和模型并行跑，guardrail 判定违规时，模型的 token 还要付钱吗？</li>
+<li>一个调用被批准了，进程在工具执行完、状态保存前崩溃，恢复后会发生什么？</li>
+</ul>
+<hr />
+<h2 id="1-四个基本概念">1. 四个基本概念</h2>
+<ul>
+<li><strong>Agent</strong>：一份配置。名字、指令（system prompt，可以是函数）、模型、工具、handoff、guardrail、<code>output_type</code>（结构化输出）、<code>tool_use_behavior</code> 等。<code>clone()</code> 可以复制后改几个字段。Agent 不是进程，同一个 agent 可以被很多 run 同时使用。</li>
+<li><strong>Runner</strong>：执行循环。<code>Runner.run()</code>（异步）、<code>Runner.run_sync()</code>（同步包装）、<code>Runner.run_streamed()</code>（流式）。</li>
+<li><strong>Item</strong>：Responses API 格式的输入输出项：消息、函数调用、函数调用结果、推理项等。整个 run 的历史就是一串 item。</li>
+<li><strong>RunResult</strong>：<code>final_output</code>、<code>last_agent</code>、<code>new_items</code>、<code>interruptions</code>、<code>to_input_list()</code>、<code>to_state()</code> 等。</li>
+</ul>
+<p>一次 <code>Runner.run()</code> 代表聊天里的<strong>一个逻辑轮次</strong>：用户说一句话，可能有多次模型调用、多次工具调用、几次 handoff，最后产生一个输出。用户接着问，就再调一次 <code>run()</code>。</p>
+<hr />
+<h2 id="2-runner-循环">2. Runner 循环</h2>
+<p>官方文档描述的循环：</p>
+<ol>
+<li>用当前 agent 和当前输入调用模型；</li>
+<li>模型产生输出：<ul>
+<li>如果被判定为<strong>最终输出</strong>，循环结束，返回结果；</li>
+<li>如果模型请求 <strong>handoff</strong>，更新当前 agent 和输入，重新进入循环；</li>
+<li>如果模型产生了<strong>工具调用</strong>，执行工具、追加结果，重新进入循环；</li>
+</ul>
+</li>
+<li>超过 <code>max_turns</code> 抛 <code>MaxTurnsExceeded</code>。<code>max_turns=None</code> 关闭上限。</li>
+</ol>
+<p>“最终输出”的规则：<strong>产生了符合期望类型的文本输出，并且没有工具调用</strong>。</p>
+<p><code>max_turns</code> 默认是 10（源码里 <code>DEFAULT_MAX_TURNS = 10</code>），按模型调用次数计。这就是 3.2 课 Agent Loop 的步数上限。</p>
+<p>Go 练习的 <code>loop</code> 就是这个循环，每一圈做三件事：</p>
+<div class="hl"><pre><span></span><code><span class="k">for</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="o">!</span><span class="nx">st</span><span class="p">.</span><span class="nx">Processed</span><span class="w"> </span><span class="p">{</span><span class="w">                  </span><span class="c1">// 1. 处理上一次模型响应</span>
+<span class="w">        </span><span class="nx">final</span><span class="p">,</span><span class="w"> </span><span class="nx">paused</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">processTurn</span><span class="p">(...)</span>
+<span class="w">        </span><span class="p">...</span><span class="w">                             </span><span class="c1">// 暂停 → 返回 interruptions；最终输出 → 输出 guardrail、写 session、返回</span>
+<span class="w">        </span><span class="k">continue</span><span class="w">                        </span><span class="c1">// 执行了工具或 handoff → 再调模型</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">maxTurns</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">st</span><span class="p">.</span><span class="nx">Turn</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="nx">maxTurns</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">}</span><span class="w">   </span><span class="c1">// 2. 轮数上限</span>
+<span class="w">    </span><span class="nx">items</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">Model</span><span class="p">.</span><span class="nx">Respond</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">req</span><span class="p">)</span><span class="w">           </span><span class="c1">// 3. 调模型，把响应追加到 Items</span>
+<span class="w">    </span><span class="nx">st</span><span class="p">.</span><span class="nx">Turn</span><span class="o">++</span><span class="p">;</span><span class="w"> </span><span class="nx">st</span><span class="p">.</span><span class="nx">Processed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>把“处理响应”和“调模型”拆开，并用 <code>Processed</code> 标记，是为了审批恢复：恢复时上一次响应还没处理完，直接从处理那一步继续，<strong>不会重新调用模型</strong>。</p>
+<h3 id="21-一轮里的处理顺序">2.1 一轮里的处理顺序</h3>
+<p><code>processTurn</code> 对一次模型响应按这个顺序处理：</p>
+<ol>
+<li>逐个看函数调用：找不到工具？需要审批但没有决定？被拒绝？可以执行？</li>
+<li>可以执行的工具<strong>并发</strong>执行，结果<strong>按调用顺序</strong>写回（<code>TestToolLoopConcurrencyAndOrder</code>：四个工具耗时不同、最多两个并发，完成顺序和调用顺序不一样，写回顺序仍是 t1–t4）；</li>
+<li>有未决定的审批 → 暂停；</li>
+<li><code>tool_use_behavior</code> 要求工具结果直接当最终输出 → 结束；</li>
+<li>有 handoff → 只采用第一个，切换 agent；</li>
+<li>有工具调用 → 再调一次模型；</li>
+<li>什么调用都没有 → 最后一条 assistant 消息就是最终输出。</li>
+</ol>
+<h3 id="22-工具执行的配置">2.2 工具执行的配置</h3>
+<ul>
+<li><code>ModelSettings.parallel_tool_calls</code>：模型是否<strong>允许</strong>在一次响应里发出多个工具调用（提供商侧）；</li>
+<li><code>RunConfig.tool_execution.max_function_tool_concurrency</code>：模型发出之后，SDK <strong>同时执行</strong>几个本地函数工具。默认 <code>None</code> 表示全部同时开始；</li>
+<li><code>tool_not_found_behavior</code>：模型调用了当前 agent 没有的工具，默认抛 <code>ModelBehaviorError</code>；设成 <code>"return_error_to_model"</code> 则把错误作为工具结果交给模型，让它重新选；</li>
+<li>工具函数自己抛异常：默认把错误信息作为工具结果交给模型（练习 <code>TestToolErrorBecomesOutput</code>）；</li>
+<li><code>tool_error_formatter</code>：自定义交给模型的错误文字，比如审批被拒、找不到工具。</li>
+</ul>
+<h3 id="23-tool_use_behavior">2.3 tool_use_behavior</h3>
+<ul>
+<li><code>"run_llm_again"</code>（默认）：执行工具，把结果交给模型，由模型给出最终回答；</li>
+<li><code>"stop_on_first_tool"</code>：第一个工具调用的结果直接当最终输出，不再调模型；</li>
+<li><code>StopAtTools(stop_at_tool_names=[...])</code>：调用了其中任何一个工具就停，用它的结果当最终输出；</li>
+<li>也可以传一个函数自己决定。</li>
+</ul>
+<p>另外 <code>reset_tool_choice</code> 默认 <code>True</code>：强制模型调用工具（<code>tool_choice</code>）之后会重置，避免每轮都被迫调用工具、陷入死循环。</p>
+<h3 id="24-错误处理器">2.4 错误处理器</h3>
+<p><code>error_handlers</code> 按错误类型返回一个受控的最终输出，而不是让 run 以异常结束。支持三个键：<code>"max_turns"</code>、<code>"model_refusal"</code>、<code>"invalid_final_output"</code>。<code>RunErrorHandlerResult.include_in_history</code> 默认 <code>True</code>，会把兜底输出写进历史和 session；不想写就设 <code>False</code>。处理器<strong>不会重试模型调用，也不会重放工具副作用</strong>。</p>
+<p>练习的 <code>OnMaxTurns</code> 对应 <code>"max_turns"</code> 处理器（<code>TestMaxTurnsAndHandler</code>）。</p>
+<hr />
+<h2 id="3-多-agenthandoff-与-agent-as-tool">3. 多 agent：handoff 与 agent-as-tool</h2>
+<h3 id="31-handoff-就是工具">3.1 handoff 就是工具</h3>
+<p>官方文档原话：<strong>handoff 对 LLM 来说就是工具</strong>。交给 <code>Refund Agent</code> 的 handoff，工具名是 <code>transfer_to_refund_agent</code>。</p>
+<div class="hl"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">agents</span><span class="w"> </span><span class="kn">import</span> <span class="n">Agent</span><span class="p">,</span> <span class="n">handoff</span>
+
+<span class="n">billing_agent</span> <span class="o">=</span> <span class="n">Agent</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"Billing agent"</span><span class="p">)</span>
+<span class="n">refund_agent</span> <span class="o">=</span> <span class="n">Agent</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"Refund agent"</span><span class="p">)</span>
+<span class="n">triage_agent</span> <span class="o">=</span> <span class="n">Agent</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"Triage agent"</span><span class="p">,</span> <span class="n">handoffs</span><span class="o">=</span><span class="p">[</span><span class="n">billing_agent</span><span class="p">,</span> <span class="n">handoff</span><span class="p">(</span><span class="n">refund_agent</span><span class="p">)])</span>
+</code></pre></div>
+
+<p><code>handoff()</code> 可以定制：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>参数</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>tool_name_override</code> / <code>tool_description_override</code></td>
+<td>改工具名和描述</td>
+</tr>
+<tr>
+<td><code>on_handoff</code></td>
+<td>转交时执行的回调，可以收到模型生成的参数</td>
+</tr>
+<tr>
+<td><code>input_type</code></td>
+<td>handoff 工具调用的参数 schema（比如 <code>reason</code>、<code>priority</code>），解析后传给 <code>on_handoff</code></td>
+</tr>
+<tr>
+<td><code>input_filter</code></td>
+<td>改写下一个 agent 能看到的历史</td>
+</tr>
+<tr>
+<td><code>is_enabled</code></td>
+<td>布尔值或函数，运行时开关这个 handoff</td>
+</tr>
+</tbody>
+</table></div>
+<p>几个容易误解的点：</p>
+<ul>
+<li><code>input_type</code> 是<strong>模型在转交时决定的元数据</strong>，不替换下一个 agent 的主输入，也不能用来在多个目的地之间选择。多个专家就注册多个 handoff，让模型选；</li>
+<li><code>is_enabled</code> 在准备工具列表时求值，那时还没有参数，所以它<strong>不能</strong>基于参数做授权。授权要放在 <code>on_handoff</code> 开头、任何副作用之前，失败就抛异常，SDK 就不会转交（练习 <code>TestOnHandoffErrorBlocksTransfer</code>）；</li>
+<li>工具 guardrail 对 handoff 不生效，handoff 走自己的管道。</li>
+</ul>
+<p>练习里，模型在同一次响应里发了两个 handoff，只有第一个生效，第二个得到“忽略”的结果（<code>TestHandoffSwitchesAgentAndFilters</code>）。</p>
+<h3 id="32-input_filter新-agent-看到什么">3.2 input_filter：新 agent 看到什么</h3>
+<p>默认情况下，handoff 后新 agent <strong>看到之前的全部对话历史</strong>。<code>input_filter</code> 接收 <code>HandoffInputData</code>，返回新的 <code>HandoffInputData</code>：</p>
+<ul>
+<li><code>input_history</code>：<code>Runner.run()</code> 开始前的输入历史；</li>
+<li><code>pre_handoff_items</code>：发生 handoff 的那一轮之前产生的项；</li>
+<li><code>new_items</code>：这一轮产生的项，包括 handoff 调用和结果；</li>
+<li><code>input_items</code>：可选，代替 <code>new_items</code> 交给下一个 agent，这样可以过滤模型输入，同时让 session 历史保持完整；</li>
+<li><code>run_context</code>。</li>
+</ul>
+<p>常用的过滤器在 <code>agents.extensions.handoff_filters</code> 里，比如 <code>remove_all_tools</code> 去掉所有工具相关的项。注意它只去掉<strong>结构化的工具项</strong>，已经被抄进普通消息里的工具参数和结果不会被脱敏。</p>
+<p>还有一个可选的 beta 功能 <code>nest_handoff_history</code>（默认关闭），把可以摘要的历史压成有序的摘要段。它改变的是历史的表示方式，<strong>不做脱敏</strong>。使用服务端会话（<code>conversation_id</code>、<code>previous_response_id</code>）时不支持 handoff 的 input filter。</p>
+<p>练习里 <code>doHandoff</code> 用 <code>Prefix</code> 和 <code>ModelFrom</code> 实现：过滤后的历史成为新的前缀，模型以后只看到前缀加上之后的项；<code>Items</code> 本身完整保留，结果和 session 不受影响。这对应 SDK 里“过滤模型输入，同时保持 session 历史完整”的设计。</p>
+<h3 id="33-agent-as-tool控制权不交出去">3.3 agent-as-tool：控制权不交出去</h3>
+<p>另一种多 agent 方式是把 agent 包成工具：</p>
+<div class="hl"><pre><span></span><code><span class="n">orchestrator</span> <span class="o">=</span> <span class="n">Agent</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">"Orchestrator"</span><span class="p">,</span>
+    <span class="n">tools</span><span class="o">=</span><span class="p">[</span>
+        <span class="n">booking_agent</span><span class="o">.</span><span class="n">as_tool</span><span class="p">(</span><span class="n">tool_name</span><span class="o">=</span><span class="s2">"booking_expert"</span><span class="p">,</span> <span class="n">tool_description</span><span class="o">=</span><span class="s2">"Handles booking questions."</span><span class="p">),</span>
+        <span class="n">refund_agent</span><span class="o">.</span><span class="n">as_tool</span><span class="p">(</span><span class="n">tool_name</span><span class="o">=</span><span class="s2">"refund_expert"</span><span class="p">,</span> <span class="n">tool_description</span><span class="o">=</span><span class="s2">"Handles refund questions."</span><span class="p">),</span>
+    <span class="p">],</span>
+<span class="p">)</span>
+</code></pre></div>
+
+<p>和 handoff 的区别：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th></th>
+<th>handoff</th>
+<th><code>Agent.as_tool()</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>控制权</td>
+<td>交给新 agent，由它产出最终输出</td>
+<td>留在调用方，嵌套 agent 的输出只是工具结果</td>
+</tr>
+<tr>
+<td>新 agent 看到的历史</td>
+<td>默认全部对话</td>
+<td>只有工具参数</td>
+</tr>
+<tr>
+<td>适合</td>
+<td>分诊后由专家直接面对用户</td>
+<td>管理者统一和用户对话，专家只提供能力</td>
+</tr>
+</tbody>
+</table></div>
+<p>这正是 3.3 课的“交接 vs 委派”。练习 <code>TestAgentAsToolKeepsControl</code> 验证嵌套 agent 只看到 1 条输入，<code>LastAgent</code> 仍是外层的“经理”。</p>
+<hr />
+<h2 id="4-guardrail">4. guardrail</h2>
+<h3 id="41-三种-guardrail三个边界">4.1 三种 guardrail，三个边界</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>种类</th>
+<th>什么时候跑</th>
+<th>只对谁生效</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>输入 guardrail</td>
+<td>run 开始时，检查用户输入</td>
+<td><strong>run 的第一个 agent</strong></td>
+</tr>
+<tr>
+<td>输出 guardrail</td>
+<td>产生最终输出后</td>
+<td><strong>产生最终输出的那个 agent</strong></td>
+</tr>
+<tr>
+<td>工具 guardrail</td>
+<td>每次调用被保护的函数工具前后</td>
+<td>那个工具，不管哪个 agent 调用</td>
+</tr>
+</tbody>
+</table></div>
+<p>所以在有 handoff、有管理者和专家的工作流里，handoff 后面那个 agent 的输入 guardrail <strong>不会跑</strong>，前面那个 agent 的输出 guardrail 也不会跑（练习 <code>TestGuardrailBoundaries</code>）。需要每次工具调用前后都检查，就用工具 guardrail。</p>
+<p>guardrail 函数返回 <code>GuardrailFunctionOutput</code>，<code>tripwire_triggered=True</code> 就抛 <code>InputGuardrailTripwireTriggered</code> / <code>OutputGuardrailTripwireTriggered</code>，运行停止。guardrail 可以内部跑一个便宜的 agent 做分类，也可以直接调外部分类器。</p>
+<h3 id="42-输入-guardrail-的两种执行模式">4.2 输入 guardrail 的两种执行模式</h3>
+<ul>
+<li><strong>并行</strong>（默认，<code>run_in_parallel=True</code>）：guardrail 和 agent 同时开始，延迟最低。但 tripwire 触发时，agent <strong>可能已经消耗了 token、执行了工具</strong>；</li>
+<li><strong>阻塞</strong>（<code>run_in_parallel=False</code>）：guardrail 先跑完，agent 才开始。tripwire 触发时 agent 根本不执行，不花 token、没有工具副作用。</li>
+</ul>
+<p>练习 <code>TestInputGuardrailBlockingVsParallel</code>：同样是违规输入，阻塞模式下模型调用 0 次，并行模式下 1 次。练习做了一个简化：并行模式下等 guardrail 结束再执行工具。真实 SDK 不保证这一点，有副作用的工具要用阻塞模式。</p>
+<p>输出 guardrail 总是在 agent 完成之后跑，没有并行选项。</p>
+<h3 id="43-输出-tripwire-和-session">4.3 输出 tripwire 和 session</h3>
+<p>输出 guardrail 判定违规时，SDK 让 session <strong>保存已经完成的工具调用和结果，但不保存被拒绝的候选输出</strong>。guardrail 函数自己抛异常时，结论算“未知”，这一轮完成的项照常保存再抛异常。</p>
+<p>如果被拒绝的是一个“工具结果直接当最终输出”的情况（<code>stop_on_first_tool</code>），工具已经执行过了，SDK 会把保存下来的工具结果替换成占位文字 <code>"Output withheld by an output guardrail."</code>，原始内容不进 session、<code>RunState</code> 和流式结果状态。可以用 <code>RunConfig.output_guardrail_blocked_message</code> 改占位文字，但它会被保存和重放，不要放敏感信息。</p>
+<p>练习的 <code>finish</code> 实现了前一条：tripwire 时把最后那条 assistant 消息去掉再写 session。</p>
+<h3 id="44-工具-guardrail">4.4 工具 guardrail</h3>
+<p>工具 guardrail 挂在 <code>FunctionTool</code> 上，每次调用都跑：</p>
+<ul>
+<li><strong>输入</strong>：执行前运行，可以 <code>allow</code>、<code>reject_content</code>（不执行工具，用一段话代替结果交给模型）、或触发 tripwire；</li>
+<li><strong>输出</strong>：执行后运行，可以替换输出或触发 tripwire；</li>
+<li>工具需要审批时，输入 guardrail <strong>默认在审批通过后、执行前</strong>跑。设 <code>ToolExecutionConfig(pre_approval_tool_input_guardrails=True)</code> 可以在发出审批请求前先跑一次，通过的调用批准后还会再检查一次（时效性检查需要重新验证）；</li>
+<li>只适用于函数工具。托管工具（web search、file search、hosted MCP、code interpreter 等）、内置执行工具（computer、shell、apply_patch）和 handoff 都不走这条管道；本地 MCP server 可以给它暴露的所有工具统一配置。</li>
+</ul>
+<p>练习 <code>TestToolGuardrails</code> 覆盖了三种结果，并验证审批通过之前输入 guardrail 不运行。</p>
+<hr />
+<h2 id="5-人工审批与-runstate">5. 人工审批与 RunState</h2>
+<p>这是本课和上一课最值得对照的部分。</p>
+<h3 id="51-用法">5.1 用法</h3>
+<div class="hl"><pre><span></span><code><span class="nd">@tool</span><span class="p">(</span><span class="n">needs_approval</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">cancel_order</span><span class="p">(</span><span class="n">order_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"Cancelled order </span><span class="si">{</span><span class="n">order_id</span><span class="si">}</span><span class="s2">"</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">requires_review</span><span class="p">(</span><span class="n">_ctx</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">_call_id</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="k">return</span> <span class="s2">"refund"</span> <span class="ow">in</span> <span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"subject"</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+<span class="nd">@tool</span><span class="p">(</span><span class="n">needs_approval</span><span class="o">=</span><span class="n">requires_review</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">send_email</span><span class="p">(</span><span class="n">subject</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">body</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span> <span class="o">...</span>
+
+<span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">Runner</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">agent</span><span class="p">,</span> <span class="s2">"取消订单 7"</span><span class="p">)</span>
+<span class="k">while</span> <span class="n">result</span><span class="o">.</span><span class="n">interruptions</span><span class="p">:</span>
+    <span class="n">state</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">to_state</span><span class="p">()</span>
+    <span class="n">store</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">to_string</span><span class="p">())</span>                 <span class="c1"># 可以存库，换进程恢复</span>
+    <span class="n">state</span> <span class="o">=</span> <span class="k">await</span> <span class="n">RunState</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">agent</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">store</span><span class="o">.</span><span class="n">load</span><span class="p">()))</span>
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">interruptions</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">ask_human</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">item</span><span class="o">.</span><span class="n">arguments</span><span class="p">):</span>
+            <span class="n">state</span><span class="o">.</span><span class="n">approve</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">state</span><span class="o">.</span><span class="n">reject</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">rejection_message</span><span class="o">=</span><span class="s2">"主管拒绝：订单已发货"</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">Runner</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">agent</span><span class="p">,</span> <span class="n">state</span><span class="p">)</span>       <span class="c1"># 传原来的顶层 agent</span>
+</code></pre></div>
+
+<p><code>needs_approval</code> 可以用在 <code>function_tool</code>、<code>Agent.as_tool</code>、<code>ShellTool</code>、<code>ApplyPatchTool</code> 上；本地 MCP server 用 <code>require_approval</code>，托管 MCP 用 <code>tool_config={"require_approval": "always"}</code>。shell、apply_patch 和托管 MCP 还可以给一个回调，在代码里直接批准或拒绝，不暂停。</p>
+<h3 id="52-流程">5.2 流程</h3>
+<ol>
+<li>模型发出工具调用，runner 评估审批规则；</li>
+<li>这个调用已经有决定（存在 <code>RunContextWrapper</code> 里）→ 直接继续；</li>
+<li>需要审批但没有决定 → 暂停，<code>result.interruptions</code> 里是 <code>ToolApprovalItem</code>（agent 名、工具名、参数）。<strong>handoff 之后的 agent、嵌套的 agent-as-tool 里发出的审批，也都冒到外层 run 上</strong>；</li>
+<li><code>result.to_state()</code> → <code>state.approve(...)</code> / <code>state.reject(...)</code> → <code>Runner.run(原顶层 agent, state)</code>；</li>
+<li>恢复后从停下的地方继续，遇到新的审批再进入这个流程。</li>
+</ol>
+<p>和 LangGraph 的根本区别：LangGraph 的 interrupt 在<strong>节点内部</strong>暂停，恢复时节点从头重跑，所以有“之前的副作用要幂等”“调用顺序不能变”这些规则。Agents SDK 在<strong>工具执行之前</strong>暂停，暂停的单位是“一个还没执行的工具调用”，恢复时直接决定执行或不执行这个调用，<strong>不重新调用模型</strong>（练习 <code>TestApprovalPauseSerializeResume</code>：模型只调用了 2 次，被批准的工具只执行了 1 次）。代价是灵活性：它只能在工具调用这个位置暂停，不能在任意代码行暂停。</p>
+<h3 id="53-几个细节">5.3 几个细节</h3>
+<ul>
+<li><strong>拒绝不是报错</strong>：被拒绝的调用得到一段文字作为工具结果交给模型，模型可以换个方案。默认文字可以用 <code>tool_error_formatter</code> 全局改，<code>state.reject(..., rejection_message=...)</code> 单次改，单次优先（<code>TestRejectReturnsMessageToModel</code>）；</li>
+<li><strong>部分决定</strong>：不必一次决定所有审批。已经决定的先继续，没决定的留在 <code>interruptions</code> 里再次暂停（<code>TestPartialDecisions</code>）；</li>
+<li><strong>sticky 决定</strong>：<code>always_approve=True</code> / <code>always_reject=True</code> 让同一个工具以后自动按这个决定处理，并随 <code>RunState</code> 序列化保存。对函数工具，<strong>按请求审批的 agent 区分</strong>，另一个 agent 的同名工具不继承（<code>TestStickyApprovalScopedToAgent</code>）。但本地 <code>ShellTool</code> 和 <code>ApplyPatchTool</code> 例外：sticky 决定按工具类型和名字匹配，<strong>不区分 agent</strong>，handoff 后可能作用到权限不同的另一个 agent 的 shell 上。权限不同时用逐次决定；</li>
+<li><strong>审批回调 fail closed</strong>：<code>needs_approval</code> 是函数时，如果参数缺失、为空、不是合法 JSON、是合法 JSON 但不是对象（如 <code>null</code> 或列表）、或含 <code>NaN</code> / <code>Infinity</code>，<strong>不调用回调，直接要求人工审批</strong>（<code>TestApprovalCallableFailsClosed</code>）。</li>
+</ul>
+<h3 id="54-长时间审批状态放在服务端">5.4 长时间审批：状态放在服务端</h3>
+<p><code>RunState</code> 用 <code>to_json()</code> / <code>to_string()</code> 存进数据库或队列，<code>from_json()</code> / <code>from_string()</code> 恢复。官方文档对安全讲得很重：</p>
+<ul>
+<li><code>RunState</code> 里有审批决定、待执行的调用和参数。<strong>反序列化不认证快照，也不认证提交者</strong>。只能从受信任的存储加载；</li>
+<li>给浏览器或手机做审批界面时，<strong>完整快照留在服务端</strong>，只把审批人有权看的工具信息和不透明的 ID 发给客户端。工具名和参数是不可信的展示内容，渲染 HTML 要转义；</li>
+<li>决定到达服务端时：用应用的会话认证审批人（不信请求体里的身份）；授权他能处理这个 run 的这些调用（拿到 run ID 不等于有权限）；只接受 ID 和布尔值，从服务端快照里用 <code>state.get_interruptions()</code> 取待审批项，不接受客户端提交的调用、参数或状态；用存储层保证每个待审批请求<strong>只被消费一次</strong>（原子的、检查归属的状态转换），防止并发或重放提交把同一个快照恢复两次；</li>
+<li>应用上下文（<code>RunContextWrapper.context</code>）会随状态一起序列化，<strong>别放密钥</strong>；</li>
+<li>审批可能挂很久，同时存一个 agent 定义或 SDK 的版本号，恢复时按版本走对应的代码路径。</li>
+</ul>
+<p>练习 2 就是实现这一套。</p>
+<h3 id="55-批准不等于恰好执行一次">5.5 批准不等于恰好执行一次</h3>
+<p>官方文档专门有一节：<strong>审批允许一个调用执行，但不保证只执行一次</strong>。工具执行了外部动作，进程在保存新状态之前停了，从旧的“已批准”快照恢复就会再执行一次，比如付款已经完成，但快照里没有付款结果。</p>
+<p>做法和 3.4 课一样：给每个逻辑动作一个稳定的幂等键，交给能原子去重的目的系统；重试时用同样的键和参数。拿不到目的系统的幂等保证时，重试前先和目的系统<strong>权威地对账</strong>：普通查询查不到不代表没执行过（读可能滞后，之前的请求可能还会完成）。结果不确定就记为未知，不要自动重放。练习 3 实现幂等键。</p>
+<h3 id="56-持久执行集成">5.6 持久执行集成</h3>
+<p>需要跨越长时间等待、重试、进程重启的 run，SDK 文档列了几个集成：Dapr、Temporal、Restate、DBOS。它们把 run 放进持久工作流引擎里。Temporal 在模块 08 详细讲。</p>
+<hr />
+<h2 id="6-对话状态">6. 对话状态</h2>
+<h3 id="61-四种记忆策略">6.1 四种记忆策略</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>策略</th>
+<th>状态在哪</th>
+<th>下一轮传什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>result.to_input_list()</code></td>
+<td>你的内存</td>
+<td>这个列表 + 新的用户消息</td>
+</tr>
+<tr>
+<td><code>session</code></td>
+<td>你的存储，SDK 管理</td>
+<td>同一个 session</td>
+</tr>
+<tr>
+<td><code>conversation_id</code></td>
+<td>OpenAI Conversations API</td>
+<td>同一个 ID + 新的用户消息</td>
+</tr>
+<tr>
+<td><code>previous_response_id</code></td>
+<td>OpenAI Responses API</td>
+<td><code>result.last_response_id</code> + 新的用户消息</td>
+</tr>
+</tbody>
+</table></div>
+<p>前两种是客户端管理，后两种是 OpenAI 服务端管理，只适用于 Responses API。<strong>一个会话选一种</strong>，混用会重复上下文。session 不能和服务端会话设置在同一次 run 里同时用。<code>conversation_id</code> 和 <code>previous_response_id</code> 互斥。审批暂停后从 <code>RunState</code> 恢复，SDK 会保留服务端会话设置，恢复的这一轮继续在同一个服务端会话里。</p>
+<h3 id="62-session">6.2 Session</h3>
+<div class="hl"><pre><span></span><code><span class="n">session</span> <span class="o">=</span> <span class="n">SQLiteSession</span><span class="p">(</span><span class="s2">"conversation_123"</span><span class="p">)</span>
+<span class="k">await</span> <span class="n">Runner</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">agent</span><span class="p">,</span> <span class="s2">"金门大桥在哪个城市？"</span><span class="p">,</span> <span class="n">session</span><span class="o">=</span><span class="n">session</span><span class="p">)</span>
+<span class="k">await</span> <span class="n">Runner</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">agent</span><span class="p">,</span> <span class="s2">"在哪个州？"</span><span class="p">,</span> <span class="n">session</span><span class="o">=</span><span class="n">session</span><span class="p">)</span>   <span class="c1"># 自动带上历史</span>
+</code></pre></div>
+
+<p>Session 在每次 run 之前取历史、之后存新项，不同 session ID 互相隔离。接口：<code>get_items(limit)</code>、<code>add_items(items)</code>、<code>pop_item()</code>（撤回最后一项，适合用户修改上一条消息）、<code>clear_session()</code>。现成实现有 SQLite、SQLAlchemy、Redis、MongoDB、Dapr、加密 session 等。<code>RunConfig.session_input_callback</code> 自定义历史和新输入怎么合并，<code>session_settings</code> 控制取多少条。</p>
+<p>从 <code>RunState</code> 恢复时，传同一个 session（或指向同一存储、同一 ID 的 session），恢复的这一轮会追加到同一段历史。</p>
+<p>练习的 <code>MemSession</code> 和 <code>TestSessionAccumulates</code>。练习做了一个简化：session 在 run 结束（或输出 tripwire）时一次写入，暂停期间的项保存在 <code>RunState</code> 里。</p>
+<h3 id="63-call_model_input_filter">6.3 call_model_input_filter</h3>
+<p><code>RunConfig.call_model_input_filter</code> 在每次模型调用之前拿到准备好的完整输入（指令 + 输入项，已经合并了 session 历史），返回新的 <code>ModelInputData</code>。用来裁剪历史、脱敏、注入额外指令。它收到的是副本，改了不影响原列表。这是 1.6 课上下文工程在框架里的挂钩点。</p>
+<hr />
+<h2 id="7-其他能力本课不展开">7. 其他能力（本课不展开）</h2>
+<ul>
+<li><strong>Tracing</strong>：默认开启，记录 agent、模型调用（generation）、工具（function）、handoff、guardrail 的 span，发到 OpenAI 的 trace 后台，可以接自己的处理器。<code>workflow_name</code>、<code>group_id</code>（把多次 run 串成一个会话）、<code>trace_include_sensitive_data</code>。练习的 <code>Result.Trace</code> 是一个极简版本。模块 07 详讲。</li>
+<li><strong>Streaming</strong>：<code>run_streamed()</code> + <code>stream_events()</code>。审批在流式下一样工作：先把事件流读完，再看 <code>interruptions</code>。</li>
+<li><strong>Sandbox agents</strong>：在沙箱里给 agent 文件系统、shell、记忆等能力（2.5 课的内容在 SDK 里的形态）。</li>
+<li><strong>Realtime / Voice agents</strong>：语音。</li>
+<li><strong>MCP</strong>：本地 stdio / SSE / Streamable HTTP server 和托管 MCP。</li>
+<li><strong>模型无关</strong>：可以通过 LiteLLM、Any-LLM 适配器用其他提供商的模型。</li>
+</ul>
+<hr />
+<h2 id="8-练习代码导读">8. 练习代码导读</h2>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>文件</th>
+<th>内容</th>
+<th>对应 SDK</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>types.go</code></td>
+<td><code>Item</code>、<code>Model</code>、<code>Agent</code>、<code>FunctionTool</code>、<code>Handoff</code>（<code>transfer_to_&lt;name&gt;</code>）、<code>RemoveAllTools</code>、<code>AsTool</code>、三种 guardrail、错误类型、<code>parseArgs</code></td>
+<td><code>Agent</code>、<code>function_tool</code>、<code>handoff()</code>、<code>handoff_filters</code>、<code>Agent.as_tool()</code>、<code>InputGuardrail</code> 等</td>
+</tr>
+<tr>
+<td><code>state.go</code></td>
+<td><code>Interruption</code>、<code>Decision</code>、<code>RunState</code>（<code>Approve</code>/<code>Reject</code>/<code>ToJSON</code>/<code>StateFromJSON</code>）、<code>Session</code>、<code>MemSession</code></td>
+<td><code>ToolApprovalItem</code>、<code>RunState</code>、<code>Session</code>、<code>SQLiteSession</code></td>
+</tr>
+<tr>
+<td><code>runner.go</code></td>
+<td><code>Runner.Run</code>/<code>Resume</code>、<code>loop</code>、<code>processTurn</code>、<code>runTools</code>、<code>runOne</code>、<code>doHandoff</code>、<code>finish</code></td>
+<td><code>Runner.run()</code>、<code>RunConfig</code>、<code>error_handlers</code></td>
+</tr>
+<tr>
+<td><code>agents_test.go</code></td>
+<td>18 个测试，用一个按调用次数返回脚本的假模型</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<p>和 Python 版的差异：</p>
+<ul>
+<li>恢复用单独的 <code>Resume</code> 方法，Python 是把 <code>RunState</code> 当输入传给同一个 <code>Runner.run()</code>；</li>
+<li><code>RunState</code> 只存 agent 的<strong>名字</strong>，<code>StateFromJSON</code> 沿 handoff 图把 agent 找回来。agent 定义改了（改名、删掉）就恢复失败，这就是 5.4 节说要存版本号的原因；</li>
+<li>没有实现流式、tracing 后台、结构化输出、嵌套 agent-as-tool 的审批冒泡、服务端会话。</li>
+</ul>
+<hr />
+<h2 id="9-常见的坑">9. 常见的坑</h2>
+<ul>
+<li><strong>以为一次 <code>run()</code> 是一次模型调用</strong>：它是一个逻辑轮次，可能有很多次调用。</li>
+<li><strong><code>max_turns</code> 太小</strong>：默认 10，工具多的任务会提前抛错；用 <code>error_handlers</code> 给兜底输出。</li>
+<li><strong>把 handoff 和 agent-as-tool 搞混</strong>：前者交出控制权和完整历史，后者只交出一个子任务。</li>
+<li><strong>用 <code>is_enabled</code> 做基于参数的授权</strong>：那时还没有参数，授权放在 <code>on_handoff</code> 开头。</li>
+<li><strong>以为 handoff 后专家 agent 的输入 guardrail 会跑</strong>：只有第一个 agent 的会跑。</li>
+<li><strong>有副作用的工具配并行输入 guardrail</strong>：tripwire 触发前工具可能已经执行了，用阻塞模式。</li>
+<li><strong>sticky 批准 shell</strong>：shell 和 apply_patch 的 sticky 决定不区分 agent。</li>
+<li><strong>把 <code>RunState</code> 发给浏览器再收回来</strong>：快照不认证，必须留在服务端。</li>
+<li><strong>把密钥放进 run context</strong>：会随 <code>RunState</code> 一起序列化。</li>
+<li><strong>以为批准后工具恰好执行一次</strong>：崩溃恢复可能重复，要幂等键或对账。</li>
+<li><strong>session 和 <code>previous_response_id</code> 混用</strong>：重复上下文，SDK 也不允许同一次 run 里同时用。</li>
+<li><strong>以为 <code>remove_all_tools</code> 会脱敏</strong>：只去掉结构化工具项。</li>
+</ul>
+<hr />
+<h2 id="10-练习">10. 练习</h2>
+<h3 id="练习-1读懂并跑通必做">练习 1：读懂并跑通（必做）</h3>
+<div class="hl"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>projects/25-agents-sdk<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>make<span class="w"> </span><span class="nb">test</span>
+</code></pre></div>
+
+<p>回答：</p>
+<ol>
+<li><code>TestToolLoopConcurrencyAndOrder</code> 第二次模型调用看到的输入为什么是 9 条？如果把结果按完成顺序写回，会出什么问题？</li>
+<li><code>TestApprovalPauseSerializeResume</code> 里，恢复之后为什么模型没有被重新调用？在 <code>runner.go</code> 里指出是哪个字段保证的。如果没有这个字段，会发生什么？</li>
+<li><code>TestStickyApprovalScopedToAgent</code> 里，如果 sticky 的键只用工具名、不带 agent 名，测试结果会怎样？为什么 SDK 对函数工具要这样区分？</li>
+<li><code>TestGuardrailBoundaries</code> 里，B 的输入 guardrail 设成了“总是触发”，为什么 run 没有在 handoff 时被它拦下？如果确实需要在专家 agent 开始前做检查，有哪几种办法？</li>
+</ol>
+<h3 id="练习-2服务端审批存储必做">练习 2：服务端审批存储（必做）</h3>
+<p>实现 <code>ApprovalStore</code>，按 5.4 节的要求处理来自客户端的审批：</p>
+<div class="hl"><pre><span></span><code><span class="kd">type</span><span class="w"> </span><span class="nx">ApprovalStore</span><span class="w"> </span><span class="kd">interface</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Save 保存暂停的 run，返回 runID。快照、所属用户、agent 版本号都存在服务端。</span>
+<span class="w">    </span><span class="nx">Save</span><span class="p">(</span><span class="nx">owner</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">version</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">st</span><span class="w"> </span><span class="o">*</span><span class="nx">RunState</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="nx">runID</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span>
+<span class="w">    </span><span class="c1">// Pending 返回给审批界面看的内容：只有不透明的决定 ID、工具名和参数，不含快照。</span>
+<span class="w">    </span><span class="nx">Pending</span><span class="p">(</span><span class="nx">user</span><span class="p">,</span><span class="w"> </span><span class="nx">runID</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="p">([]</span><span class="nx">PendingView</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span>
+<span class="w">    </span><span class="c1">// Decide 应用决定并“消费”这个快照：同一个快照只能被成功消费一次。</span>
+<span class="w">    </span><span class="nx">Decide</span><span class="p">(</span><span class="nx">user</span><span class="p">,</span><span class="w"> </span><span class="nx">runID</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">decisions</span><span class="w"> </span><span class="kt">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">bool</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="nx">RunState</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>要求：</p>
+<ul>
+<li><code>user</code> 由调用方从会话里认证得到，不是请求体里的字段；不是 owner 返回 <code>ErrForbidden</code>；</li>
+<li><code>decisions</code> 的键必须正好覆盖所有待审批的决定 ID（和官方示例一样，要求一批全部决定），多了、少了、未知 ID 都拒绝；</li>
+<li>版本号和当前代码的版本不一致时拒绝（<code>ErrVersionMismatch</code>），不要尝试恢复；</li>
+<li>两个 goroutine 同时 <code>Decide</code> 同一个 run，恰好一个成功，另一个返回 <code>ErrAlreadyConsumed</code>。用 <code>-race</code> 跑；</li>
+<li>测试：完整走一遍 暂停 → Save → Pending → Decide → Resume；越权、重放、并发、版本不符各一个测试。</li>
+</ul>
+<h3 id="练习-3有副作用的工具和幂等键选做">练习 3：有副作用的工具和幂等键（选做）</h3>
+<p>给 <code>FunctionTool</code> 加 <code>Idempotent bool</code>。对这样的工具，runner 在执行前生成幂等键 <code>runID/callID</code>（<code>runID</code> 存在 <code>RunState</code> 里，第一次 <code>Run</code> 时生成），通过 <code>RunContext.IdempotencyKey()</code> 交给工具。写一个假的支付服务：同一个键只扣一次款，第二次返回第一次的结果。</p>
+<p>测试：批准支付 → 工具执行成功 → <strong>模拟崩溃</strong>：丢掉恢复后得到的新状态，用批准后、执行前的旧快照再恢复一次。断言支付服务只扣了一次款，两次恢复交给模型的工具结果相同。</p>
+<hr />
+<h2 id="11-自测题">11. 自测题</h2>
+<ol>
+<li>Runner 循环有哪几步？什么算“最终输出”？<code>max_turns</code> 默认多少，按什么计数？</li>
+<li>handoff 对模型来说是什么？<code>input_type</code>、<code>is_enabled</code>、<code>on_handoff</code> 分别做什么，授权应该放在哪？</li>
+<li>handoff 和 agent-as-tool 有什么区别？各适合什么场景？</li>
+<li>输入、输出、工具三种 guardrail 分别在什么时候跑、对谁生效？</li>
+<li>输入 guardrail 并行和阻塞两种模式各有什么代价？</li>
+<li>输出 tripwire 触发时，session 里保存什么、不保存什么？</li>
+<li>Agents SDK 的审批和 LangGraph 的 interrupt 在暂停位置和恢复方式上有什么不同？各自的代价是什么？</li>
+<li>什么是 sticky 决定？函数工具和 shell 工具在作用范围上有什么不同？</li>
+<li>为什么 <code>RunState</code> 不能交给客户端保管？服务端处理审批决定要做哪几件事？</li>
+<li>为什么“批准”不保证“恰好执行一次”？怎么办？</li>
+</ol>
+<h2 id="12-自测题答案">12. 自测题答案</h2>
+<ol>
+<li>用当前 agent 和输入调用模型；如果是最终输出就结束；如果是 handoff 就换 agent 和输入再循环；如果有工具调用就执行、追加结果再循环；超过 <code>max_turns</code> 抛 <code>MaxTurnsExceeded</code>。最终输出是“产生了期望类型的文本输出，并且没有工具调用”。默认 10，按模型调用（循环轮次）计，<code>None</code> 关闭。</li>
+<li>一个叫 <code>transfer_to_&lt;agent 名&gt;</code> 的工具。<code>input_type</code> 定义这个工具调用的参数 schema，是模型在转交时给出的元数据，解析后交给 <code>on_handoff</code>，不替换下一个 agent 的输入也不选目的地；<code>is_enabled</code> 在准备工具列表时求值，控制这个 handoff 是否出现；<code>on_handoff</code> 在转交时执行。基于参数的授权放在 <code>on_handoff</code> 开头、任何副作用之前，失败就抛异常，SDK 不会转交。</li>
+<li>handoff 把控制权和（默认）完整历史交给新 agent，由它产出最终输出；agent-as-tool 跑一个嵌套 run，嵌套 agent 只看到工具参数，结果作为工具输出交回，控制权留在调用方。前者适合分诊后由专家直接面对用户，后者适合一个管理者统一对话、调用多个专家能力。</li>
+<li>输入 guardrail 在 run 开始时检查用户输入，只对 run 的第一个 agent 生效；输出 guardrail 在产生最终输出后检查，只对产生最终输出的 agent 生效；工具 guardrail 在每次调用被保护的函数工具前后运行，有审批时输入检查默认在批准后、执行前。</li>
+<li>并行：延迟最低，但触发时 agent 可能已经消耗 token、执行了工具；阻塞：多了 guardrail 的延迟，但触发时 agent 根本不执行，没有成本和副作用。</li>
+<li>保存已经完成的工具调用和结果（以及重放它们所需的推理上下文），不保存被拒绝的候选最终输出。如果被拒绝的是直接当最终输出的工具结果，保存的工具结果被替换成占位文字。guardrail 自己抛异常时算结论未知，这一轮完成的项照常保存。</li>
+<li>LangGraph 在节点内部任意位置暂停，恢复时节点从头重跑，按序号把恢复值交给 <code>interrupt()</code>，所以要求之前的副作用幂等、调用顺序不变；灵活，但约束多。Agents SDK 只在工具执行之前暂停，暂停的单位是还没执行的工具调用，恢复时直接执行或拒绝这个调用，不重新调用模型；简单，但只能在工具调用处暂停。</li>
+<li><code>always_approve=True</code> / <code>always_reject=True</code> 让同一工具以后的调用自动按这个决定处理，保存在 <code>RunContextWrapper</code> 和 <code>RunState</code> 里。函数工具的 sticky 决定按请求审批的 agent 区分；本地 <code>ShellTool</code> 和 <code>ApplyPatchTool</code> 只按工具类型和名字匹配，不区分 agent，handoff 后可能作用到权限不同的 agent。</li>
+<li><code>RunState</code> 里有审批决定、待执行的调用和参数，反序列化不认证快照也不认证提交者，客户端可以篡改或重放。服务端要：用会话认证审批人；授权他处理这个 run 的这些调用；只接受决定 ID 和布尔值，从服务端快照取待审批项；原子地消费每个待审批请求，防止并发或重放导致恢复两次。</li>
+<li>工具执行了外部动作，进程在保存新状态前停了，从旧的已批准快照恢复会再执行一次。给每个逻辑动作一个稳定的幂等键，交给能原子去重的目的系统，重试时用同样的键和参数；没有这种保证时，先和目的系统权威对账再决定是否重试，结果不确定就记为未知，不自动重放。</li>
+</ol>
+<hr />
+<h2 id="13-参考答案">13. 参考答案</h2>
+<h3 id="练习-1">练习 1</h3>
+<ol>
+<li>1 条用户输入 + 第一次响应里的 4 个函数调用 + 4 个结果 = 9 条。按完成顺序写回的话：同样的输入每次产生不同的历史顺序，测试和重放都不稳定；Responses API 要求调用和结果能对上，乱序本身问题不大，但结果的顺序变成了调度的副产品，日志、session、缓存前缀（1.5 课）都会随机变化，prompt cache 命中率下降。</li>
+<li><code>RunState.Processed</code>。模型响应追加到 <code>Items</code> 时它被设成 <code>false</code>，<code>processTurn</code> 处理完（包括暂停）之前保持 <code>false</code>。恢复时 <code>loop</code> 看到 <code>Processed == false</code>，直接再处理一次上一次响应：已经有结果的调用跳过，被批准的执行，然后才调模型。没有这个字段，恢复时会把“暂停”当成“该调模型了”，模型会在缺少工具结果的情况下被调用（Responses API 会因为调用没有对应结果而报错），或者重新生成一批新的调用，审批的那个调用就丢了。</li>
+<li>第三个调用（handoff 后“另一个” agent 的 <code>cancel_order</code>）会被自动批准，不会暂停，<code>runs</code> 变成 3。SDK 区分 agent 是因为同名不等于同权限：两个 agent 的 <code>cancel_order</code> 可能连着不同的后端、有不同的参数约束，批准了一个 agent 不应该让另一个也自动通过。</li>
+<li>输入 guardrail 只对 run 的第一个 agent 生效，B 是 handoff 进来的，它的输入 guardrail 不跑。办法：<ul>
+<li>在 handoff 的 <code>on_handoff</code> 里做检查，失败就抛异常阻止转交；</li>
+<li>把检查写成 B 的工具的工具 guardrail；</li>
+<li>把检查放在第一个 agent 的输入 guardrail 里（它看到的是同一份用户输入）；</li>
+<li>把 B 作为 agent-as-tool 用，嵌套 run 里 B 是第一个 agent，它的输入 guardrail 会跑。</li>
+</ul>
+</li>
+</ol>
+<h3 id="练习-2">练习 2</h3>
+<div class="hl"><pre><span></span><code><span class="kd">var</span><span class="w"> </span><span class="p">(</span>
+<span class="w">    </span><span class="nx">ErrForbidden</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="nx">errors</span><span class="p">.</span><span class="nx">New</span><span class="p">(</span><span class="s">"无权处理这个 run"</span><span class="p">)</span>
+<span class="w">    </span><span class="nx">ErrAlreadyConsumed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">errors</span><span class="p">.</span><span class="nx">New</span><span class="p">(</span><span class="s">"这个审批已经处理过了"</span><span class="p">)</span>
+<span class="w">    </span><span class="nx">ErrVersionMismatch</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">errors</span><span class="p">.</span><span class="nx">New</span><span class="p">(</span><span class="s">"agent 版本已变化"</span><span class="p">)</span>
+<span class="w">    </span><span class="nx">ErrBadDecisions</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="nx">errors</span><span class="p">.</span><span class="nx">New</span><span class="p">(</span><span class="s">"决定必须正好覆盖所有待审批项"</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="kd">type</span><span class="w"> </span><span class="nx">record</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">owner</span><span class="p">,</span><span class="w"> </span><span class="nx">version</span><span class="w"> </span><span class="kt">string</span>
+<span class="w">    </span><span class="nx">snapshot</span><span class="w">       </span><span class="p">[]</span><span class="kt">byte</span><span class="w">            </span><span class="c1">// RunState JSON，只在服务端</span>
+<span class="w">    </span><span class="nx">ids</span><span class="w">            </span><span class="kt">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">string</span><span class="w"> </span><span class="c1">// 不透明决定 ID → call_id</span>
+<span class="w">    </span><span class="nx">consumed</span><span class="w">       </span><span class="kt">bool</span>
+<span class="p">}</span>
+
+<span class="kd">type</span><span class="w"> </span><span class="nx">MemApprovalStore</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">mu</span><span class="w">      </span><span class="nx">sync</span><span class="p">.</span><span class="nx">Mutex</span>
+<span class="w">    </span><span class="nx">version</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="c1">// 当前代码的 agent 版本</span>
+<span class="w">    </span><span class="nx">root</span><span class="w">    </span><span class="o">*</span><span class="nx">Agent</span>
+<span class="w">    </span><span class="nx">runs</span><span class="w">    </span><span class="kt">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="o">*</span><span class="nx">record</span>
+<span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">s</span><span class="w"> </span><span class="o">*</span><span class="nx">MemApprovalStore</span><span class="p">)</span><span class="w"> </span><span class="nx">Decide</span><span class="p">(</span><span class="nx">user</span><span class="p">,</span><span class="w"> </span><span class="nx">runID</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">d</span><span class="w"> </span><span class="kt">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">bool</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="nx">RunState</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">s</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nx">Lock</span><span class="p">()</span>
+<span class="w">    </span><span class="nx">rec</span><span class="p">,</span><span class="w"> </span><span class="nx">ok</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">s</span><span class="p">.</span><span class="nx">runs</span><span class="p">[</span><span class="nx">runID</span><span class="p">]</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="o">!</span><span class="nx">ok</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nx">rec</span><span class="p">.</span><span class="nx">owner</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="nx">user</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">s</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nx">Unlock</span><span class="p">()</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="nx">ErrForbidden</span><span class="w"> </span><span class="c1">// 不区分“不存在”和“不是你的”，避免泄露 run 是否存在</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">rec</span><span class="p">.</span><span class="nx">consumed</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">s</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nx">Unlock</span><span class="p">()</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="nx">ErrAlreadyConsumed</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">rec</span><span class="p">.</span><span class="nx">version</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="nx">s</span><span class="p">.</span><span class="nx">version</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">s</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nx">Unlock</span><span class="p">()</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="nx">ErrVersionMismatch</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">d</span><span class="p">)</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">rec</span><span class="p">.</span><span class="nx">ids</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">s</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nx">Unlock</span><span class="p">()</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="nx">ErrBadDecisions</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">id</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">d</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">ok</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">rec</span><span class="p">.</span><span class="nx">ids</span><span class="p">[</span><span class="nx">id</span><span class="p">];</span><span class="w"> </span><span class="o">!</span><span class="nx">ok</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nx">s</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nx">Unlock</span><span class="p">()</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="nx">ErrBadDecisions</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="nx">rec</span><span class="p">.</span><span class="nx">consumed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="w"> </span><span class="c1">// 先消费，再反序列化和恢复：失败或取消也算消费掉了</span>
+<span class="w">    </span><span class="nx">snap</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">rec</span><span class="p">.</span><span class="nx">snapshot</span>
+<span class="w">    </span><span class="nx">s</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nx">Unlock</span><span class="p">()</span>
+
+<span class="w">    </span><span class="nx">st</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">StateFromJSON</span><span class="p">(</span><span class="nx">s</span><span class="p">.</span><span class="nx">root</span><span class="p">,</span><span class="w"> </span><span class="nx">snap</span><span class="p">)</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">id</span><span class="p">,</span><span class="w"> </span><span class="nx">ok</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">d</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">in</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">Interruption</span><span class="p">{</span><span class="nx">CallID</span><span class="p">:</span><span class="w"> </span><span class="nx">rec</span><span class="p">.</span><span class="nx">ids</span><span class="p">[</span><span class="nx">id</span><span class="p">]}</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">ok</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nx">err</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">st</span><span class="p">.</span><span class="nx">Approve</span><span class="p">(</span><span class="nx">in</span><span class="p">,</span><span class="w"> </span><span class="kc">false</span><span class="p">)</span>
+<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nx">err</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">st</span><span class="p">.</span><span class="nx">Reject</span><span class="p">(</span><span class="nx">in</span><span class="p">,</span><span class="w"> </span><span class="s">""</span><span class="p">,</span><span class="w"> </span><span class="kc">false</span><span class="p">)</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">st</span><span class="p">,</span><span class="w"> </span><span class="kc">nil</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>要点：</p>
+<ul>
+<li>不透明 ID 用随机串（<code>crypto/rand</code>），不要直接用 <code>call_id</code>，客户端不需要知道内部 ID；</li>
+<li>“检查未消费 → 标记已消费”必须在<strong>同一把锁或同一个原子操作</strong>里。数据库里是 <code>UPDATE ... SET consumed = true WHERE run_id = $1 AND owner = $2 AND consumed = false</code>，看影响行数是不是 1；</li>
+<li>和官方示例一样，<strong>在反序列化和恢复之前</strong>就消费。代价是恢复失败后这个审批不能再提交一次，需要人工处理；好处是不会因为“恢复到一半失败、再提交一次”而执行两次；</li>
+<li><code>Pending</code> 返回的 <code>PendingView</code> 只有不透明 ID、工具名和参数，展示时转义；</li>
+<li>只决定一部分的情况，官方示例选择拒绝。如果要支持，就要在消费后把剩余的待审批项连同新快照重新 <code>Save</code> 成一条新记录。</li>
+</ul>
+<h3 id="练习-3">练习 3</h3>
+<div class="hl"><pre><span></span><code><span class="c1">// RunState 加一个字段：第一次 Run 时生成，序列化后不变</span>
+<span class="nx">RunID</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="s">`json:"run_id"`</span>
+
+<span class="c1">// RunContext 加一个字段，runOne 执行前设置（注意并发：每个 job 用自己的 RunContext 副本，或者通过参数传）</span>
+<span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">rc</span><span class="w"> </span><span class="o">*</span><span class="nx">RunContext</span><span class="p">)</span><span class="w"> </span><span class="nx">IdempotencyKey</span><span class="p">()</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nx">rc</span><span class="p">.</span><span class="nx">key</span><span class="w"> </span><span class="p">}</span>
+
+<span class="c1">// 假的支付服务</span>
+<span class="kd">type</span><span class="w"> </span><span class="nx">Payments</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">mu</span><span class="w">      </span><span class="nx">sync</span><span class="p">.</span><span class="nx">Mutex</span>
+<span class="w">    </span><span class="nx">charged</span><span class="w"> </span><span class="kt">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">string</span><span class="w"> </span><span class="c1">// key → 第一次的结果</span>
+<span class="w">    </span><span class="nx">count</span><span class="w">   </span><span class="kt">int</span>
+<span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">p</span><span class="w"> </span><span class="o">*</span><span class="nx">Payments</span><span class="p">)</span><span class="w"> </span><span class="nx">Charge</span><span class="p">(</span><span class="nx">key</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">amount</span><span class="w"> </span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">p</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nx">Lock</span><span class="p">()</span>
+<span class="w">    </span><span class="k">defer</span><span class="w"> </span><span class="nx">p</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nx">Unlock</span><span class="p">()</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">r</span><span class="p">,</span><span class="w"> </span><span class="nx">ok</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">p</span><span class="p">.</span><span class="nx">charged</span><span class="p">[</span><span class="nx">key</span><span class="p">];</span><span class="w"> </span><span class="nx">ok</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">r</span><span class="w"> </span><span class="c1">// 同一个键：返回第一次的结果，不再扣款</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="nx">p</span><span class="p">.</span><span class="nx">count</span><span class="o">++</span>
+<span class="w">    </span><span class="nx">r</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Sprintf</span><span class="p">(</span><span class="s">"已扣款 %d 元，流水号 %d"</span><span class="p">,</span><span class="w"> </span><span class="nx">amount</span><span class="p">,</span><span class="w"> </span><span class="nx">p</span><span class="p">.</span><span class="nx">count</span><span class="p">)</span>
+<span class="w">    </span><span class="nx">p</span><span class="p">.</span><span class="nx">charged</span><span class="p">[</span><span class="nx">key</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">r</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">r</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>测试步骤：</p>
+<ol>
+<li><code>Run</code> → 暂停 → <code>st.Approve</code> → <code>old, _ := st.ToJSON()</code>（批准后、执行前的快照）；</li>
+<li><code>Resume(st)</code> → 工具扣款；</li>
+<li>丢掉新状态，<code>StateFromJSON(old)</code> 再 <code>Resume</code> 一次 → 工具再执行一次，但用的是同一个 <code>runID/callID</code>；</li>
+<li>断言 <code>payments.count == 1</code>，两次 <code>FinalOutput</code> 相同。</li>
+</ol>
+<p>要点：</p>
+<ul>
+<li>键必须<strong>稳定</strong>：用 <code>RunID + callID</code>，不能用时间戳或每次重新生成的随机数，否则重试就是一个新动作；</li>
+<li><code>RunID</code> 存在 <code>RunState</code> 里，所以从旧快照恢复也拿到同一个；</li>
+<li>幂等是在<strong>目的系统</strong>（支付服务）里保证的，不是在 runner 里。runner 无法让“外部动作”和“保存状态”成为一个原子操作，这正是 5.5 节的结论；</li>
+<li>真实支付服务的幂等键有保留期（比如 24 小时），超过保留期再重试就不受保护了，这时要先对账。</li>
+</ul>
+<hr />
+<h2 id="完成标准">完成标准</h2>
+<ul>
+<li><code>make test</code> 全部通过（18 个测试），<code>go test -race</code> 通过；</li>
+<li>练习 1 的四个问题能讲清楚，尤其是第 2 题 <code>Processed</code> 的作用；</li>
+<li>练习 2 写完，并发测试在 <code>-race</code> 下稳定通过；</li>
+<li>能画出 Runner 循环，说出一次响应里工具、审批、handoff、最终输出的处理顺序；</li>
+<li>能说清 handoff 和 agent-as-tool、三种 guardrail 的边界；</li>
+<li>能对比 Agents SDK 的审批和 LangGraph 的 interrupt：暂停在哪、恢复时重跑什么、各自要求你保证什么；</li>
+<li>自测题 10 道能不看答案讲出来，尤其是第 4、7、9、10 题。</li>
+</ul>
+<p>下一课是 4.3 Claude Agent SDK：把 Claude Code 的 agent 循环做成库，工具、权限、hooks、子 agent 和会话又是另一种取舍，可以和 3.6 课的 Coding Agent 架构对照着看。</p>
+    <nav class="pager"><a class="prev" href="04-01-langgraph.html"><span>← 上一课 4.1</span>LangGraph：状态图、持久化与 interrupt</a></nav>
+    <p class="foot">© 2026 duang777 · 课件源文件：<a href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/notes/04-frameworks/02-openai-agents-sdk.md">notes/04-frameworks/02-openai-agents-sdk.md</a></p>
+  </article>
+</div>
+<script>
+document.getElementById("theme-toggle").addEventListener("click",function(){var r=document.documentElement,n=r.getAttribute("data-theme")==="light"?"dark":"light";r.setAttribute("data-theme",n);try{localStorage.setItem("x-theme",n)}catch(e){}});
+document.querySelectorAll('article pre').forEach(function(pre){
+  var b=document.createElement('button');b.className='code__copy';b.textContent='复制';
+  b.onclick=function(){navigator.clipboard.writeText(pre.innerText).then(function(){b.textContent='已复制';setTimeout(function(){b.textContent='复制'},1200)})};
+  pre.parentNode.insertBefore(b,pre);
+});
+var links=[].slice.call(document.querySelectorAll('.toc a')),map={};
+links.forEach(function(a){map[decodeURIComponent(a.getAttribute('href').slice(1))]=a});
+var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting&&map[e.target.id]){links.forEach(function(l){l.classList.remove('on')});map[e.target.id].classList.add('on')}})},{rootMargin:'-80px 0px -70% 0px'});
+document.querySelectorAll('article h1[id],article h2[id]').forEach(function(h){io.observe(h)});
+</script>
+</body>
+</html>

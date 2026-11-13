@@ -47,6 +47,7 @@ LESSONS = [
     ("notes/03-agents/06-coding-agent.md", "03-06-coding-agent", "3.6", "Coding Agent 架构：拆解 Claude Code、Codex、SWE-agent", "3–4 小时"),
     ("notes/03-agents/07-deep-research.md", "03-07-deep-research", "3.7", "Deep Research Agent 架构：拆解 Anthropic Research、OpenAI、Gemini", "3–4 小时"),
     ("notes/04-frameworks/01-langgraph.md", "04-01-langgraph", "4.1", "LangGraph：状态图、持久化与 interrupt", "4–5 小时"),
+    ("notes/04-frameworks/02-openai-agents-sdk.md", "04-02-openai-agents-sdk", "4.2", "OpenAI Agents SDK：Runner 循环、handoff、guardrail 与 RunState", "4–5 小时"),
 ]
 
 CSS = r"""
