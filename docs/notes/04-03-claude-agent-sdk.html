@@ -1,0 +1,1307 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>4.3 Claude Agent SDK：agent 循环、六步权限、hooks、子 agent 与会话 · AI Agent 全栈</title>
+<meta name="description" content="4.3 Claude Agent SDK：agent 循环、六步权限、hooks、子 agent 与会话。duang777 的 AI Agent 全栈公开学习课件。" />
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("x-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
+<style>
+:root{
+  --bg:#0a0a0a;--surface:#111;--text:#ededed;--text-2:#a1a1a1;--text-3:rgb(255 255 255/.4);
+  --line:rgb(255 255 255/.1);--line-2:rgb(255 255 255/.06);
+  --body:#d4d4d4;--code-bg:#1a1a1a;--pre-bg:#0f0f0f;--nav-bg:rgb(10 10 10/.8);--sb:#2a2a2a;--sb-h:#3a3a3a;
+  --sans:Inter,-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei","Helvetica Neue",sans-serif;
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+}
+*{box-sizing:border-box}
+html{color-scheme:dark}
+:root[data-theme="light"]{--bg:#fff;--surface:#fafafa;--text:#0a0a0a;--text-2:#555;--text-3:rgb(0 0 0/.42);--line:rgb(0 0 0/.1);--line-2:rgb(0 0 0/.06);--body:#333;--code-bg:#f2f2f2;--pre-bg:#fafafa;--nav-bg:rgb(255 255 255/.85);--sb:#d4d4d4;--sb-h:#bdbdbd}
+:root[data-theme="light"]{color-scheme:light}
+.toc{scrollbar-width:none}.toc::-webkit-scrollbar{display:none}
+html{scrollbar-width:thin;scrollbar-color:var(--sb) transparent}
+::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--sb);border-radius:8px}::-webkit-scrollbar-thumb:hover{background:var(--sb-h)}
+html{scroll-behavior:smooth;scroll-padding-top:80px}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;line-height:1.8;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+.nav{position:sticky;top:0;z-index:10;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;border-bottom:1px solid var(--line);background:var(--nav-bg);backdrop-filter:blur(12px)}
+.nav__brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-size:14px;font-weight:500}
+.nav__dot{width:10px;height:10px;border-radius:3px;background:var(--text)}
+.nav__links{display:flex;gap:20px;font-size:14px;color:var(--text-2)}
+.nav__links a{text-decoration:none}.nav__links a:hover{color:var(--text)}
+.wrap{max-width:1200px;margin:0 auto;padding:0 24px;display:grid;grid-template-columns:220px minmax(0,1fr);gap:56px}
+.toc{position:sticky;top:80px;align-self:start;max-height:calc(100vh - 100px);overflow:auto;padding:40px 0 40px;font-size:13px;line-height:1.6}
+.toc__label{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--text-3);text-transform:uppercase;margin-bottom:12px}
+.toc ul{list-style:none;margin:0;padding:0}
+.toc li{margin:0}
+.toc a{display:block;padding:4px 0 4px 12px;border-left:1px solid var(--line);color:var(--text-2);text-decoration:none}
+.toc a:hover,.toc a.on{color:var(--text);border-left-color:var(--text)}
+.toc ul ul a{padding-left:24px;font-size:12.5px;color:var(--text-3)}
+.toc ul ul a:hover,.toc ul ul a.on{color:var(--text)}
+article{min-width:0;max-width:760px;padding:48px 0 96px}
+.meta{font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--text-3);margin-bottom:16px}
+article h1.title{font-size:40px;line-height:1.2;letter-spacing:-.02em;font-weight:600;margin:0 0 24px}
+article h1{font-size:28px;line-height:1.3;letter-spacing:-.01em;font-weight:600;margin:72px 0 20px;padding-top:32px;border-top:1px solid var(--line)}
+article h2{font-size:22px;line-height:1.4;font-weight:600;margin:48px 0 16px}
+article h3{font-size:18px;font-weight:600;margin:36px 0 12px}
+article h4{font-size:16px;font-weight:600;margin:28px 0 8px}
+article p{margin:0 0 18px;color:var(--body)}
+article strong{color:var(--text);font-weight:600}
+article ul,article ol{padding-left:22px;margin:0 0 18px;color:var(--body)}
+article li{margin:4px 0}
+article a{text-decoration:underline;text-decoration-color:var(--text-3);text-underline-offset:3px}
+article a:hover{text-decoration-color:var(--text)}
+article hr{border:0;border-top:1px solid var(--line);margin:48px 0}
+article blockquote{margin:0 0 20px;padding:12px 18px;border-left:2px solid var(--text-2);background:var(--surface);border-radius:0 8px 8px 0;color:var(--text-2)}
+article blockquote p{margin:6px 0;color:var(--text-2)}
+article code{font-family:var(--mono);font-size:.88em;background:var(--code-bg);border:1px solid var(--line-2);border-radius:5px;padding:1px 6px}
+article pre{position:relative;margin:0 0 22px;padding:16px 18px;background:var(--pre-bg);border:1px solid var(--line);border-radius:10px;overflow:auto;font-size:13.5px;line-height:1.65}
+article pre code{background:none;border:0;padding:0;font-size:inherit}
+.code{position:relative}
+.code__lang{position:absolute;top:8px;right:46px;font-family:var(--mono);font-size:11px;color:var(--text-3);z-index:1}
+.code__copy{position:absolute;top:6px;right:8px;z-index:1;font:11px var(--mono);color:var(--text-2);background:var(--code-bg);border:1px solid var(--line);border-radius:6px;padding:2px 7px;cursor:pointer}
+.code__copy:hover{color:var(--text)}
+.tbl{overflow-x:auto;margin:0 0 22px;border:1px solid var(--line);border-radius:10px}
+article table{border-collapse:collapse;width:100%;font-size:14px}
+article th,article td{padding:10px 14px;border-bottom:1px solid var(--line-2);text-align:left;vertical-align:top}
+article th{font-weight:600;background:var(--surface);color:var(--text)}
+article tr:last-child td{border-bottom:0}
+article details{margin:0 0 18px;border:1px solid var(--line);border-radius:10px;padding:10px 16px;background:var(--surface)}
+article summary{cursor:pointer;font-weight:500}
+.pager{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:72px;padding-top:32px;border-top:1px solid var(--line)}
+.pager a{display:block;padding:16px 18px;border:1px solid var(--line);border-radius:10px;text-decoration:none}
+.pager a:hover{border-color:var(--text-2)}
+.pager span{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--text-3)}
+.pager .next{text-align:right;grid-column:2}
+.foot{margin-top:40px;font-size:13px;color:var(--text-3)}
+/* 代码高亮：黑白灰为主 */
+.hl .c,.hl .c1,.hl .cm,.hl .ch,.hl .cs,.hl .cp,.hl .cpf{color:#6b6b6b;font-style:italic}
+.hl .k,.hl .kd,.hl .kn,.hl .kr,.hl .kt,.hl .kc,.hl .kp,.hl .ow{color:#ffffff;font-weight:600}
+.hl .s,.hl .s1,.hl .s2,.hl .sb,.hl .sc,.hl .sd,.hl .se,.hl .sh,.hl .si,.hl .sx,.hl .sr,.hl .ss,.hl .dl,.hl .sa{color:#86efac}
+.hl .m,.hl .mi,.hl .mf,.hl .mh,.hl .mo,.hl .il{color:#fcd34d}
+.hl .nf,.hl .fm,.hl .nc,.hl .nn{color:#e5e5e5;font-weight:500}
+.hl .nb,.hl .bp,.hl .nd,.hl .na,.hl .nt{color:#bdbdbd}
+.hl .o,.hl .p{color:#9a9a9a}
+.hl .gd{color:#fca5a5}.hl .gi{color:#86efac}
+.hl{color:#d4d4d4}
+:root[data-theme="light"] .hl{color:#262626}
+:root[data-theme="light"] .hl .c,:root[data-theme="light"] .hl .c1,:root[data-theme="light"] .hl .cm,:root[data-theme="light"] .hl .ch,:root[data-theme="light"] .hl .cs,:root[data-theme="light"] .hl .cp,:root[data-theme="light"] .hl .cpf{color:#8a8a8a}
+:root[data-theme="light"] .hl .k,:root[data-theme="light"] .hl .kd,:root[data-theme="light"] .hl .kn,:root[data-theme="light"] .hl .kr,:root[data-theme="light"] .hl .kt,:root[data-theme="light"] .hl .kc,:root[data-theme="light"] .hl .kp,:root[data-theme="light"] .hl .ow{color:#000}
+:root[data-theme="light"] .hl .s,:root[data-theme="light"] .hl .s1,:root[data-theme="light"] .hl .s2,:root[data-theme="light"] .hl .sb,:root[data-theme="light"] .hl .sc,:root[data-theme="light"] .hl .sd,:root[data-theme="light"] .hl .se,:root[data-theme="light"] .hl .sh,:root[data-theme="light"] .hl .si,:root[data-theme="light"] .hl .sx,:root[data-theme="light"] .hl .sr,:root[data-theme="light"] .hl .ss,:root[data-theme="light"] .hl .dl,:root[data-theme="light"] .hl .sa{color:#15803d}
+:root[data-theme="light"] .hl .m,:root[data-theme="light"] .hl .mi,:root[data-theme="light"] .hl .mf,:root[data-theme="light"] .hl .mh,:root[data-theme="light"] .hl .mo,:root[data-theme="light"] .hl .il{color:#b45309}
+:root[data-theme="light"] .hl .nf,:root[data-theme="light"] .hl .fm,:root[data-theme="light"] .hl .nc,:root[data-theme="light"] .hl .nn{color:#171717}
+:root[data-theme="light"] .hl .nb,:root[data-theme="light"] .hl .bp,:root[data-theme="light"] .hl .nd,:root[data-theme="light"] .hl .na,:root[data-theme="light"] .hl .nt{color:#525252}
+:root[data-theme="light"] .hl .o,:root[data-theme="light"] .hl .p{color:#6b6b6b}
+:root[data-theme="light"] .hl .gd{color:#b91c1c}:root[data-theme="light"] .hl .gi{color:#15803d}
+.nav__right{display:flex;align-items:center;gap:20px}
+.theme-toggle{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--text);cursor:pointer}
+.theme-toggle:hover{border-color:var(--text-2)}
+.theme-toggle svg{width:15px;height:15px}
+.theme-toggle .i-moon,:root[data-theme="light"] .theme-toggle .i-sun{display:none}
+:root[data-theme="light"] .theme-toggle .i-moon{display:block}
+@media (max-width:960px){.wrap{grid-template-columns:1fr;gap:0}.toc{display:none}article h1.title{font-size:30px}.nav__links a.hide-sm{display:none}}
+</style>
+</head>
+<body>
+<header class="nav">
+  <a class="nav__brand" href="../index.html"><span class="nav__dot"></span>AI Agent 全栈</a>
+  <div class="nav__right">
+  <nav class="nav__links">
+    <a href="../index.html#progress">课件</a>
+    <a class="hide-sm" href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/ROADMAP.md">路线图</a>
+    <a href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/notes/04-frameworks/03-claude-agent-sdk.md">在 GitHub 上查看</a>
+  </nav>
+  <button class="theme-toggle" id="theme-toggle" type="button" aria-label="切换浅色 / 深色" title="切换浅色 / 深色"><svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg><svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
+  </div>
+</header>
+<div class="wrap">
+  <aside class="toc"><div class="toc__label">本课目录</div><ul>
+<li><a href="#读前说明">读前说明</a></li>
+<li><a href="#1-它是什么不是什么">1. 它是什么，不是什么</a></li>
+<li><a href="#2-agent-循环">2. agent 循环</a></li>
+<li><a href="#3-工具">3. 工具</a></li>
+<li><a href="#4-权限六步判定">4. 权限：六步判定</a></li>
+<li><a href="#5-canusetool运行时审批">5. canUseTool：运行时审批</a></li>
+<li><a href="#6-hooks">6. Hooks</a></li>
+<li><a href="#7-子-agent">7. 子 agent</a></li>
+<li><a href="#8-会话">8. 会话</a></li>
+<li><a href="#9-上下文">9. 上下文</a></li>
+<li><a href="#10-和-42-对照">10. 和 4.2 对照</a></li>
+<li><a href="#11-练习代码导读">11. 练习代码导读</a></li>
+<li><a href="#12-常见的坑">12. 常见的坑</a></li>
+<li><a href="#13-练习">13. 练习</a></li>
+<li><a href="#14-自测题">14. 自测题</a></li>
+<li><a href="#15-自测题答案">15. 自测题答案</a></li>
+<li><a href="#16-参考答案">16. 参考答案</a></li>
+<li><a href="#完成标准">完成标准</a></li>
+</ul>
+</aside>
+  <article>
+    <div class="meta">模块 04 · 框架与 SDK · 第 4.3 课</div>
+    <h1 class="title">4.3 Claude Agent SDK：agent 循环、六步权限、hooks、子 agent 与会话</h1>
+    <blockquote>
+<p>第 4 部分 · 第 3 课 ｜ 预计 4–5 小时 ｜ 前置：2.2 MCP、3.2 Agent Loop、3.3 多智能体、3.6 Coding Agent 架构、4.2 OpenAI Agents SDK</p>
+<p>配套练习：<code>projects/26-claude-agent-sdk/</code>（纯 Go 标准库，22 个测试）。用 Go 重写 Claude Agent SDK 运行时的核心：agent 循环与消息流（每个内容块一条 assistant 消息、<code>max_turns</code> 把最后一轮也算进去、预算在调模型前检查所以会超出一次响应）；只读工具并发、其他工具顺序执行；六步权限判定（hooks → deny 规则 → ask 规则 → 权限模式 → allow 规则 → <code>canUseTool</code>）和规则语法的几个陷阱；<code>PreToolUse</code> 多个 hook 的聚合、<code>updatedInput</code>、<code>onFailure</code>；<code>PostToolUse</code> 改写结果；<code>canUseTool</code> 改参数与“批准并记住”；<code>defer</code> 暂停与恢复；子 agent 的上下文隔离、深度 / 并发 / 预算上限、权限模式继承；会话的 resume / fork / continue。</p>
+</blockquote>
+<h2 id="读前说明">读前说明</h2>
+<p>4.2 课的 OpenAI Agents SDK 是“一个循环 + 几个可插拔的点”，运行时是你进程里的一个 Python 库。Claude Agent SDK 的出发点不一样：<strong>它把 Claude Code 整个当成库来用</strong>。你在 Python 或 TypeScript 里调 <code>query()</code>，SDK 启动一个 <code>claude</code> CLI 子进程，通过 stdio 和它通信。这个子进程自带内置工具（Read、Edit、Bash、Grep……）、权限系统、hooks、子 agent、会话文件、上下文压缩。你得到的是一个现成的 coding agent，你做的事情主要是<strong>收紧它</strong>。</p>
+<p>三个框架对照：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>问题</th>
+<th>LangGraph（4.1）</th>
+<th>OpenAI Agents SDK（4.2）</th>
+<th>Claude Agent SDK（本课）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>运行时在哪</td>
+<td>你的进程</td>
+<td>你的进程</td>
+<td>一个 <code>claude</code> 子进程，一个会话一个</td>
+</tr>
+<tr>
+<td>自带工具</td>
+<td>没有</td>
+<td>没有（托管工具除外）</td>
+<td>Read / Edit / Write / Bash / Grep / Glob / WebFetch / Agent 等</td>
+</tr>
+<tr>
+<td>控制流</td>
+<td>你画的图</td>
+<td>固定的 Runner 循环</td>
+<td>固定的 agent 循环</td>
+</tr>
+<tr>
+<td>多 agent</td>
+<td>子图、Send</td>
+<td>handoff（交出控制权）、agent-as-tool</td>
+<td>子 agent（<code>Agent</code> 工具），只回传最终消息</td>
+</tr>
+<tr>
+<td>人工审批</td>
+<td><code>interrupt()</code>，节点重跑</td>
+<td><code>needs_approval</code>，run 停下，<code>RunState</code> 序列化</td>
+<td><code>canUseTool</code> 回调在循环内阻塞等待；要跨进程就用 hook 返回 <code>defer</code>，之后 resume 会话</td>
+</tr>
+<tr>
+<td>防护</td>
+<td>自己写节点</td>
+<td>输入 / 输出 / 工具 guardrail</td>
+<td>权限规则 + 权限模式 + hooks</td>
+</tr>
+<tr>
+<td>状态持久化</td>
+<td>checkpointer</td>
+<td>Session / 服务端会话</td>
+<td>会话 JSONL 文件，可镜像到 <code>SessionStore</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>本课依据 code.claude.com 上的 Agent SDK 文档（2026 年 11 月）：agent-loop、permissions、user-input、hooks、subagents、sessions、custom-tools、file-checkpointing、hosting 等页面，以及 Claude Code 的 hooks 参考里 <code>defer</code> 一节。写课时 PyPI 上 <code>claude-agent-sdk</code> 最新是 0.2.182，npm 上 <code>@anthropic-ai/claude-agent-sdk</code> 最新是 0.3.325，都在 2026-11-13（UTC）发布。这个 SDK 更新很快，文档里不少行为都标了“需要 Claude Code v2.1.xxx 以上”，用之前先看你的版本。</p>
+<p>先想几个问题：</p>
+<ul>
+<li><code>allowed_tools=["Read"]</code> 加上 <code>permission_mode="bypassPermissions"</code>，Bash 还能跑吗？</li>
+<li>你在 <code>canUseTool</code> 里写了一套检查，为什么有的调用根本没进来？</li>
+<li>一个 <code>PreToolUse</code> hook 返回 <code>allow</code>，一个返回 <code>ask</code>，最后听谁的？hook 自己抛了异常呢？</li>
+<li>审批人可能明天才回复，你的进程不能挂一整天，怎么办？</li>
+<li>子 agent 能看到主 agent 之前读过的文件吗？主 agent 能看到子 agent 读过的文件吗？</li>
+</ul>
+<hr />
+<h2 id="1-它是什么不是什么">1. 它是什么，不是什么</h2>
+<p>文档把四个东西放在一起比较：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>你想要</th>
+<th>用</th>
+<th>得到什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>在自己的 Python / TS 应用里嵌入 Claude Code 的 agent，跑在你运维的进程里</td>
+<td><strong>Agent SDK</strong></td>
+<td>一个驱动 Claude Code 二进制的库，带内置工具、权限、会话、hooks</td>
+</tr>
+<tr>
+<td>在终端里交互开发</td>
+<td>Claude Code CLI</td>
+<td>终端界面</td>
+</tr>
+<tr>
+<td>直接调 Claude API</td>
+<td>Client SDK</td>
+<td>直接访问 API，工具循环自己写（或用 beta 的 tool runner）</td>
+</tr>
+<tr>
+<td>让 Anthropic 托管 agent</td>
+<td>Managed Agents</td>
+<td>托管的 agent harness，沙箱在 Anthropic 云上或你自己的基础设施上</td>
+</tr>
+</tbody>
+</table></div>
+<p>其他语言想用同一个循环，就把 CLI 当子进程跑：<code>claude -p ... --output-format json</code>。Go 没有官方 Agent SDK，本课练习用 Go 重写的是<strong>运行时的语义</strong>，不是去调用这个二进制。</p>
+<p>托管时要记住的事实（hosting 页）：</p>
+<ul>
+<li>一个 agent 会话就是一个子进程，N 个并发会话就是 N 个子进程，各自有进程树和会话文件；</li>
+<li>子进程拥有 shell、工作目录、本地磁盘上的 JSONL 会话记录。会话记录、CLAUDE.md、工作目录里的产物默认都在容器磁盘上，容器重启就没了；</li>
+<li>会话要跨主机恢复，用 <code>SessionStore</code> 适配器把记录镜像到你自己的存储（第 8 节）。</li>
+</ul>
+<p>所以它不是一个“无状态 API 包装”。部署形态更像 3.6 课说的 coding agent：一个任务一个容器，或者一个长期运行的容器里跑多个会话。</p>
+<p>另一个约束：除非事先获批，第三方产品不能用 claude.ai 登录或它的额度，要用 API key。</p>
+<hr />
+<h2 id="2-agent-循环">2. agent 循环</h2>
+<h3 id="21-五步">2.1 五步</h3>
+<p>官方文档描述的循环：</p>
+<ol>
+<li><strong>收到 prompt</strong>：Claude 收到你的 prompt、system prompt、工具定义和历史。SDK 先吐一条 <code>SystemMessage</code>，subtype 是 <code>"init"</code>，里面有会话信息；</li>
+<li><strong>评估并响应</strong>：Claude 输出文本、请求一个或多个工具调用，或者两者都有。SDK 为<strong>每个内容块</strong>吐一条 <code>AssistantMessage</code>，同一次响应的这些消息共享一个消息 ID；</li>
+<li><strong>执行工具</strong>：SDK 执行每个请求的工具，收集结果，结果作为 <code>UserMessage</code> 吐出来并交回 Claude。hooks 可以在执行前拦截、修改、阻止；</li>
+<li><strong>重复</strong>：2、3 循环，直到 Claude 给出一个<strong>没有工具调用</strong>的响应；</li>
+<li><strong>返回结果</strong>：最后一条 <code>AssistantMessage</code> 是纯文本回答，然后是 <code>ResultMessage</code>：最终文本、token 用量、花费、会话 ID。</li>
+</ol>
+<p>一个 turn 就是走一遍 2 和 3。这一切发生在一次 <code>query()</code> 里，中间不把控制权交回你的代码。</p>
+<p>练习 <code>TestLoopTurnsAndEvents</code> 验证事件顺序是 <code>system, assistant, assistant, user, assistant, result</code>，前两个 assistant（同一次响应里的一个文本块和一个工具调用）消息 ID 相同。</p>
+<h3 id="22-消息类型">2.2 消息类型</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>类型</th>
+<th>什么时候出现</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>SystemMessage</code></td>
+<td>会话事件：<code>init</code>、<code>compact_boundary</code>（压缩之后）、<code>informational</code> 等</td>
+</tr>
+<tr>
+<td><code>AssistantMessage</code></td>
+<td>Claude 响应里的每个内容块，包括最后那个纯文本回答</td>
+</tr>
+<tr>
+<td><code>UserMessage</code></td>
+<td>每次工具执行后的结果；你在循环中途流式发进去的用户输入</td>
+</tr>
+<tr>
+<td><code>StreamEvent</code></td>
+<td>打开 partial messages 之后才有，是原始的流式事件（文本增量、工具参数片段）</td>
+</tr>
+<tr>
+<td><code>ResultMessage</code></td>
+<td>循环结束。之后还可能有少量 system 事件，所以要把流读完，别一见到 result 就 break</td>
+</tr>
+</tbody>
+</table></div>
+<p>TypeScript 里 <code>AssistantMessage</code> 和 <code>UserMessage</code> 把原始 API 消息包在 <code>.message</code> 字段里，内容块在 <code>message.message.content</code>，不是 <code>message.content</code>。</p>
+<h3 id="23-max_turns-和预算">2.3 max_turns 和预算</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>选项</th>
+<th>控制什么</th>
+<th>默认</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>max_turns</code> / <code>maxTurns</code></td>
+<td>最多多少个 turn</td>
+<td>不限</td>
+</tr>
+<tr>
+<td><code>max_budget_usd</code> / <code>maxBudgetUsd</code></td>
+<td>估算花费到多少就停</td>
+<td>不限</td>
+</tr>
+</tbody>
+</table></div>
+<p>两个容易算错的地方：</p>
+<ul>
+<li><strong><code>max_turns</code> 要把最后那个纯文本回答也算进去</strong>。一个任务用了 3 轮工具调用加 1 轮回答，<code>max_turns=3</code> 会以 <code>error_max_turns</code> 结束，没有最终回答（<code>TestMaxTurnsCountsFinalTurn</code>）；</li>
+<li><strong>预算会超出一次响应的花费</strong>。每次响应的花费要等 API 返回用量才知道，所以 SDK 是在响应回来之后再比较。把花费推过上限的那次响应会照常完成并计入总花费，此时还在跑的子 agent 停下前花的钱也算。设上限要留余量（<code>TestBudgetLetsCrossingResponseFinish</code>：每次 0.4 美元，上限 1.0，最后花了 1.2）。</li>
+</ul>
+<p>预算覆盖子 agent：它们的花费计入总数；达到上限后，再派子 agent 会失败并返回 <code>Budget limit reached</code>，后台还在跑的子 agent 会被停掉（文档注明需要 Claude Code v2.1.217 以上）。</p>
+<p>练习在<strong>每次调模型之前</strong>检查轮数和预算，这样“越线的那次响应”自然会完整执行完，包括它请求的工具。真实 SDK 的检查时机是“响应回来之后”，效果相同的部分是：越线那次响应的花费一定会计入。</p>
+<p>没有限制时循环会一直跑到 Claude 自己结束，对“改进一下这个代码库”这种开放任务可能跑很久。文档的建议是：<strong>生产环境默认设预算</strong>。</p>
+<h3 id="24-结果-subtype">2.4 结果 subtype</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>subtype</th>
+<th>含义</th>
+<th>有 <code>result</code> 吗</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>success</code></td>
+<td>正常完成</td>
+<td>有</td>
+</tr>
+<tr>
+<td><code>error_max_turns</code></td>
+<td>到了 <code>maxTurns</code></td>
+<td>没有</td>
+</tr>
+<tr>
+<td><code>error_max_budget_usd</code></td>
+<td>到了预算</td>
+<td>没有</td>
+</tr>
+<tr>
+<td><code>error_during_execution</code></td>
+<td>执行中出错，比如请求被取消、会话崩溃</td>
+<td>没有</td>
+</tr>
+<tr>
+<td><code>error_max_structured_output_retries</code></td>
+<td>结构化输出在重试次数内都没通过校验</td>
+<td>没有</td>
+</tr>
+</tbody>
+</table></div>
+<p>所有 subtype 都带 <code>total_cost_usd</code>、<code>usage</code>、<code>num_turns</code>、<code>session_id</code>，所以出错之后也能记账、也能 resume。单次 <code>query()</code> 在吐出错误结果之后会<strong>再抛一个异常</strong>，这是有意的，要用 try 包住。<code>usage</code> 只覆盖主循环，整棵树的用量看 <code>modelUsage</code> / <code>model_usage</code>。</p>
+<p><code>stop_reason</code> 是模型最后一轮停下的原因：<code>end_turn</code>、<code>max_tokens</code>、<code>refusal</code>。检测拒答就看 <code>stop_reason == "refusal"</code>。</p>
+<h3 id="25-effort">2.5 effort</h3>
+<p><code>effort</code> 控制每次响应的推理深度：<code>low</code>、<code>medium</code>、<code>high</code>、<code>xhigh</code>、<code>max</code>。可以在整个会话上设，也可以在某个子 agent 的定义上单独设。读文件、列目录这类子任务用 <code>low</code> 能省不少 token。这是 1.4 课推理模型在框架里的开关。</p>
+<hr />
+<h2 id="3-工具">3. 工具</h2>
+<h3 id="31-内置工具">3.1 内置工具</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>类别</th>
+<th>工具</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>文件</td>
+<td><code>Read</code>、<code>Edit</code>、<code>Write</code></td>
+</tr>
+<tr>
+<td>搜索</td>
+<td><code>Glob</code>、<code>Grep</code></td>
+</tr>
+<tr>
+<td>执行</td>
+<td><code>Bash</code></td>
+</tr>
+<tr>
+<td>网络</td>
+<td><code>WebSearch</code>、<code>WebFetch</code></td>
+</tr>
+<tr>
+<td>发现</td>
+<td><code>ToolSearch</code>：按需加载工具，而不是一开始全部塞进上下文</td>
+</tr>
+<tr>
+<td>编排</td>
+<td><code>Agent</code>（子 agent）、<code>Skill</code>、<code>AskUserQuestion</code>、<code>TaskCreate</code>、<code>TaskUpdate</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>这就是 3.6 课拆过的 Claude Code 工具集，现在你可以直接拿来用。</p>
+<h3 id="32-并发规则">3.2 并发规则</h3>
+<p>一轮里有多个工具调用时：<strong>只读工具</strong>（Read、Glob、Grep、标了只读的 MCP 工具）可以并发；<strong>会改状态的工具</strong>（Edit、Write、Bash）顺序执行，避免冲突。自定义工具默认顺序执行，在注解里设 <code>readOnlyHint: true</code> 才能并发。这个字段名来自 MCP SDK。</p>
+<p>对比 4.2：OpenAI 的 SDK 用一个并发上限 <code>max_function_tool_concurrency</code> 控制所有函数工具；Claude 的 SDK 按工具<strong>有没有副作用</strong>区分。后者更安全，但要求你对每个自定义工具如实标注。</p>
+<p>练习的 <code>handleCalls</code> 先按调用顺序逐个做权限判定，再执行：相邻的已批准只读调用一起并发，其他调用单独执行；结果按调用顺序写回。<code>TestReadOnlyConcurrentMutatingSequential</code> 发了 <code>R1 R2 W R3 R4</code>，断言 R1、R2 真的同时在跑，W 开始时没有别的调用在跑，W 结束后 R3、R4 才开始。</p>
+<h3 id="33-自定义工具进程内-mcp-server">3.3 自定义工具：进程内 MCP server</h3>
+<p>自定义工具不是直接传函数，而是包成一个<strong>跑在你进程里的 MCP server</strong>：</p>
+<div class="hl"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">claude_agent_sdk</span><span class="w"> </span><span class="kn">import</span> <span class="n">tool</span><span class="p">,</span> <span class="n">create_sdk_mcp_server</span><span class="p">,</span> <span class="n">ClaudeAgentOptions</span>
+
+<span class="nd">@tool</span><span class="p">(</span><span class="s2">"get_temperature"</span><span class="p">,</span> <span class="s2">"查询某地当前气温"</span><span class="p">,</span> <span class="p">{</span><span class="s2">"latitude"</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="s2">"longitude"</span><span class="p">:</span> <span class="nb">float</span><span class="p">})</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_temperature</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="k">await</span> <span class="n">fetch_temp</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s2">"latitude"</span><span class="p">],</span> <span class="n">args</span><span class="p">[</span><span class="s2">"longitude"</span><span class="p">])</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">"content"</span><span class="p">:</span> <span class="p">[{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"text"</span><span class="p">,</span> <span class="s2">"text"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">t</span><span class="si">}</span><span class="s2">°C"</span><span class="p">}]}</span>
+
+<span class="n">weather</span> <span class="o">=</span> <span class="n">create_sdk_mcp_server</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"weather"</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="s2">"1.0.0"</span><span class="p">,</span> <span class="n">tools</span><span class="o">=</span><span class="p">[</span><span class="n">get_temperature</span><span class="p">])</span>
+
+<span class="n">options</span> <span class="o">=</span> <span class="n">ClaudeAgentOptions</span><span class="p">(</span>
+    <span class="n">mcp_servers</span><span class="o">=</span><span class="p">{</span><span class="s2">"weather"</span><span class="p">:</span> <span class="n">weather</span><span class="p">},</span>
+    <span class="n">allowed_tools</span><span class="o">=</span><span class="p">[</span><span class="s2">"mcp__weather__get_temperature"</span><span class="p">],</span>
+<span class="p">)</span>
+</code></pre></div>
+
+<p>要点：</p>
+<ul>
+<li>工具的完整名字是 <code>mcp__{server}__{tool}</code>，<code>server</code> 是你在 <code>mcp_servers</code> 里给的键；权限规则、hook 的 matcher 都用这个完整名字；</li>
+<li>handler 返回 <code>content</code> 数组（text / image / audio / resource / resource_link），可选 <code>structuredContent</code>（机器可读的 JSON），可选 <code>isError: true</code>；</li>
+<li>想让 Claude 读到一段你组织好的错误信息，就返回 <code>isError: true</code> 加文字，而不是让原始异常冒出去；</li>
+<li>工具多了用 tool search：默认对 SDK MCP 工具开启，Claude 先看到一个紧凑的名字列表，需要时再加载完整 schema。这是 1.6 课上下文工程的一个具体手段。</li>
+</ul>
+<p>TypeScript 版还能给自定义工具设 <code>permission_policy: "always_ask"</code>：这样的调用<strong>任何 allow 规则都批不了</strong>，连 <code>allowedTools</code> 里写了也不行。</p>
+<hr />
+<h2 id="4-权限六步判定">4. 权限：六步判定</h2>
+<p>这是本课最重要的一节。官方文档给的顺序：</p>
+<ol>
+<li><strong>hooks</strong>：<code>PreToolUse</code> hook 可以直接拒绝，或放行到下一步。hook 返回 <code>allow</code> <strong>不会跳过</strong>第 2、3 步；</li>
+<li><strong>deny 规则</strong>（<code>disallowed_tools</code> 和 SDK 加载的 settings 文件）：命中就拒绝，<code>canUseTool</code> 不会被调用。<strong><code>bypassPermissions</code> 模式下、hook 返回了 <code>allow</code> 也一样被拒</strong>；</li>
+<li><strong>ask 规则</strong>（settings.json 里的 <code>ask</code>）：命中就交给 <code>canUseTool</code> 确认，<strong><code>bypassPermissions</code> 下也一样</strong>。需要用户交互的工具（<code>AskUserQuestion</code>、服务端标了 <code>anthropic/requiresUserInteraction</code> 的 MCP 工具）同理；</li>
+<li><strong>权限模式</strong>：<code>bypassPermissions</code> 在这里批准；<code>acceptEdits</code> 批准工作目录内的文件编辑；<code>plan</code> 把编辑交给回调；<code>default</code> 和 <code>dontAsk</code> 继续往下；</li>
+<li><strong>allow 规则</strong>（<code>allowed_tools</code> 和 settings.json）：命中就批准。工具“自己就能批准”的调用也在这一步通过，比如工作目录内的读文件、只读的 Bash 命令；</li>
+<li><strong><code>canUseTool</code> 回调</strong>：前面都没定下来，就问你的回调。<code>dontAsk</code> 模式跳过这一步直接拒绝；没传回调也是拒绝。</li>
+</ol>
+<p>练习的 <code>decide</code> 一步一步对应：</p>
+<div class="hl"><pre><span></span><code><span class="c1">// 1. hooks</span>
+<span class="nx">dec</span><span class="p">,</span><span class="w"> </span><span class="nx">reason</span><span class="p">,</span><span class="w"> </span><span class="nx">upd</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">aggregatePre</span><span class="p">(</span><span class="nx">runHooks</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">o</span><span class="p">.</span><span class="nx">Hooks</span><span class="p">,</span><span class="w"> </span><span class="s">"PreToolUse"</span><span class="p">,</span><span class="w"> </span><span class="nx">t</span><span class="p">.</span><span class="nx">Name</span><span class="p">,</span><span class="w"> </span><span class="nx">hin</span><span class="p">))</span>
+<span class="c1">// deny → 直接拒绝；defer → 暂停；ask → 记下 forceAsk；allow → 记下 hookAllow（先不批）</span>
+<span class="c1">// 2. deny 规则</span>
+<span class="k">if</span><span class="w"> </span><span class="nx">anyRule</span><span class="p">(</span><span class="nx">o</span><span class="p">.</span><span class="nx">DisallowedTools</span><span class="p">,</span><span class="w"> </span><span class="nx">t</span><span class="p">,</span><span class="w"> </span><span class="nx">in</span><span class="p">,</span><span class="w"> </span><span class="nx">o</span><span class="p">.</span><span class="nx">Cwd</span><span class="p">,</span><span class="w"> </span><span class="kc">false</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nx">deny</span><span class="p">(...)</span><span class="w"> </span><span class="p">}</span>
+<span class="c1">// 3. ask 规则</span>
+<span class="k">if</span><span class="w"> </span><span class="nx">forceAsk</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nx">anyRule</span><span class="p">(</span><span class="nx">o</span><span class="p">.</span><span class="nx">AskRules</span><span class="p">,</span><span class="w"> </span><span class="nx">t</span><span class="p">,</span><span class="w"> </span><span class="nx">in</span><span class="p">,</span><span class="w"> </span><span class="nx">o</span><span class="p">.</span><span class="nx">Cwd</span><span class="p">,</span><span class="w"> </span><span class="kc">false</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">callback</span><span class="p">(...)</span><span class="w"> </span><span class="p">}</span>
+<span class="c1">// 4. 权限模式</span>
+<span class="k">switch</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">mode</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">case</span><span class="w"> </span><span class="nx">ModeBypass</span><span class="p">:</span><span class="w"> </span><span class="p">...;</span><span class="w"> </span><span class="k">case</span><span class="w"> </span><span class="nx">ModeAcceptEdits</span><span class="p">:</span><span class="w"> </span><span class="p">...;</span><span class="w"> </span><span class="k">case</span><span class="w"> </span><span class="nx">ModePlan</span><span class="p">:</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">}</span>
+<span class="k">if</span><span class="w"> </span><span class="nx">hookAllow</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nx">allow</span><span class="w"> </span><span class="p">}</span><span class="w">       </span><span class="c1">// hook 的 allow 在模式之后才生效</span>
+<span class="c1">// 5. allow 规则 + 工具自批</span>
+<span class="c1">// 6. canUseTool</span>
+</code></pre></div>
+
+<p><code>hookAllow</code> 放在第 4 步之后，是为了表达文档里 plan 模式的规则：规划期间的编辑<strong>即使 allow 规则命中、即使 <code>PreToolUse</code> 返回了 <code>allow</code></strong>，也要交给回调（<code>TestPlanModeEditsReachCallback</code>）。</p>
+<p>被拒绝的调用不会让循环报错：Claude 收到一条拒绝信息作为工具结果，通常会换个办法，或者说明做不了。</p>
+<h3 id="41-权限模式">4.1 权限模式</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>模式</th>
+<th>行为</th>
+<th>适合</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>default</code></td>
+<td>没有基于模式的自动批准；需要批准、又没有 allow 规则命中的调用交给 <code>canUseTool</code>；没有回调就拒绝</td>
+<td>有审批界面的交互应用</td>
+</tr>
+<tr>
+<td><code>acceptEdits</code></td>
+<td>自动批准工作目录内的文件编辑和常见文件系统命令（<code>mkdir</code>、<code>touch</code>、<code>mv</code>、<code>cp</code> 等）</td>
+<td>信任编辑、想快速迭代</td>
+</tr>
+<tr>
+<td><code>plan</code></td>
+<td>Claude 只探索和规划；文件工具的编辑交给回调，allow 规则也挡不住</td>
+<td>先出方案再动手</td>
+</tr>
+<tr>
+<td><code>dontAsk</code></td>
+<td>从不提示：本来会提示的调用一律拒绝</td>
+<td>没人审批的无头 agent</td>
+</tr>
+<tr>
+<td><code>auto</code></td>
+<td>用一个模型分类器审查 shell 命令、网络请求等，逐个放行或拦截</td>
+<td>想自主运行又要护栏</td>
+</tr>
+<tr>
+<td><code>bypassPermissions</code></td>
+<td>不提示直接执行，<strong>包括 <code>allowedTools</code> 里没列的工具</strong></td>
+<td>只在隔离环境（CI、容器）里用</td>
+</tr>
+</tbody>
+</table></div>
+<p>几个细节：</p>
+<ul>
+<li>Claude Code v2.1.302 起，没设模式的应用从 <code>default</code> 开始；</li>
+<li><code>bypassPermissions</code> 在 Linux / macOS 上以 root 或 sudo 运行（且不在被识别的沙箱里）时拒绝启动；TS SDK 还要求 <code>allowDangerouslySkipPermissions: true</code>；</li>
+<li><code>acceptEdits</code> 不自动批准工作目录之外的路径、受保护路径、对关键路径的 <code>rm</code>。练习里 <code>/work/../etc/x</code> 先规范化成 <code>/etc/x</code>，不在工作目录内，交给回调（<code>TestAcceptEditsScopedToCwd</code>）；</li>
+<li>模式可以在流式会话中途用 <code>set_permission_mode()</code> 切换，比如先看过方案再切到 <code>acceptEdits</code>。</li>
+</ul>
+<h3 id="42-allow-deny-规则的语法和陷阱">4.2 allow / deny 规则的语法和陷阱</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>写法</th>
+<th>效果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>allowed_tools=["Read", "Grep"]</code></td>
+<td>自动批准这两个工具；其他工具<strong>仍然可用</strong>，需要批准的调用落到权限模式和 <code>canUseTool</code></td>
+</tr>
+<tr>
+<td><code>disallowed_tools=["Bash"]</code></td>
+<td>把 Bash 的工具定义从请求里<strong>拿掉</strong>，模型根本看不到</td>
+</tr>
+<tr>
+<td><code>disallowed_tools=["Bash(rm *)"]</code></td>
+<td>Bash 还在；<strong>按写法</strong>匹配 <code>rm *</code> 的调用在所有模式下被拒；<code>/bin/rm</code> 不匹配，落到权限模式</td>
+</tr>
+<tr>
+<td><code>disallowed_tools=["*"]</code>、<code>["mcp__*"]</code></td>
+<td>deny 规则支持工具名通配</td>
+</tr>
+<tr>
+<td><code>allowed_tools=["*"]</code>、<code>["mcp__*"]</code></td>
+<td><strong>被忽略</strong>，什么都不批准。allow 的通配必须跟在字面的 <code>mcp__&lt;server&gt;__</code> 后面，如 <code>mcp__github__get_*</code></td>
+</tr>
+<tr>
+<td><code>Edit(//secrets/**)</code></td>
+<td><code>//</code> 开头是绝对路径，单个 <code>/</code> 开头是工作目录内的路径</td>
+</tr>
+<tr>
+<td><code>Write(path)</code></td>
+<td><strong>不匹配任何调用</strong>。写文件的路径规则一律写成 <code>Edit(path)</code>，它管 Write、Edit、NotebookEdit</td>
+</tr>
+</tbody>
+</table></div>
+<p>这些都在练习里：</p>
+<ul>
+<li><code>TestDenyRuleBeatsHookAllowAndBypass</code>：hook 对所有调用返回 <code>allow</code>，模式是 <code>bypassPermissions</code>，<code>Bash(rm *)</code> 照样拦下 <code>rm -rf build</code>，但 <code>/bin/rm -rf build</code> 漏过去了；</li>
+<li><code>TestToolNameGlobs</code>：<code>"*"</code> 和 <code>"mcp__*"</code> 放在 allow 里不起作用，<code>mcp__github__get_*</code> 只批准 <code>get_issue</code>；deny 里的 <code>mcp__*</code> 和 <code>Bash</code> 把这些工具从请求里拿掉；</li>
+<li><code>TestPathRules</code>：<code>Write(//etc/**)</code> 不匹配，<code>Edit(//etc/**)</code> 匹配 Write 调用。</li>
+</ul>
+<p>这些规则是<strong>字符串匹配</strong>，不是安全边界。文档自己说：<code>Edit(//secrets/**)</code> 能拦住文件工具和 <code>tee</code>、<code>&gt;</code> 重定向这类 Bash 写法，但 Claude 跑的脚本自己打开文件写，照样能写进去。要操作系统级的保证，用沙箱化的 Bash（2.5 课）。</p>
+<h3 id="43-两个警告">4.3 两个警告</h3>
+<p>文档用了两个警告框，值得原样记住：</p>
+<ul>
+<li><strong>自动批准的调用永远到不了 <code>canUseTool</code></strong>。被 <code>acceptEdits</code>、<code>bypassPermissions</code>、allow 规则批准的调用跳过你的回调，你写在回调里的检查对它们<strong>静默失效</strong>（<code>TestAllowedToolsSkipCallbackAndNoCallbackDenies</code>）。要检查所有调用，写在 <code>PreToolUse</code> hook 里，它对这些调用也会运行。TS SDK 检测到这种配置会发一个代码为 <code>CLAUDE_SDK_CAN_USE_TOOL_SHADOWED</code> 的进程警告；</li>
+<li><strong><code>allowed_tools</code> 约束不了 <code>bypassPermissions</code></strong>。<code>allowed_tools=["Read"]</code> 加 <code>bypassPermissions</code>，Bash、Write、Edit 照样被批准。在这个模式下要禁掉某些工具，用 <code>disallowed_tools</code>。</li>
+</ul>
+<p>想要一个锁死的 agent：<code>allowedTools</code> 加 <code>permissionMode: "dontAsk"</code>。列出的工具放行，其他本来会提示的调用全部拒绝。注意“默认就不需要批准的调用”仍然会跑：工作目录内的读文件、只读 Bash 命令、<code>Agent</code>。想让模型连看都看不到某个内置工具，把它的裸名字放进 <code>disallowedTools</code>。</p>
+<h3 id="44-有些调用任何-allow-规则都批不了">4.4 有些调用任何 allow 规则都批不了</h3>
+<ul>
+<li><code>AskUserQuestion</code>，以及标了需要用户交互的 MCP 工具：要在回调里回答；</li>
+<li>组织设置为 <code>ask</code> 的连接器工具；</li>
+<li>TS 里 <code>permission_policy: "always_ask"</code> 的自定义工具；</li>
+<li>被识别出的关键路径删除（如 <code>rm -rf ~</code>），<code>PreToolUse</code> 返回 <code>allow</code> 也批不了；</li>
+<li>从网络路径读文件。</li>
+</ul>
+<p>在 <code>dontAsk</code> 模式下这些调用直接被拒绝。</p>
+<hr />
+<h2 id="5-canusetool运行时审批">5. canUseTool：运行时审批</h2>
+<h3 id="51-回调收到什么返回什么">5.1 回调收到什么、返回什么</h3>
+<p>回调在两种情况下被调用：工具需要批准且前面五步都没定下来；Claude 调用 <code>AskUserQuestion</code> 问澄清问题。参数是工具名、输入，以及一个上下文（含 <code>suggestions</code> 和取消信号）。</p>
+<p>返回两种之一：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th></th>
+<th>Python</th>
+<th>TypeScript</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>允许</td>
+<td><code>PermissionResultAllow(updated_input=...)</code></td>
+<td><code>{ behavior: "allow", updatedInput }</code></td>
+</tr>
+<tr>
+<td>拒绝</td>
+<td><code>PermissionResultDeny(message=...)</code></td>
+<td><code>{ behavior: "deny", message }</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>由此有六种回应方式：</p>
+<ul>
+<li><strong>批准</strong>：原样放行；</li>
+<li><strong>改了再批</strong>：返回修改过的输入，比如清理路径、加约束。Claude 看到结果，但<strong>不会被告知你改过</strong>；</li>
+<li><strong>批准并记住</strong>：把上下文里给的 <code>suggestions</code>（现成的 <code>PermissionUpdate</code>）原样放进 <code>updatedPermissions</code>，以后匹配的调用不再问。目标是 <code>localSettings</code> 的建议会写进 <code>.claude/settings.local.json</code>；</li>
+<li><strong>拒绝</strong>：给一段说明，Claude 看到后可能换办法；</li>
+<li><strong>拒绝并建议</strong>：在说明里写你想要什么；</li>
+<li><strong>彻底换方向</strong>：用流式输入直接发一条新指令。</li>
+</ul>
+<p>练习 <code>TestCanUseToolUpdatedInputAndRemember</code>：第一次 <code>npm test</code> 被回调改成 <code>npm test --silent</code> 并记住 <code>Bash(npm test)</code>；第二次直接被 allow 规则批准，没有再问，也就没有被改写。注意这个副作用：<strong>“记住”的规则批准的是原始命令</strong>，改写逻辑不会再跑。如果你的改写是安全必需的（比如加 <code>--dry-run</code>），就不要“记住”，或者把改写放到 <code>PreToolUse</code> hook 里。</p>
+<h3 id="52-回调可以一直挂着">5.2 回调可以一直挂着</h3>
+<p>文档：回调可以无限期挂起，执行一直暂停到回调返回。这和 4.2 很不一样。OpenAI 的 SDK 遇到需要审批的调用会<strong>结束这次 run</strong>，把 <code>RunState</code> 交给你；Claude 的 SDK 默认是<strong>在循环里阻塞等待</strong>，子进程一直活着。</p>
+<p>对一个网页或手机上的审批界面，阻塞等待意味着：审批人一天后才点，这个进程、这个容器就要活一天。文档给的出路是下一节的 <code>defer</code>。</p>
+<h3 id="53-askuserquestion">5.3 AskUserQuestion</h3>
+<p>Claude 在有多种合理做法时会调用 <code>AskUserQuestion</code>，输入里是一个 <code>questions</code> 数组，每个问题有 <code>question</code>、<code>options</code>、<code>multiSelect</code>。你在回调里展示给用户，把选择放回去。两个限制：你不能往这个流程里加自己的问题；如果你给了 <code>tools</code> 数组限制工具，要把 <code>AskUserQuestion</code> 也放进去，否则 Claude 没法提问。plan 模式下澄清问题特别常见。</p>
+<hr />
+<h2 id="6-hooks">6. Hooks</h2>
+<h3 id="61-事件">6.1 事件</h3>
+<p>hooks 是在 agent 生命周期关键点运行的回调，跑在<strong>你的应用进程里</strong>，不占 agent 的上下文。常用的：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>事件</th>
+<th>什么时候</th>
+<th>典型用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>PreToolUse</code></td>
+<td>工具执行前（可以阻止或修改）</td>
+<td>拦截危险命令、改写参数、自动批准</td>
+</tr>
+<tr>
+<td><code>PostToolUse</code></td>
+<td>工具返回后</td>
+<td>审计、改写或补充结果</td>
+</tr>
+<tr>
+<td><code>PostToolUseFailure</code></td>
+<td>工具执行失败</td>
+<td>记录或处理错误</td>
+</tr>
+<tr>
+<td><code>UserPromptSubmit</code></td>
+<td>提交 prompt 时</td>
+<td>注入额外上下文</td>
+</tr>
+<tr>
+<td><code>Stop</code></td>
+<td>agent 结束时</td>
+<td>校验结果、保存状态</td>
+</tr>
+<tr>
+<td><code>SubagentStart</code> / <code>SubagentStop</code></td>
+<td>子 agent 启动 / 结束</td>
+<td>跟踪并行任务</td>
+</tr>
+<tr>
+<td><code>PreCompact</code></td>
+<td>上下文压缩前</td>
+<td>归档完整记录</td>
+</tr>
+<tr>
+<td><code>PermissionRequest</code></td>
+<td>某个调用需要权限决定</td>
+<td>自定义权限处理、发通知</td>
+</tr>
+<tr>
+<td><code>Notification</code></td>
+<td>agent 状态消息</td>
+<td>转发到 Slack</td>
+</tr>
+</tbody>
+</table></div>
+<p>TS SDK 的事件多得多（<code>SessionStart</code>、<code>SessionEnd</code>、<code>PostToolBatch</code>、<code>PostCompact</code>、<code>TaskCompleted</code>、<code>PermissionDenied</code> 等），Python 还不全支持。</p>
+<h3 id="62-matcher">6.2 matcher</h3>
+<p>hooks 按事件名注册，每个事件下是一组 matcher，每个 matcher 有一个过滤模式和一组回调：</p>
+<div class="hl"><pre><span></span><code><span class="n">options</span> <span class="o">=</span> <span class="n">ClaudeAgentOptions</span><span class="p">(</span><span class="n">hooks</span><span class="o">=</span><span class="p">{</span>
+    <span class="s2">"PreToolUse"</span><span class="p">:</span> <span class="p">[</span>
+        <span class="n">HookMatcher</span><span class="p">(</span><span class="n">matcher</span><span class="o">=</span><span class="s2">"Write|Edit|NotebookEdit"</span><span class="p">,</span> <span class="n">hooks</span><span class="o">=</span><span class="p">[</span><span class="n">file_guard</span><span class="p">]),</span>  <span class="c1"># 精确列表</span>
+        <span class="n">HookMatcher</span><span class="p">(</span><span class="n">matcher</span><span class="o">=</span><span class="s2">"^mcp__"</span><span class="p">,</span> <span class="n">hooks</span><span class="o">=</span><span class="p">[</span><span class="n">mcp_audit</span><span class="p">]),</span>                    <span class="c1"># 正则</span>
+        <span class="n">HookMatcher</span><span class="p">(</span><span class="n">hooks</span><span class="o">=</span><span class="p">[</span><span class="n">global_logger</span><span class="p">]),</span>                                  <span class="c1"># 不写：全部</span>
+    <span class="p">],</span>
+<span class="p">})</span>
+</code></pre></div>
+
+<p>matcher 只匹配<strong>工具名</strong>，不匹配路径和参数。要按路径过滤，在回调里看 <code>tool_input["file_path"]</code>。还要注意：<code>Write|Edit</code> 这个 matcher 拦得住 Write 工具写 <code>.env</code>，拦不住 Claude 用 Bash 写 <code>.env</code>。</p>
+<h3 id="63-输入和输出">6.3 输入和输出</h3>
+<p>所有 hook 输入都有 <code>session_id</code>、<code>cwd</code>、<code>hook_event_name</code>；在子 agent 里触发时还有 <code>agent_id</code>、<code>agent_type</code>。工具类 hook 有 <code>tool_name</code>、<code>tool_input</code>，第二个参数 <code>tool_use_id</code> 用来把同一次调用的 Pre 和 Post 对上。</p>
+<p>输出分两类：</p>
+<ul>
+<li>顶层字段：<code>systemMessage</code>（给用户看）、<code>continue</code>（agent 是否继续）；</li>
+<li><code>hookSpecificOutput</code>：<ul>
+<li><code>PreToolUse</code>：<code>permissionDecision</code>（<code>allow</code> / <code>deny</code> / <code>ask</code> / <code>defer</code>）、<code>permissionDecisionReason</code>（告诉模型为什么）、<code>updatedInput</code>；</li>
+<li><code>PostToolUse</code>：<code>additionalContext</code>（追加到工具结果）、<code>updatedToolOutput</code>（替换工具结果，内置工具和 MCP 工具都支持）。</li>
+</ul>
+</li>
+</ul>
+<p>返回 <code>{}</code> 表示没意见。<code>updatedInput</code> 的几种组合：配 <code>allow</code> 就是“改了直接批”；配 <code>ask</code> 是“改了给用户看”；不写决定，改过的输入照样生效并走正常的权限流程；配 <code>defer</code> 时被忽略。总是返回新对象，不要原地改 <code>tool_input</code>。</p>
+<h3 id="64-多个-hook并行执行最严格的胜出">6.4 多个 hook：并行执行，最严格的胜出</h3>
+<p>一个事件触发时，所有匹配的 hook <strong>并行</strong>运行，完成顺序不确定，所以每个 hook 都要能独立工作，不能假设另一个先跑过。权限决定取最严格的：<strong><code>deny</code> &gt; <code>defer</code> &gt; <code>ask</code> &gt; <code>allow</code></strong>。</p>
+<p>练习 <code>TestHookAggregationAndUpdatedInput</code>：</p>
+<ul>
+<li>Write：一个 hook 返回 <code>allow</code> 加改写后的路径，另一个返回 <code>{}</code>，结果是按新路径执行；</li>
+<li>MCP 工具：一个 <code>deny</code>、一个 <code>allow</code>，结果是拒绝，模型看到的是 deny 的理由；</li>
+<li>Bash：一个 <code>allow</code>、一个 <code>ask</code>，<code>ask</code> 胜出，交给回调。</li>
+</ul>
+<h3 id="65-hook-失败了怎么办">6.5 hook 失败了怎么办</h3>
+<p>这是一个默认值很“宽松”的地方：大多数事件上，回调<strong>抛异常或返回不合法的输出，动作照常进行</strong>，应用收到一条 <code>hook_callback_failed</code> 警告。也就是说，一个崩掉的 <code>PreToolUse</code> 守卫会让调用直接进入正常的权限流程。回调<strong>什么都没返回</strong>（某个分支忘了 return）也算失败。</p>
+<p>要 fail closed，在 matcher 上设 <code>onFailure: "block"</code>（Python 是 <code>on_failure="block"</code>）。这时工具结果里会有 <code>failed; blocking because onFailure is "block"</code>，Claude 看不到你的错误文字。几个例外：<code>Stop</code>、<code>SubagentStop</code> 等事件忽略这个选项；<code>PostToolUse</code> 时工具已经跑过了，只能把失败作为反馈给 Claude。</p>
+<p>练习 <code>TestHookFailure</code> 覆盖三种情况：默认放行到后续步骤；<code>block</code> 时拒绝；<code>block</code> 且回调返回 nil 时也拒绝。</p>
+<p>还有超时：每个回调有超时，大多数事件默认 600 秒，<code>UserPromptSubmit</code> 30 秒。<code>PreToolUse</code> 超时会阻止这次工具调用。如果一个 hook 只是做日志、发 webhook，不需要影响 agent，可以返回 <code>async: true</code>，agent 不等它；这种输出不能阻止、修改或注入上下文。</p>
+<h3 id="66-defer把一个工具调用挂起之后再继续">6.6 defer：把一个工具调用挂起，之后再继续</h3>
+<p><code>permissionDecision: "defer"</code> 是给“跑 <code>claude -p</code> 子进程并读它的 JSON 输出”的集成用的，Agent SDK 应用正是这种情况。流程（以 <code>AskUserQuestion</code> 为例）：</p>
+<ol>
+<li>Claude 调用工具，<code>PreToolUse</code> 触发；</li>
+<li>hook 返回 <code>defer</code>。工具不执行，这一轮以一个 <code>stop_reason: "tool_deferred"</code> 的结果结束，待执行的调用留在会话记录里；</li>
+<li>你的进程从结果里读 <code>deferred_tool_use</code>（调用的 <code>id</code>、<code>name</code>、<code>input</code>），在自己的界面里收集输入。<strong>这时进程可以退出</strong>；</li>
+<li>之后用同一个会话 ID resume，同一个工具调用会<strong>再次</strong>触发 <code>PreToolUse</code>；</li>
+<li>hook 这次返回 <code>allow</code>，把答案放进 <code>updatedInput</code>。工具执行，Claude 继续。</li>
+</ol>
+<p>几个限制：只在非交互模式（<code>-p</code>）下生效；<strong>一轮里只有一个工具调用时才生效</strong>，多个调用时 <code>defer</code> 被忽略并给出警告，工具走正常权限流程；没有超时和重试上限，会话文件保留到清理周期（默认 30 天）；答案还没好时 hook 可以再返回 <code>defer</code>。如果 resume 时带了 prompt，Claude 会在没有工具结果的情况下回答它，不执行那个调用，所以要<strong>不带 prompt</strong> 地 resume，直到 hook 返回 <code>allow</code> 或 <code>deny</code>。</p>
+<p>练习 <code>TestDeferAndResume</code> 实现了这个往返：第一次 run 停在 <code>tool_deferred</code>，模型只调用了 1 次；带 prompt 恢复返回 <code>ErrDeferredPending</code>（练习的简化，真实行为见上一段）；不带 prompt 恢复时 hook 返回 <code>allow</code> 和答案，工具执行，<strong>模型没有被重新调用来生成那次工具调用</strong>，总共只调了 2 次。同一个测试还验证：一轮两个调用时 <code>defer</code> 被忽略。</p>
+<p>这和 4.2 的审批是同一个思路：<strong>暂停的单位是一个还没执行的工具调用，恢复时不重新生成它</strong>。区别是状态放在哪：OpenAI 交给你一个 <code>RunState</code> 对象自己存；Claude 的状态就是会话记录，你只需要保存会话 ID（会话记录本身要能被 resume 找到，跨主机就要 <code>SessionStore</code>）。</p>
+<p>4.2 课说过的“批准不等于恰好执行一次”在这里一样成立：resume 后 hook 返回 <code>allow</code>、工具执行了外部动作，进程在会话记录落盘前崩了，再 resume 一次就会再执行一次。有副作用的工具照样需要幂等键（练习 2）。</p>
+<hr />
+<h2 id="7-子-agent">7. 子 agent</h2>
+<h3 id="71-定义和调用">7.1 定义和调用</h3>
+<p>子 agent 是主 agent 可以派生的独立 agent 实例。三种定义方式：代码里通过 <code>agents</code> 参数（推荐）；<code>.claude/agents/</code> 目录下的 markdown 文件；内置的 <code>general-purpose</code>，什么都不定义 Claude 也能用。Claude 通过 <code>Agent</code> 工具调用子 agent。</p>
+<div class="hl"><pre><span></span><code><span class="n">options</span> <span class="o">=</span> <span class="n">ClaudeAgentOptions</span><span class="p">(</span>
+    <span class="n">allowed_tools</span><span class="o">=</span><span class="p">[</span><span class="s2">"Read"</span><span class="p">,</span> <span class="s2">"Grep"</span><span class="p">,</span> <span class="s2">"Glob"</span><span class="p">,</span> <span class="s2">"Agent"</span><span class="p">],</span>
+    <span class="n">agents</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">"code-reviewer"</span><span class="p">:</span> <span class="n">AgentDefinition</span><span class="p">(</span>
+            <span class="n">description</span><span class="o">=</span><span class="s2">"代码审查专家。审查代码质量、安全问题时使用。"</span><span class="p">,</span>
+            <span class="n">prompt</span><span class="o">=</span><span class="s2">"你是代码审查员……"</span><span class="p">,</span>
+            <span class="n">tools</span><span class="o">=</span><span class="p">[</span><span class="s2">"Read"</span><span class="p">,</span> <span class="s2">"Grep"</span><span class="p">,</span> <span class="s2">"Glob"</span><span class="p">],</span>
+            <span class="n">model</span><span class="o">=</span><span class="s2">"sonnet"</span><span class="p">,</span>
+        <span class="p">),</span>
+    <span class="p">},</span>
+<span class="p">)</span>
+</code></pre></div>
+
+<p><code>AgentDefinition</code> 的主要字段：<code>description</code>（必填，Claude 靠它决定什么时候用）、<code>prompt</code>（必填，子 agent 的 system prompt）、<code>tools</code>（不写就继承所有可给子 agent 的工具）、<code>disallowedTools</code>、<code>model</code>、<code>skills</code>、<code>mcpServers</code>、<code>maxTurns</code>、<code>background</code>、<code>effort</code>、<code>permissionMode</code>。</p>
+<p>Claude 根据 <code>description</code> 自动决定是否委派；想确保用某个子 agent，就在 prompt 里点名。子 agent 默认在<strong>后台</strong>运行，<code>Agent</code> 工具先返回 <code>status: "async_launched"</code>，报告在后面的轮次到达；Claude 下一步需要这份报告时会等它。</p>
+<h3 id="72-子-agent-能看到什么">7.2 子 agent 能看到什么</h3>
+<p>除非是 fork，子 agent 的上下文<strong>从空白开始</strong>，但不是完全空的：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>子 agent 收到</th>
+<th>子 agent 收不到</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>自己的 system prompt 和 <code>Agent</code> 工具的 prompt 字符串</td>
+<td>父 agent 的对话历史和工具结果</td>
+</tr>
+<tr>
+<td>项目的 CLAUDE.md（除非设了 <code>omitClaudeMd</code>）</td>
+<td>预加载的 skill 内容（除非列在 <code>skills</code> 里）</td>
+</tr>
+<tr>
+<td>工具定义（继承的，或 <code>tools</code> 指定的子集）</td>
+<td>父 agent 的 system prompt</td>
+</tr>
+</tbody>
+</table></div>
+<p>父→子唯一的通道是那个 prompt 字符串，所以文件路径、错误信息、已经做的决定都要写进去。子→父也只回传<strong>最终消息</strong>：子 agent 读了几十个文件，主 agent 的上下文只多一段总结。这就是 3.3 课“上下文隔离”的落地，也是 3.7 课 Deep Research 里多个子 agent 并行检索的基础。</p>
+<p>文档还提到：父 agent 读子 agent 的最终消息之前，Claude Code 会扫描里面像指令的模式（模仿 <code>&lt;system-reminder&gt;</code> 的标签、<code>Human:</code> / <code>Assistant:</code> 开头的行），加反斜杠中和掉，不删改原文。这是对 2.1 课“工具结果是数据不是指令”的一层防御。</p>
+<p>练习 <code>TestSubagentContextIsolation</code>：子 agent 第一次请求的消息只有一条 user 消息“审查 /work/a.go”，工具只有 Read；主 agent 第二次请求里，<code>Agent</code> 调用的结果是“发现 2 个问题”，看不到子 agent 读到的文件内容；子 agent 内部的 3 条事件带 <code>ParentToolUseID</code>；子 agent 里触发的 hook 带 <code>AgentType</code>。</p>
+<p>TS 里子 agent 产生的消息带 <code>parent_tool_use_id</code> 和 <code>agent_id</code>。检测是否发生了委派，就看 <code>tool_use</code> 块的名字是不是 <code>"Agent"</code>（老版本叫 <code>"Task"</code>，两个都要匹配）。</p>
+<h3 id="73-深度并发预算">7.3 深度、并发、预算</h3>
+<p>Claude 自己决定何时派、派几个，子 agent 还能再派子 agent，一个 prompt 可能长成一棵树。三个上限：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>上限</th>
+<th>怎么设</th>
+<th>默认</th>
+<th>到了上限</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>深度</td>
+<td>环境变量 <code>CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH</code></td>
+<td>主 agent 下面 3 层；设 1 则子 agent 不能再派</td>
+<td>最底层的子 agent 不能派，自己干</td>
+</tr>
+<tr>
+<td>并发</td>
+<td>环境变量 <code>CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS</code></td>
+<td>同时 20 个</td>
+<td>拒绝再派，返回 <code>Concurrent subagent limit reached</code></td>
+</tr>
+<tr>
+<td>花费</td>
+<td><code>max_budget_usd</code></td>
+<td>不限</td>
+<td>拒绝再派（<code>Budget limit reached</code>）、停掉后台子 agent、以 <code>error_max_budget_usd</code> 结束</td>
+</tr>
+</tbody>
+</table></div>
+<p>练习：<code>TestSubagentDepth</code>（深度 1 时子 agent 的工具列表里没有 <code>Agent</code>）、<code>TestSubagentConcurrencyLimit</code>（上限 2，同时派 3 个，恰好 1 个被拒）、<code>TestSubagentPartialAndSharedBudget</code>（子 agent 花掉 1.0 后，同一轮里第二次派生被拒，主循环下一次调模型前停下，总花费 1.0 包括子 agent）。</p>
+<p>文档专门提醒：新一代模型更倾向于委派，所以这几个上限在那些模型上最重要。只靠 prompt 里写“别乱派子 agent”是引导，上限才是强制。</p>
+<h3 id="74-子-agent-的权限模式">7.4 子 agent 的权限模式</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>父会话的模式</th>
+<th>子 agent 用什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>plan</code> / <code>acceptEdits</code> / <code>auto</code> / <code>bypassPermissions</code></td>
+<td>继承父的模式，子 agent 自己写的不算</td>
+</tr>
+<tr>
+<td><code>default</code> / <code>dontAsk</code></td>
+<td>用子 agent 定义里的模式，但 <code>bypassPermissions</code> <strong>永远不生效</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p>为什么这样设计：父会话在 plan 模式，说明你还没看过方案，不能因为把活交给了一个声明 <code>acceptEdits</code> 的子 agent 就绕过审查；反过来，父会话在 <code>bypassPermissions</code>，子 agent 继承它，就拿到了完整的系统权限，文档的警告是子 agent 的 system prompt 可能约束更少，要清楚这一点。练习 <code>TestSubagentPermissionMode</code> 用一张表测了 <code>childMode</code>，再跑一个集成：父 plan、子 acceptEdits，子 agent 的 Write 仍然以 <code>plan</code> 的理由交给回调，回调里能看到 <code>AgentType</code> 是 <code>editor</code>。</p>
+<h3 id="75-resume-和-fork">7.5 resume 和 fork</h3>
+<p>子 agent 结束时，<code>Agent</code> 工具的结果里有 <code>agentId: &lt;id&gt;</code>。resume 同一个会话、在 prompt 里带上这个 ID，就能让子 agent 带着完整历史继续。到了 <code>maxTurns</code> 的子 agent，输出会被标成部分结果，方便之后继续（练习用 <code>[partial: ...]</code> 前缀表示）。fork 是复制父对话的子 agent：Claude 可以用 <code>subagent_type: "fork"</code> 启动；不想要就加一条 <code>Agent(fork)</code> 的 deny 规则。</p>
+<p>需要协调几十上百个 agent 时，文档推荐 <code>Workflow</code> 工具（TS SDK），把编排挪到运行时执行的脚本里，不放在对话上下文里。</p>
+<hr />
+<h2 id="8-会话">8. 会话</h2>
+<h3 id="81-continueresumefork">8.1 continue、resume、fork</h3>
+<p>会话就是 SDK 积累的对话历史：prompt、每个工具调用、每个结果、每个响应，自动写到磁盘。<strong>会话保存的是对话，不是文件系统。</strong></p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>你在做什么</th>
+<th>用什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>一次性任务</td>
+<td>什么都不用，一次 <code>query()</code></td>
+</tr>
+<tr>
+<td>一个进程里多轮对话</td>
+<td>Python 用 <code>ClaudeSDKClient</code>；TS 用 <code>continue: true</code></td>
+</tr>
+<tr>
+<td>进程重启后接着上一次</td>
+<td><code>continue</code>：取当前目录下最近的会话</td>
+</tr>
+<tr>
+<td>回到某个特定的会话</td>
+<td>保存会话 ID，传给 <code>resume</code></td>
+</tr>
+<tr>
+<td>试另一种做法而不丢原来的</td>
+<td><code>resume</code> 加 <code>fork</code>：新会话从原历史的副本开始，原会话不变</td>
+</tr>
+<tr>
+<td>不想写磁盘</td>
+<td>TS：<code>persistSession: false</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>会话 ID 从 <code>ResultMessage.session_id</code> 取，成功和失败的结果都有。典型用法：上次以 <code>error_max_turns</code> 结束，提高上限后 resume。</p>
+<p>练习 <code>TestSessionsResumeForkContinue</code>：resume 后模型看到 3 条消息；fork 后看到 5 条，新 ID，原会话仍是 4 条；之后 <code>continue</code> 取到的是最近写入的 fork。</p>
+<h3 id="82-跨主机">8.2 跨主机</h3>
+<p>会话文件在本机 <code>~/.claude/projects/&lt;编码后的 cwd&gt;/&lt;id&gt;.jsonl</code>。跨主机恢复有三种办法：</p>
+<ul>
+<li>配 <code>SessionStore</code> 适配器（必须实现 <code>append</code> 和 <code>load</code>），SDK 把记录镜像到你的对象存储或数据库。键里编码了工作目录，所以要从<strong>相同的 cwd</strong> resume；子进程仍然先写本地磁盘；</li>
+<li>把会话文件搬过去；</li>
+<li>不依赖 resume：把需要的结论、决定、diff 存成应用状态，放进新会话的 prompt。文档说这往往更稳。</li>
+</ul>
+<h3 id="83-文件-checkpoint">8.3 文件 checkpoint</h3>
+<p>因为会话不管文件系统，SDK 另有文件 checkpoint：开启 <code>enable_file_checkpointing</code> 后，Write / Edit / NotebookEdit 修改文件前先备份，每个开启一轮的用户消息 UUID 就是一个还原点，<code>rewind_files()</code> 把文件恢复到那时的状态（新建的删掉，改过的还原）。它<strong>不回退对话</strong>；Bash 改的文件（比如 <code>sed -i</code>）不跟踪；子 agent 的编辑不跟踪。</p>
+<p>把这三件事放在一起看：<strong>对话</strong>靠会话 resume / fork，<strong>文件</strong>靠 checkpoint，<strong>外部副作用</strong>两者都管不了，只能靠幂等和对账。这和 3.4、3.5 课讲的状态分层是一回事。</p>
+<hr />
+<h2 id="9-上下文">9. 上下文</h2>
+<p>上下文窗口在一个会话内不会在轮次之间重置，所有东西都在累积：system prompt、工具定义、历史、工具输入输出。不变的部分（system prompt、工具定义、CLAUDE.md）自动走 prompt caching（1.5 课）。</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>来源</th>
+<th>何时加载</th>
+<th>影响</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>system prompt</td>
+<td>每次请求</td>
+<td>固定的小开销</td>
+</tr>
+<tr>
+<td>CLAUDE.md</td>
+<td>会话开始，经 <code>settingSources</code></td>
+<td>每次请求都带全文（有缓存）</td>
+</tr>
+<tr>
+<td>工具定义</td>
+<td>核心内置工具每次都带；MCP 工具和其他工具默认由 tool search 延迟加载</td>
+<td>关掉 tool search 时 schema 全部预加载</td>
+</tr>
+<tr>
+<td>对话历史</td>
+<td>逐轮累积</td>
+<td>越来越大</td>
+</tr>
+<tr>
+<td>skill 描述</td>
+<td>会话开始</td>
+<td>只是摘要，调用时才加载全文</td>
+</tr>
+</tbody>
+</table></div>
+<p>接近上限时 SDK <strong>自动压缩</strong>：把较早的历史总结掉，保留最近的交流和关键决定，并在流里吐一条 <code>compact_boundary</code>。压缩会丢掉早期 prompt 里的具体指令，所以<strong>长期规则放进 CLAUDE.md</strong>（每次请求都会重新注入），不要只写在第一条 prompt 里。可以在 CLAUDE.md 里写一段“总结时保留什么”，用 <code>PreCompact</code> hook 在压缩前归档完整记录，或者发 <code>/compact</code> 手动压缩。</p>
+<p>保持上下文精简的办法：子任务交给子 agent；用 <code>tools</code> 字段给子 agent 最小工具集；注意 MCP server 的工具数量；常规任务用低 effort。练习 3 实现一个简化的自动压缩。</p>
+<hr />
+<h2 id="10-和-42-对照">10. 和 4.2 对照</h2>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th></th>
+<th>OpenAI Agents SDK</th>
+<th>Claude Agent SDK</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>定位</td>
+<td>搭 agent 的库，工具自己写</td>
+<td>Claude Code 当库，工具现成</td>
+</tr>
+<tr>
+<td>多 agent</td>
+<td>handoff 交出控制权和历史；agent-as-tool 只给参数</td>
+<td>子 agent 只给 prompt 字符串、只回最终消息，接近 agent-as-tool</td>
+</tr>
+<tr>
+<td>工具并发</td>
+<td>一个并发上限</td>
+<td>只读并发、有副作用顺序</td>
+</tr>
+<tr>
+<td>审批</td>
+<td>工具声明 <code>needs_approval</code>，run 结束，<code>RunState</code> 交给你</td>
+<td>六步判定，<code>canUseTool</code> 在循环内阻塞；跨进程用 <code>defer</code> + resume</td>
+</tr>
+<tr>
+<td>防护</td>
+<td>三种 guardrail，各有边界（输入只看第一个 agent）</td>
+<td>规则 + 模式 + hooks；<code>PreToolUse</code> 对所有调用都跑</td>
+</tr>
+<tr>
+<td>失败默认</td>
+<td>审批回调参数异常时 fail closed</td>
+<td>hook 失败默认放行，要 <code>onFailure: "block"</code> 才 fail closed</td>
+</tr>
+<tr>
+<td>状态</td>
+<td><code>RunState</code> 对象（反序列化不认证）</td>
+<td>会话 JSONL（可镜像到 <code>SessionStore</code>）</td>
+</tr>
+<tr>
+<td>max_turns</td>
+<td>默认 10</td>
+<td>默认不限</td>
+</tr>
+</tbody>
+</table></div>
+<p>两个都没有替你解决的问题：<strong>外部副作用的恰好一次</strong>，以及<strong>规则只是字符串匹配</strong>。</p>
+<hr />
+<h2 id="11-练习代码导读">11. 练习代码导读</h2>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>文件</th>
+<th>内容</th>
+<th>对应 SDK</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>types.go</code></td>
+<td><code>Block</code>、<code>Message</code>、<code>Model</code>、<code>Tool</code>（<code>ReadOnly</code>、<code>EditsFiles</code>、<code>SpecKey</code>、<code>SelfApprove</code>）、<code>Event</code>、<code>Result</code> 和 subtype</td>
+<td>内容块、消息类型、<code>ResultMessage</code></td>
+</tr>
+<tr>
+<td><code>permissions.go</code></td>
+<td>权限模式、规则解析与匹配（工具名通配的锚定、<code>//</code> 与 <code>/</code> 路径、<code>Edit(path)</code> 管所有写文件工具）、hooks 的 matcher 与并发执行、决定聚合、<code>decide</code> 六步判定、<code>canUseTool</code></td>
+<td><code>permission_mode</code>、<code>allowed_tools</code> / <code>disallowed_tools</code>、<code>HookMatcher</code>、<code>can_use_tool</code></td>
+</tr>
+<tr>
+<td><code>query.go</code></td>
+<td><code>Query</code>、<code>loop</code>、<code>handleCalls</code>（权限 → 分组执行 → <code>PostToolUse</code>）、<code>visibleTools</code>、<code>Agent</code> 工具与 <code>spawn</code>、<code>childMode</code></td>
+<td><code>query()</code>、<code>AgentDefinition</code>、子 agent 上限</td>
+</tr>
+<tr>
+<td><code>session.go</code></td>
+<td><code>SessionStore</code>：Save / Load / Latest</td>
+<td>会话文件、<code>SessionStore</code></td>
+</tr>
+<tr>
+<td><code>sdk_test.go</code></td>
+<td>22 个测试，用按调用次数返回脚本的假模型；<code>router</code> 按 system prompt 把请求分给主 agent 和子 agent 的假模型</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<p>和真实 SDK 的差异：</p>
+<ul>
+<li>没有子进程、没有流式、没有 <code>StreamEvent</code>、没有上下文压缩、没有 <code>auto</code> 模式的分类器、没有 settings 文件加载；</li>
+<li>子 agent 同步执行（<code>Agent</code> 工具标成只读，所以同一轮的多个 <code>Agent</code> 调用会并发），没有后台模式和 <code>agentId</code> resume；</li>
+<li>预算在每次调模型前检查；</li>
+<li>defer 挂起时带 prompt 恢复直接报错，真实 SDK 会让 Claude 回答 prompt 而不执行那个调用；</li>
+<li>规则匹配只实现了 <code>*</code> 通配，没有 Bash 命令解析（真实实现会识别复合命令、只读命令等）。</li>
+</ul>
+<hr />
+<h2 id="12-常见的坑">12. 常见的坑</h2>
+<ul>
+<li><strong>在 <code>canUseTool</code> 里写安全检查</strong>：被 allow 规则、<code>acceptEdits</code>、<code>bypassPermissions</code> 批准的调用根本到不了回调。所有调用都要过的检查写在 <code>PreToolUse</code> hook 里。</li>
+<li><strong>以为 <code>allowed_tools</code> 是白名单</strong>：它只是“自动批准”，没列的工具照样可用；在 <code>bypassPermissions</code> 下更是全部放行。白名单用 <code>tools</code>（子 agent）或 <code>disallowed_tools</code>。</li>
+<li><strong><code>allowed_tools=["*"]</code></strong>：被忽略，什么都不批准。</li>
+<li><strong><code>Write(//secrets/**)</code></strong>：不匹配任何调用，要写 <code>Edit(...)</code>。</li>
+<li><strong><code>Bash(rm *)</code> 当安全边界</strong>：<code>/bin/rm</code>、<code>find -delete</code>、脚本里的删除都绕得过去。安全边界是沙箱和容器。</li>
+<li><strong>hook 默认失败放行</strong>：守卫类 hook 要设 <code>onFailure: "block"</code>，并且让错误往外抛，别自己 catch 了返回 <code>{}</code>。</li>
+<li><strong>hook 之间互相依赖</strong>：它们并行跑，顺序不确定。</li>
+<li><strong>matcher 写路径</strong>：matcher 只匹配工具名。</li>
+<li><strong><code>max_turns</code> 少算一轮</strong>：最后的纯文本回答也是一轮。</li>
+<li><strong>预算卡死</strong>：会超出一次响应的花费，加上还在跑的子 agent。留余量。</li>
+<li><strong>没限制子 agent</strong>：深度、并发、预算三个上限都要想一遍。</li>
+<li><strong>子 agent 的 prompt 写得太短</strong>：父→子只有这一个字符串。</li>
+<li><strong>以为 fork 会话会隔离文件</strong>：fork 只分叉对话，文件改动是真实的。</li>
+<li><strong>审批界面用阻塞回调</strong>：审批要等很久就用 <code>defer</code>。</li>
+<li><strong>长期规则写在第一条 prompt 里</strong>：压缩后可能丢，放进 CLAUDE.md。</li>
+</ul>
+<hr />
+<h2 id="13-练习">13. 练习</h2>
+<h3 id="练习-1读懂并跑通必做">练习 1：读懂并跑通（必做）</h3>
+<div class="hl"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>projects/26-claude-agent-sdk<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>make<span class="w"> </span><span class="nb">test</span>
+</code></pre></div>
+
+<p>回答：</p>
+<ol>
+<li><code>TestBudgetLetsCrossingResponseFinish</code> 里上限是 1.0，为什么总花费是 1.2？在 <code>query.go</code> 里指出检查发生在哪。如果业务要求“绝对不超过 1.0”，SDK 层面能做到吗？你会怎么设上限？</li>
+<li><code>TestDenyRuleBeatsHookAllowAndBypass</code> 里 <code>/bin/rm -rf build</code> 为什么没被拦住？列出至少三种能拦住它的办法，说明各自在哪一层。</li>
+<li><code>decide</code> 里 <code>if hookAllow</code> 为什么放在权限模式那一步之后？如果挪到第 2 步之前，哪个测试会失败？那代表什么安全问题？</li>
+<li><code>TestSubagentConcurrencyLimit</code> 里，为什么要等“收到拒绝”之后才放行另外两个子 agent？如果改成 <code>time.Sleep(50 * time.Millisecond)</code> 后放行，会有什么问题？</li>
+</ol>
+<h3 id="练习-2基于-defer-的异步审批必做">练习 2：基于 defer 的异步审批（必做）</h3>
+<p>实现一个 <code>ApprovalHook</code>，让审批人可以第二天再批，进程中途可以退出：</p>
+<div class="hl"><pre><span></span><code><span class="kd">type</span><span class="w"> </span><span class="nx">ApprovalStore</span><span class="w"> </span><span class="kd">interface</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Request 为 (sessionID, toolUseID) 登记一个待审批请求，重复登记不产生新请求。</span>
+<span class="w">    </span><span class="nx">Request</span><span class="p">(</span><span class="nx">sessionID</span><span class="p">,</span><span class="w"> </span><span class="nx">toolUseID</span><span class="p">,</span><span class="w"> </span><span class="nx">tool</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">input</span><span class="w"> </span><span class="kt">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">any</span><span class="p">)</span><span class="w"> </span><span class="kt">error</span>
+<span class="w">    </span><span class="c1">// Decide 由审批服务调用（审批人已认证）：approve 为 true 时可附带改写后的输入。</span>
+<span class="w">    </span><span class="nx">Decide</span><span class="p">(</span><span class="nx">sessionID</span><span class="p">,</span><span class="w"> </span><span class="nx">toolUseID</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">approve</span><span class="w"> </span><span class="kt">bool</span><span class="p">,</span><span class="w"> </span><span class="nx">reason</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">updated</span><span class="w"> </span><span class="kt">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">any</span><span class="p">)</span><span class="w"> </span><span class="kt">error</span>
+<span class="w">    </span><span class="c1">// Consume 原子地取走决定：没有决定返回 ok=false；同一个决定只能被取走一次。</span>
+<span class="w">    </span><span class="nx">Consume</span><span class="p">(</span><span class="nx">sessionID</span><span class="p">,</span><span class="w"> </span><span class="nx">toolUseID</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="nx">d</span><span class="w"> </span><span class="nx">Decision</span><span class="p">,</span><span class="w"> </span><span class="nx">ok</span><span class="w"> </span><span class="kt">bool</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="nx">ApprovalHook</span><span class="p">(</span><span class="nx">store</span><span class="w"> </span><span class="nx">ApprovalStore</span><span class="p">,</span><span class="w"> </span><span class="nx">tools</span><span class="w"> </span><span class="p">...</span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="nx">HookMatcher</span>
+</code></pre></div>
+
+<p>要求：</p>
+<ul>
+<li>hook 对列出的工具生效：<code>Consume</code> 拿到决定就按决定返回 <code>allow</code>（带 <code>UpdatedInput</code>）或 <code>deny</code>（带理由）；拿不到就 <code>Request</code> 并返回 <code>defer</code>；</li>
+<li><code>Decide</code> 对同一个调用只接受一次，第二次返回错误；</li>
+<li><code>Consume</code> 在 <code>-race</code> 下并发调用，恰好一个拿到决定；</li>
+<li>测试：完整走一遍 defer → 进程“退出”（丢掉所有内存对象，只保留 store 和会话 store）→ Decide → resume → 工具恰好执行 1 次；拒绝路径；在决定之前 resume，仍然 defer、工具不执行、模型不被调用；一轮里两个需要审批的调用时会发生什么（写测试把这个行为固定下来，并在注释里说明对产品的影响）。</li>
+</ul>
+<h3 id="练习-3自动压缩与-precompact选做">练习 3：自动压缩与 PreCompact（选做）</h3>
+<p>给 <code>Options</code> 加 <code>CompactAtChars int</code> 和 <code>KeepLast int</code>。每次调模型之前，如果历史的总字符数超过阈值：</p>
+<ul>
+<li>触发 <code>PreCompact</code> hook（输入里带上将被压缩的消息数）；</li>
+<li>用一次单独的模型调用（system 为固定的总结指令）把除最后 <code>KeepLast</code> 条之外的历史总结成一条 user 消息；</li>
+<li>吐一条 <code>system</code> / <code>compact_boundary</code> 事件；</li>
+<li>注意：不要把一个 <code>tool_use</code> 和它的 <code>tool_result</code> 切到两边。</li>
+</ul>
+<p>测试：压缩后的请求消息数是 <code>KeepLast + 1</code>；<code>System</code> 里的规则不受影响，而第一条 prompt 里的指令只剩总结里的内容；切分点不会落在工具调用和结果之间。</p>
+<hr />
+<h2 id="14-自测题">14. 自测题</h2>
+<ol>
+<li>agent 循环有哪几步？一次响应里有文本和两个工具调用，SDK 吐出几条 <code>AssistantMessage</code>？它们有什么共同点？</li>
+<li><code>max_turns</code> 怎么计数？为什么预算上限会被超过？超过多少？</li>
+<li>哪些工具可以并发执行？自定义工具怎么才能并发？</li>
+<li>权限判定的六步是什么？hook 返回 <code>allow</code> 能跳过哪些步骤、不能跳过哪些？</li>
+<li>为什么写在 <code>canUseTool</code> 里的检查可能静默失效？应该写在哪？</li>
+<li><code>allowed_tools=["Read"]</code> 加 <code>bypassPermissions</code>，Bash 能跑吗？想在 bypass 模式下禁掉 Bash 怎么办？</li>
+<li>多个 <code>PreToolUse</code> hook 返回不同的决定，结果是什么？hook 抛异常时默认会怎样？</li>
+<li><code>defer</code> 的完整往返是怎样的？它有什么限制？</li>
+<li>子 agent 能看到什么、看不到什么？主 agent 能拿到子 agent 的什么？</li>
+<li>父会话在 plan 模式、子 agent 声明 <code>acceptEdits</code>，子 agent 的编辑会怎样？父会话在 <code>default</code>、子 agent 声明 <code>bypassPermissions</code> 呢？</li>
+<li>continue、resume、fork 有什么区别？fork 会隔离文件改动吗？</li>
+<li>为什么长期规则要放在 CLAUDE.md 而不是第一条 prompt？</li>
+</ol>
+<h2 id="15-自测题答案">15. 自测题答案</h2>
+<ol>
+<li>收到 prompt（吐 <code>init</code>）→ Claude 评估并响应 → 执行工具、结果交回 → 重复直到没有工具调用 → 返回结果（最后的 <code>AssistantMessage</code> 和 <code>ResultMessage</code>）。三条 <code>AssistantMessage</code>，每个内容块一条，共享同一个消息 ID。</li>
+<li>每次模型响应算一轮，包括最后那个纯文本回答；少了这一轮会以 <code>error_max_turns</code> 结束且没有最终回答。预算是在响应回来、拿到用量之后比较的，越线的那次响应会照常完成并计入，所以最多超出一次响应的花费，再加上此时还在跑的子 agent 停下前的花费。</li>
+<li>只读工具（Read、Glob、Grep、标了只读的 MCP 工具）可以并发；Edit、Write、Bash 顺序执行。自定义工具默认顺序执行，在注解里设 <code>readOnlyHint: true</code> 才并发。</li>
+<li>hooks → deny 规则 → ask 规则 → 权限模式 → allow 规则 → <code>canUseTool</code>。hook 的 <code>allow</code> 跳不过 deny 规则和 ask 规则；plan 模式下的编辑即使 hook 返回 <code>allow</code> 也交给回调；对被识别的关键路径删除、<code>always_ask</code> 工具、需要用户交互的工具也不起作用。</li>
+<li>被前面步骤批准的调用（allow 规则、<code>acceptEdits</code>、<code>bypassPermissions</code>）不会进入回调。所有调用都要过的检查写在 <code>PreToolUse</code> hook 里，它对这些调用也运行，它的 deny 在 bypass 模式下也有效。</li>
+<li>能。<code>allowed_tools</code> 只是预先批准，bypass 模式会批准没列出的工具。要禁掉就用 <code>disallowed_tools</code>：写 <code>Bash</code> 把工具从请求里拿掉，或写 <code>Bash(...)</code> 拒绝特定调用。</li>
+<li>所有匹配的 hook 并行执行，取最严格的：<code>deny</code> &gt; <code>defer</code> &gt; <code>ask</code> &gt; <code>allow</code>。hook 抛异常、返回不合法输出或什么都不返回，默认动作照常进行（进入正常权限流程），应用收到一条警告；设 <code>onFailure: "block"</code> 才会阻止。</li>
+<li>Claude 调用工具 → <code>PreToolUse</code> 返回 <code>defer</code> → 工具不执行，这一轮以 <code>stop_reason: "tool_deferred"</code> 结束，结果里有 <code>deferred_tool_use</code> → 你的进程收集输入（可以先退出）→ 用同一会话 ID resume，同一个调用再次触发 <code>PreToolUse</code> → hook 返回 <code>allow</code> 和 <code>updatedInput</code>，工具执行，Claude 继续。限制：只在非交互模式；一轮只有一个工具调用时才生效；带 prompt resume 时 Claude 会回答 prompt 而不执行调用；没有超时，会话文件在清理周期后被删。</li>
+<li>子 agent 收到自己的 system prompt、<code>Agent</code> 工具的 prompt 字符串、项目 CLAUDE.md、工具定义；收不到父 agent 的历史、工具结果、system prompt，以及没列在 <code>skills</code> 里的 skill 内容。主 agent 只拿到子 agent 的最终消息（经过指令模式扫描）。</li>
+<li>父在 plan，子 agent 继承 plan，它的编辑交给 <code>canUseTool</code>。父在 <code>default</code>，子 agent 用自己定义的模式，但 <code>bypassPermissions</code> 永远不生效，所以仍是 <code>default</code>。</li>
+<li>continue 取当前目录最近的会话继续；resume 按 ID 继续某个会话；fork 从原会话历史的副本开一个新会话，新 ID，原会话不变。fork 只分叉对话，不隔离文件，文件回退要用 file checkpoint。</li>
+<li>上下文接近上限时自动压缩会把早期历史总结掉，第一条 prompt 里的具体指令可能丢失；CLAUDE.md 每次请求都会重新注入，压缩不影响它。</li>
+</ol>
+<hr />
+<h2 id="16-参考答案">16. 参考答案</h2>
+<h3 id="练习-1">练习 1</h3>
+<ol>
+<li>每次响应 0.4，前两次之后是 0.8，没到上限，于是调第三次模型，第三次之后是 1.2，这次响应和它请求的工具照常执行；下一次调模型前检查到 1.2 ≥ 1.0 才停。检查在 <code>loop</code> 里 <code>r.model.Respond</code> 之前的 <code>over := o.MaxBudgetUSD &gt; 0 &amp;&amp; r.sh.cost &gt;= o.MaxBudgetUSD</code>。SDK 层面做不到“绝对不超过”，因为花费在响应之后才知道。办法是把上限设成 <code>硬上限 - 单次响应最大花费 - 并行子 agent 的余量</code>；单次响应的最大花费可以用 <code>max_tokens</code> 和上下文大小估出来；更硬的控制放在 API key 的额度或你自己的代理层。</li>
+<li><code>Bash(rm *)</code> 是按命令字符串的写法匹配的，<code>/bin/rm</code> 不以 <code>rm</code> 开头。能拦住它的办法：<ul>
+<li><code>PreToolUse</code> hook 里自己解析命令（拆分管道、<code>&amp;&amp;</code>、取第一个词的 basename），对删除类命令返回 <code>deny</code>，并设 <code>onFailure: "block"</code>。这在权限层，bypass 模式下也有效；</li>
+<li>不用 bypass，改成 <code>dontAsk</code> 加精确的 allow 规则，只放行已知安全的命令。这也在权限层，但是白名单思路；</li>
+<li>沙箱化的 Bash：限制可写目录，删不掉工作目录外的东西。这在操作系统层；</li>
+<li>容器只读挂载源码、只给一个临时可写目录。这在部署层。前两者是字符串和策略，后两者才是真正的边界。</li>
+</ul>
+</li>
+<li>文档规定 hook 的 <code>allow</code> 不能跳过 deny 规则、ask 规则，plan 模式下的编辑也要交给回调。挪到第 2 步之前，<code>TestDenyRuleBeatsHookAllowAndBypass</code>（<code>rm -rf build</code> 会被执行）和 <code>TestPlanModeEditsReachCallback</code>（Write 不再交给回调）都会失败。安全问题是：任何一个“宽松”的 hook（比如为了省事对只读工具返回 <code>allow</code>，结果 matcher 写宽了）就能绕过管理员在 settings 里写的 deny 规则，deny 规则就不再是“任何情况下都生效”的底线。</li>
+<li>三个子 agent 同时开始，只有当两个占着名额、第三个来检查时才会被拒。如果先放行，占名额的子 agent 可能在第三个检查前就结束释放了名额，于是三个都成功，测试失败。用 <code>Sleep</code> 放行依赖调度时机：机器慢或者 <code>-race</code> 下调度变化，就会时过时不过。等“拒绝已经发生”这个事件再放行，顺序是确定的：被拒绝的那个一定是在另外两个都还占着名额时检查的。</li>
+</ol>
+<h3 id="练习-2">练习 2</h3>
+<div class="hl"><pre><span></span><code><span class="kd">var</span><span class="w"> </span><span class="p">(</span>
+<span class="w">    </span><span class="nx">ErrAlreadyDecided</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">errors</span><span class="p">.</span><span class="nx">New</span><span class="p">(</span><span class="s">"这个调用已经有决定了"</span><span class="p">)</span>
+<span class="w">    </span><span class="nx">ErrUnknown</span><span class="w">        </span><span class="o">=</span><span class="w"> </span><span class="nx">errors</span><span class="p">.</span><span class="nx">New</span><span class="p">(</span><span class="s">"没有这个待审批请求"</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="kd">type</span><span class="w"> </span><span class="nx">Decision</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">Approve</span><span class="w"> </span><span class="kt">bool</span>
+<span class="w">    </span><span class="nx">Reason</span><span class="w">  </span><span class="kt">string</span>
+<span class="w">    </span><span class="nx">Updated</span><span class="w"> </span><span class="kt">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">any</span>
+<span class="p">}</span>
+
+<span class="kd">type</span><span class="w"> </span><span class="nx">entry</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">tool</span><span class="w">     </span><span class="kt">string</span>
+<span class="w">    </span><span class="nx">input</span><span class="w">    </span><span class="kt">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">any</span>
+<span class="w">    </span><span class="nx">decision</span><span class="w"> </span><span class="o">*</span><span class="nx">Decision</span>
+<span class="w">    </span><span class="nx">consumed</span><span class="w"> </span><span class="kt">bool</span>
+<span class="p">}</span>
+
+<span class="kd">type</span><span class="w"> </span><span class="nx">MemApprovals</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">mu</span><span class="w"> </span><span class="nx">sync</span><span class="p">.</span><span class="nx">Mutex</span>
+<span class="w">    </span><span class="nx">m</span><span class="w">  </span><span class="kt">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="o">*</span><span class="nx">entry</span><span class="w"> </span><span class="c1">// sessionID + "/" + toolUseID</span>
+<span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="nx">key</span><span class="p">(</span><span class="nx">s</span><span class="p">,</span><span class="w"> </span><span class="nx">t</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nx">s</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">"/"</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">t</span><span class="w"> </span><span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">a</span><span class="w"> </span><span class="o">*</span><span class="nx">MemApprovals</span><span class="p">)</span><span class="w"> </span><span class="nx">Request</span><span class="p">(</span><span class="nx">s</span><span class="p">,</span><span class="w"> </span><span class="nx">t</span><span class="p">,</span><span class="w"> </span><span class="nx">tool</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">in</span><span class="w"> </span><span class="kt">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">any</span><span class="p">)</span><span class="w"> </span><span class="kt">error</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">a</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nx">Lock</span><span class="p">()</span>
+<span class="w">    </span><span class="k">defer</span><span class="w"> </span><span class="nx">a</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nx">Unlock</span><span class="p">()</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">ok</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">a</span><span class="p">.</span><span class="nx">m</span><span class="p">[</span><span class="nx">key</span><span class="p">(</span><span class="nx">s</span><span class="p">,</span><span class="w"> </span><span class="nx">t</span><span class="p">)];</span><span class="w"> </span><span class="o">!</span><span class="nx">ok</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">a</span><span class="p">.</span><span class="nx">m</span><span class="p">[</span><span class="nx">key</span><span class="p">(</span><span class="nx">s</span><span class="p">,</span><span class="w"> </span><span class="nx">t</span><span class="p">)]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">entry</span><span class="p">{</span><span class="nx">tool</span><span class="p">:</span><span class="w"> </span><span class="nx">tool</span><span class="p">,</span><span class="w"> </span><span class="nx">input</span><span class="p">:</span><span class="w"> </span><span class="nx">in</span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span>
+<span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">a</span><span class="w"> </span><span class="o">*</span><span class="nx">MemApprovals</span><span class="p">)</span><span class="w"> </span><span class="nx">Decide</span><span class="p">(</span><span class="nx">s</span><span class="p">,</span><span class="w"> </span><span class="nx">t</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">ok</span><span class="w"> </span><span class="kt">bool</span><span class="p">,</span><span class="w"> </span><span class="nx">reason</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">upd</span><span class="w"> </span><span class="kt">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">any</span><span class="p">)</span><span class="w"> </span><span class="kt">error</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">a</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nx">Lock</span><span class="p">()</span>
+<span class="w">    </span><span class="k">defer</span><span class="w"> </span><span class="nx">a</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nx">Unlock</span><span class="p">()</span>
+<span class="w">    </span><span class="nx">e</span><span class="p">,</span><span class="w"> </span><span class="nx">found</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">a</span><span class="p">.</span><span class="nx">m</span><span class="p">[</span><span class="nx">key</span><span class="p">(</span><span class="nx">s</span><span class="p">,</span><span class="w"> </span><span class="nx">t</span><span class="p">)]</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="o">!</span><span class="nx">found</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">ErrUnknown</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">e</span><span class="p">.</span><span class="nx">decision</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">ErrAlreadyDecided</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="nx">e</span><span class="p">.</span><span class="nx">decision</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">Decision</span><span class="p">{</span><span class="nx">Approve</span><span class="p">:</span><span class="w"> </span><span class="nx">ok</span><span class="p">,</span><span class="w"> </span><span class="nx">Reason</span><span class="p">:</span><span class="w"> </span><span class="nx">reason</span><span class="p">,</span><span class="w"> </span><span class="nx">Updated</span><span class="p">:</span><span class="w"> </span><span class="nx">upd</span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span>
+<span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">a</span><span class="w"> </span><span class="o">*</span><span class="nx">MemApprovals</span><span class="p">)</span><span class="w"> </span><span class="nx">Consume</span><span class="p">(</span><span class="nx">s</span><span class="p">,</span><span class="w"> </span><span class="nx">t</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="nx">Decision</span><span class="p">,</span><span class="w"> </span><span class="kt">bool</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">a</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nx">Lock</span><span class="p">()</span>
+<span class="w">    </span><span class="k">defer</span><span class="w"> </span><span class="nx">a</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nx">Unlock</span><span class="p">()</span>
+<span class="w">    </span><span class="nx">e</span><span class="p">,</span><span class="w"> </span><span class="nx">found</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">a</span><span class="p">.</span><span class="nx">m</span><span class="p">[</span><span class="nx">key</span><span class="p">(</span><span class="nx">s</span><span class="p">,</span><span class="w"> </span><span class="nx">t</span><span class="p">)]</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="o">!</span><span class="nx">found</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nx">e</span><span class="p">.</span><span class="nx">decision</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nx">e</span><span class="p">.</span><span class="nx">consumed</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">Decision</span><span class="p">{},</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="kc">nil</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="nx">e</span><span class="p">.</span><span class="nx">consumed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="w"> </span><span class="c1">// 检查和标记在同一把锁里</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="o">*</span><span class="nx">e</span><span class="p">.</span><span class="nx">decision</span><span class="p">,</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="kc">nil</span>
+<span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="nx">ApprovalHook</span><span class="p">(</span><span class="nx">store</span><span class="w"> </span><span class="nx">ApprovalStore</span><span class="p">,</span><span class="w"> </span><span class="nx">tools</span><span class="w"> </span><span class="p">...</span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="nx">HookMatcher</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">HookMatcher</span><span class="p">{</span>
+<span class="w">        </span><span class="nx">Matcher</span><span class="p">:</span><span class="w">   </span><span class="nx">strings</span><span class="p">.</span><span class="nx">Join</span><span class="p">(</span><span class="nx">tools</span><span class="p">,</span><span class="w"> </span><span class="s">"|"</span><span class="p">),</span>
+<span class="w">        </span><span class="nx">OnFailure</span><span class="p">:</span><span class="w"> </span><span class="s">"block"</span><span class="p">,</span><span class="w"> </span><span class="c1">// 审批服务不可用时拒绝，而不是放行</span>
+<span class="w">        </span><span class="nx">Hooks</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="nx">HookFunc</span><span class="p">{</span><span class="kd">func</span><span class="p">(</span><span class="nx">_</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">in</span><span class="w"> </span><span class="nx">HookInput</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="nx">HookOutput</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nx">d</span><span class="p">,</span><span class="w"> </span><span class="nx">ok</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">store</span><span class="p">.</span><span class="nx">Consume</span><span class="p">(</span><span class="nx">in</span><span class="p">.</span><span class="nx">SessionID</span><span class="p">,</span><span class="w"> </span><span class="nx">in</span><span class="p">.</span><span class="nx">ToolUseID</span><span class="p">)</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="o">!</span><span class="nx">ok</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">store</span><span class="p">.</span><span class="nx">Request</span><span class="p">(</span><span class="nx">in</span><span class="p">.</span><span class="nx">SessionID</span><span class="p">,</span><span class="w"> </span><span class="nx">in</span><span class="p">.</span><span class="nx">ToolUseID</span><span class="p">,</span><span class="w"> </span><span class="nx">in</span><span class="p">.</span><span class="nx">ToolName</span><span class="p">,</span><span class="w"> </span><span class="nx">in</span><span class="p">.</span><span class="nx">ToolInput</span><span class="p">);</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                    </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span>
+<span class="w">                </span><span class="p">}</span>
+<span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">HookOutput</span><span class="p">{</span><span class="nx">PermissionDecision</span><span class="p">:</span><span class="w"> </span><span class="s">"defer"</span><span class="p">},</span><span class="w"> </span><span class="kc">nil</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="o">!</span><span class="nx">d</span><span class="p">.</span><span class="nx">Approve</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">HookOutput</span><span class="p">{</span><span class="nx">PermissionDecision</span><span class="p">:</span><span class="w"> </span><span class="s">"deny"</span><span class="p">,</span><span class="w"> </span><span class="nx">Reason</span><span class="p">:</span><span class="w"> </span><span class="s">"审批人拒绝："</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">d</span><span class="p">.</span><span class="nx">Reason</span><span class="p">},</span><span class="w"> </span><span class="kc">nil</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">HookOutput</span><span class="p">{</span><span class="nx">PermissionDecision</span><span class="p">:</span><span class="w"> </span><span class="s">"allow"</span><span class="p">,</span><span class="w"> </span><span class="nx">UpdatedInput</span><span class="p">:</span><span class="w"> </span><span class="nx">d</span><span class="p">.</span><span class="nx">Updated</span><span class="p">},</span><span class="w"> </span><span class="kc">nil</span>
+<span class="w">        </span><span class="p">}},</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>要点：</p>
+<ul>
+<li>键用 <code>sessionID + toolUseID</code>：resume 时同一个调用再次触发 <code>PreToolUse</code>，<code>tool_use_id</code> 不变，所以能找回同一个请求。这两个值都来自 SDK 传给 hook 的输入，不是客户端提交的；</li>
+<li><code>Consume</code> 的“检查未消费 → 标记已消费”必须是一个原子操作。数据库里就是 <code>UPDATE ... SET consumed = true WHERE key = $1 AND decision IS NOT NULL AND consumed = false</code>，看影响行数；</li>
+<li>先消费再执行：消费之后工具执行失败或进程崩溃，这个决定不会被再次使用，再 resume 会重新 <code>Request</code>，要人重新批。代价是人要多批一次；好处是不会因为重放执行两次。外部动作本身的重复仍然要靠工具侧的幂等键（4.2 课练习 3），键可以直接用 <code>sessionID/toolUseID</code>；</li>
+<li><code>OnFailure: "block"</code>：审批存储挂了，默认行为是 hook 失败放行，那就等于没有审批；</li>
+<li><code>Decide</code> 由审批服务调用，审批人的身份和权限在那一层用应用的会话认证，和 4.2 课练习 2 的要求一样；</li>
+<li>两个需要审批的调用在同一轮：<code>defer</code> 被忽略，调用走正常权限流程。如果没有 allow 规则和回调，结果是拒绝，Claude 收到两条拒绝信息。对产品的影响是：需要异步审批的工具最好在 system prompt 里要求“每轮只调用一个”，或者把这类工具设计成一次只处理一个动作。测试里把这个行为固定下来，SDK 改行为时你会第一时间知道。</li>
+</ul>
+<p>测试骨架：</p>
+<div class="hl"><pre><span></span><code><span class="nx">store</span><span class="p">,</span><span class="w"> </span><span class="nx">sessions</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">MemApprovals</span><span class="p">{</span><span class="nx">m</span><span class="p">:</span><span class="w"> </span><span class="kt">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="o">*</span><span class="nx">entry</span><span class="p">{}},</span><span class="w"> </span><span class="nx">NewSessionStore</span><span class="p">()</span>
+<span class="nx">mk</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="kd">func</span><span class="p">()</span><span class="w"> </span><span class="nx">Options</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1">// 每次都新建，模拟进程重启后只剩两个 store</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">Options</span><span class="p">{</span><span class="nx">Model</span><span class="p">:</span><span class="w"> </span><span class="nx">model</span><span class="p">,</span><span class="w"> </span><span class="nx">Tools</span><span class="p">:</span><span class="w"> </span><span class="nx">tools</span><span class="p">,</span><span class="w"> </span><span class="nx">Store</span><span class="p">:</span><span class="w"> </span><span class="nx">sessions</span><span class="p">,</span>
+<span class="w">        </span><span class="nx">Hooks</span><span class="p">:</span><span class="w"> </span><span class="kt">map</span><span class="p">[</span><span class="kt">string</span><span class="p">][]</span><span class="nx">HookMatcher</span><span class="p">{</span><span class="s">"PreToolUse"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nx">ApprovalHook</span><span class="p">(</span><span class="nx">store</span><span class="p">,</span><span class="w"> </span><span class="s">"Pay"</span><span class="p">)}}}</span>
+<span class="p">}</span>
+<span class="nx">r1</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">Query</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="s">"付款"</span><span class="p">,</span><span class="w"> </span><span class="nx">mk</span><span class="p">())</span><span class="w">                      </span><span class="c1">// StopReason == "tool_deferred"</span>
+<span class="nx">o</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">mk</span><span class="p">();</span><span class="w"> </span><span class="nx">o</span><span class="p">.</span><span class="nx">Resume</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">r1</span><span class="p">.</span><span class="nx">SessionID</span>
+<span class="nx">r2</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">Query</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="s">""</span><span class="p">,</span><span class="w"> </span><span class="nx">o</span><span class="p">)</span><span class="w">                             </span><span class="c1">// 还没决定：仍然 defer，模型调用次数不变</span>
+<span class="nx">_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">store</span><span class="p">.</span><span class="nx">Decide</span><span class="p">(</span><span class="nx">r1</span><span class="p">.</span><span class="nx">SessionID</span><span class="p">,</span><span class="w"> </span><span class="nx">r1</span><span class="p">.</span><span class="nx">DeferredToolUse</span><span class="p">.</span><span class="nx">ID</span><span class="p">,</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="s">""</span><span class="p">,</span><span class="w"> </span><span class="kc">nil</span><span class="p">)</span>
+<span class="nx">r3</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">Query</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="s">""</span><span class="p">,</span><span class="w"> </span><span class="nx">o</span><span class="p">)</span><span class="w">                             </span><span class="c1">// Pay 执行，r3.Result 是最终回答</span>
+<span class="c1">// 断言：Pay 恰好执行 1 次；store.Consume 再调一次返回 ok=false（决定已被取走）</span>
+</code></pre></div>
+
+<h3 id="练习-3">练习 3</h3>
+<div class="hl"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">r</span><span class="w"> </span><span class="o">*</span><span class="nx">agentRun</span><span class="p">)</span><span class="w"> </span><span class="nx">maybeCompact</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">o</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">sh</span><span class="p">.</span><span class="nx">opts</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">o</span><span class="p">.</span><span class="nx">CompactAtChars</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nx">size</span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nx">msgs</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="nx">o</span><span class="p">.</span><span class="nx">CompactAtChars</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nx">msgs</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="nx">o</span><span class="p">.</span><span class="nx">KeepLast</span><span class="o">+</span><span class="mi">1</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="nx">cut</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nx">msgs</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nx">o</span><span class="p">.</span><span class="nx">KeepLast</span>
+<span class="w">    </span><span class="c1">// 不能把 tool_use 和它的 tool_result 分开：如果 cut 处是一条带 tool_result 的 user 消息，往前挪一条</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">cut</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">hasToolResult</span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nx">msgs</span><span class="p">[</span><span class="nx">cut</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">cut</span><span class="o">--</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">cut</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="nx">runHooks</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">o</span><span class="p">.</span><span class="nx">Hooks</span><span class="p">,</span><span class="w"> </span><span class="s">"PreCompact"</span><span class="p">,</span><span class="w"> </span><span class="s">"auto"</span><span class="p">,</span><span class="w"> </span><span class="nx">HookInput</span><span class="p">{</span><span class="nx">SessionID</span><span class="p">:</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">sh</span><span class="p">.</span><span class="nx">sessionID</span><span class="p">,</span><span class="w"> </span><span class="nx">ToolOutput</span><span class="p">:</span><span class="w"> </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Sprint</span><span class="p">(</span><span class="nx">cut</span><span class="p">)})</span>
+<span class="w">    </span><span class="nx">sum</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">model</span><span class="p">.</span><span class="nx">Respond</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">ModelRequest</span><span class="p">{</span>
+<span class="w">        </span><span class="nx">System</span><span class="p">:</span><span class="w">   </span><span class="s">"把下面的对话总结成要点，保留任务目标、读过和改过的文件、测试结果、做过的决定。"</span><span class="p">,</span>
+<span class="w">        </span><span class="nx">Messages</span><span class="p">:</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">msgs</span><span class="p">[:</span><span class="nx">cut</span><span class="p">],</span>
+<span class="w">    </span><span class="p">})</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="c1">// 压缩失败就不压缩，下一轮再试</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="nx">summary</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">Message</span><span class="p">{</span><span class="nx">Role</span><span class="p">:</span><span class="w"> </span><span class="s">"user"</span><span class="p">,</span><span class="w"> </span><span class="nx">Blocks</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="nx">Block</span><span class="p">{</span><span class="nx">Text</span><span class="p">(</span><span class="s">"[之前对话的总结]\n"</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">lastText</span><span class="p">([]</span><span class="nx">Message</span><span class="p">{{</span><span class="nx">Role</span><span class="p">:</span><span class="w"> </span><span class="s">"assistant"</span><span class="p">,</span><span class="w"> </span><span class="nx">Blocks</span><span class="p">:</span><span class="w"> </span><span class="nx">sum</span><span class="p">.</span><span class="nx">Blocks</span><span class="p">}}))}}</span>
+<span class="w">    </span><span class="nx">r</span><span class="p">.</span><span class="nx">sh</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nx">Lock</span><span class="p">()</span>
+<span class="w">    </span><span class="nx">r</span><span class="p">.</span><span class="nx">sh</span><span class="p">.</span><span class="nx">cost</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="nx">sum</span><span class="p">.</span><span class="nx">CostUSD</span><span class="w"> </span><span class="c1">// 总结也花钱，计入预算</span>
+<span class="w">    </span><span class="nx">r</span><span class="p">.</span><span class="nx">sh</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nx">Unlock</span><span class="p">()</span>
+<span class="w">    </span><span class="nx">r</span><span class="p">.</span><span class="nx">msgs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">append</span><span class="p">([]</span><span class="nx">Message</span><span class="p">{</span><span class="nx">summary</span><span class="p">},</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">msgs</span><span class="p">[</span><span class="nx">cut</span><span class="p">:]...)</span>
+<span class="w">    </span><span class="nx">r</span><span class="p">.</span><span class="nx">sh</span><span class="p">.</span><span class="nx">emit</span><span class="p">(</span><span class="nx">Event</span><span class="p">{</span><span class="nx">Type</span><span class="p">:</span><span class="w"> </span><span class="s">"system"</span><span class="p">,</span><span class="w"> </span><span class="nx">Subtype</span><span class="p">:</span><span class="w"> </span><span class="s">"compact_boundary"</span><span class="p">})</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>要点：</p>
+<ul>
+<li>在 <code>loop</code> 里调模型之前调用 <code>maybeCompact</code>；</li>
+<li>切分点要落在“一条 assistant 消息开始”的位置，否则留下来的第一条可能是一个没有对应 <code>tool_use</code> 的 <code>tool_result</code>，API 会报错；</li>
+<li>总结调用的花费计入预算；</li>
+<li><code>System</code> 不参与压缩，这就是“规则放 CLAUDE.md”的原因：练习里的 <code>System</code> 相当于每次请求都重新注入的那部分；</li>
+<li>压缩之后会话记录里保存的是压缩后的历史。真实 SDK 会在记录里留下 <code>compact_boundary</code>，resume 时从边界之后加上总结继续。</li>
+</ul>
+<hr />
+<h2 id="完成标准">完成标准</h2>
+<ul>
+<li><code>make test</code> 全部通过（22 个测试），<code>go test -race</code> 通过；</li>
+<li>练习 1 的四个问题能讲清楚，尤其是第 2、3 题；</li>
+<li>练习 2 写完，并发 <code>Consume</code> 在 <code>-race</code> 下稳定通过，“进程重启”的测试只依赖两个 store；</li>
+<li>能默写六步权限判定，并说出 hook 的 <code>allow</code> 跳不过哪几步；</li>
+<li>能说清 <code>allowed_tools</code>、<code>disallowed_tools</code>、<code>tools</code>、权限模式各自管什么，以及 <code>canUseTool</code> 什么时候会被绕过；</li>
+<li>能对比三种审批方式：LangGraph 的 <code>interrupt</code>、OpenAI 的 <code>needs_approval</code> + <code>RunState</code>、Claude 的 <code>canUseTool</code> / <code>defer</code>，说出各自暂停在哪、状态放在哪、恢复时重跑什么；</li>
+<li>自测题 12 道能不看答案讲出来，尤其是第 4、5、7、8、10 题。</li>
+</ul>
+<p>下一课是 4.4 Go 生态：Eino（CloudWeGo）、Genkit Go 和官方 MCP Go SDK。前三课用 Go 重写了三个 Python / TS 框架的核心，下一课看 Go 原生的框架怎么做同样的事。</p>
+    <nav class="pager"><a class="prev" href="04-02-openai-agents-sdk.html"><span>← 上一课 4.2</span>OpenAI Agents SDK：Runner 循环、handoff、guardrail 与 RunState</a></nav>
+    <p class="foot">© 2026 duang777 · 课件源文件：<a href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/notes/04-frameworks/03-claude-agent-sdk.md">notes/04-frameworks/03-claude-agent-sdk.md</a></p>
+  </article>
+</div>
+<script>
+document.getElementById("theme-toggle").addEventListener("click",function(){var r=document.documentElement,n=r.getAttribute("data-theme")==="light"?"dark":"light";r.setAttribute("data-theme",n);try{localStorage.setItem("x-theme",n)}catch(e){}});
+document.querySelectorAll('article pre').forEach(function(pre){
+  var b=document.createElement('button');b.className='code__copy';b.textContent='复制';
+  b.onclick=function(){navigator.clipboard.writeText(pre.innerText).then(function(){b.textContent='已复制';setTimeout(function(){b.textContent='复制'},1200)})};
+  pre.parentNode.insertBefore(b,pre);
+});
+var links=[].slice.call(document.querySelectorAll('.toc a')),map={};
+links.forEach(function(a){map[decodeURIComponent(a.getAttribute('href').slice(1))]=a});
+var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting&&map[e.target.id]){links.forEach(function(l){l.classList.remove('on')});map[e.target.id].classList.add('on')}})},{rootMargin:'-80px 0px -70% 0px'});
+document.querySelectorAll('article h1[id],article h2[id]').forEach(function(h){io.observe(h)});
+</script>
+</body>
+</html>

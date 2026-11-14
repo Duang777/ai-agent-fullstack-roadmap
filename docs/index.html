@@ -263,14 +263,14 @@
         <section class="stats" data-reveal>
           <div class="stat"><span class="stat__fig x-mono">14</span><span class="stat__label">模块</span></div>
           <div class="stat"><span class="stat__fig x-mono">84</span><span class="stat__label">知识点</span></div>
-          <div class="stat"><span class="stat__fig x-mono">Day 20</span><span class="stat__label">今天</span></div>
+          <div class="stat"><span class="stat__fig x-mono">Day 21</span><span class="stat__label">今天</span></div>
           <div class="stat"><span class="stat__fig x-mono">20/84</span><span class="stat__label">已完成</span></div>
         </section>
 
         <section class="section" id="progress" data-nav="进度">
           <div class="head" data-reveal>
             <p class="head__eyebrow x-kicker">当前进度</p>
-            <h2 class="x-h2">00 基础功底、01 LLM 原理与使用、02 工具调用与协议全部完成；03 Agent 架构已完成 3.1–3.3，3.4–3.7 练习进行中，模块 03 课件全部完成；04 框架与 SDK 进行中，4.1 LangGraph、4.2 OpenAI Agents SDK 已发布。</h2>
+            <h2 class="x-h2">00 基础功底、01 LLM 原理与使用、02 工具调用与协议全部完成；03 Agent 架构已完成 3.1–3.3，3.4–3.7 练习进行中，模块 03 课件全部完成；04 框架与 SDK 进行中，4.1 LangGraph、4.2 OpenAI Agents SDK、4.3 Claude Agent SDK 已发布。</h2>
             <p class="head__sub">学完且有笔记或代码产出，才在 ROADMAP 里打勾。</p>
           </div>
           <div class="x-progress" data-reveal>
@@ -772,6 +772,25 @@
                 <dd><span class="chip x-chip x-chip--live">进行中</span></dd>
               </dl>
             </article>
+            <article class="step">
+              <div class="step__intro">
+                <p class="step__num x-step-num">4.3</p>
+                <p class="step__eyebrow">进行中 · 04 框架与 SDK</p>
+              </div>
+              <div>
+                <h3>Claude Agent SDK：agent 循环、六步权限、hooks、子 agent 与会话</h3>
+                <p class="sub">用 Go 重写 SDK 的核心：Claude Code 被当成库来用，你的工作主要是收紧它。工具调用要过六步权限判定，hooks 并行执行、最严格的决定胜出；子 agent 只拿到一个 prompt、只交回最终消息；审批用 defer 挂起，之后 resume 会话。</p>
+                <div class="links" style="margin-top: 16px">
+                  <a class="x-btn x-btn--primary" href="notes/04-03-claude-agent-sdk.html">在线阅读</a>
+                </div>
+              </div>
+              <dl class="step__panel">
+                <dt>课件</dt>
+                <dd><span class="chip x-chip x-chip--done">已完成</span></dd>
+                <dt>练习</dt>
+                <dd><span class="chip x-chip x-chip--live">进行中</span></dd>
+              </dl>
+            </article>
           </div>
         </section>
 
@@ -782,6 +801,20 @@
           </div>
           <ol class="timeline" data-reveal>
             <li class="is-current">
+              <p class="timeline__when"><span class="x-mono">Day 21 · 2026-11-14</span></p>
+              <div class="timeline__what">
+                <p><strong>Claude Agent SDK：现成的 agent，收紧它</strong></p>
+                <ul>
+                  <li>一个会话一个 claude 子进程；max_turns 要算上最后一轮，预算会超出一次响应</li>
+                  <li>六步权限：hooks → deny → ask → 模式 → allow → canUseTool；被自动批准的调用到不了回调</li>
+                  <li>hooks 并行执行、deny 优先；默认失败放行，守卫要设 onFailure: block</li>
+                  <li>子 agent 只拿到 prompt 字符串、只交回最终消息；审批人要很久就用 defer 挂起再 resume</li>
+                </ul>
+                <p class="x-think">思考：写在 canUseTool 里的安全检查，什么时候会静默失效？</p>
+              </div>
+              <p><a class="x-btn x-btn--ghost" href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/logs/2026-11-14.md" target="_blank" rel="noopener">日志</a></p>
+            </li>
+            <li>
               <p class="timeline__when"><span class="x-mono">Day 20 · 2026-11-13</span></p>
               <div class="timeline__what">
                 <p><strong>OpenAI Agents SDK：固定的循环，可插拔的点</strong></p>
