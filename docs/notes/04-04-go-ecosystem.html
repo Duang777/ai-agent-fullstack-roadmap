@@ -1,0 +1,1168 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>4.4 Go 生态：Eino、Genkit Go 与官方 MCP Go SDK · AI Agent 全栈</title>
+<meta name="description" content="4.4 Go 生态：Eino、Genkit Go 与官方 MCP Go SDK。duang777 的 AI Agent 全栈公开学习课件。" />
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("x-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
+<style>
+:root{
+  --bg:#0a0a0a;--surface:#111;--text:#ededed;--text-2:#a1a1a1;--text-3:rgb(255 255 255/.4);
+  --line:rgb(255 255 255/.1);--line-2:rgb(255 255 255/.06);
+  --body:#d4d4d4;--code-bg:#1a1a1a;--pre-bg:#0f0f0f;--nav-bg:rgb(10 10 10/.8);--sb:#2a2a2a;--sb-h:#3a3a3a;
+  --sans:Inter,-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei","Helvetica Neue",sans-serif;
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+}
+*{box-sizing:border-box}
+html{color-scheme:dark}
+:root[data-theme="light"]{--bg:#fff;--surface:#fafafa;--text:#0a0a0a;--text-2:#555;--text-3:rgb(0 0 0/.42);--line:rgb(0 0 0/.1);--line-2:rgb(0 0 0/.06);--body:#333;--code-bg:#f2f2f2;--pre-bg:#fafafa;--nav-bg:rgb(255 255 255/.85);--sb:#d4d4d4;--sb-h:#bdbdbd}
+:root[data-theme="light"]{color-scheme:light}
+.toc{scrollbar-width:none}.toc::-webkit-scrollbar{display:none}
+html{scrollbar-width:thin;scrollbar-color:var(--sb) transparent}
+::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--sb);border-radius:8px}::-webkit-scrollbar-thumb:hover{background:var(--sb-h)}
+html{scroll-behavior:smooth;scroll-padding-top:80px}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;line-height:1.8;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+.nav{position:sticky;top:0;z-index:10;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;border-bottom:1px solid var(--line);background:var(--nav-bg);backdrop-filter:blur(12px)}
+.nav__brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-size:14px;font-weight:500}
+.nav__dot{width:10px;height:10px;border-radius:3px;background:var(--text)}
+.nav__links{display:flex;gap:20px;font-size:14px;color:var(--text-2)}
+.nav__links a{text-decoration:none}.nav__links a:hover{color:var(--text)}
+.wrap{max-width:1200px;margin:0 auto;padding:0 24px;display:grid;grid-template-columns:220px minmax(0,1fr);gap:56px}
+.toc{position:sticky;top:80px;align-self:start;max-height:calc(100vh - 100px);overflow:auto;padding:40px 0 40px;font-size:13px;line-height:1.6}
+.toc__label{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--text-3);text-transform:uppercase;margin-bottom:12px}
+.toc ul{list-style:none;margin:0;padding:0}
+.toc li{margin:0}
+.toc a{display:block;padding:4px 0 4px 12px;border-left:1px solid var(--line);color:var(--text-2);text-decoration:none}
+.toc a:hover,.toc a.on{color:var(--text);border-left-color:var(--text)}
+.toc ul ul a{padding-left:24px;font-size:12.5px;color:var(--text-3)}
+.toc ul ul a:hover,.toc ul ul a.on{color:var(--text)}
+article{min-width:0;max-width:760px;padding:48px 0 96px}
+.meta{font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--text-3);margin-bottom:16px}
+article h1.title{font-size:40px;line-height:1.2;letter-spacing:-.02em;font-weight:600;margin:0 0 24px}
+article h1{font-size:28px;line-height:1.3;letter-spacing:-.01em;font-weight:600;margin:72px 0 20px;padding-top:32px;border-top:1px solid var(--line)}
+article h2{font-size:22px;line-height:1.4;font-weight:600;margin:48px 0 16px}
+article h3{font-size:18px;font-weight:600;margin:36px 0 12px}
+article h4{font-size:16px;font-weight:600;margin:28px 0 8px}
+article p{margin:0 0 18px;color:var(--body)}
+article strong{color:var(--text);font-weight:600}
+article ul,article ol{padding-left:22px;margin:0 0 18px;color:var(--body)}
+article li{margin:4px 0}
+article a{text-decoration:underline;text-decoration-color:var(--text-3);text-underline-offset:3px}
+article a:hover{text-decoration-color:var(--text)}
+article hr{border:0;border-top:1px solid var(--line);margin:48px 0}
+article blockquote{margin:0 0 20px;padding:12px 18px;border-left:2px solid var(--text-2);background:var(--surface);border-radius:0 8px 8px 0;color:var(--text-2)}
+article blockquote p{margin:6px 0;color:var(--text-2)}
+article code{font-family:var(--mono);font-size:.88em;background:var(--code-bg);border:1px solid var(--line-2);border-radius:5px;padding:1px 6px}
+article pre{position:relative;margin:0 0 22px;padding:16px 18px;background:var(--pre-bg);border:1px solid var(--line);border-radius:10px;overflow:auto;font-size:13.5px;line-height:1.65}
+article pre code{background:none;border:0;padding:0;font-size:inherit}
+.code{position:relative}
+.code__lang{position:absolute;top:8px;right:46px;font-family:var(--mono);font-size:11px;color:var(--text-3);z-index:1}
+.code__copy{position:absolute;top:6px;right:8px;z-index:1;font:11px var(--mono);color:var(--text-2);background:var(--code-bg);border:1px solid var(--line);border-radius:6px;padding:2px 7px;cursor:pointer}
+.code__copy:hover{color:var(--text)}
+.tbl{overflow-x:auto;margin:0 0 22px;border:1px solid var(--line);border-radius:10px}
+article table{border-collapse:collapse;width:100%;font-size:14px}
+article th,article td{padding:10px 14px;border-bottom:1px solid var(--line-2);text-align:left;vertical-align:top}
+article th{font-weight:600;background:var(--surface);color:var(--text)}
+article tr:last-child td{border-bottom:0}
+article details{margin:0 0 18px;border:1px solid var(--line);border-radius:10px;padding:10px 16px;background:var(--surface)}
+article summary{cursor:pointer;font-weight:500}
+.pager{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:72px;padding-top:32px;border-top:1px solid var(--line)}
+.pager a{display:block;padding:16px 18px;border:1px solid var(--line);border-radius:10px;text-decoration:none}
+.pager a:hover{border-color:var(--text-2)}
+.pager span{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--text-3)}
+.pager .next{text-align:right;grid-column:2}
+.foot{margin-top:40px;font-size:13px;color:var(--text-3)}
+/* 代码高亮：黑白灰为主 */
+.hl .c,.hl .c1,.hl .cm,.hl .ch,.hl .cs,.hl .cp,.hl .cpf{color:#6b6b6b;font-style:italic}
+.hl .k,.hl .kd,.hl .kn,.hl .kr,.hl .kt,.hl .kc,.hl .kp,.hl .ow{color:#ffffff;font-weight:600}
+.hl .s,.hl .s1,.hl .s2,.hl .sb,.hl .sc,.hl .sd,.hl .se,.hl .sh,.hl .si,.hl .sx,.hl .sr,.hl .ss,.hl .dl,.hl .sa{color:#86efac}
+.hl .m,.hl .mi,.hl .mf,.hl .mh,.hl .mo,.hl .il{color:#fcd34d}
+.hl .nf,.hl .fm,.hl .nc,.hl .nn{color:#e5e5e5;font-weight:500}
+.hl .nb,.hl .bp,.hl .nd,.hl .na,.hl .nt{color:#bdbdbd}
+.hl .o,.hl .p{color:#9a9a9a}
+.hl .gd{color:#fca5a5}.hl .gi{color:#86efac}
+.hl{color:#d4d4d4}
+:root[data-theme="light"] .hl{color:#262626}
+:root[data-theme="light"] .hl .c,:root[data-theme="light"] .hl .c1,:root[data-theme="light"] .hl .cm,:root[data-theme="light"] .hl .ch,:root[data-theme="light"] .hl .cs,:root[data-theme="light"] .hl .cp,:root[data-theme="light"] .hl .cpf{color:#8a8a8a}
+:root[data-theme="light"] .hl .k,:root[data-theme="light"] .hl .kd,:root[data-theme="light"] .hl .kn,:root[data-theme="light"] .hl .kr,:root[data-theme="light"] .hl .kt,:root[data-theme="light"] .hl .kc,:root[data-theme="light"] .hl .kp,:root[data-theme="light"] .hl .ow{color:#000}
+:root[data-theme="light"] .hl .s,:root[data-theme="light"] .hl .s1,:root[data-theme="light"] .hl .s2,:root[data-theme="light"] .hl .sb,:root[data-theme="light"] .hl .sc,:root[data-theme="light"] .hl .sd,:root[data-theme="light"] .hl .se,:root[data-theme="light"] .hl .sh,:root[data-theme="light"] .hl .si,:root[data-theme="light"] .hl .sx,:root[data-theme="light"] .hl .sr,:root[data-theme="light"] .hl .ss,:root[data-theme="light"] .hl .dl,:root[data-theme="light"] .hl .sa{color:#15803d}
+:root[data-theme="light"] .hl .m,:root[data-theme="light"] .hl .mi,:root[data-theme="light"] .hl .mf,:root[data-theme="light"] .hl .mh,:root[data-theme="light"] .hl .mo,:root[data-theme="light"] .hl .il{color:#b45309}
+:root[data-theme="light"] .hl .nf,:root[data-theme="light"] .hl .fm,:root[data-theme="light"] .hl .nc,:root[data-theme="light"] .hl .nn{color:#171717}
+:root[data-theme="light"] .hl .nb,:root[data-theme="light"] .hl .bp,:root[data-theme="light"] .hl .nd,:root[data-theme="light"] .hl .na,:root[data-theme="light"] .hl .nt{color:#525252}
+:root[data-theme="light"] .hl .o,:root[data-theme="light"] .hl .p{color:#6b6b6b}
+:root[data-theme="light"] .hl .gd{color:#b91c1c}:root[data-theme="light"] .hl .gi{color:#15803d}
+.nav__right{display:flex;align-items:center;gap:20px}
+.theme-toggle{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--text);cursor:pointer}
+.theme-toggle:hover{border-color:var(--text-2)}
+.theme-toggle svg{width:15px;height:15px}
+.theme-toggle .i-moon,:root[data-theme="light"] .theme-toggle .i-sun{display:none}
+:root[data-theme="light"] .theme-toggle .i-moon{display:block}
+@media (max-width:960px){.wrap{grid-template-columns:1fr;gap:0}.toc{display:none}article h1.title{font-size:30px}.nav__links a.hide-sm{display:none}}
+</style>
+</head>
+<body>
+<header class="nav">
+  <a class="nav__brand" href="../index.html"><span class="nav__dot"></span>AI Agent 全栈</a>
+  <div class="nav__right">
+  <nav class="nav__links">
+    <a href="../index.html#progress">课件</a>
+    <a class="hide-sm" href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/ROADMAP.md">路线图</a>
+    <a href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/notes/04-frameworks/04-go-ecosystem.md">在 GitHub 上查看</a>
+  </nav>
+  <button class="theme-toggle" id="theme-toggle" type="button" aria-label="切换浅色 / 深色" title="切换浅色 / 深色"><svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg><svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
+  </div>
+</header>
+<div class="wrap">
+  <aside class="toc"><div class="toc__label">本课目录</div><ul>
+<li><a href="#读前说明">读前说明</a></li>
+<li><a href="#1-三个库在一张图里">1. 三个库在一张图里</a></li>
+<li><a href="#2-eino">2. Eino</a></li>
+<li><a href="#3-genkit-go">3. Genkit Go</a></li>
+<li><a href="#4-官方-mcp-go-sdk">4. 官方 MCP Go SDK</a></li>
+<li><a href="#5-把-mcp-工具接进-eino-和-genkit">5. 把 MCP 工具接进 Eino 和 Genkit</a></li>
+<li><a href="#6-同一件事三个库怎么写">6. 同一件事，三个库怎么写</a></li>
+<li><a href="#7-怎么选">7. 怎么选</a></li>
+<li><a href="#8-练习代码导读">8. 练习代码导读</a></li>
+<li><a href="#9-常见的坑">9. 常见的坑</a></li>
+<li><a href="#10-练习">10. 练习</a></li>
+<li><a href="#11-自测题">11. 自测题</a></li>
+<li><a href="#12-自测题答案">12. 自测题答案</a></li>
+<li><a href="#13-参考答案">13. 参考答案</a></li>
+<li><a href="#完成标准">完成标准</a></li>
+</ul>
+</aside>
+  <article>
+    <div class="meta">模块 04 · 框架与 SDK · 第 4.4 课</div>
+    <h1 class="title">4.4 Go 生态：Eino、Genkit Go 与官方 MCP Go SDK</h1>
+    <blockquote>
+<p>第 4 部分 · 第 4 课 ｜ 预计 4–5 小时 ｜ 前置：2.1 Function Calling、2.2 MCP、3.2 Agent Loop、3.4 长任务 Agent、4.1 LangGraph</p>
+<p>配套练习：<code>projects/27-go-ecosystem/</code>（22 个测试）。这一课不再重写运行时，而是直接用真实的库：Eino v0.9.23、Genkit Go v1.14.0、官方 MCP Go SDK v1.8.0。测试里的模型是按脚本回复的假模型，不需要 API key。内容包括：用 <code>compose.Graph</code> 写一个带局部状态和分支的确定性流程，再包装成工具；用 ADK 的 <code>ChatModelAgent</code> + <code>Runner</code> 跑 ReAct 循环（流式事件、<code>MaxIterations</code>、调用不存在的工具）；Eino 的工具中断、checkpoint 和跨实例恢复；Genkit 的工具循环、<code>tool.Fail</code> 和普通错误的区别、<code>maxTurns</code>、可恢复工具和 flow；用官方 SDK 写 MCP 服务端（schema 推断、调用 handler 前先校验参数、错误结果、MRTR 多轮请求）；最后把同一组 MCP 工具分别接进 Eino 和 Genkit。</p>
+</blockquote>
+<h2 id="读前说明">读前说明</h2>
+<p>4.1 到 4.3 讲的三个框架都是 Python / TypeScript 生态的，所以那几课用 Go 把它们的运行时重写了一遍，目的是看清楚机制。Go 这边有自己能直接用的库，这一课就用真库写代码，看它们的 API 实际长什么样、行为在哪里和你预想的不一样。</p>
+<p>三个库管的事情不同：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th></th>
+<th>Eino</th>
+<th>Genkit Go</th>
+<th>官方 MCP Go SDK</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>出身</td>
+<td>字节跳动 CloudWeGo</td>
+<td>Google Firebase</td>
+<td>MCP 官方组织（modelcontextprotocol）</td>
+</tr>
+<tr>
+<td>定位</td>
+<td>组件接口 + 编排引擎（compose）+ agent 开发包（ADK）</td>
+<td>统一的模型调用接口 + 工具 + flow + 开发工具（Dev UI、trace）</td>
+<td>MCP 协议本身：客户端、服务端、传输层、OAuth</td>
+</tr>
+<tr>
+<td>模型接入</td>
+<td><code>eino-ext</code> 里的组件（OpenAI、Claude、Gemini、Ark、Ollama……）</td>
+<td>插件（googlegenai、anthropic、compat_oai、ollama……）</td>
+<td>不涉及模型</td>
+</tr>
+<tr>
+<td>控制流</td>
+<td>你画图（Graph / Chain / Workflow），或用 ADK 的固定循环</td>
+<td><code>Generate</code> 内置的工具循环，外面用 flow 包起来</td>
+<td>不涉及</td>
+</tr>
+<tr>
+<td>人工审批</td>
+<td><code>tool.StatefulInterrupt</code> + <code>CheckPointStore</code> + <code>Runner.ResumeWithParams</code></td>
+<td>可恢复工具 + <code>tool.Interrupt</code> + <code>ai.WithResume</code></td>
+<td>服务端返回 <code>InputRequests</code>，客户端带 <code>InputResponses</code> 重试（MRTR）</td>
+</tr>
+<tr>
+<td>当前版本</td>
+<td>v0.9.23（2026-11-09 发布）</td>
+<td>v1.14.0（2026-10-19 UTC 发布）</td>
+<td>v1.8.0（2026-09-04 发布），最新协议版本 2026-07-28</td>
+</tr>
+</tbody>
+</table></div>
+<p>版本号来自 Go module proxy（proxy.golang.org）。Eino 还没到 v1，minor 版本之间有破坏性变更（v0.7 重构了中断恢复，v0.8 改了 ADK 中间件，v0.9 加了 agentic 运行时），升级前看它的迁移文档。Genkit Go 的 agent API（<code>genkit/exp</code>）标着预览，minor 版本也可能改。MCP SDK 已经是 v1，承诺不破坏兼容。</p>
+<p>本课依据：</p>
+<ul>
+<li>Eino：仓库 README 和 <code>llms.txt</code>，cloudwego.io 上的 “Agent or Graph?”、“Stream Programming Essentials”、“Human-in-the-Loop Framework” 三篇文档，以及 v0.9.23 源码里的注释（<code>adk/chatmodel.go</code>、<code>compose/tool_node.go</code>、<code>components/tool/interrupt.go</code>）。</li>
+<li>Genkit Go：<code>go/</code> 目录下的 README，v1.14.0 源码里 <code>genkit.DefineResumableTool</code>、<code>ai/tool</code> 包、<code>ai.WithMaxTurns</code> 的注释。</li>
+<li>MCP Go SDK：仓库 README（版本兼容表）、<code>docs/protocol.md</code>（生命周期、<code>server/discover</code>）、<code>docs/server.md</code>（工具、MRTR）、<code>docs/rough_edges.md</code>，以及 <code>mcp.AddTool</code> / <code>ToolHandlerFor</code> 的注释。</li>
+</ul>
+<p>下文凡是写了“测试验证过”的行为，练习里都有对应的测试。</p>
+<p>先想几个问题：</p>
+<ul>
+<li>Eino 的 <code>MaxIterations</code> 设成 2 和 Genkit 的 <code>WithMaxTurns(2)</code>，模型各会被调用几次？</li>
+<li>模型调用了一个不存在的工具名，Eino 默认怎么处理？</li>
+<li>一个 MCP 工具的 handler 返回了 Go 的 <code>error</code>，客户端拿到的是协议错误还是别的？</li>
+<li>审批要等到明天，第二天处理恢复请求的是另一台机器，Eino 需要你保存什么？</li>
+</ul>
+<h2 id="1-三个库在一张图里">1. 三个库在一张图里</h2>
+<div class="hl"><pre><span></span><code>            ┌──────────────── 你的服务 ────────────────┐
+            │                                           │
+  用户 ───► │  Eino ADK Runner          Genkit flow     │
+            │   └ ChatModelAgent         └ Generate     │
+            │       ├ ChatModel (eino-ext)   ├ 模型插件 │
+            │       └ Tools ──┐              └ Tools ─┐ │
+            │                 │                       │ │
+            │        compose.Graph（包成工具）         │ │
+            │                 │                       │ │
+            │                 └──── MCP 适配器 ◄───────┘ │
+            └───────────────────────┬───────────────────┘
+                                    │ MCP（stdio / Streamable HTTP）
+                           MCP Go SDK 写的服务端
+</code></pre></div>
+
+<p>Eino 和 Genkit 是同一层的东西，二选一就够了，很少有项目同时用。MCP SDK 在另一层：不管你用哪个框架，工具都可以放在 MCP 服务端里，框架通过适配器调用。练习里把同一个 MCP 服务端同时接进两个框架，就是为了对照这一点。</p>
+<h2 id="2-eino">2. Eino</h2>
+<h3 id="21-组件接口">2.1 组件接口</h3>
+<p>Eino 先定义组件接口，具体实现放在单独的 <code>eino-ext</code> 仓库。和 agent 关系最大的两个：</p>
+<div class="hl"><pre><span></span><code><span class="c1">// components/model</span>
+<span class="kd">type</span><span class="w"> </span><span class="nx">BaseChatModel</span><span class="w"> </span><span class="kd">interface</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">Generate</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">input</span><span class="w"> </span><span class="p">[]</span><span class="o">*</span><span class="nx">schema</span><span class="p">.</span><span class="nx">Message</span><span class="p">,</span><span class="w"> </span><span class="nx">opts</span><span class="w"> </span><span class="p">...</span><span class="nx">Option</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="nx">schema</span><span class="p">.</span><span class="nx">Message</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span>
+<span class="w">    </span><span class="nx">Stream</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">input</span><span class="w"> </span><span class="p">[]</span><span class="o">*</span><span class="nx">schema</span><span class="p">.</span><span class="nx">Message</span><span class="p">,</span><span class="w"> </span><span class="nx">opts</span><span class="w"> </span><span class="p">...</span><span class="nx">Option</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="nx">schema</span><span class="p">.</span><span class="nx">StreamReader</span><span class="p">[</span><span class="o">*</span><span class="nx">schema</span><span class="p">.</span><span class="nx">Message</span><span class="p">],</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">type</span><span class="w"> </span><span class="nx">ToolCallingChatModel</span><span class="w"> </span><span class="kd">interface</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">BaseChatModel</span>
+<span class="w">    </span><span class="nx">WithTools</span><span class="p">(</span><span class="nx">tools</span><span class="w"> </span><span class="p">[]</span><span class="o">*</span><span class="nx">schema</span><span class="p">.</span><span class="nx">ToolInfo</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="nx">ToolCallingChatModel</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="c1">// components/tool</span>
+<span class="kd">type</span><span class="w"> </span><span class="nx">BaseTool</span><span class="w"> </span><span class="kd">interface</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">Info</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="nx">schema</span><span class="p">.</span><span class="nx">ToolInfo</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span>
+<span class="p">}</span>
+<span class="kd">type</span><span class="w"> </span><span class="nx">InvokableTool</span><span class="w"> </span><span class="kd">interface</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">BaseTool</span>
+<span class="w">    </span><span class="nx">InvokableRun</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">argumentsInJSON</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">opts</span><span class="w"> </span><span class="p">...</span><span class="nx">Option</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>几点值得注意：</p>
+<ul>
+<li>还有一个旧接口 <code>ChatModel</code>，它的 <code>BindTools</code> 会修改模型自己，多个 goroutine 共用一个模型实例、各自绑不同工具时会互相覆盖。新接口 <code>ToolCallingChatModel.WithTools</code> 返回一个新实例，新代码用这个。</li>
+<li><code>ChatModelAgent</code> 实际上不调用 <code>WithTools</code>，而是每次调用模型时通过 <code>model.WithTools(...)</code> 这个调用选项把工具传进去。练习里的假模型一开始只在 <code>WithTools</code> 方法里记录工具，测试读到的是空列表，改成从 <code>model.GetCommonOptions(nil, opts...).Tools</code> 读之后才对。你自己写模型适配器时，两个入口都要处理。（测试验证过）</li>
+<li>工具参数用的是字符串形式的 JSON，返回值也是字符串。要用 Go 结构体，用 <code>utils.InferTool</code>，它从输入类型推断 schema，自动做反序列化和序列化。字段描述写在 <code>jsonschema:"description=..."</code> 标签里。</li>
+<li><code>schema.Message</code> 是各家模型消息格式的公共子集：<code>Role</code>、<code>Content</code>、<code>ToolCalls</code>、<code>ToolCallID</code> 等字段。v0.9 还加了一套 <code>AgenticMessage</code>（beta），用来表示推理过程、服务端工具这类新内容块。本课只用 <code>schema.Message</code>。</li>
+</ul>
+<h3 id="22-compose把确定的流程画成图">2.2 compose：把确定的流程画成图</h3>
+<p><code>compose</code> 包提供三种编排方式：<code>Chain</code> 是线性的，<code>Graph</code> 是带条件分支的有向图，<code>Workflow</code> 在 <code>Graph</code> 上加了字段级别的数据映射。练习里的工单分流图：</p>
+<div class="hl"><pre><span></span><code><span class="nx">g</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">compose</span><span class="p">.</span><span class="nx">NewGraph</span><span class="p">[</span><span class="nx">Ticket</span><span class="p">,</span><span class="w"> </span><span class="nx">Triage</span><span class="p">](</span><span class="nx">compose</span><span class="p">.</span><span class="nx">WithGenLocalState</span><span class="p">(</span><span class="kd">func</span><span class="p">(</span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="nx">triageState</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">triageState</span><span class="p">{}</span>
+<span class="p">}))</span>
+<span class="nx">_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">g</span><span class="p">.</span><span class="nx">AddLambdaNode</span><span class="p">(</span><span class="s">"classify"</span><span class="p">,</span><span class="w"> </span><span class="nx">compose</span><span class="p">.</span><span class="nx">InvokableLambda</span><span class="p">(</span><span class="nx">classifyFn</span><span class="p">))</span>
+<span class="nx">_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">g</span><span class="p">.</span><span class="nx">AddLambdaNode</span><span class="p">(</span><span class="s">"refund"</span><span class="p">,</span><span class="w"> </span><span class="nx">route</span><span class="p">(</span><span class="s">"billing"</span><span class="p">,</span><span class="w"> </span><span class="s">"P2"</span><span class="p">),</span><span class="w"> </span><span class="nx">visit</span><span class="p">(</span><span class="s">"refund"</span><span class="p">))</span>
+<span class="nx">_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">g</span><span class="p">.</span><span class="nx">AddLambdaNode</span><span class="p">(</span><span class="s">"bug"</span><span class="p">,</span><span class="w"> </span><span class="nx">route</span><span class="p">(</span><span class="s">"engineering"</span><span class="p">,</span><span class="w"> </span><span class="s">"P1"</span><span class="p">),</span><span class="w"> </span><span class="nx">visit</span><span class="p">(</span><span class="s">"bug"</span><span class="p">))</span>
+<span class="nx">_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">g</span><span class="p">.</span><span class="nx">AddLambdaNode</span><span class="p">(</span><span class="s">"human"</span><span class="p">,</span><span class="w"> </span><span class="nx">route</span><span class="p">(</span><span class="s">"frontline"</span><span class="p">,</span><span class="w"> </span><span class="s">"P3"</span><span class="p">),</span><span class="w"> </span><span class="nx">visit</span><span class="p">(</span><span class="s">"human"</span><span class="p">))</span>
+
+<span class="nx">_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">g</span><span class="p">.</span><span class="nx">AddEdge</span><span class="p">(</span><span class="nx">compose</span><span class="p">.</span><span class="nx">START</span><span class="p">,</span><span class="w"> </span><span class="s">"classify"</span><span class="p">)</span>
+<span class="nx">_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">g</span><span class="p">.</span><span class="nx">AddBranch</span><span class="p">(</span><span class="s">"classify"</span><span class="p">,</span><span class="w"> </span><span class="nx">compose</span><span class="p">.</span><span class="nx">NewGraphBranch</span><span class="p">(</span><span class="nx">pickFn</span><span class="p">,</span>
+<span class="w">    </span><span class="kt">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">bool</span><span class="p">{</span><span class="s">"refund"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="s">"bug"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="s">"human"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">}))</span>
+<span class="k">for</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">n</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="p">[]</span><span class="kt">string</span><span class="p">{</span><span class="s">"refund"</span><span class="p">,</span><span class="w"> </span><span class="s">"bug"</span><span class="p">,</span><span class="w"> </span><span class="s">"human"</span><span class="p">}</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">g</span><span class="p">.</span><span class="nx">AddEdge</span><span class="p">(</span><span class="nx">n</span><span class="p">,</span><span class="w"> </span><span class="nx">compose</span><span class="p">.</span><span class="nx">END</span><span class="p">)</span>
+<span class="p">}</span>
+<span class="nx">r</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">g</span><span class="p">.</span><span class="nx">Compile</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">compose</span><span class="p">.</span><span class="nx">WithGraphName</span><span class="p">(</span><span class="s">"triage"</span><span class="p">))</span>
+<span class="nx">out</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">Invoke</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">Ticket</span><span class="p">{</span><span class="nx">ID</span><span class="p">:</span><span class="w"> </span><span class="s">"T1"</span><span class="p">,</span><span class="w"> </span><span class="nx">Text</span><span class="p">:</span><span class="w"> </span><span class="s">"我要退款"</span><span class="p">})</span>
+</code></pre></div>
+
+<p>和 4.1 的 LangGraph 对照：</p>
+<ul>
+<li><strong>类型是泛型参数</strong>。<code>NewGraph[Ticket, Triage]</code> 规定了整张图的输入输出类型，每个节点的输入输出类型在连边时检查。练习里有个测试故意把输出 <code>int</code> 的节点连到输入 <code>string</code> 的节点，<code>AddEdge</code> 当场返回 <code>start node's output type[int] and end node's input type[string] mismatch</code>。（测试验证过）</li>
+<li><strong>错误会粘在图上</strong>。构图时第一个出错的调用会把错误记在图里，之后所有 <code>AddXxx</code> 和 <code>Compile</code> 都返回同一个错误，所以示例代码里每一步都可以写 <code>_ =</code>，只检查 <code>Compile</code>。上面那个测试也验证了 <code>Compile</code> 返回的错误和 <code>AddEdge</code> 的一样。</li>
+<li><strong>状态是局部的、显式的</strong>。LangGraph 的状态是全图共享的 channel，节点返回部分更新，由 reducer 合并。Eino 的节点之间传的是普通的 Go 值；需要跨节点共享的东西放在 <code>WithGenLocalState</code> 生成的状态对象里，用 <code>WithStatePreHandler</code> / <code>WithStatePostHandler</code> 在节点前后读写，或者在节点里调 <code>compose.ProcessState</code> 读写。框架保证这些访问是串行的。</li>
+<li><strong>分支是一个函数</strong>。<code>NewGraphBranch</code> 接收上游输出，返回下一个节点的名字，第二个参数列出所有可能的目标。还有 <code>NewStreamGraphBranch</code>，它接收的是流，可以只看第一个分片就决定走哪条路（典型用途：看模型输出的第一片有没有工具调用）。</li>
+</ul>
+<h3 id="23-流四种范式和自动转换">2.3 流：四种范式和自动转换</h3>
+<p>Eino 文档把组件对流的支持分成四种：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>方法</th>
+<th>输入</th>
+<th>输出</th>
+<th>Lambda 构造函数</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Invoke</td>
+<td>非流</td>
+<td>非流</td>
+<td><code>compose.InvokableLambda</code></td>
+</tr>
+<tr>
+<td>Stream</td>
+<td>非流</td>
+<td>流</td>
+<td><code>compose.StreamableLambda</code></td>
+</tr>
+<tr>
+<td>Collect</td>
+<td>流</td>
+<td>非流</td>
+<td><code>compose.CollectableLambda</code></td>
+</tr>
+<tr>
+<td>Transform</td>
+<td>流</td>
+<td>流</td>
+<td><code>compose.TransformableLambda</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>组件只需要实现对它有意义的那几种：ChatModel 和 Tool 实现 Invoke 和 Stream，Retriever、Embedder 这些只实现 Invoke。在图里上下游对不上时，框架自动转换：上游给的是流而下游只收完整值，框架把流拼起来（concat）；反过来，框架把一个值包成只有一个分片的流（文档管它叫“假流”）。</p>
+<p>文档里有一条规则要记住：<strong>整张图用 Invoke 调用时，里面每个组件都按 Invoke 调用；用 Stream / Collect / Transform 调用时，里面每个组件都按 Transform 调用。</strong> 也就是说，你在图外面用 <code>Invoke</code>，里面的 ChatModel 也不会流式输出；想要首字延迟低，整张图要用 <code>Stream</code> 调。文档承认这不是在所有情况下最优，但规则简单、好预测。</p>
+<p>自定义类型的流要拼接时，框架可能需要你注册一个 concat 函数，否则会报错。</p>
+<h3 id="24-graph-还是-agent">2.4 Graph 还是 Agent</h3>
+<p>Eino 的文档专门写了一篇 “Agent or Graph?”，结论很明确：</p>
+<ul>
+<li>Graph 适合输入是结构化数据、流程固定、只关心最终结果的任务，比如“录音 → 总结 → 保存”这种按钮背后的功能。</li>
+<li>Agent 适合输入是自然语言、步骤不确定、过程和结果都要展示给用户的任务。</li>
+<li>把整个 agent 塞进 graph 当一个节点通常不合适：agent 依赖自己的对话历史，输出是一串异步事件，下游节点不好用。graph 里需要智能的地方，放一个普通的 LLM 节点就够了。</li>
+<li><strong>最好的结合方式是把 graph 包装成 agent 的工具。</strong> graph 的输入是结构化的、执行一次就结束、对调用方来说是同步的，这些正好都是工具的特征。</li>
+</ul>
+<p>练习里的 <code>TriageTool</code> 就是这么做的：</p>
+<div class="hl"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nx">TriageTool</span><span class="p">(</span><span class="nx">r</span><span class="w"> </span><span class="nx">compose</span><span class="p">.</span><span class="nx">Runnable</span><span class="p">[</span><span class="nx">Ticket</span><span class="p">,</span><span class="w"> </span><span class="nx">Triage</span><span class="p">])</span><span class="w"> </span><span class="p">(</span><span class="nx">tool</span><span class="p">.</span><span class="nx">InvokableTool</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">utils</span><span class="p">.</span><span class="nx">InferTool</span><span class="p">(</span><span class="s">"triage_ticket"</span><span class="p">,</span><span class="w"> </span><span class="s">"把工单分到对应队列并给出优先级"</span><span class="p">,</span>
+<span class="w">        </span><span class="kd">func</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">t</span><span class="w"> </span><span class="nx">Ticket</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="nx">Triage</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">Invoke</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">t</span><span class="p">)</span>
+<span class="w">        </span><span class="p">})</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>工具的参数 schema 从 <code>Ticket</code> 推断，<code>jsonschema:"description=用户的原话"</code> 会出现在模型看到的参数说明里（测试验证过）。eino-examples 里有一个更完整的 <code>graphtool</code>，还处理了图内部中断的透传。</p>
+<h3 id="25-adkchatmodelagent-和-runner">2.5 ADK：ChatModelAgent 和 Runner</h3>
+<p>ADK 是 v0.5 加进来的 agent 开发包，层级在 compose 之上。最常用的是 <code>ChatModelAgent</code>，它就是 3.2 课的 ReAct 循环：</p>
+<div class="hl"><pre><span></span><code><span class="nx">agent</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">adk</span><span class="p">.</span><span class="nx">NewChatModelAgent</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">adk</span><span class="p">.</span><span class="nx">ChatModelAgentConfig</span><span class="p">{</span>
+<span class="w">    </span><span class="nx">Name</span><span class="p">:</span><span class="w">          </span><span class="s">"support"</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">Description</span><span class="p">:</span><span class="w">   </span><span class="s">"处理客服工单的 agent"</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">Instruction</span><span class="p">:</span><span class="w">   </span><span class="s">"你是客服 agent，需要时调用工具。"</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">Model</span><span class="p">:</span><span class="w">         </span><span class="nx">m</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">MaxIterations</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="c1">// 0 = 默认 20</span>
+<span class="w">    </span><span class="nx">ToolsConfig</span><span class="p">:</span><span class="w"> </span><span class="nx">adk</span><span class="p">.</span><span class="nx">ToolsConfig</span><span class="p">{</span><span class="nx">ToolsNodeConfig</span><span class="p">:</span><span class="w"> </span><span class="nx">compose</span><span class="p">.</span><span class="nx">ToolsNodeConfig</span><span class="p">{</span>
+<span class="w">        </span><span class="nx">Tools</span><span class="p">:</span><span class="w">               </span><span class="nx">tools</span><span class="p">,</span>
+<span class="w">        </span><span class="nx">UnknownToolsHandler</span><span class="p">:</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w">   </span><span class="c1">// nil = 调用不存在的工具时整次运行报错</span>
+<span class="w">        </span><span class="nx">ExecuteSequentially</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="c1">// false = 同一轮的多个工具调用并行执行</span>
+<span class="w">    </span><span class="p">}},</span>
+<span class="p">})</span>
+<span class="nx">runner</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">adk</span><span class="p">.</span><span class="nx">NewRunner</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">adk</span><span class="p">.</span><span class="nx">RunnerConfig</span><span class="p">{</span><span class="nx">Agent</span><span class="p">:</span><span class="w"> </span><span class="nx">agent</span><span class="p">,</span><span class="w"> </span><span class="nx">EnableStreaming</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="nx">CheckPointStore</span><span class="p">:</span><span class="w"> </span><span class="nx">store</span><span class="p">})</span>
+<span class="nx">iter</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">runner</span><span class="p">.</span><span class="nx">Query</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="s">"工单 T9：申请退款"</span><span class="p">,</span><span class="w"> </span><span class="nx">adk</span><span class="p">.</span><span class="nx">WithCheckPointID</span><span class="p">(</span><span class="s">"s1"</span><span class="p">))</span>
+<span class="k">for</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">ev</span><span class="p">,</span><span class="w"> </span><span class="nx">ok</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">iter</span><span class="p">.</span><span class="nx">Next</span><span class="p">()</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="o">!</span><span class="nx">ok</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">break</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="c1">// ev.Err / ev.Output.MessageOutput / ev.Action.Interrupted</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>行为细节：</p>
+<ul>
+<li><strong><code>Instruction</code> 变成 system 消息</strong>放在最前面。测试里检查了第二次调用模型时收到 4 条消息：system、user、带工具调用的 assistant、tool。（测试验证过）</li>
+<li><strong><code>MaxIterations</code> 数的是模型调用次数</strong>，默认 20。设成 2，模型被调用 2 次后还想调工具，运行以错误结束。（测试验证过）</li>
+<li><strong>同一轮的多个工具调用默认并行执行</strong>，设 <code>ExecuteSequentially: true</code> 才按顺序。这和 4.3 课 Claude Agent SDK “只读工具才并发”不同，Eino 不区分只读和有副作用，你要自己判断。</li>
+<li><strong>调用不存在的工具默认让整次运行失败。</strong> 模型偶尔会编造工具名，生产环境建议配 <code>UnknownToolsHandler</code>，返回一段“没有这个工具，可用的有……”让模型自己纠正。练习里两种情况都测了。（测试验证过）</li>
+<li><strong>事件是迭代器</strong>，每个事件可能带一条消息输出、一个动作（中断、转交、退出），或者一个错误。<code>MessageOutput.Role</code> 区分是模型输出（<code>schema.Assistant</code>）还是工具结果（<code>schema.Tool</code>），工具结果事件的 <code>ToolName</code> 是工具名。流式模式下 <code>IsStreaming</code> 为 true，消息在 <code>MessageStream</code> 里，必须读完并关闭；<code>adk.GetMessage(ev)</code> 会帮你把流拼成一条完整消息。练习里的 <code>Collect</code> 函数就是这样处理的。</li>
+<li><strong><code>Runner</code> 不只是个壳。</strong> 它管 checkpoint 的保存和读取，<code>Resume</code> / <code>ResumeWithParams</code> 都在它上面。直接调 <code>agent.Run</code> 拿不到这些。</li>
+</ul>
+<p>ADK 还有：<code>deep.New</code> 创建的 DeepAgent（规划、子 agent、文件系统，类似 4.3 课的 Claude Code）；<code>ChatModelAgentMiddleware</code>（文件系统、技能、上下文摘要、工具搜索等现成的中间件）；Plan-Execute、Supervisor 这些预置的多 agent 模式；<code>adk.NewAgentTool</code> 把一个 agent 包成另一个 agent 的工具。源码注释里对“agent 转交、共享全部上下文”的方式（<code>Exit</code>、<code>OutputKey</code>、<code>TransferToAgent</code> 等）都标了 NOT RECOMMENDED，原话是这种方式“没有被经验证明更有效”，建议用 AgentTool 或 DeepAgent。这和 3.3 课、4.2 课的结论一致：子 agent 拿干净的上下文、只回传结果，比整段对话交出去更稳。</p>
+<h3 id="26-中断与恢复">2.6 中断与恢复</h3>
+<p>v0.7 重构之后，Eino 的中断机制基于“地址”：每个可能中断的位置（agent、图节点、某一次工具调用）都有一个稳定唯一的 ID，比如 <code>agent:support;tool:refund:c1</code> 这种形式（具体格式是框架内部的，不要自己拼）。恢复时你按 ID 把数据交给对应的位置。</p>
+<p>在工具里用的四个函数（<code>components/tool</code> 包，和 <code>compose</code> 包里同名的函数对称）：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>函数</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>tool.Interrupt(ctx, info)</code></td>
+<td>中断，<code>info</code> 是给人看的信息，不保存</td>
+</tr>
+<tr>
+<td><code>tool.StatefulInterrupt(ctx, info, state)</code></td>
+<td>中断并把 <code>state</code> 存进 checkpoint</td>
+</tr>
+<tr>
+<td><code>tool.GetInterruptState[T](ctx)</code></td>
+<td>恢复时问：我之前中断过吗？存的状态是什么？</td>
+</tr>
+<tr>
+<td><code>tool.GetResumeContext[T](ctx)</code></td>
+<td>恢复时问：这次恢复是冲着我来的吗？人给了什么数据？</td>
+</tr>
+</tbody>
+</table></div>
+<p>练习里的退款工具：</p>
+<div class="hl"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">t</span><span class="w"> </span><span class="o">*</span><span class="nx">RefundTool</span><span class="p">)</span><span class="w"> </span><span class="nx">InvokableRun</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">argsJSON</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="p">...</span><span class="nx">tool</span><span class="p">.</span><span class="nx">Option</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nx">args</span><span class="w"> </span><span class="nx">RefundArgs</span>
+<span class="w">    </span><span class="nx">_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">json</span><span class="p">.</span><span class="nx">Unmarshal</span><span class="p">([]</span><span class="kt">byte</span><span class="p">(</span><span class="nx">argsJSON</span><span class="p">),</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">args</span><span class="p">)</span>
+
+<span class="w">    </span><span class="nx">wasInterrupted</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">pending</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">tool</span><span class="p">.</span><span class="nx">GetInterruptState</span><span class="p">[</span><span class="o">*</span><span class="nx">RefundPending</span><span class="p">](</span><span class="nx">ctx</span><span class="p">)</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="o">!</span><span class="nx">wasInterrupted</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">args</span><span class="p">.</span><span class="nx">Amount</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="nx">t</span><span class="p">.</span><span class="nx">Threshold</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="nx">t</span><span class="p">.</span><span class="nx">execute</span><span class="p">(</span><span class="nx">args</span><span class="p">),</span><span class="w"> </span><span class="kc">nil</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="nx">p</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">RefundPending</span><span class="p">{</span><span class="nx">OrderID</span><span class="p">:</span><span class="w"> </span><span class="nx">args</span><span class="p">.</span><span class="nx">OrderID</span><span class="p">,</span><span class="w"> </span><span class="nx">Amount</span><span class="p">:</span><span class="w"> </span><span class="nx">args</span><span class="p">.</span><span class="nx">Amount</span><span class="p">}</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="s">""</span><span class="p">,</span><span class="w"> </span><span class="nx">tool</span><span class="p">.</span><span class="nx">StatefulInterrupt</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">p</span><span class="p">,</span><span class="w"> </span><span class="nx">p</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nx">isTarget</span><span class="p">,</span><span class="w"> </span><span class="nx">hasData</span><span class="p">,</span><span class="w"> </span><span class="nx">decision</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">tool</span><span class="p">.</span><span class="nx">GetResumeContext</span><span class="p">[</span><span class="o">*</span><span class="nx">RefundApproval</span><span class="p">](</span><span class="nx">ctx</span><span class="p">)</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="o">!</span><span class="nx">isTarget</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="s">""</span><span class="p">,</span><span class="w"> </span><span class="nx">tool</span><span class="p">.</span><span class="nx">StatefulInterrupt</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">pending</span><span class="p">,</span><span class="w"> </span><span class="nx">pending</span><span class="p">)</span><span class="w"> </span><span class="c1">// 不是我：原样再中断</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="o">!</span><span class="nx">hasData</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nx">decision</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="s">""</span><span class="p">,</span><span class="w"> </span><span class="nx">errors</span><span class="p">.</span><span class="nx">New</span><span class="p">(</span><span class="s">"refund: resumed without a decision"</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="o">!</span><span class="nx">decision</span><span class="p">.</span><span class="nx">Approved</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="s">"退款被拒绝："</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">decision</span><span class="p">.</span><span class="nx">Note</span><span class="p">,</span><span class="w"> </span><span class="kc">nil</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">t</span><span class="p">.</span><span class="nx">execute</span><span class="p">(</span><span class="nx">RefundArgs</span><span class="p">{</span><span class="nx">OrderID</span><span class="p">:</span><span class="w"> </span><span class="nx">pending</span><span class="p">.</span><span class="nx">OrderID</span><span class="p">,</span><span class="w"> </span><span class="nx">Amount</span><span class="p">:</span><span class="w"> </span><span class="nx">pending</span><span class="p">.</span><span class="nx">Amount</span><span class="p">}),</span><span class="w"> </span><span class="kc">nil</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>调用方：</p>
+<div class="hl"><pre><span></span><code><span class="nx">res</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">Collect</span><span class="p">(</span><span class="nx">runner</span><span class="p">.</span><span class="nx">Query</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="s">"给 A100 退 800"</span><span class="p">,</span><span class="w"> </span><span class="nx">adk</span><span class="p">.</span><span class="nx">WithCheckPointID</span><span class="p">(</span><span class="s">"s1"</span><span class="p">)))</span>
+<span class="nx">ic</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">res</span><span class="p">.</span><span class="nx">Interrupts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w">               </span><span class="c1">// IsRootCause 为 true 的那个</span>
+<span class="c1">// ……把 ic.Info 展示给审批人，拿到决定……</span>
+<span class="nx">iter</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">runner</span><span class="p">.</span><span class="nx">ResumeWithParams</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="s">"s1"</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">adk</span><span class="p">.</span><span class="nx">ResumeParams</span><span class="p">{</span>
+<span class="w">    </span><span class="nx">Targets</span><span class="p">:</span><span class="w"> </span><span class="kt">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">any</span><span class="p">{</span><span class="nx">ic</span><span class="p">.</span><span class="nx">ID</span><span class="p">:</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">RefundApproval</span><span class="p">{</span><span class="nx">Approved</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">}},</span>
+<span class="p">})</span>
+</code></pre></div>
+
+<p>要点：</p>
+<ul>
+<li><strong>恢复时工具会被重新调用</strong>，和 4.1 课 LangGraph 的“节点重跑”一样。所以中断之前不能有副作用，或者副作用必须幂等。</li>
+<li><strong>“不是我”的时候必须再中断一次。</strong> 同一轮可能有多个工具并行中断，你这次只恢复了其中一个，其余的工具也会被重新调用，它们发现自己不是目标，就要带着原来的状态再中断，否则状态就丢了。Eino 的测试里有专门的例子：两个工具并行中断，先恢复 A，B 再中断一次，第二次恢复 B。</li>
+<li><strong>checkpoint 用 gob 序列化</strong>，状态里放自定义类型要先注册：<code>schema.RegisterName[*RefundPending]("goeco_refund_pending")</code>。名字要全局唯一而且以后不能改，否则旧的 checkpoint 读不出来。</li>
+<li><strong><code>CheckPointStore</code> 只有两个方法</strong>：<code>Get(ctx, id) ([]byte, bool, error)</code> 和 <code>Set(ctx, id, []byte) error</code>，Redis、数据库都很好实现。</li>
+<li><strong>跨实例恢复只需要共享 store 和 checkpoint ID。</strong> 练习里的第二个测试用另一个 Runner、另一个模型实例、另一个工具实例去恢复，只共享 store，结果正确。新模型只需要回答恢复之后的那一轮，因为对话历史在 checkpoint 里。（测试验证过）</li>
+<li>人给的恢复数据（<code>Targets</code> 的值）不需要 gob 注册，它是恢复时从内存直接传进去的。</li>
+<li>中断事件里，<code>InterruptContexts</code> 是一条链：最内层真正中断的那个 <code>IsRootCause</code> 为 true，外面包着它的 agent 也各有一个上下文。展示给人看时取 root cause。</li>
+</ul>
+<h3 id="27-和-41-langgraph-的中断对照">2.7 和 4.1 LangGraph 的中断对照</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th></th>
+<th>LangGraph</th>
+<th>Eino</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>中断</td>
+<td>节点里调 <code>interrupt(value)</code></td>
+<td>工具 / 节点里返回 <code>tool.Interrupt</code> 或 <code>StatefulInterrupt</code> 的 error</td>
+</tr>
+<tr>
+<td>恢复时重跑</td>
+<td>整个节点从头重跑，<code>interrupt()</code> 第 N 次调用返回第 N 个恢复值</td>
+<td>被中断的工具或节点重跑，自己查 <code>GetInterruptState</code> / <code>GetResumeContext</code></td>
+</tr>
+<tr>
+<td>状态</td>
+<td>图状态由 checkpointer 保存，节点内的局部变量不保存</td>
+<td>可以用 <code>StatefulInterrupt</code> 显式保存一份局部状态</td>
+</tr>
+<tr>
+<td>定位</td>
+<td>按中断 ID 或按顺序</td>
+<td>按地址 ID</td>
+</tr>
+<tr>
+<td>存储</td>
+<td>checkpointer（每个 super-step 都写）</td>
+<td><code>CheckPointStore</code>，中断时写</td>
+</tr>
+</tbody>
+</table></div>
+<p>Eino 的方式更啰嗦，但每个中断点自己决定存什么，不靠“第几次调用”这种隐式顺序。</p>
+<h2 id="3-genkit-go">3. Genkit Go</h2>
+<h3 id="31-一切都是注册过的-action">3.1 一切都是注册过的 action</h3>
+<p>Genkit 的核心概念是 action：模型、工具、flow、prompt、检索器都注册在一个 <code>*genkit.Genkit</code> 实例上，有名字、有输入输出 schema，可以被 Dev UI 列出来单独调用，每次调用都自动产生 trace。</p>
+<div class="hl"><pre><span></span><code><span class="nx">g</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">genkit</span><span class="p">.</span><span class="nx">Init</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">genkit</span><span class="p">.</span><span class="nx">WithPlugins</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">googlegenai</span><span class="p">.</span><span class="nx">GoogleAI</span><span class="p">{}))</span>
+<span class="nx">answer</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">genkit</span><span class="p">.</span><span class="nx">GenerateText</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">g</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">ai</span><span class="p">.</span><span class="nx">WithModelName</span><span class="p">(</span><span class="s">"googleai/gemini-flash-latest"</span><span class="p">),</span>
+<span class="w">    </span><span class="nx">ai</span><span class="p">.</span><span class="nx">WithPrompt</span><span class="p">(</span><span class="s">"Why is Go a great language for AI applications?"</span><span class="p">),</span>
+<span class="p">)</span>
+</code></pre></div>
+
+<p>插件负责注册模型。练习里不加任何插件，用 <code>genkit.DefineModel</code> 自己注册一个脚本模型：</p>
+<div class="hl"><pre><span></span><code><span class="nx">m</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">genkit</span><span class="p">.</span><span class="nx">DefineModel</span><span class="p">(</span><span class="nx">g</span><span class="p">,</span><span class="w"> </span><span class="s">"test/loop"</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">ai</span><span class="p">.</span><span class="nx">ModelOptions</span><span class="p">{</span>
+<span class="w">    </span><span class="nx">Supports</span><span class="p">:</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">ai</span><span class="p">.</span><span class="nx">ModelSupports</span><span class="p">{</span><span class="nx">Multiturn</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="nx">Tools</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="nx">SystemRole</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">},</span>
+<span class="p">},</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">req</span><span class="w"> </span><span class="o">*</span><span class="nx">ai</span><span class="p">.</span><span class="nx">ModelRequest</span><span class="p">,</span><span class="w"> </span><span class="nx">cb</span><span class="w"> </span><span class="nx">ai</span><span class="p">.</span><span class="nx">ModelStreamCallback</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="nx">ai</span><span class="p">.</span><span class="nx">ModelResponse</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// req.Messages、req.Tools 是 Genkit 交给模型的全部内容</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">ai</span><span class="p">.</span><span class="nx">ModelResponse</span><span class="p">{</span><span class="nx">Request</span><span class="p">:</span><span class="w"> </span><span class="nx">req</span><span class="p">,</span><span class="w"> </span><span class="nx">Message</span><span class="p">:</span><span class="w"> </span><span class="nx">next</span><span class="p">(),</span><span class="w"> </span><span class="nx">FinishReason</span><span class="p">:</span><span class="w"> </span><span class="nx">ai</span><span class="p">.</span><span class="nx">FinishReasonStop</span><span class="p">},</span><span class="w"> </span><span class="kc">nil</span>
+<span class="p">})</span>
+</code></pre></div>
+
+<p><code>Supports</code> 描述模型能做什么，要如实填，Genkit 和 Dev UI 会读它。写真实模型的适配器就是这个函数：把 <code>ModelRequest</code> 转成厂商的请求格式，把响应转回 <code>ModelResponse</code>，流式时每个分片调一次 <code>cb</code>。</p>
+<h3 id="32-generate-和工具循环">3.2 Generate 和工具循环</h3>
+<div class="hl"><pre><span></span><code><span class="nx">stock</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">genkit</span><span class="p">.</span><span class="nx">DefineTool</span><span class="p">(</span><span class="nx">g</span><span class="p">,</span><span class="w"> </span><span class="s">"check_stock"</span><span class="p">,</span><span class="w"> </span><span class="s">"查询商品库存"</span><span class="p">,</span>
+<span class="w">    </span><span class="kd">func</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="o">*</span><span class="nx">ai</span><span class="p">.</span><span class="nx">ToolContext</span><span class="p">,</span><span class="w"> </span><span class="nx">in</span><span class="w"> </span><span class="nx">StockQuery</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">})</span>
+
+<span class="nx">resp</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">genkit</span><span class="p">.</span><span class="nx">Generate</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">g</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">ai</span><span class="p">.</span><span class="nx">WithModel</span><span class="p">(</span><span class="nx">m</span><span class="p">),</span>
+<span class="w">    </span><span class="nx">ai</span><span class="p">.</span><span class="nx">WithPrompt</span><span class="p">(</span><span class="s">"A1 还有货吗？"</span><span class="p">),</span>
+<span class="w">    </span><span class="nx">ai</span><span class="p">.</span><span class="nx">WithTools</span><span class="p">(</span><span class="nx">stock</span><span class="p">),</span>
+<span class="w">    </span><span class="nx">ai</span><span class="p">.</span><span class="nx">WithMaxTurns</span><span class="p">(</span><span class="mi">5</span><span class="p">),</span>
+<span class="p">)</span>
+</code></pre></div>
+
+<p><code>Generate</code> 自己跑工具循环：模型要工具就执行，把结果追加进消息，再调模型，直到模型不再要工具。</p>
+<ul>
+<li><strong><code>maxTurns</code> 数的是工具轮数，不是模型调用次数</strong>，默认 50。注释原文：每一轮往返（包括同一轮里并行的多个工具）算一轮。设成 2：模型第 1、2 次要工具都执行了，第 3 次还要工具时报 <code>ai.ErrMaxTurnsExceeded</code>，所以模型一共被调用 3 次。对比 Eino 的 <code>MaxIterations=2</code> 是模型调用 2 次。同一个数字，两个框架差一次。（测试验证过）</li>
+<li><strong>工具错误分两种。</strong> 用 <code>tool.Fail(ctx, err)</code> 包起来的错误会作为 <code>{"error": "..."}</code> 交给模型，循环继续，模型可以换个参数再试；其他错误直接让 <code>Generate</code> 失败。练习里查不到商品用 <code>tool.Fail</code>，库存服务挂了直接返回 <code>ErrInventoryDown</code>，测试分别验证了“模型第二轮看到了错误”和“<code>errors.Is(err, ErrInventoryDown)</code> 成立、模型只被调用一次”。（测试验证过）</li>
+<li><strong>模型给的工具参数不符合 schema 时，<code>Generate</code> 直接失败</strong>，错误是 <code>invalid input to action ... data did not match expected schema</code>，不会作为 <code>tool.Fail</code> 交还模型。写课时用一个把字符串字段传成数字的工具调用试过。想让模型自己纠正参数，就把输入类型放宽，在工具里自己校验，校验失败时返回 <code>tool.Fail</code>。</li>
+<li>不想让 <code>Generate</code> 自动执行工具，用 <code>ai.WithReturnToolRequests(true)</code>，它会把工具请求原样返回给你，循环由你自己写。</li>
+<li>结构化输出用 <code>genkit.GenerateData[T]</code>，schema 从 <code>T</code> 推断，结果直接解码成 <code>*T</code>。</li>
+</ul>
+<p>和 Eino 对照：Eino 默认把“工具不存在”当致命错误，工具返回的普通 error 也会让运行失败；想让模型看到错误，要在工具里自己把错误变成字符串返回。Genkit 反过来提供了明确的标记 <code>tool.Fail</code>。两种设计都要求你在写工具时想清楚：这个错误模型能处理吗？</p>
+<h3 id="33-可恢复工具">3.3 可恢复工具</h3>
+<p>Genkit 1.14 用 <code>DefineResumableTool</code> 定义能暂停的工具。工具函数多一个参数，第一次调用时为 nil，恢复时是调用方给的答复：</p>
+<div class="hl"><pre><span></span><code><span class="nx">transfer</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">genkit</span><span class="p">.</span><span class="nx">DefineResumableTool</span><span class="p">(</span><span class="nx">g</span><span class="p">,</span><span class="w"> </span><span class="s">"transfer"</span><span class="p">,</span><span class="w"> </span><span class="s">"转账"</span><span class="p">,</span>
+<span class="w">    </span><span class="kd">func</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">in</span><span class="w"> </span><span class="nx">TransferInput</span><span class="p">,</span><span class="w"> </span><span class="nx">approval</span><span class="w"> </span><span class="o">*</span><span class="nx">TransferApproval</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">approval</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">in</span><span class="p">.</span><span class="nx">Amount</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="nx">limit</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="s">""</span><span class="p">,</span><span class="w"> </span><span class="nx">tool</span><span class="p">.</span><span class="nx">Interrupt</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">TransferHold</span><span class="p">{</span><span class="nx">Reason</span><span class="p">:</span><span class="w"> </span><span class="s">"over_limit"</span><span class="p">,</span><span class="w"> </span><span class="nx">Amount</span><span class="p">:</span><span class="w"> </span><span class="nx">in</span><span class="p">.</span><span class="nx">Amount</span><span class="p">})</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">approval</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">!</span><span class="nx">approval</span><span class="p">.</span><span class="nx">Approved</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="s">"转账已取消"</span><span class="p">,</span><span class="w"> </span><span class="kc">nil</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="nx">log</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="nx">in</span><span class="p">)</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Sprintf</span><span class="p">(</span><span class="s">"已向 %s 转账 %.0f"</span><span class="p">,</span><span class="w"> </span><span class="nx">in</span><span class="p">.</span><span class="nx">To</span><span class="p">,</span><span class="w"> </span><span class="nx">in</span><span class="p">.</span><span class="nx">Amount</span><span class="p">),</span><span class="w"> </span><span class="kc">nil</span>
+<span class="w">    </span><span class="p">})</span>
+</code></pre></div>
+
+<p>调用方：</p>
+<div class="hl"><pre><span></span><code><span class="nx">resp</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">genkit</span><span class="p">.</span><span class="nx">Generate</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">g</span><span class="p">,</span><span class="w"> </span><span class="nx">ai</span><span class="p">.</span><span class="nx">WithModel</span><span class="p">(</span><span class="nx">m</span><span class="p">),</span><span class="w"> </span><span class="nx">ai</span><span class="p">.</span><span class="nx">WithPrompt</span><span class="p">(</span><span class="s">"给 alice 转 5000"</span><span class="p">),</span><span class="w"> </span><span class="nx">ai</span><span class="p">.</span><span class="nx">WithTools</span><span class="p">(</span><span class="nx">transfer</span><span class="p">))</span>
+<span class="c1">// resp.FinishReason == ai.FinishReasonInterrupted</span>
+<span class="nx">part</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">resp</span><span class="p">.</span><span class="nx">Interrupts</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+<span class="nx">call</span><span class="p">,</span><span class="w"> </span><span class="nx">ok</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">transfer</span><span class="p">.</span><span class="nx">Interrupted</span><span class="p">(</span><span class="nx">part</span><span class="p">)</span><span class="w">        </span><span class="c1">// call.Input 是 TransferInput</span>
+<span class="nx">hold</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">ai</span><span class="p">.</span><span class="nx">InterruptAs</span><span class="p">[</span><span class="nx">TransferHold</span><span class="p">](</span><span class="nx">part</span><span class="p">)</span><span class="w">  </span><span class="c1">// 读中断数据</span>
+
+<span class="nx">resp</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">genkit</span><span class="p">.</span><span class="nx">Generate</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">g</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">ai</span><span class="p">.</span><span class="nx">WithModel</span><span class="p">(</span><span class="nx">m</span><span class="p">),</span>
+<span class="w">    </span><span class="nx">ai</span><span class="p">.</span><span class="nx">WithMessages</span><span class="p">(</span><span class="nx">resp</span><span class="p">.</span><span class="nx">History</span><span class="p">()...),</span><span class="w">        </span><span class="c1">// 把之前的对话原样带回去</span>
+<span class="w">    </span><span class="nx">ai</span><span class="p">.</span><span class="nx">WithTools</span><span class="p">(</span><span class="nx">transfer</span><span class="p">),</span>
+<span class="w">    </span><span class="nx">ai</span><span class="p">.</span><span class="nx">WithResume</span><span class="p">(</span><span class="nx">call</span><span class="p">.</span><span class="nx">Restart</span><span class="p">(</span><span class="nx">TransferApproval</span><span class="p">{</span><span class="nx">Approved</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">})),</span>
+<span class="p">)</span>
+</code></pre></div>
+
+<ul>
+<li><code>call.Restart(res)</code> 重新执行工具，<code>res</code> 作为第三个参数传进去。<code>call.Respond(out)</code> 不执行工具，直接替它给出输出。练习里有一个测试用 <code>Respond</code> 拒绝转账，检查了工具没有执行、模型在下一轮看到了这个输出。（测试验证过）</li>
+<li><strong><code>Res</code> 和中断数据都必须能序列化成 JSON 对象</strong>（结构体或 key 为字符串的 map）。<code>tool.Interrupt(ctx, "请确认")</code> 传一个字符串不会中断，而是返回一个普通错误让工具调用失败。这是因为它们要能通过 HTTP 发给远端调用方，进程内和过网络时的形状要一致。</li>
+<li><strong>没有 checkpoint store。</strong> 状态就是 <code>resp.History()</code> 返回的消息列表，中断的工具请求在最后一条消息里，带着元数据。要跨进程恢复，你自己把这些消息存起来，恢复时用 <code>WithMessages</code> 传回去。对比 Eino，Genkit 的 <code>Generate</code> 是无状态的，存储完全交给你；Eino 的 Runner 帮你存。</li>
+<li>中断之前同样不能有副作用：<code>Restart</code> 会重新执行整个工具函数。</li>
+</ul>
+<p><code>ToolApproval</code> 中间件可以不改工具代码，给任意工具加上“先暂停等批准”，原理一样。</p>
+<h3 id="34-flow">3.4 flow</h3>
+<p>flow 是 Genkit 的部署单元：</p>
+<div class="hl"><pre><span></span><code><span class="nx">flow</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">genkit</span><span class="p">.</span><span class="nx">DefineFlow</span><span class="p">(</span><span class="nx">g</span><span class="p">,</span><span class="w"> </span><span class="s">"ask"</span><span class="p">,</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">question</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">q</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">genkit</span><span class="p">.</span><span class="nx">Run</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="s">"normalize"</span><span class="p">,</span><span class="w"> </span><span class="kd">func</span><span class="p">()</span><span class="w"> </span><span class="p">(</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">strings</span><span class="p">.</span><span class="nx">TrimSpace</span><span class="p">(</span><span class="nx">question</span><span class="p">),</span><span class="w"> </span><span class="kc">nil</span>
+<span class="w">    </span><span class="p">})</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="s">""</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="nx">resp</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">genkit</span><span class="p">.</span><span class="nx">Generate</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">g</span><span class="p">,</span><span class="w"> </span><span class="nx">ai</span><span class="p">.</span><span class="nx">WithModel</span><span class="p">(</span><span class="nx">model</span><span class="p">),</span><span class="w"> </span><span class="nx">ai</span><span class="p">.</span><span class="nx">WithSystem</span><span class="p">(</span><span class="s">"你是库存助手"</span><span class="p">),</span>
+<span class="w">        </span><span class="nx">ai</span><span class="p">.</span><span class="nx">WithPrompt</span><span class="p">(</span><span class="nx">q</span><span class="p">),</span><span class="w"> </span><span class="nx">ai</span><span class="p">.</span><span class="nx">WithTools</span><span class="p">(</span><span class="nx">tools</span><span class="p">...))</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="s">""</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">resp</span><span class="p">.</span><span class="nx">Text</span><span class="p">(),</span><span class="w"> </span><span class="kc">nil</span>
+<span class="p">})</span>
+<span class="nx">out</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">flow</span><span class="p">.</span><span class="nx">Run</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="s">"  A1 还有货吗？ "</span><span class="p">)</span>
+</code></pre></div>
+
+<ul>
+<li>flow 有类型化的输入输出，自动产生一条 trace，里面的 <code>genkit.Run</code> 子步骤和 <code>Generate</code> 调用都是 trace 的子节点。</li>
+<li><code>genkit start -- go run .</code> 启动 Dev UI（设置环境变量 <code>GENKIT_ENV=dev</code> 后会开一个本地反射服务），可以在浏览器里单独跑某个 flow、某个模型、某个工具，看每一步的输入输出。不设这个变量时 Genkit 以 prod 模式运行，不开反射服务，测试日志里能看到 <code>Genkit initialized env=prod</code>。</li>
+<li><code>genkit.Handler(flow)</code> 把 flow 变成 <code>http.HandlerFunc</code>，配合 <code>plugins/server</code> 可以直接部署。</li>
+</ul>
+<h3 id="35-agents预览">3.5 Agents（预览）</h3>
+<p>Genkit Go 在 <code>genkit/exp</code> 和 <code>ai/exp</code> 里有一套预览中的 agent API，要 <code>genkit.WithExperimental()</code> 才能用：<code>genkitx.DefineAgent</code> 定义有会话存储的 agent，每一轮写一个快照，可以从任意快照继续或分叉；<code>Detach</code> 把一轮交给后台运行；<code>middlewarex.Agents</code> 给 agent 生成 <code>delegate_to_&lt;name&gt;</code> 工具来委派子 agent；<code>AllAgentRoutes</code> 把 agent 挂成 HTTP 接口，还能用 <code>DefineRemoteAgent</code> 调另一个进程（Go、JS 或 Dart 写的）里的 agent。概念上和 4.3 课 Claude Agent SDK 的会话 / fork 很接近。README 写着这套 API 在 minor 版本里可能有破坏性变更，本课的练习不用它。</p>
+<h2 id="4-官方-mcp-go-sdk">4. 官方 MCP Go SDK</h2>
+<h3 id="41-版本和协议">4.1 版本和协议</h3>
+<p>SDK 的 README 有一张兼容表：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>SDK 版本</th>
+<th>最新 MCP 规范</th>
+<th>支持的规范</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>v1.7.0+</td>
+<td>2026-07-28</td>
+<td>2026-07-28、2025-11-25、2025-06-18、2025-03-26、2024-11-05</td>
+</tr>
+<tr>
+<td>v1.4.0 – v1.6.1</td>
+<td>2025-11-25</td>
+<td>2025-11-25、2025-06-18、2025-03-26、2024-11-05</td>
+</tr>
+<tr>
+<td>v1.0.0 – v1.1.0</td>
+<td>2025-06-18</td>
+<td>2025-06-18、2025-03-26、2024-11-05</td>
+</tr>
+</tbody>
+</table></div>
+<p>2.2 课讲过 2026-07-28 规范的变化：没有 <code>initialize</code> 握手，每个请求在 <code>_meta</code> 里带协议版本和客户端能力；新增 <code>server/discover</code>；服务端向客户端要信息改用 MRTR（多轮请求）。SDK 对上层隐藏了两种模式的差别：</p>
+<ul>
+<li><code>Client.Connect</code> 先发 <code>server/discover</code>，用结果协商版本；发现失败或服务端不支持最新版本时，退回旧的 <code>initialize</code> 握手。</li>
+<li><code>Server.Connect</code> 自动注册 <code>server/discover</code>。</li>
+<li>不管协商出哪个版本，你用的 API 都一样。</li>
+</ul>
+<p>练习里客户端和服务端都是 v1.8.0，测试检查了协商结果是 <code>2026-07-28</code>。（测试验证过）</p>
+<p>另外，2026-07-28 规范通过 SEP-2577 把 roots、sampling、logging 三个功能标为废弃，SDK 在废弃期（至少十二个月）内继续支持。新代码不要再依赖它们。</p>
+<h3 id="42-服务端类型化工具">4.2 服务端：类型化工具</h3>
+<div class="hl"><pre><span></span><code><span class="kd">type</span><span class="w"> </span><span class="nx">DocQuery</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">Query</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="s">`json:"query" jsonschema:"要搜索的关键词"`</span>
+<span class="w">    </span><span class="nx">Limit</span><span class="w"> </span><span class="kt">int</span><span class="w">    </span><span class="s">`json:"limit,omitempty" jsonschema:"最多返回几条"`</span>
+<span class="p">}</span>
+<span class="kd">type</span><span class="w"> </span><span class="nx">DocHits</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">Titles</span><span class="w"> </span><span class="p">[]</span><span class="kt">string</span><span class="w"> </span><span class="s">`json:"titles"`</span>
+<span class="p">}</span>
+
+<span class="nx">srv</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">mcp</span><span class="p">.</span><span class="nx">NewServer</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">mcp</span><span class="p">.</span><span class="nx">Implementation</span><span class="p">{</span><span class="nx">Name</span><span class="p">:</span><span class="w"> </span><span class="s">"docs"</span><span class="p">,</span><span class="w"> </span><span class="nx">Version</span><span class="p">:</span><span class="w"> </span><span class="s">"v0.1.0"</span><span class="p">},</span><span class="w"> </span><span class="kc">nil</span><span class="p">)</span>
+<span class="nx">mcp</span><span class="p">.</span><span class="nx">AddTool</span><span class="p">(</span><span class="nx">srv</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">mcp</span><span class="p">.</span><span class="nx">Tool</span><span class="p">{</span><span class="nx">Name</span><span class="p">:</span><span class="w"> </span><span class="s">"search_docs"</span><span class="p">,</span><span class="w"> </span><span class="nx">Description</span><span class="p">:</span><span class="w"> </span><span class="s">"搜索内部文档"</span><span class="p">},</span>
+<span class="w">    </span><span class="kd">func</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">req</span><span class="w"> </span><span class="o">*</span><span class="nx">mcp</span><span class="p">.</span><span class="nx">CallToolRequest</span><span class="p">,</span><span class="w"> </span><span class="nx">in</span><span class="w"> </span><span class="nx">DocQuery</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="nx">mcp</span><span class="p">.</span><span class="nx">CallToolResult</span><span class="p">,</span><span class="w"> </span><span class="nx">DocHits</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="nx">DocHits</span><span class="p">{</span><span class="nx">Titles</span><span class="p">:</span><span class="w"> </span><span class="nx">search</span><span class="p">(</span><span class="nx">in</span><span class="p">)},</span><span class="w"> </span><span class="kc">nil</span>
+<span class="w">    </span><span class="p">})</span>
+</code></pre></div>
+
+<p>泛型函数 <code>mcp.AddTool</code> 会自动做很多事（<code>ToolHandlerFor</code> 的注释里逐条列了）：</p>
+<ul>
+<li>从 <code>In</code> 推断输入 schema，从 <code>Out</code> 推断输出 schema。没有 <code>omitempty</code> 的字段是必填。<code>jsonschema</code> 标签的<strong>整段内容就是字段描述</strong>，不是 <code>key=value</code> 格式。这里和 Eino 的 <code>jsonschema:"description=..."</code> 写法不同：两个库用的是不同的 JSON Schema 包（MCP SDK 用 <code>google/jsonschema-go</code>，Eino 用 <code>eino-contrib/jsonschema</code>），同一个结构体在两边要写不同的标签。</li>
+<li><strong>调用 handler 之前先按 schema 校验参数。</strong> 不合法的输入根本到不了 handler。测试里漏传必填的 <code>query</code>，handler 调用次数是 0。（测试验证过）</li>
+<li><code>Out</code> 的值放进 <code>StructuredContent</code>；没设 <code>Content</code> 时，SDK 把输出的 JSON 也放进一个文本内容块，兼容只读文本的客户端。</li>
+<li><strong>handler 返回的 error 是工具错误，不是协议错误。</strong> 它被放进 <code>Content</code>，<code>IsError</code> 设为 true，客户端的 <code>CallTool</code> 返回 <code>err == nil</code>。参数校验失败也是这样。只有像“工具不存在”这种情况才是协议错误，<code>CallTool</code> 返回非 nil 的 err。练习里这三种情况都测了。（测试验证过）</li>
+<li><code>In</code> 必须是结构体或 map（推断出的 schema 类型必须是 object）；不需要参数时用 <code>struct{}</code>。</li>
+</ul>
+<p>这个区分对写 agent 很重要：工具错误应该交给模型，让它决定重试或换办法；协议错误说明连接或配置有问题，应该让这次运行失败。第 5 节的适配器就按这个规则来。</p>
+<h3 id="43-客户端和传输">4.3 客户端和传输</h3>
+<div class="hl"><pre><span></span><code><span class="nx">client</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">mcp</span><span class="p">.</span><span class="nx">NewClient</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">mcp</span><span class="p">.</span><span class="nx">Implementation</span><span class="p">{</span><span class="nx">Name</span><span class="p">:</span><span class="w"> </span><span class="s">"bridge"</span><span class="p">,</span><span class="w"> </span><span class="nx">Version</span><span class="p">:</span><span class="w"> </span><span class="s">"v0.1.0"</span><span class="p">},</span><span class="w"> </span><span class="kc">nil</span><span class="p">)</span>
+<span class="nx">cs</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">client</span><span class="p">.</span><span class="nx">Connect</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">mcp</span><span class="p">.</span><span class="nx">CommandTransport</span><span class="p">{</span><span class="nx">Command</span><span class="p">:</span><span class="w"> </span><span class="nx">exec</span><span class="p">.</span><span class="nx">Command</span><span class="p">(</span><span class="s">"docs-server"</span><span class="p">)},</span><span class="w"> </span><span class="kc">nil</span><span class="p">)</span>
+<span class="k">defer</span><span class="w"> </span><span class="nx">cs</span><span class="p">.</span><span class="nx">Close</span><span class="p">()</span>
+
+<span class="k">for</span><span class="w"> </span><span class="nx">t</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">cs</span><span class="p">.</span><span class="nx">Tools</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="kc">nil</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">}</span><span class="w">   </span><span class="c1">// 自动翻页的迭代器</span>
+<span class="nx">res</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">cs</span><span class="p">.</span><span class="nx">CallTool</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">mcp</span><span class="p">.</span><span class="nx">CallToolParams</span><span class="p">{</span><span class="nx">Name</span><span class="p">:</span><span class="w"> </span><span class="s">"search_docs"</span><span class="p">,</span><span class="w"> </span><span class="nx">Arguments</span><span class="p">:</span><span class="w"> </span><span class="kt">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">any</span><span class="p">{</span><span class="s">"query"</span><span class="p">:</span><span class="w"> </span><span class="s">"eino"</span><span class="p">}})</span>
+</code></pre></div>
+
+<p>传输层有 <code>StdioTransport</code> / <code>CommandTransport</code>（子进程）、<code>StreamableClientTransport</code> / <code>StreamableHTTPHandler</code>（HTTP）、旧的 SSE 传输，以及测试用的 <code>NewInMemoryTransports()</code>。练习全部用内存传输，换成别的传输，上层代码不用改。</p>
+<h3 id="44-mrtr服务端向用户要确认">4.4 MRTR：服务端向用户要确认</h3>
+<p>2026-07-28 规范里，服务端不再在请求进行中主动给客户端发请求，而是在结果里返回 <code>InputRequests</code>，客户端拿到答复后带着 <code>InputResponses</code> 重新发起原来的调用。SDK 的写法：</p>
+<div class="hl"><pre><span></span><code><span class="nx">mcp</span><span class="p">.</span><span class="nx">AddTool</span><span class="p">(</span><span class="nx">srv</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">mcp</span><span class="p">.</span><span class="nx">Tool</span><span class="p">{</span><span class="nx">Name</span><span class="p">:</span><span class="w"> </span><span class="s">"delete_doc"</span><span class="p">},</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">req</span><span class="w"> </span><span class="o">*</span><span class="nx">mcp</span><span class="p">.</span><span class="nx">CallToolRequest</span><span class="p">,</span><span class="w"> </span><span class="nx">in</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">Title</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="s">`json:"title"`</span>
+<span class="p">})</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="nx">mcp</span><span class="p">.</span><span class="nx">CallToolResult</span><span class="p">,</span><span class="w"> </span><span class="kt">any</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">req</span><span class="p">.</span><span class="nx">Params</span><span class="p">.</span><span class="nx">InputResponses</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">mcp</span><span class="p">.</span><span class="nx">CallToolResult</span><span class="p">{</span>
+<span class="w">            </span><span class="nx">InputRequests</span><span class="p">:</span><span class="w"> </span><span class="nx">mcp</span><span class="p">.</span><span class="nx">InputRequestMap</span><span class="p">{</span><span class="s">"confirm"</span><span class="p">:</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">mcp</span><span class="p">.</span><span class="nx">ElicitParams</span><span class="p">{</span>
+<span class="w">                </span><span class="nx">Message</span><span class="p">:</span><span class="w">         </span><span class="s">"确认删除《"</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">in</span><span class="p">.</span><span class="nx">Title</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">"》？"</span><span class="p">,</span>
+<span class="w">                </span><span class="nx">RequestedSchema</span><span class="p">:</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">jsonschema</span><span class="p">.</span><span class="nx">Schema</span><span class="p">{</span><span class="nx">Type</span><span class="p">:</span><span class="w"> </span><span class="s">"object"</span><span class="p">,</span><span class="w"> </span><span class="nx">Properties</span><span class="p">:</span><span class="w"> </span><span class="kt">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="o">*</span><span class="nx">jsonschema</span><span class="p">.</span><span class="nx">Schema</span><span class="p">{</span><span class="s">"ok"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nx">Type</span><span class="p">:</span><span class="w"> </span><span class="s">"boolean"</span><span class="p">}}},</span>
+<span class="w">            </span><span class="p">}},</span>
+<span class="w">            </span><span class="nx">RequestState</span><span class="p">:</span><span class="w"> </span><span class="s">"title="</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">in</span><span class="p">.</span><span class="nx">Title</span><span class="p">,</span>
+<span class="w">        </span><span class="p">},</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="kc">nil</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="nx">res</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">req</span><span class="p">.</span><span class="nx">Params</span><span class="p">.</span><span class="nx">InputResponses</span><span class="p">[</span><span class="s">"confirm"</span><span class="p">].(</span><span class="o">*</span><span class="nx">mcp</span><span class="p">.</span><span class="nx">ElicitResult</span><span class="p">)</span>
+<span class="w">    </span><span class="p">...</span>
+<span class="p">})</span>
+</code></pre></div>
+
+<ul>
+<li>handler 会被调用两次：第一次返回输入请求，第二次读答复。<code>InputRequests</code> 的 key 是你自己起的名字，客户端会原样带回。<code>RequestState</code> 是一个不透明的字符串，客户端也原样带回，服务端可以用它恢复进度，不需要按会话存东西。</li>
+<li>同时返回 <code>InputRequests</code> 和内容是服务端的 bug，SDK 返回 <code>-32603</code>。</li>
+<li><strong>客户端默认自动处理</strong>：<code>ClientOptions.ElicitationHandler</code> 配好后，SDK 的 MRTR 中间件拿到输入请求就调你的 handler，自动重试，你的 <code>CallTool</code> 只看到最终结果。测试验证了这一点。（测试验证过）</li>
+<li>设 <code>ClientOptions.MultiRoundTrip = &amp;mcp.MultiRoundTripOptions{Disabled: true}</code> 关掉自动处理，<code>CallTool</code> 就会直接返回带 <code>InputRequests</code> 的结果，<code>res.NeedsInput()</code> 为 true，重试由你来做。练习 2 要用这个。</li>
+<li>对旧协议版本的客户端，服务端的中间件会代替你调用旧的 <code>ServerSession.Elicit</code> 等接口，再带着答复重新调用一次 handler。所以按 MRTR 方式写的 handler 对新旧客户端都能用。</li>
+<li>自动重试最多 10 次；服务端返回空的输入请求（相当于“稍后再试”）累计 3 次就放弃。</li>
+</ul>
+<h3 id="45-go-里的另一个-mcp-库">4.5 Go 里的另一个 MCP 库</h3>
+<p>在官方 SDK 之前，Go 社区用得最多的是 <code>mark3labs/mcp-go</code>，现在仍在维护（v1.5.0，2026-10-30 发布），官方 SDK 的 README 也把它列为可选的替代品。框架的 MCP 集成用的库不一样：</p>
+<ul>
+<li>Genkit Go v1.14.0 的 <code>plugins/mcp</code> 依赖 <code>mark3labs/mcp-go</code> v0.32.0（看它的 go.mod）。</li>
+<li><code>eino-ext</code> 的 <code>components/tool/mcp</code> 依赖 <code>mark3labs/mcp-go</code>；另有一个子模块 <code>components/tool/mcp/officialmcp</code> 依赖官方 SDK（v0.1.1 用的是 v1.6.1）。</li>
+</ul>
+<p>这意味着用框架自带的 MCP 集成时，你实际用的 MCP 实现和协议版本由框架的依赖决定，不一定支持 2026-07-28。需要新协议的特性（无状态、MRTR）时，自己用官方 SDK 写一个适配器，就是下一节的内容。</p>
+<h2 id="5-把-mcp-工具接进-eino-和-genkit">5. 把 MCP 工具接进 Eino 和 Genkit</h2>
+<p>适配器要做三件事：把工具列表转过去，把 schema 转过去，把调用结果和错误转过去。</p>
+<h3 id="51-schema用-json-当桥">5.1 schema：用 JSON 当桥</h3>
+<p>三个库用了三种 schema 表示：MCP SDK 是 <code>google/jsonschema-go</code> 的 <code>*jsonschema.Schema</code>（客户端拿到的 <code>Tool.InputSchema</code> 是 <code>any</code>），Eino 是 <code>eino-contrib/jsonschema</code> 的 <code>*jsonschema.Schema</code>，Genkit 是 <code>map[string]any</code>。最稳的转换方式是序列化成 JSON 再反序列化：</p>
+<div class="hl"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nx">einoToolInfo</span><span class="p">(</span><span class="nx">t</span><span class="w"> </span><span class="o">*</span><span class="nx">mcp</span><span class="p">.</span><span class="nx">Tool</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="nx">schema</span><span class="p">.</span><span class="nx">ToolInfo</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">raw</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">json</span><span class="p">.</span><span class="nx">Marshal</span><span class="p">(</span><span class="nx">t</span><span class="p">.</span><span class="nx">InputSchema</span><span class="p">)</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nx">js</span><span class="w"> </span><span class="nx">einojs</span><span class="p">.</span><span class="nx">Schema</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">json</span><span class="p">.</span><span class="nx">Unmarshal</span><span class="p">(</span><span class="nx">raw</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">js</span><span class="p">);</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Errorf</span><span class="p">(</span><span class="s">"tool %s: input schema: %w"</span><span class="p">,</span><span class="w"> </span><span class="nx">t</span><span class="p">.</span><span class="nx">Name</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">schema</span><span class="p">.</span><span class="nx">ToolInfo</span><span class="p">{</span><span class="nx">Name</span><span class="p">:</span><span class="w"> </span><span class="nx">t</span><span class="p">.</span><span class="nx">Name</span><span class="p">,</span><span class="w"> </span><span class="nx">Desc</span><span class="p">:</span><span class="w"> </span><span class="nx">t</span><span class="p">.</span><span class="nx">Description</span><span class="p">,</span><span class="w"> </span><span class="nx">ParamsOneOf</span><span class="p">:</span><span class="w"> </span><span class="nx">schema</span><span class="p">.</span><span class="nx">NewParamsOneOfByJSONSchema</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">js</span><span class="p">)},</span><span class="w"> </span><span class="kc">nil</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>Genkit 那边更简单：反序列化成 <code>map[string]any</code>，传给 <code>ai.WithInputSchema(in)</code>，工具的输入类型因此是 <code>any</code>。测试检查了转换之后 <code>required</code> 和字段描述都还在。（测试验证过）</p>
+<h3 id="52-错误两个框架的约定不同">5.2 错误：两个框架的约定不同</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>MCP 结果</th>
+<th>Eino 适配器</th>
+<th>Genkit 适配器</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>成功，有 <code>StructuredContent</code></td>
+<td>返回它的 JSON 字符串</td>
+<td>返回 <code>StructuredContent</code> 本身</td>
+</tr>
+<tr>
+<td>成功，只有文本</td>
+<td>返回拼接的文本</td>
+<td>返回拼接的文本</td>
+</tr>
+<tr>
+<td><code>IsError = true</code>（工具错误）</td>
+<td>返回 <code>"工具出错：" + 文本</code>，error 为 nil，模型能看到</td>
+<td>返回 <code>tool.Fail(ctx, err)</code>，模型看到 <code>{"error": ...}</code></td>
+</tr>
+<tr>
+<td><code>CallTool</code> 返回 err（协议错误）</td>
+<td>返回 err，运行失败</td>
+<td>返回 err，<code>Generate</code> 失败</td>
+</tr>
+</tbody>
+</table></div>
+<p>Eino 没有 <code>tool.Fail</code> 这样的标记，所以想让模型看到错误，只能作为正常输出返回。练习里两个框架的测试都让模型先调一个总是失败的 <code>broken</code> 工具，再调 <code>search_docs</code>，验证了模型在下一轮看到了错误信息，循环没有中断。（测试验证过）</p>
+<h3 id="53-生命周期">5.3 生命周期</h3>
+<ul>
+<li>适配器持有 <code>*mcp.ClientSession</code>，它要比 agent 活得久。服务关闭时 <code>cs.Close()</code>。</li>
+<li>工具列表在构造 agent 时取一次。服务端的工具可能变化（<code>notifications/tools/list_changed</code>），长期运行的服务需要处理变化通知，或者每次运行前重新取。2026-07-28 规范还加了可缓存的列表结果，SDK 的 <code>docs/server.md</code> 有一节专门讲。</li>
+<li>Genkit 的工具注册在 <code>*genkit.Genkit</code> 上，同一个名字注册两次会 panic。练习给 MCP 工具加了 <code>mcp_</code> 前缀，避免和本地工具重名。</li>
+</ul>
+<h2 id="6-同一件事三个库怎么写">6. 同一件事，三个库怎么写</h2>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>问题</th>
+<th>Eino ADK</th>
+<th>Genkit Go</th>
+<th>MCP Go SDK</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>循环上限</td>
+<td><code>MaxIterations</code>，数模型调用，默认 20</td>
+<td><code>WithMaxTurns</code>，数工具轮，默认 50</td>
+<td>不涉及；MRTR 自动重试最多 10 次</td>
+</tr>
+<tr>
+<td>上限设成 2 时模型调用次数</td>
+<td>2</td>
+<td>3</td>
+<td></td>
+</tr>
+<tr>
+<td>并行工具</td>
+<td>默认并行，<code>ExecuteSequentially</code> 改为顺序</td>
+<td>同一轮的多个工具算一轮</td>
+<td></td>
+</tr>
+<tr>
+<td>工具不存在</td>
+<td>默认运行失败，<code>UnknownToolsHandler</code> 兜底</td>
+<td>（工具定义来自注册表）</td>
+<td>协议错误</td>
+</tr>
+<tr>
+<td>工具出错让模型看到</td>
+<td>作为正常输出返回</td>
+<td><code>tool.Fail</code></td>
+<td>handler 返回 error 即可，自动变成 <code>IsError</code></td>
+</tr>
+<tr>
+<td>工具出错让运行失败</td>
+<td>返回 error</td>
+<td>返回普通 error</td>
+<td>不涉及</td>
+</tr>
+<tr>
+<td>参数校验</td>
+<td>由你在工具里做（<code>InferTool</code> 只做反序列化）</td>
+<td>按输入 schema 校验，不合法时整个 <code>Generate</code> 失败</td>
+<td>调 handler 前按 schema 校验，不合法时返回 <code>IsError</code> 结果</td>
+</tr>
+<tr>
+<td>人工审批</td>
+<td><code>StatefulInterrupt</code> + <code>ResumeWithParams</code></td>
+<td>可恢复工具 + <code>WithResume</code></td>
+<td><code>InputRequests</code> + <code>InputResponses</code></td>
+</tr>
+<tr>
+<td>审批期间的状态存在哪</td>
+<td><code>CheckPointStore</code>（框架写）</td>
+<td><code>resp.History()</code>（你自己存）</td>
+<td><code>RequestState</code>（客户端带回）</td>
+</tr>
+<tr>
+<td>恢复时</td>
+<td>工具重新执行</td>
+<td><code>Restart</code> 重新执行或 <code>Respond</code> 直接给结果</td>
+<td>handler 重新执行</td>
+</tr>
+</tbody>
+</table></div>
+<p>“恢复时重新执行”这一行三个库都一样。这也是 3.4 课的结论：能暂停的地方前面不要有副作用。</p>
+<h2 id="7-怎么选">7. 怎么选</h2>
+<ul>
+<li><strong>团队主力语言是 Go，要做的是 agent 产品（对话、多步、工具很多）</strong>：Eino ADK。它的 agent 运行时最完整（中断恢复、checkpoint、中间件、DeepAgent），组件生态大，在字节内部有大规模使用。代价是 v0，API 还在变；文档站点由飞书文档同步生成，细节以源码注释为准。</li>
+<li><strong>做的是“AI 功能”（总结、分类、抽取、带几个工具的问答），想要好用的开发工具和 trace</strong>：Genkit。<code>Generate</code> + flow 很顺手，Dev UI 调试方便，多家模型接口统一。agent 相关的 API 还在预览。</li>
+<li><strong>只需要调一两个模型、几个工具</strong>：可能两个都不需要，直接用厂商的 Go SDK 自己写循环（3.2 课那个循环几十行就够了）。这是 4.6 课要讨论的。</li>
+<li><strong>工具要给多个 agent、多种语言的客户端共用</strong>：放进 MCP 服务端，用官方 SDK 写。框架选什么都可以接。</li>
+<li>两个框架都想要的部分（比如 Eino 的编排 + Genkit 的 Dev UI）不要硬凑在一个服务里。它们各有一套模型、工具、消息类型，混用就要写双向转换。</li>
+</ul>
+<h2 id="8-练习代码导读">8. 练习代码导读</h2>
+<p><code>projects/27-go-ecosystem/</code> 里的文件：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>文件</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>eino_model.go</code></td>
+<td><code>ScriptedModel</code>：按脚本回复，记录每次的输入和工具列表；<code>ChunkRunes</code> 控制流式分片大小。<code>CallTool</code> / <code>Say</code> 构造脚本消息</td>
+</tr>
+<tr>
+<td><code>eino_graph.go</code></td>
+<td><code>NewTriageGraph</code>：classify → 分支 → refund / bug / human，局部状态记录路径；<code>TriageTool</code> 把图包成工具</td>
+</tr>
+<tr>
+<td><code>eino_agent.go</code></td>
+<td><code>MemoryStore</code>；<code>NewEinoRunner</code>；<code>Collect</code> 把事件收集成 <code>RunResult</code>；<code>RefundTool</code> 中断恢复示例</td>
+</tr>
+<tr>
+<td><code>genkit_part.go</code></td>
+<td><code>DefineScriptedModel</code>；<code>DefineStockTool</code>（<code>tool.Fail</code> 与普通错误）；<code>DefineTransferTool</code>（可恢复工具）；<code>DefineAskFlow</code></td>
+</tr>
+<tr>
+<td><code>mcp_bridge.go</code></td>
+<td><code>NewDocsServer</code>（search_docs / broken / delete_doc）；<code>ConnectInMemory</code>；<code>MCPToEino</code>；<code>MCPToGenkit</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>测试按文件分组：<code>eino_test.go</code>（图、图工具、agent、流式、上限、未知工具、中断恢复，10 个）、<code>genkit_test.go</code>（flow、<code>tool.Fail</code>、普通错误、<code>maxTurns</code>、<code>Restart</code>、<code>Respond</code>，6 个）、<code>mcp_test.go</code>（协议版本、schema 推断、参数校验与错误、MRTR、接入 Eino、接入 Genkit，6 个）。</p>
+<p>运行：</p>
+<div class="hl"><pre><span></span><code>cd projects/27-go-ecosystem
+make test
+</code></pre></div>
+
+<p>如果你的 Go 版本比 Eino 依赖的 sonic 支持的版本新，测试开头会打一行 <code>WARNING: sonic/ast only supports ...</code>，sonic 会退回 <code>encoding/json</code>，不影响结果。</p>
+<h2 id="9-常见的坑">9. 常见的坑</h2>
+<ol>
+<li><strong>假模型只实现了 <code>WithTools</code> 方法。</strong> <code>ChatModelAgent</code> 通过调用选项传工具，你的模型适配器要从 <code>opts</code> 里读，否则模型看不到工具。</li>
+<li><strong>流式事件没读完。</strong> Eino 的 <code>MessageStream</code> 必须读到 <code>io.EOF</code> 并 <code>Close</code>，不读完会泄漏 goroutine。用 <code>adk.GetMessage</code> 省事。</li>
+<li><strong>以为图外面用 <code>Invoke</code> 里面也能流式。</strong> 不能。要流式就整张图用 <code>Stream</code>。</li>
+<li><strong>中断状态里的类型没注册 gob。</strong> 恢复时报反序列化错误。<code>schema.RegisterName</code> 的名字以后也不能改。</li>
+<li><strong>恢复时“不是我”的工具没有再中断。</strong> 并行中断时其余的状态会丢。</li>
+<li><strong>中断前做了副作用。</strong> 三个库恢复时都会重新执行，退款、转账、删除要放在审批通过之后。</li>
+<li><strong>把 Genkit 中断数据写成字符串。</strong> <code>tool.Interrupt(ctx, "请确认")</code> 不会中断，会变成工具调用失败。用结构体或 map。</li>
+<li><strong>以为 Genkit 帮你存了中断状态。</strong> 没有，<code>resp.History()</code> 要你自己存。</li>
+<li><strong>两个框架的 <code>maxTurns</code> / <code>MaxIterations</code> 按同一个意思理解。</strong> 一个数工具轮，一个数模型调用。</li>
+<li><strong>MCP 工具错误当协议错误处理。</strong> handler 返回 error 时 <code>CallTool</code> 的 err 是 nil，要看 <code>res.IsError</code>。反过来，适配器把 <code>IsError</code> 当成运行失败，模型就失去了纠正的机会。</li>
+<li><strong>同一个结构体同时给 MCP SDK 和 Eino 推断 schema。</strong> 两边的 <code>jsonschema</code> 标签语法不同，一边的描述会丢或者解析错。各写各的类型，或者像练习那样只在 MCP 一侧定义、用 JSON 转换。</li>
+<li><strong>以为框架自带的 MCP 集成支持最新协议。</strong> 先看它依赖哪个 MCP 库、哪个版本。</li>
+<li><strong>以为 Genkit 会把参数错误交给模型。</strong> 参数不符合 schema 时整个 <code>Generate</code> 失败。</li>
+<li><strong>在 Genkit 上重复注册同名工具。</strong> 会 panic（<code>action "/tool.v2/check_stock" is already registered</code>），每次请求都 <code>DefineTool</code> 的写法不行，工具要在启动时注册一次。</li>
+</ol>
+<h2 id="10-练习">10. 练习</h2>
+<h3 id="练习-1读懂并跑通必做">练习 1：读懂并跑通（必做）</h3>
+<ol>
+<li><code>make test</code>，22 个测试全部通过。</li>
+<li>读 <code>TestRefundResumeInNewRunnerAndReject</code>，回答：第二个 Runner 用的模型脚本只有一条消息，为什么够用？</li>
+<li>把 <code>TestMaxIterationsStopsLoop</code> 的 <code>MaxIterations</code> 改成 3，<code>TestGenkitMaxTurns</code> 的 <code>WithMaxTurns</code> 改成 3，先预测两边模型各被调用几次，再改断言跑一遍。</li>
+<li>在 <code>NewEinoRunner</code> 里把 <code>ExecuteSequentially</code> 设成 true，写一个测试：模型一次要求两个工具调用，用两个会 <code>time.Sleep(50 * time.Millisecond)</code> 的工具，比较并行和顺序时 <code>Collect</code> 的耗时。</li>
+</ol>
+<h3 id="练习-2把-mcp-的输入请求变成-eino-中断必做">练习 2：把 MCP 的输入请求变成 Eino 中断（必做）</h3>
+<p>现在 MRTR 由 MCP 客户端的 <code>ElicitationHandler</code> 当场回答，这要求回答的人此刻就在线。改成走 Eino 的中断恢复：</p>
+<ul>
+<li>客户端关闭自动 MRTR：<code>&amp;mcp.ClientOptions{MultiRoundTrip: &amp;mcp.MultiRoundTripOptions{Disabled: true}}</code>。</li>
+<li>写 <code>MCPToEinoInterrupting(ctx, cs)</code>，返回的工具在 <code>res.NeedsInput()</code> 为 true 时调用 <code>tool.StatefulInterrupt</code>，保存工具名、原始参数、<code>RequestState</code>，以及每个输入请求要问的话（ElicitParams 的 <code>Message</code>）。</li>
+<li>恢复时，<code>ResumeWithParams</code> 传进来的数据类型是 <code>map[string]*mcp.ElicitResult</code>（key 是输入请求的 key）。工具用保存的参数和 <code>RequestState</code>，带上 <code>InputResponses</code> 重新调用 <code>CallTool</code>。</li>
+<li>不是恢复目标时原样再中断。</li>
+<li>测试：模型调用 <code>delete_doc</code>，运行中断，中断信息里能看到“确认删除《旧周报》？”；用 <code>{"confirm": {Action: "accept", Content: {"ok": true}}}</code> 恢复，工具输出是“已删除《旧周报》”，最终回答来自脚本。</li>
+</ul>
+<p>提示：中断状态是自定义类型，记得注册 gob。</p>
+<h3 id="练习-3genkit-版选做">练习 3：Genkit 版（选做）</h3>
+<p>同样的事情用 Genkit 做：写 <code>MCPToGenkitResumable(ctx, g, cs)</code>，把每个 MCP 工具注册成 <code>DefineResumableTool</code>，输入类型 <code>any</code>、输出类型 <code>any</code>、恢复类型自己定义。需要输入时用 <code>tool.Interrupt</code> 暂停，中断数据里放要问的话和 <code>RequestState</code>。调用方用 <code>Interrupted</code> 认领，读中断数据，<code>Restart</code> 时把答复和 <code>RequestState</code> 一起传回去。</p>
+<p>想一想：Eino 版的 <code>RequestState</code> 存在 checkpoint 里，Genkit 版存在哪里？哪种更适合“审批人明天才回复”？</p>
+<h2 id="11-自测题">11. 自测题</h2>
+<ol>
+<li>Eino 的 <code>ChatModel.BindTools</code> 和 <code>ToolCallingChatModel.WithTools</code> 有什么区别？为什么推荐后者？</li>
+<li>一张 Eino 图用 <code>Invoke</code> 调用，里面的 ChatModel 节点是流式调用的吗？</li>
+<li>Eino 文档认为 Graph 和 Agent 最好的结合方式是什么？为什么不推荐把 agent 当成 graph 的一个节点？</li>
+<li><code>ChatModelAgent</code> 的 <code>MaxIterations</code> 默认是多少？数的是什么？</li>
+<li>模型调用了一个不存在的工具，<code>ChatModelAgent</code> 默认怎么处理？怎么改？</li>
+<li>Eino 工具恢复时，<code>GetInterruptState</code> 和 <code>GetResumeContext</code> 分别回答什么问题？“不是恢复目标”时为什么要再中断一次？</li>
+<li>跨机器恢复一个中断的 Eino agent，需要两台机器共享什么？</li>
+<li>Genkit 的 <code>tool.Fail</code> 返回的错误和普通错误有什么不同？</li>
+<li><code>ai.WithMaxTurns(2)</code> 时模型最多被调用几次？</li>
+<li>Genkit 可恢复工具的 <code>Restart</code> 和 <code>Respond</code> 有什么区别？</li>
+<li>为什么 <code>tool.Interrupt(ctx, "请确认")</code> 不会中断？</li>
+<li>MCP Go SDK 的 <code>mcp.AddTool</code> 里，handler 返回 error 时客户端看到什么？参数缺少必填字段呢？工具名不存在呢？</li>
+<li>MCP Go SDK 的 <code>jsonschema</code> 标签和 Eino 的有什么不同？</li>
+<li>MRTR 里 <code>RequestState</code> 的作用是什么？</li>
+<li>用 Genkit 的 <code>plugins/mcp</code> 能拿到 2026-07-28 协议的特性吗？怎么判断？</li>
+</ol>
+<h2 id="12-自测题答案">12. 自测题答案</h2>
+<ol>
+<li><code>BindTools</code> 修改模型实例自己，多个 goroutine 共用一个实例、各自绑不同工具时会互相覆盖；<code>WithTools</code> 返回新实例，原实例不变，并发安全。</li>
+<li>不是。整张图用 Invoke 调用时，所有组件都按 Invoke 调用；要流式，整张图用 Stream 调用，这时内部组件都按 Transform 调用。</li>
+<li>把 graph 包成 agent 的工具。graph 的输入是结构化的、执行一次就结束、对调用方是同步的，和工具的特征一致。agent 依赖自己的对话历史，输出是一串异步的过程事件，放进 graph 当节点时下游很难使用它的输出。graph 里需要智能时放 LLM 节点就够了。</li>
+<li>默认 20，数的是模型生成的次数。超过后运行以错误结束。</li>
+<li>默认整次运行失败。配 <code>ToolsNodeConfig.UnknownToolsHandler</code>，返回一段文字（比如可用的工具列表）作为工具结果交给模型。</li>
+<li><code>GetInterruptState</code>：我之前中断过吗，存的状态是什么。<code>GetResumeContext</code>：这次恢复是冲着我来的吗，人给了什么数据。同一轮里多个工具并行中断时，恢复其中一个，其余的也会被重新执行；它们如果不再中断，原来保存的状态就没了，等到真正恢复它们时拿不到。</li>
+<li>同一个 <code>CheckPointStore</code>（比如同一个 Redis），以及 checkpoint ID 和中断 ID。模型、工具都可以是新实例，对话历史在 checkpoint 里。中断状态的类型要在两边用同样的名字注册 gob。</li>
+<li><code>tool.Fail</code> 的错误作为 <code>{"error": "..."}</code> 交给模型，工具循环继续；普通错误让 <code>Generate</code> 直接返回错误。</li>
+<li>3 次。前两次的工具请求都执行，第三次模型还要工具时报 <code>ErrMaxTurnsExceeded</code>。</li>
+<li><code>Restart</code> 重新执行工具函数，把恢复数据作为第三个参数传进去；<code>Respond</code> 不执行工具，直接用你给的值作为工具输出。</li>
+<li>中断数据必须能序列化成 JSON 对象（结构体或字符串 key 的 map），字符串是 JSON 标量。这时 <code>tool.Interrupt</code> 返回一个普通错误，工具调用失败。这样规定是为了让中断数据在进程内和通过网络传给远端调用方时形状一致。</li>
+<li>handler 返回 error：<code>CallTool</code> 的 err 为 nil，结果的 <code>IsError</code> 为 true，错误信息在 <code>Content</code> 里。缺少必填字段：同样是 <code>IsError</code> 结果，而且 handler 根本不会被调用。工具名不存在：协议错误，<code>CallTool</code> 返回非 nil 的 err。</li>
+<li>MCP SDK（<code>google/jsonschema-go</code>）的标签整段就是描述：<code>jsonschema:"要搜索的关键词"</code>。Eino（<code>eino-contrib/jsonschema</code>）用 <code>key=value</code>：<code>jsonschema:"description=用户的原话"</code>。</li>
+<li>服务端返回输入请求时附带的不透明字符串，客户端重试时原样带回。服务端可以把进度编码进去，第二次调用时据此继续，不需要按会话保存状态，这符合 2026-07-28 规范的无状态设计。</li>
+<li>不一定。Genkit Go v1.14.0 的 <code>plugins/mcp</code> 依赖 <code>mark3labs/mcp-go</code> v0.32.0，要看这个库的这个版本支持哪个协议版本。判断方法是看框架的 go.mod 里 MCP 库的名字和版本，再查那个版本支持的规范。</li>
+</ol>
+<h2 id="13-参考答案">13. 参考答案</h2>
+<h3 id="练习-1">练习 1</h3>
+<ol start="2">
+<li>对话历史（user 消息、带工具调用的 assistant 消息）都在 checkpoint 里，恢复后工具执行完，Runner 只需要再调一次模型拿最终回答。新模型的脚本只要覆盖恢复之后的调用。</li>
+<li><code>MaxIterations=3</code>：模型被调用 3 次后报错。<code>WithMaxTurns(3)</code>：模型被调用 4 次，第 4 次还要工具时报错。</li>
+<li>一个思路：</li>
+</ol>
+<div class="hl"><pre><span></span><code><span class="kd">type</span><span class="w"> </span><span class="nx">sleepTool</span><span class="w"> </span><span class="kd">struct</span><span class="p">{</span><span class="w"> </span><span class="nx">name</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">s</span><span class="w"> </span><span class="nx">sleepTool</span><span class="p">)</span><span class="w"> </span><span class="nx">Info</span><span class="p">(</span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="nx">schema</span><span class="p">.</span><span class="nx">ToolInfo</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">schema</span><span class="p">.</span><span class="nx">ToolInfo</span><span class="p">{</span><span class="nx">Name</span><span class="p">:</span><span class="w"> </span><span class="nx">s</span><span class="p">.</span><span class="nx">name</span><span class="p">,</span><span class="w"> </span><span class="nx">Desc</span><span class="p">:</span><span class="w"> </span><span class="s">"sleep"</span><span class="p">},</span><span class="w"> </span><span class="kc">nil</span>
+<span class="p">}</span>
+<span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">s</span><span class="w"> </span><span class="nx">sleepTool</span><span class="p">)</span><span class="w"> </span><span class="nx">InvokableRun</span><span class="p">(</span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="p">...</span><span class="nx">tool</span><span class="p">.</span><span class="nx">Option</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">time</span><span class="p">.</span><span class="nx">Sleep</span><span class="p">(</span><span class="mi">50</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Millisecond</span><span class="p">)</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="s">"ok"</span><span class="p">,</span><span class="w"> </span><span class="kc">nil</span>
+<span class="p">}</span>
+
+<span class="c1">// 模型脚本：一条消息里两个工具调用，然后 Say("done")</span>
+<span class="nx">msg</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">schema</span><span class="p">.</span><span class="nx">AssistantMessage</span><span class="p">(</span><span class="s">""</span><span class="p">,</span><span class="w"> </span><span class="p">[]</span><span class="nx">schema</span><span class="p">.</span><span class="nx">ToolCall</span><span class="p">{</span>
+<span class="w">    </span><span class="p">{</span><span class="nx">ID</span><span class="p">:</span><span class="w"> </span><span class="s">"1"</span><span class="p">,</span><span class="w"> </span><span class="nx">Function</span><span class="p">:</span><span class="w"> </span><span class="nx">schema</span><span class="p">.</span><span class="nx">FunctionCall</span><span class="p">{</span><span class="nx">Name</span><span class="p">:</span><span class="w"> </span><span class="s">"a"</span><span class="p">,</span><span class="w"> </span><span class="nx">Arguments</span><span class="p">:</span><span class="w"> </span><span class="s">"{}"</span><span class="p">}},</span>
+<span class="w">    </span><span class="p">{</span><span class="nx">ID</span><span class="p">:</span><span class="w"> </span><span class="s">"2"</span><span class="p">,</span><span class="w"> </span><span class="nx">Function</span><span class="p">:</span><span class="w"> </span><span class="nx">schema</span><span class="p">.</span><span class="nx">FunctionCall</span><span class="p">{</span><span class="nx">Name</span><span class="p">:</span><span class="w"> </span><span class="s">"b"</span><span class="p">,</span><span class="w"> </span><span class="nx">Arguments</span><span class="p">:</span><span class="w"> </span><span class="s">"{}"</span><span class="p">}},</span>
+<span class="p">})</span>
+<span class="c1">// 并行时 Collect 耗时约 50ms，ExecuteSequentially=true 时约 100ms。</span>
+<span class="c1">// 断言用宽松的阈值（比如并行 &lt; 90ms、顺序 &gt;= 100ms），避免 CI 机器慢导致误报。</span>
+</code></pre></div>
+
+<p><code>AgentOptions</code> 需要加一个 <code>Sequential bool</code> 字段，传给 <code>ToolsNodeConfig.ExecuteSequentially</code>。</p>
+<h3 id="练习-2">练习 2</h3>
+<div class="hl"><pre><span></span><code><span class="c1">// MCPPending 是中断时保存的状态，也是交给人看的信息。</span>
+<span class="kd">type</span><span class="w"> </span><span class="nx">MCPPending</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">Tool</span><span class="w">         </span><span class="kt">string</span>
+<span class="w">    </span><span class="nx">Args</span><span class="w">         </span><span class="kt">string</span>
+<span class="w">    </span><span class="nx">RequestState</span><span class="w"> </span><span class="kt">string</span>
+<span class="w">    </span><span class="nx">Questions</span><span class="w">    </span><span class="kt">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">string</span><span class="w"> </span><span class="c1">// 输入请求的 key → 要问用户的话</span>
+<span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="nx">init</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">schema</span><span class="p">.</span><span class="nx">RegisterName</span><span class="p">[</span><span class="o">*</span><span class="nx">MCPPending</span><span class="p">](</span><span class="s">"goeco_mcp_pending"</span><span class="p">)</span><span class="w"> </span><span class="p">}</span>
+
+<span class="kd">type</span><span class="w"> </span><span class="nx">interruptingMCPTool</span><span class="w"> </span><span class="kd">struct</span><span class="p">{</span><span class="w"> </span><span class="nx">einoMCPTool</span><span class="w"> </span><span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="nx">MCPToEinoInterrupting</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">cs</span><span class="w"> </span><span class="o">*</span><span class="nx">mcp</span><span class="p">.</span><span class="nx">ClientSession</span><span class="p">)</span><span class="w"> </span><span class="p">([]</span><span class="nx">tool</span><span class="p">.</span><span class="nx">BaseTool</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">base</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">MCPToEino</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">cs</span><span class="p">)</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="nx">out</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">make</span><span class="p">([]</span><span class="nx">tool</span><span class="p">.</span><span class="nx">BaseTool</span><span class="p">,</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">base</span><span class="p">))</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="p">,</span><span class="w"> </span><span class="nx">b</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">base</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">out</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">interruptingMCPTool</span><span class="p">{</span><span class="o">*</span><span class="nx">b</span><span class="p">.(</span><span class="o">*</span><span class="nx">einoMCPTool</span><span class="p">)}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">out</span><span class="p">,</span><span class="w"> </span><span class="kc">nil</span>
+<span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">t</span><span class="w"> </span><span class="o">*</span><span class="nx">interruptingMCPTool</span><span class="p">)</span><span class="w"> </span><span class="nx">InvokableRun</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">args</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="p">...</span><span class="nx">tool</span><span class="p">.</span><span class="nx">Option</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">params</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">mcp</span><span class="p">.</span><span class="nx">CallToolParams</span><span class="p">{</span><span class="nx">Name</span><span class="p">:</span><span class="w"> </span><span class="nx">t</span><span class="p">.</span><span class="nx">info</span><span class="p">.</span><span class="nx">Name</span><span class="p">,</span><span class="w"> </span><span class="nx">Arguments</span><span class="p">:</span><span class="w"> </span><span class="nx">json</span><span class="p">.</span><span class="nx">RawMessage</span><span class="p">(</span><span class="nx">args</span><span class="p">)}</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">was</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">p</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">tool</span><span class="p">.</span><span class="nx">GetInterruptState</span><span class="p">[</span><span class="o">*</span><span class="nx">MCPPending</span><span class="p">](</span><span class="nx">ctx</span><span class="p">);</span><span class="w"> </span><span class="nx">was</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">isTarget</span><span class="p">,</span><span class="w"> </span><span class="nx">hasData</span><span class="p">,</span><span class="w"> </span><span class="nx">answers</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">tool</span><span class="p">.</span><span class="nx">GetResumeContext</span><span class="p">[</span><span class="kt">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="o">*</span><span class="nx">mcp</span><span class="p">.</span><span class="nx">ElicitResult</span><span class="p">](</span><span class="nx">ctx</span><span class="p">)</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="o">!</span><span class="nx">isTarget</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="o">!</span><span class="nx">hasData</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="s">""</span><span class="p">,</span><span class="w"> </span><span class="nx">tool</span><span class="p">.</span><span class="nx">StatefulInterrupt</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">p</span><span class="p">,</span><span class="w"> </span><span class="nx">p</span><span class="p">)</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="nx">params</span><span class="p">.</span><span class="nx">Arguments</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">json</span><span class="p">.</span><span class="nx">RawMessage</span><span class="p">(</span><span class="nx">p</span><span class="p">.</span><span class="nx">Args</span><span class="p">)</span>
+<span class="w">        </span><span class="nx">params</span><span class="p">.</span><span class="nx">RequestState</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">p</span><span class="p">.</span><span class="nx">RequestState</span>
+<span class="w">        </span><span class="nx">params</span><span class="p">.</span><span class="nx">InputResponses</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">mcp</span><span class="p">.</span><span class="nx">InputResponseMap</span><span class="p">{}</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="nx">k</span><span class="p">,</span><span class="w"> </span><span class="nx">v</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">answers</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nx">params</span><span class="p">.</span><span class="nx">InputResponses</span><span class="p">[</span><span class="nx">k</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">v</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nx">res</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">t</span><span class="p">.</span><span class="nx">cs</span><span class="p">.</span><span class="nx">CallTool</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">params</span><span class="p">)</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="s">""</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">res</span><span class="p">.</span><span class="nx">NeedsInput</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">p</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">MCPPending</span><span class="p">{</span><span class="nx">Tool</span><span class="p">:</span><span class="w"> </span><span class="nx">t</span><span class="p">.</span><span class="nx">info</span><span class="p">.</span><span class="nx">Name</span><span class="p">,</span><span class="w"> </span><span class="nx">Args</span><span class="p">:</span><span class="w"> </span><span class="nx">args</span><span class="p">,</span><span class="w"> </span><span class="nx">RequestState</span><span class="p">:</span><span class="w"> </span><span class="nx">res</span><span class="p">.</span><span class="nx">RequestState</span><span class="p">,</span><span class="w"> </span><span class="nx">Questions</span><span class="p">:</span><span class="w"> </span><span class="kt">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">string</span><span class="p">{}}</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="nx">k</span><span class="p">,</span><span class="w"> </span><span class="nx">r</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">res</span><span class="p">.</span><span class="nx">InputRequests</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="nx">e</span><span class="p">,</span><span class="w"> </span><span class="nx">ok</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">r</span><span class="p">.(</span><span class="o">*</span><span class="nx">mcp</span><span class="p">.</span><span class="nx">ElicitParams</span><span class="p">);</span><span class="w"> </span><span class="nx">ok</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="nx">p</span><span class="p">.</span><span class="nx">Questions</span><span class="p">[</span><span class="nx">k</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">e</span><span class="p">.</span><span class="nx">Message</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="s">""</span><span class="p">,</span><span class="w"> </span><span class="nx">tool</span><span class="p">.</span><span class="nx">StatefulInterrupt</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">p</span><span class="p">,</span><span class="w"> </span><span class="nx">p</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">res</span><span class="p">.</span><span class="nx">IsError</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="s">"工具出错："</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">resultText</span><span class="p">(</span><span class="nx">res</span><span class="p">),</span><span class="w"> </span><span class="kc">nil</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">resultText</span><span class="p">(</span><span class="nx">res</span><span class="p">),</span><span class="w"> </span><span class="kc">nil</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>测试：</p>
+<div class="hl"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nx">TestMCPInputBecomesEinoInterrupt</span><span class="p">(</span><span class="nx">t</span><span class="w"> </span><span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">T</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">ctx</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Background</span><span class="p">()</span>
+<span class="w">    </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">cs</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">connect</span><span class="p">(</span><span class="nx">t</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">mcp</span><span class="p">.</span><span class="nx">ClientOptions</span><span class="p">{</span><span class="nx">MultiRoundTrip</span><span class="p">:</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">mcp</span><span class="p">.</span><span class="nx">MultiRoundTripOptions</span><span class="p">{</span><span class="nx">Disabled</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">}})</span>
+<span class="w">    </span><span class="nx">tools</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">MCPToEinoInterrupting</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">cs</span><span class="p">)</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">t</span><span class="p">.</span><span class="nx">Fatal</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="nx">store</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">NewMemoryStore</span><span class="p">()</span>
+<span class="w">    </span><span class="nx">m</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">NewScriptedModel</span><span class="p">(</span><span class="nx">CallTool</span><span class="p">(</span><span class="s">"c1"</span><span class="p">,</span><span class="w"> </span><span class="s">"delete_doc"</span><span class="p">,</span><span class="w"> </span><span class="s">`{"title":"旧周报"}`</span><span class="p">),</span><span class="w"> </span><span class="nx">Say</span><span class="p">(</span><span class="s">"删好了"</span><span class="p">))</span>
+<span class="w">    </span><span class="nx">r</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">NewEinoRunner</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">m</span><span class="p">,</span><span class="w"> </span><span class="nx">store</span><span class="p">,</span><span class="w"> </span><span class="nx">AgentOptions</span><span class="p">{},</span><span class="w"> </span><span class="nx">tools</span><span class="p">...)</span>
+
+<span class="w">    </span><span class="nx">res</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">Collect</span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nx">Query</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="s">"删掉旧周报"</span><span class="p">,</span><span class="w"> </span><span class="nx">adk</span><span class="p">.</span><span class="nx">WithCheckPointID</span><span class="p">(</span><span class="s">"d1"</span><span class="p">)))</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">res</span><span class="p">.</span><span class="nx">Interrupts</span><span class="p">)</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">t</span><span class="p">.</span><span class="nx">Fatalf</span><span class="p">(</span><span class="s">"err %v interrupts %d"</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="p">,</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">res</span><span class="p">.</span><span class="nx">Interrupts</span><span class="p">))</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="nx">p</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">res</span><span class="p">.</span><span class="nx">Interrupts</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">Info</span><span class="p">.(</span><span class="o">*</span><span class="nx">MCPPending</span><span class="p">)</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">p</span><span class="p">.</span><span class="nx">Questions</span><span class="p">[</span><span class="s">"confirm"</span><span class="p">]</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="s">"确认删除《旧周报》？"</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">t</span><span class="p">.</span><span class="nx">Fatalf</span><span class="p">(</span><span class="s">"%+v"</span><span class="p">,</span><span class="w"> </span><span class="nx">p</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nx">iter</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">ResumeWithParams</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="s">"d1"</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">adk</span><span class="p">.</span><span class="nx">ResumeParams</span><span class="p">{</span><span class="nx">Targets</span><span class="p">:</span><span class="w"> </span><span class="kt">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">any</span><span class="p">{</span>
+<span class="w">        </span><span class="nx">res</span><span class="p">.</span><span class="nx">Interrupts</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">ID</span><span class="p">:</span><span class="w"> </span><span class="kt">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="o">*</span><span class="nx">mcp</span><span class="p">.</span><span class="nx">ElicitResult</span><span class="p">{</span>
+<span class="w">            </span><span class="s">"confirm"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nx">Action</span><span class="p">:</span><span class="w"> </span><span class="s">"accept"</span><span class="p">,</span><span class="w"> </span><span class="nx">Content</span><span class="p">:</span><span class="w"> </span><span class="kt">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">any</span><span class="p">{</span><span class="s">"ok"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">}},</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">    </span><span class="p">}})</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">t</span><span class="p">.</span><span class="nx">Fatal</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="nx">res</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Collect</span><span class="p">(</span><span class="nx">iter</span><span class="p">)</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">t</span><span class="p">.</span><span class="nx">Fatal</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">res</span><span class="p">.</span><span class="nx">ToolOutputs</span><span class="p">[</span><span class="s">"delete_doc"</span><span class="p">]</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="s">"已删除《旧周报》"</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nx">res</span><span class="p">.</span><span class="nx">Final</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="s">"删好了"</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">t</span><span class="p">.</span><span class="nx">Fatalf</span><span class="p">(</span><span class="s">"%v %q"</span><span class="p">,</span><span class="w"> </span><span class="nx">res</span><span class="p">.</span><span class="nx">ToolOutputs</span><span class="p">,</span><span class="w"> </span><span class="nx">res</span><span class="p">.</span><span class="nx">Final</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>两个细节：恢复时用的是保存的 <code>p.Args</code>，不是这次传进来的 <code>args</code>（通常相同，但以 checkpoint 为准更稳）；<code>MCPPending</code> 里只放能被 gob 序列化的字段，<code>ElicitParams</code> 里的 schema 不要整个存进去，只存要问的话。这段代码在写课时的沙箱里跑通过。</p>
+<h3 id="练习-3">练习 3</h3>
+<div class="hl"><pre><span></span><code><span class="kd">type</span><span class="w"> </span><span class="nx">MCPAnswer</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">RequestState</span><span class="w"> </span><span class="kt">string</span><span class="w">                       </span><span class="s">`json:"requestState"`</span>
+<span class="w">    </span><span class="nx">Answers</span><span class="w">      </span><span class="kt">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="o">*</span><span class="nx">mcp</span><span class="p">.</span><span class="nx">ElicitResult</span><span class="w"> </span><span class="s">`json:"answers"`</span>
+<span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="nx">MCPToGenkitResumable</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">g</span><span class="w"> </span><span class="o">*</span><span class="nx">genkit</span><span class="p">.</span><span class="nx">Genkit</span><span class="p">,</span><span class="w"> </span><span class="nx">cs</span><span class="w"> </span><span class="o">*</span><span class="nx">mcp</span><span class="p">.</span><span class="nx">ClientSession</span><span class="p">)</span><span class="w"> </span><span class="p">([]</span><span class="o">*</span><span class="nx">ai</span><span class="p">.</span><span class="nx">ResumableToolAction</span><span class="p">[</span><span class="kt">any</span><span class="p">,</span><span class="w"> </span><span class="kt">any</span><span class="p">,</span><span class="w"> </span><span class="nx">MCPAnswer</span><span class="p">],</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nx">out</span><span class="w"> </span><span class="p">[]</span><span class="o">*</span><span class="nx">ai</span><span class="p">.</span><span class="nx">ResumableToolAction</span><span class="p">[</span><span class="kt">any</span><span class="p">,</span><span class="w"> </span><span class="kt">any</span><span class="p">,</span><span class="w"> </span><span class="nx">MCPAnswer</span><span class="p">]</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">t</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">cs</span><span class="p">.</span><span class="nx">Tools</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="kc">nil</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="kd">var</span><span class="w"> </span><span class="nx">in</span><span class="w"> </span><span class="kt">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">any</span>
+<span class="w">        </span><span class="nx">raw</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">json</span><span class="p">.</span><span class="nx">Marshal</span><span class="p">(</span><span class="nx">t</span><span class="p">.</span><span class="nx">InputSchema</span><span class="p">)</span>
+<span class="w">        </span><span class="nx">_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">json</span><span class="p">.</span><span class="nx">Unmarshal</span><span class="p">(</span><span class="nx">raw</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">in</span><span class="p">)</span>
+<span class="w">        </span><span class="nx">name</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">t</span><span class="p">.</span><span class="nx">Name</span>
+<span class="w">        </span><span class="nx">out</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">out</span><span class="p">,</span><span class="w"> </span><span class="nx">genkit</span><span class="p">.</span><span class="nx">DefineResumableTool</span><span class="p">(</span><span class="nx">g</span><span class="p">,</span><span class="w"> </span><span class="s">"mcp_"</span><span class="o">+</span><span class="nx">name</span><span class="p">,</span><span class="w"> </span><span class="nx">t</span><span class="p">.</span><span class="nx">Description</span><span class="p">,</span>
+<span class="w">            </span><span class="kd">func</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">input</span><span class="w"> </span><span class="kt">any</span><span class="p">,</span><span class="w"> </span><span class="nx">ans</span><span class="w"> </span><span class="o">*</span><span class="nx">MCPAnswer</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="kt">any</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="nx">params</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">mcp</span><span class="p">.</span><span class="nx">CallToolParams</span><span class="p">{</span><span class="nx">Name</span><span class="p">:</span><span class="w"> </span><span class="nx">name</span><span class="p">,</span><span class="w"> </span><span class="nx">Arguments</span><span class="p">:</span><span class="w"> </span><span class="nx">input</span><span class="p">}</span>
+<span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="nx">ans</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                    </span><span class="nx">params</span><span class="p">.</span><span class="nx">RequestState</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">ans</span><span class="p">.</span><span class="nx">RequestState</span>
+<span class="w">                    </span><span class="nx">params</span><span class="p">.</span><span class="nx">InputResponses</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">mcp</span><span class="p">.</span><span class="nx">InputResponseMap</span><span class="p">{}</span>
+<span class="w">                    </span><span class="k">for</span><span class="w"> </span><span class="nx">k</span><span class="p">,</span><span class="w"> </span><span class="nx">v</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">ans</span><span class="p">.</span><span class="nx">Answers</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                        </span><span class="nx">params</span><span class="p">.</span><span class="nx">InputResponses</span><span class="p">[</span><span class="nx">k</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">v</span>
+<span class="w">                    </span><span class="p">}</span>
+<span class="w">                </span><span class="p">}</span>
+<span class="w">                </span><span class="nx">res</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">cs</span><span class="p">.</span><span class="nx">CallTool</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">params</span><span class="p">)</span>
+<span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                    </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span>
+<span class="w">                </span><span class="p">}</span>
+<span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="nx">res</span><span class="p">.</span><span class="nx">NeedsInput</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                    </span><span class="nx">q</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="kt">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">any</span><span class="p">{</span><span class="s">"requestState"</span><span class="p">:</span><span class="w"> </span><span class="nx">res</span><span class="p">.</span><span class="nx">RequestState</span><span class="p">}</span>
+<span class="w">                    </span><span class="k">for</span><span class="w"> </span><span class="nx">k</span><span class="p">,</span><span class="w"> </span><span class="nx">r</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">res</span><span class="p">.</span><span class="nx">InputRequests</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                        </span><span class="k">if</span><span class="w"> </span><span class="nx">e</span><span class="p">,</span><span class="w"> </span><span class="nx">ok</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">r</span><span class="p">.(</span><span class="o">*</span><span class="nx">mcp</span><span class="p">.</span><span class="nx">ElicitParams</span><span class="p">);</span><span class="w"> </span><span class="nx">ok</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                            </span><span class="nx">q</span><span class="p">[</span><span class="nx">k</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">e</span><span class="p">.</span><span class="nx">Message</span>
+<span class="w">                        </span><span class="p">}</span>
+<span class="w">                    </span><span class="p">}</span>
+<span class="w">                    </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="nx">gktool</span><span class="p">.</span><span class="nx">Interrupt</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">q</span><span class="p">)</span>
+<span class="w">                </span><span class="p">}</span>
+<span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="nx">res</span><span class="p">.</span><span class="nx">IsError</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                    </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="nx">gktool</span><span class="p">.</span><span class="nx">Fail</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">errors</span><span class="p">.</span><span class="nx">New</span><span class="p">(</span><span class="nx">resultText</span><span class="p">(</span><span class="nx">res</span><span class="p">)))</span>
+<span class="w">                </span><span class="p">}</span>
+<span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="nx">resultText</span><span class="p">(</span><span class="nx">res</span><span class="p">),</span><span class="w"> </span><span class="kc">nil</span>
+<span class="w">            </span><span class="p">},</span><span class="w"> </span><span class="nx">ai</span><span class="p">.</span><span class="nx">WithInputSchema</span><span class="p">(</span><span class="nx">in</span><span class="p">)))</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">out</span><span class="p">,</span><span class="w"> </span><span class="kc">nil</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>调用方：</p>
+<div class="hl"><pre><span></span><code><span class="nx">resp</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">genkit</span><span class="p">.</span><span class="nx">Generate</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">g</span><span class="p">,</span><span class="w"> </span><span class="nx">ai</span><span class="p">.</span><span class="nx">WithModel</span><span class="p">(</span><span class="nx">m</span><span class="p">),</span><span class="w"> </span><span class="nx">ai</span><span class="p">.</span><span class="nx">WithPrompt</span><span class="p">(</span><span class="s">"删"</span><span class="p">),</span><span class="w"> </span><span class="nx">ai</span><span class="p">.</span><span class="nx">WithTools</span><span class="p">(</span><span class="nx">refs</span><span class="p">...))</span>
+<span class="nx">part</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">resp</span><span class="p">.</span><span class="nx">Interrupts</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+<span class="nx">call</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">del</span><span class="p">.</span><span class="nx">Interrupted</span><span class="p">(</span><span class="nx">part</span><span class="p">)</span><span class="w">                 </span><span class="c1">// del 是 mcp_delete_doc 那个工具</span>
+<span class="nx">q</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">ai</span><span class="p">.</span><span class="nx">InterruptAs</span><span class="p">[</span><span class="kt">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">any</span><span class="p">](</span><span class="nx">part</span><span class="p">)</span><span class="w">     </span><span class="c1">// q["confirm"] 是要问的话</span>
+<span class="nx">rs</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">q</span><span class="p">[</span><span class="s">"requestState"</span><span class="p">].(</span><span class="kt">string</span><span class="p">)</span>
+<span class="nx">resp</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">genkit</span><span class="p">.</span><span class="nx">Generate</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">g</span><span class="p">,</span><span class="w"> </span><span class="nx">ai</span><span class="p">.</span><span class="nx">WithModel</span><span class="p">(</span><span class="nx">m</span><span class="p">),</span><span class="w"> </span><span class="nx">ai</span><span class="p">.</span><span class="nx">WithMessages</span><span class="p">(</span><span class="nx">resp</span><span class="p">.</span><span class="nx">History</span><span class="p">()...),</span><span class="w"> </span><span class="nx">ai</span><span class="p">.</span><span class="nx">WithTools</span><span class="p">(</span><span class="nx">refs</span><span class="p">...),</span>
+<span class="w">    </span><span class="nx">ai</span><span class="p">.</span><span class="nx">WithResume</span><span class="p">(</span><span class="nx">call</span><span class="p">.</span><span class="nx">Restart</span><span class="p">(</span><span class="nx">MCPAnswer</span><span class="p">{</span><span class="nx">RequestState</span><span class="p">:</span><span class="w"> </span><span class="nx">rs</span><span class="p">,</span><span class="w"> </span><span class="nx">Answers</span><span class="p">:</span><span class="w"> </span><span class="kt">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="o">*</span><span class="nx">mcp</span><span class="p">.</span><span class="nx">ElicitResult</span><span class="p">{</span>
+<span class="w">        </span><span class="s">"confirm"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nx">Action</span><span class="p">:</span><span class="w"> </span><span class="s">"accept"</span><span class="p">,</span><span class="w"> </span><span class="nx">Content</span><span class="p">:</span><span class="w"> </span><span class="kt">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">any</span><span class="p">{</span><span class="s">"ok"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">}},</span>
+<span class="w">    </span><span class="p">}})))</span>
+</code></pre></div>
+
+<p>Genkit 版的 <code>RequestState</code> 在中断数据里，中断数据在 <code>resp.History()</code> 的最后一条消息上，所以它和对话一起由你保存。审批人明天才回复的话，两种都行，区别在于谁负责存：Eino 由 Runner 写进 <code>CheckPointStore</code>，你只需要提供一个持久化的 store；Genkit 要你自己把 <code>History()</code> 存进数据库，第二天读出来。Eino 省事，Genkit 更透明，存储格式完全在你手里。这段代码也在写课时的沙箱里跑通过。</p>
+<h2 id="完成标准">完成标准</h2>
+<ul>
+<li><code>make test</code> 22 个测试全部通过，<code>go vet</code> 干净。</li>
+<li>能说清楚 Eino 的 <code>MaxIterations</code> 和 Genkit 的 <code>maxTurns</code> 各数的是什么，设成同一个数时模型调用次数差多少。</li>
+<li>能写一个 Eino 工具，正确处理中断、恢复、“不是恢复目标时再中断”，并说明跨实例恢复需要共享什么。</li>
+<li>能说清楚 MCP 工具错误和协议错误的区别，以及在 Eino、Genkit 里分别怎么交给模型。</li>
+<li>练习 2 完成：MCP 的输入请求变成 Eino 中断，恢复后工具拿到答复并完成调用。</li>
+<li>能根据项目情况在 Eino、Genkit、不用框架之间做出选择，并说出理由。</li>
+</ul>
+    <nav class="pager"><a class="prev" href="04-03-claude-agent-sdk.html"><span>← 上一课 4.3</span>Claude Agent SDK：agent 循环、六步权限、hooks、子 agent 与会话</a></nav>
+    <p class="foot">© 2026 duang777 · 课件源文件：<a href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/notes/04-frameworks/04-go-ecosystem.md">notes/04-frameworks/04-go-ecosystem.md</a></p>
+  </article>
+</div>
+<script>
+document.getElementById("theme-toggle").addEventListener("click",function(){var r=document.documentElement,n=r.getAttribute("data-theme")==="light"?"dark":"light";r.setAttribute("data-theme",n);try{localStorage.setItem("x-theme",n)}catch(e){}});
+document.querySelectorAll('article pre').forEach(function(pre){
+  var b=document.createElement('button');b.className='code__copy';b.textContent='复制';
+  b.onclick=function(){navigator.clipboard.writeText(pre.innerText).then(function(){b.textContent='已复制';setTimeout(function(){b.textContent='复制'},1200)})};
+  pre.parentNode.insertBefore(b,pre);
+});
+var links=[].slice.call(document.querySelectorAll('.toc a')),map={};
+links.forEach(function(a){map[decodeURIComponent(a.getAttribute('href').slice(1))]=a});
+var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting&&map[e.target.id]){links.forEach(function(l){l.classList.remove('on')});map[e.target.id].classList.add('on')}})},{rootMargin:'-80px 0px -70% 0px'});
+document.querySelectorAll('article h1[id],article h2[id]').forEach(function(h){io.observe(h)});
+</script>
+</body>
+</html>

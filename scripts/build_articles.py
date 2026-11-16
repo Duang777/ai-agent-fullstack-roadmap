@@ -49,6 +49,7 @@ LESSONS = [
     ("notes/04-frameworks/01-langgraph.md", "04-01-langgraph", "4.1", "LangGraph：状态图、持久化与 interrupt", "4–5 小时"),
     ("notes/04-frameworks/02-openai-agents-sdk.md", "04-02-openai-agents-sdk", "4.2", "OpenAI Agents SDK：Runner 循环、handoff、guardrail 与 RunState", "4–5 小时"),
     ("notes/04-frameworks/03-claude-agent-sdk.md", "04-03-claude-agent-sdk", "4.3", "Claude Agent SDK：agent 循环、六步权限、hooks、子 agent 与会话", "4–5 小时"),
+    ("notes/04-frameworks/04-go-ecosystem.md", "04-04-go-ecosystem", "4.4", "Go 生态：Eino、Genkit Go 与官方 MCP Go SDK", "4–5 小时"),
 ]
 
 CSS = r"""

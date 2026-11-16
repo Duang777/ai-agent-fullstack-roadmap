@@ -263,14 +263,14 @@
         <section class="stats" data-reveal>
           <div class="stat"><span class="stat__fig x-mono">14</span><span class="stat__label">模块</span></div>
           <div class="stat"><span class="stat__fig x-mono">84</span><span class="stat__label">知识点</span></div>
-          <div class="stat"><span class="stat__fig x-mono">Day 21</span><span class="stat__label">今天</span></div>
+          <div class="stat"><span class="stat__fig x-mono">Day 22</span><span class="stat__label">今天</span></div>
           <div class="stat"><span class="stat__fig x-mono">20/84</span><span class="stat__label">已完成</span></div>
         </section>
 
         <section class="section" id="progress" data-nav="进度">
           <div class="head" data-reveal>
             <p class="head__eyebrow x-kicker">当前进度</p>
-            <h2 class="x-h2">00 基础功底、01 LLM 原理与使用、02 工具调用与协议全部完成；03 Agent 架构已完成 3.1–3.3，3.4–3.7 练习进行中，模块 03 课件全部完成；04 框架与 SDK 进行中，4.1 LangGraph、4.2 OpenAI Agents SDK、4.3 Claude Agent SDK 已发布。</h2>
+            <h2 class="x-h2">00 基础功底、01 LLM 原理与使用、02 工具调用与协议全部完成；03 Agent 架构已完成 3.1–3.3，3.4–3.7 练习进行中，模块 03 课件全部完成；04 框架与 SDK 进行中，4.1 LangGraph、4.2 OpenAI Agents SDK、4.3 Claude Agent SDK、4.4 Go 生态已发布。</h2>
             <p class="head__sub">学完且有笔记或代码产出，才在 ROADMAP 里打勾。</p>
           </div>
           <div class="x-progress" data-reveal>
@@ -791,6 +791,25 @@
                 <dd><span class="chip x-chip x-chip--live">进行中</span></dd>
               </dl>
             </article>
+            <article class="step">
+              <div class="step__intro">
+                <p class="step__num x-step-num">4.4</p>
+                <p class="step__eyebrow">进行中 · 04 框架与 SDK</p>
+              </div>
+              <div>
+                <h3>Go 生态：Eino、Genkit Go 与官方 MCP Go SDK</h3>
+                <p class="sub">这次不重写，直接用真库：Eino 的 Graph 包成工具、ADK 中断恢复和跨实例 checkpoint；Genkit 的工具循环、tool.Fail 与可恢复工具；官方 MCP SDK 的类型化工具和 MRTR。最后把同一个 MCP 服务端接进两个框架。</p>
+                <div class="links" style="margin-top: 16px">
+                  <a class="x-btn x-btn--primary" href="notes/04-04-go-ecosystem.html">在线阅读</a>
+                </div>
+              </div>
+              <dl class="step__panel">
+                <dt>课件</dt>
+                <dd><span class="chip x-chip x-chip--done">已完成</span></dd>
+                <dt>练习</dt>
+                <dd><span class="chip x-chip x-chip--live">进行中</span></dd>
+              </dl>
+            </article>
           </div>
         </section>
 
@@ -801,6 +820,20 @@
           </div>
           <ol class="timeline" data-reveal>
             <li class="is-current">
+              <p class="timeline__when"><span class="x-mono">Day 22 · 2026-11-16</span></p>
+              <div class="timeline__what">
+                <p><strong>Go 生态：用真库，看它们和预想不一样的地方</strong></p>
+                <ul>
+                  <li>Eino：流程固定的部分写成 Graph 再包成工具；类型在连边时检查，错误粘在图上</li>
+                  <li>MaxIterations 数模型调用，maxTurns 数工具轮：都设成 2，模型分别被调 2 次和 3 次</li>
+                  <li>Eino 中断：不是恢复目标就原样再中断；跨机器恢复只需要共享 CheckPointStore</li>
+                  <li>MCP Go SDK：handler 返回 error 是工具错误不是协议错误；MRTR 默认由客户端自动应答</li>
+                </ul>
+                <p class="x-think">思考：同一个工具错误，在 Eino、Genkit、MCP 里分别怎么才能让模型看到？</p>
+              </div>
+              <p><a class="x-btn x-btn--ghost" href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/logs/2026-11-16.md" target="_blank" rel="noopener">日志</a></p>
+            </li>
+            <li>
               <p class="timeline__when"><span class="x-mono">Day 21 · 2026-11-14</span></p>
               <div class="timeline__what">
                 <p><strong>Claude Agent SDK：现成的 agent，收紧它</strong></p>
