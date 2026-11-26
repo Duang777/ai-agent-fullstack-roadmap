@@ -44,7 +44,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        project: [01-ts-agent-core, 03-streaming]
+        project: [01-ts-agent-core, 03-streaming, 28-ts-ecosystem]
     defaults:
       run:
         working-directory: projects/${{ matrix.project }}

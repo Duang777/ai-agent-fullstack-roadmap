@@ -1,0 +1,1105 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>4.5 TS 生态：Vercel AI SDK、Mastra 与 OpenAI Agents SDK (JS) · AI Agent 全栈</title>
+<meta name="description" content="4.5 TS 生态：Vercel AI SDK、Mastra 与 OpenAI Agents SDK (JS)。duang777 的 AI Agent 全栈公开学习课件。" />
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("x-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
+<style>
+:root{
+  --bg:#0a0a0a;--surface:#111;--text:#ededed;--text-2:#a1a1a1;--text-3:rgb(255 255 255/.4);
+  --line:rgb(255 255 255/.1);--line-2:rgb(255 255 255/.06);
+  --body:#d4d4d4;--code-bg:#1a1a1a;--pre-bg:#0f0f0f;--nav-bg:rgb(10 10 10/.8);--sb:#2a2a2a;--sb-h:#3a3a3a;
+  --sans:Inter,-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei","Helvetica Neue",sans-serif;
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+}
+*{box-sizing:border-box}
+html{color-scheme:dark}
+:root[data-theme="light"]{--bg:#fff;--surface:#fafafa;--text:#0a0a0a;--text-2:#555;--text-3:rgb(0 0 0/.42);--line:rgb(0 0 0/.1);--line-2:rgb(0 0 0/.06);--body:#333;--code-bg:#f2f2f2;--pre-bg:#fafafa;--nav-bg:rgb(255 255 255/.85);--sb:#d4d4d4;--sb-h:#bdbdbd}
+:root[data-theme="light"]{color-scheme:light}
+.toc{scrollbar-width:none}.toc::-webkit-scrollbar{display:none}
+html{scrollbar-width:thin;scrollbar-color:var(--sb) transparent}
+::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--sb);border-radius:8px}::-webkit-scrollbar-thumb:hover{background:var(--sb-h)}
+html{scroll-behavior:smooth;scroll-padding-top:80px}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;line-height:1.8;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+.nav{position:sticky;top:0;z-index:10;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;border-bottom:1px solid var(--line);background:var(--nav-bg);backdrop-filter:blur(12px)}
+.nav__brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-size:14px;font-weight:500}
+.nav__dot{width:10px;height:10px;border-radius:3px;background:var(--text)}
+.nav__links{display:flex;gap:20px;font-size:14px;color:var(--text-2)}
+.nav__links a{text-decoration:none}.nav__links a:hover{color:var(--text)}
+.wrap{max-width:1200px;margin:0 auto;padding:0 24px;display:grid;grid-template-columns:220px minmax(0,1fr);gap:56px}
+.toc{position:sticky;top:80px;align-self:start;max-height:calc(100vh - 100px);overflow:auto;padding:40px 0 40px;font-size:13px;line-height:1.6}
+.toc__label{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--text-3);text-transform:uppercase;margin-bottom:12px}
+.toc ul{list-style:none;margin:0;padding:0}
+.toc li{margin:0}
+.toc a{display:block;padding:4px 0 4px 12px;border-left:1px solid var(--line);color:var(--text-2);text-decoration:none}
+.toc a:hover,.toc a.on{color:var(--text);border-left-color:var(--text)}
+.toc ul ul a{padding-left:24px;font-size:12.5px;color:var(--text-3)}
+.toc ul ul a:hover,.toc ul ul a.on{color:var(--text)}
+article{min-width:0;max-width:760px;padding:48px 0 96px}
+.meta{font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--text-3);margin-bottom:16px}
+article h1.title{font-size:40px;line-height:1.2;letter-spacing:-.02em;font-weight:600;margin:0 0 24px}
+article h1{font-size:28px;line-height:1.3;letter-spacing:-.01em;font-weight:600;margin:72px 0 20px;padding-top:32px;border-top:1px solid var(--line)}
+article h2{font-size:22px;line-height:1.4;font-weight:600;margin:48px 0 16px}
+article h3{font-size:18px;font-weight:600;margin:36px 0 12px}
+article h4{font-size:16px;font-weight:600;margin:28px 0 8px}
+article p{margin:0 0 18px;color:var(--body)}
+article strong{color:var(--text);font-weight:600}
+article ul,article ol{padding-left:22px;margin:0 0 18px;color:var(--body)}
+article li{margin:4px 0}
+article a{text-decoration:underline;text-decoration-color:var(--text-3);text-underline-offset:3px}
+article a:hover{text-decoration-color:var(--text)}
+article hr{border:0;border-top:1px solid var(--line);margin:48px 0}
+article blockquote{margin:0 0 20px;padding:12px 18px;border-left:2px solid var(--text-2);background:var(--surface);border-radius:0 8px 8px 0;color:var(--text-2)}
+article blockquote p{margin:6px 0;color:var(--text-2)}
+article code{font-family:var(--mono);font-size:.88em;background:var(--code-bg);border:1px solid var(--line-2);border-radius:5px;padding:1px 6px}
+article pre{position:relative;margin:0 0 22px;padding:16px 18px;background:var(--pre-bg);border:1px solid var(--line);border-radius:10px;overflow:auto;font-size:13.5px;line-height:1.65}
+article pre code{background:none;border:0;padding:0;font-size:inherit}
+.code{position:relative}
+.code__lang{position:absolute;top:8px;right:46px;font-family:var(--mono);font-size:11px;color:var(--text-3);z-index:1}
+.code__copy{position:absolute;top:6px;right:8px;z-index:1;font:11px var(--mono);color:var(--text-2);background:var(--code-bg);border:1px solid var(--line);border-radius:6px;padding:2px 7px;cursor:pointer}
+.code__copy:hover{color:var(--text)}
+.tbl{overflow-x:auto;margin:0 0 22px;border:1px solid var(--line);border-radius:10px}
+article table{border-collapse:collapse;width:100%;font-size:14px}
+article th,article td{padding:10px 14px;border-bottom:1px solid var(--line-2);text-align:left;vertical-align:top}
+article th{font-weight:600;background:var(--surface);color:var(--text)}
+article tr:last-child td{border-bottom:0}
+article details{margin:0 0 18px;border:1px solid var(--line);border-radius:10px;padding:10px 16px;background:var(--surface)}
+article summary{cursor:pointer;font-weight:500}
+.pager{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:72px;padding-top:32px;border-top:1px solid var(--line)}
+.pager a{display:block;padding:16px 18px;border:1px solid var(--line);border-radius:10px;text-decoration:none}
+.pager a:hover{border-color:var(--text-2)}
+.pager span{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--text-3)}
+.pager .next{text-align:right;grid-column:2}
+.foot{margin-top:40px;font-size:13px;color:var(--text-3)}
+/* 代码高亮：黑白灰为主 */
+.hl .c,.hl .c1,.hl .cm,.hl .ch,.hl .cs,.hl .cp,.hl .cpf{color:#6b6b6b;font-style:italic}
+.hl .k,.hl .kd,.hl .kn,.hl .kr,.hl .kt,.hl .kc,.hl .kp,.hl .ow{color:#ffffff;font-weight:600}
+.hl .s,.hl .s1,.hl .s2,.hl .sb,.hl .sc,.hl .sd,.hl .se,.hl .sh,.hl .si,.hl .sx,.hl .sr,.hl .ss,.hl .dl,.hl .sa{color:#86efac}
+.hl .m,.hl .mi,.hl .mf,.hl .mh,.hl .mo,.hl .il{color:#fcd34d}
+.hl .nf,.hl .fm,.hl .nc,.hl .nn{color:#e5e5e5;font-weight:500}
+.hl .nb,.hl .bp,.hl .nd,.hl .na,.hl .nt{color:#bdbdbd}
+.hl .o,.hl .p{color:#9a9a9a}
+.hl .gd{color:#fca5a5}.hl .gi{color:#86efac}
+.hl{color:#d4d4d4}
+:root[data-theme="light"] .hl{color:#262626}
+:root[data-theme="light"] .hl .c,:root[data-theme="light"] .hl .c1,:root[data-theme="light"] .hl .cm,:root[data-theme="light"] .hl .ch,:root[data-theme="light"] .hl .cs,:root[data-theme="light"] .hl .cp,:root[data-theme="light"] .hl .cpf{color:#8a8a8a}
+:root[data-theme="light"] .hl .k,:root[data-theme="light"] .hl .kd,:root[data-theme="light"] .hl .kn,:root[data-theme="light"] .hl .kr,:root[data-theme="light"] .hl .kt,:root[data-theme="light"] .hl .kc,:root[data-theme="light"] .hl .kp,:root[data-theme="light"] .hl .ow{color:#000}
+:root[data-theme="light"] .hl .s,:root[data-theme="light"] .hl .s1,:root[data-theme="light"] .hl .s2,:root[data-theme="light"] .hl .sb,:root[data-theme="light"] .hl .sc,:root[data-theme="light"] .hl .sd,:root[data-theme="light"] .hl .se,:root[data-theme="light"] .hl .sh,:root[data-theme="light"] .hl .si,:root[data-theme="light"] .hl .sx,:root[data-theme="light"] .hl .sr,:root[data-theme="light"] .hl .ss,:root[data-theme="light"] .hl .dl,:root[data-theme="light"] .hl .sa{color:#15803d}
+:root[data-theme="light"] .hl .m,:root[data-theme="light"] .hl .mi,:root[data-theme="light"] .hl .mf,:root[data-theme="light"] .hl .mh,:root[data-theme="light"] .hl .mo,:root[data-theme="light"] .hl .il{color:#b45309}
+:root[data-theme="light"] .hl .nf,:root[data-theme="light"] .hl .fm,:root[data-theme="light"] .hl .nc,:root[data-theme="light"] .hl .nn{color:#171717}
+:root[data-theme="light"] .hl .nb,:root[data-theme="light"] .hl .bp,:root[data-theme="light"] .hl .nd,:root[data-theme="light"] .hl .na,:root[data-theme="light"] .hl .nt{color:#525252}
+:root[data-theme="light"] .hl .o,:root[data-theme="light"] .hl .p{color:#6b6b6b}
+:root[data-theme="light"] .hl .gd{color:#b91c1c}:root[data-theme="light"] .hl .gi{color:#15803d}
+.nav__right{display:flex;align-items:center;gap:20px}
+.theme-toggle{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--text);cursor:pointer}
+.theme-toggle:hover{border-color:var(--text-2)}
+.theme-toggle svg{width:15px;height:15px}
+.theme-toggle .i-moon,:root[data-theme="light"] .theme-toggle .i-sun{display:none}
+:root[data-theme="light"] .theme-toggle .i-moon{display:block}
+@media (max-width:960px){.wrap{grid-template-columns:1fr;gap:0}.toc{display:none}article h1.title{font-size:30px}.nav__links a.hide-sm{display:none}}
+</style>
+</head>
+<body>
+<header class="nav">
+  <a class="nav__brand" href="../index.html"><span class="nav__dot"></span>AI Agent 全栈</a>
+  <div class="nav__right">
+  <nav class="nav__links">
+    <a href="../index.html#progress">课件</a>
+    <a class="hide-sm" href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/ROADMAP.md">路线图</a>
+    <a href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/notes/04-frameworks/05-ts-ecosystem.md">在 GitHub 上查看</a>
+  </nav>
+  <button class="theme-toggle" id="theme-toggle" type="button" aria-label="切换浅色 / 深色" title="切换浅色 / 深色"><svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg><svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
+  </div>
+</header>
+<div class="wrap">
+  <aside class="toc"><div class="toc__label">本课目录</div><ul>
+<li><a href="#读前说明">读前说明</a></li>
+<li><a href="#1-三个库的关系">1. 三个库的关系</a></li>
+<li><a href="#2-用-ts-写这些代码要先知道的对照-go">2. 用 TS 写这些代码要先知道的（对照 Go）</a></li>
+<li><a href="#3-vercel-ai-sdk">3. Vercel AI SDK</a></li>
+<li><a href="#4-mastra">4. Mastra</a></li>
+<li><a href="#5-openai-agents-sdk-js">5. OpenAI Agents SDK (JS)</a></li>
+<li><a href="#6-同一件事三个框架怎么写">6. 同一件事，三个框架怎么写</a></li>
+<li><a href="#7-怎么选">7. 怎么选</a></li>
+<li><a href="#8-练习代码导读">8. 练习代码导读</a></li>
+<li><a href="#9-常见的坑">9. 常见的坑</a></li>
+<li><a href="#10-练习">10. 练习</a></li>
+<li><a href="#11-自测题">11. 自测题</a></li>
+<li><a href="#12-自测题答案">12. 自测题答案</a></li>
+<li><a href="#13-参考答案">13. 参考答案</a></li>
+<li><a href="#完成标准">完成标准</a></li>
+</ul>
+</aside>
+  <article>
+    <div class="meta">模块 04 · 框架与 SDK · 第 4.5 课</div>
+    <h1 class="title">4.5 TS 生态：Vercel AI SDK、Mastra 与 OpenAI Agents SDK (JS)</h1>
+    <blockquote>
+<p>第 4 部分 · 第 5 课 ｜ 预计 4–5 小时 ｜ 前置：0.2 TypeScript、2.1 Function Calling、3.2 Agent Loop、3.4 长任务 Agent、4.2 OpenAI Agents SDK、4.4 Go 生态</p>
+<p>配套练习：<code>projects/28-ts-ecosystem/</code>（25 个测试）。和 4.4 一样直接用真库：Vercel AI SDK <code>ai</code> 7.0.183、Mastra <code>@mastra/core</code> 1.86.0、OpenAI Agents SDK <code>@openai/agents</code> 0.22.0。测试里的模型都是按脚本回复的假模型，不需要 API key。内容包括：AI SDK 的 <code>ToolLoopAgent</code>、<code>generateText</code> 和 agent 的默认步数差异、<code>isStepCount</code>、三类工具错误怎么交给模型、并发执行工具、流式事件；<code>toolApproval</code> 的审批流程，以及“历史由客户端保存”时审批被篡改的风险和 HMAC 签名；Mastra 的 Agent（直接用 AI SDK 的模型对象）、默认 <code>maxSteps</code>、<code>requireApproval</code> 和工具内 <code>suspend()</code>、跨实例恢复、workflow 的 <code>branch</code> 与步骤级 suspend / resume；OpenAI Agents SDK JS 的 <code>run</code>、<code>maxTurns</code>、工具错误的默认文案、<code>toolNotFoundBehavior</code>、<code>needsApproval</code> 与 <code>RunState</code> 序列化。最后用同一个脚本对比三家的步数上限。</p>
+</blockquote>
+<h2 id="读前说明">读前说明</h2>
+<p>4.2 讲 OpenAI Agents SDK 时用的是 Python 版，4.4 讲的是 Go 库。这一课换到 TypeScript：做 Web 产品的团队，模型调用很可能就写在 Next.js 或 Node 服务里，TS 这边的选择主要就是这三个。</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th></th>
+<th>Vercel AI SDK</th>
+<th>Mastra</th>
+<th>OpenAI Agents SDK (JS)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>npm 包</td>
+<td><code>ai</code></td>
+<td><code>@mastra/core</code></td>
+<td><code>@openai/agents</code></td>
+</tr>
+<tr>
+<td>本课版本</td>
+<td>7.0.183</td>
+<td>1.86.0</td>
+<td>0.22.0</td>
+</tr>
+<tr>
+<td>定位</td>
+<td>统一的模型调用层 + 工具循环 + 前端 UI hooks</td>
+<td>基于 AI SDK 模型接口的应用框架：agent、workflow、memory、storage、服务端</td>
+<td>OpenAI 官方的 agent 运行时，和 Python 版概念一一对应</td>
+</tr>
+<tr>
+<td>模型接入</td>
+<td>provider 包（<code>@ai-sdk/openai</code>、<code>@ai-sdk/anthropic</code>……）或字符串 <code>'openai/xxx'</code>（走 Vercel AI Gateway）</td>
+<td>字符串 <code>'provider/model'</code>（Mastra 的模型路由），或任何 AI SDK 规范的模型对象</td>
+<td>默认 OpenAI Responses；其他模型通过 <code>Model</code> 接口或扩展包接入</td>
+</tr>
+<tr>
+<td>agent 循环</td>
+<td><code>ToolLoopAgent</code>，<code>stopWhen</code> 默认 <code>isStepCount(20)</code></td>
+<td><code>Agent</code>，<code>maxSteps</code> 默认 5</td>
+<td><code>run()</code>，<code>maxTurns</code> 默认 10</td>
+</tr>
+<tr>
+<td>人工审批</td>
+<td><code>toolApproval</code> → <code>tool-approval-request</code>，状态是消息历史</td>
+<td><code>requireApproval</code> / <code>suspend()</code>，状态是 storage 里的快照</td>
+<td><code>needsApproval</code> → <code>interruptions</code>，状态是 <code>RunState</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>版本号来自 npm registry（2026-11-26 查询，三个都是当天的最新版）。几点版本提醒：</p>
+<ul>
+<li>AI SDK 7 是 2026 年的大版本，相对 6 改了很多名字：<code>stepCountIs</code> → <code>isStepCount</code>，<code>system</code> → <code>instructions</code>，<code>onFinish</code> → <code>onEnd</code>，<code>fullStream</code> → <code>stream</code>，工具上的 <code>needsApproval</code> 废弃、改成调用或 agent 上的 <code>toolApproval</code>，<code>experimental_context</code> 拆成 <code>runtimeContext</code> 和按工具分的 <code>toolsContext</code>，结果上的 <code>usage</code>、<code>toolCalls</code> 等改成累计所有步骤（只看最后一步用 <code>finalStep</code>）。网上大量示例还是 v5 / v6 的写法，抄之前先看版本。7.0 只支持 ESM，最低 Node 22。</li>
+<li>Mastra 1.x 发版很快（本课写作时一天能发好几个版本），它在 <code>package.json</code> 里同时依赖 AI SDK v5、v6、v7 三代 provider 规范，所以三代的模型对象都能用。</li>
+<li>OpenAI Agents SDK JS 还在 0.x，minor 版本之间可能有破坏性变更。</li>
+</ul>
+<p>本课依据：</p>
+<ul>
+<li>AI SDK：<code>ai</code> 包里自带的文档（<code>node_modules/ai/docs/</code>，和 ai-sdk.dev 同源）：Building Agents、Loop Control、Tool Approvals、Tools and Tool Calling、Testing、Migration Guide 7.0。</li>
+<li>Mastra：<code>@mastra/core</code> 包里自带的文档（<code>dist/docs/references/</code>，开头写着“Mastra docs are the canonical, current reference”）：Agents、Tools、Human-in-the-loop、Suspend and resume、<code>Agent.generate()</code> 参考。</li>
+<li>OpenAI Agents SDK JS：0.22.0 的类型声明（<code>run.d.ts</code>、<code>model.d.ts</code>、<code>tool.d.ts</code>、<code>toolGuardrail.d.ts</code>）和源码常量（<code>runner/constants</code>：<code>DEFAULT_MAX_TURNS = 10</code>）。</li>
+</ul>
+<p>文档和实际行为不一致的地方，本课以测试为准，并在正文里注明。比如 AI SDK 的 Tools 文档说 <code>generateText</code> 遇到 <code>NoSuchToolError</code>、<code>InvalidToolInputError</code> 会抛出，但 7.0.183 实测是把它们作为错误结果交给模型、循环继续。</p>
+<p>先想几个问题：</p>
+<ul>
+<li><code>generateText</code> 不传 <code>stopWhen</code>、模型要调工具，工具会执行吗？模型会被调用几次？</li>
+<li>三个框架都把上限设成 2，模型一直要工具，各自是抛错还是正常返回？</li>
+<li>模型调用了一个不存在的工具名，三个框架默认各怎么处理？</li>
+<li>AI SDK 的审批状态放在消息历史里，消息历史由前端保存。前端能不能改掉审批人看到的参数？</li>
+</ul>
+<h2 id="1-三个库的关系">1. 三个库的关系</h2>
+<div class="hl"><pre><span></span><code>           ┌────────────── 你的 Node / Next.js 服务 ──────────────┐
+           │                                                      │
+           │   Mastra Agent / Workflow      OpenAI Agents run()   │
+           │        │  （storage 快照）           │（RunState）    │
+           │        ▼                             ▼               │
+           │   AI SDK 模型接口（LanguageModelV2/V3/V4）  Model 接口 │
+           │        │                             │               │
+           │   ToolLoopAgent / generateText       │               │
+           │        │                             │               │
+           └────────┼─────────────────────────────┼───────────────┘
+                    ▼                             ▼
+         @ai-sdk/openai、@ai-sdk/anthropic……    OpenAI Responses（默认）
+</code></pre></div>
+
+<ul>
+<li>AI SDK 是最底下那一层：它定义了模型接口规范（provider 实现 <code>doGenerate</code> / <code>doStream</code>），在上面提供 <code>generateText</code>、<code>streamText</code>、<code>ToolLoopAgent</code>，以及 React / Vue / Svelte 的 <code>useChat</code> 等前端工具。</li>
+<li>Mastra 用的是 AI SDK 的模型接口，所以 AI SDK 的任何 provider 模型、包括测试用的 <code>MockLanguageModelV4</code>，都能直接交给 Mastra 的 <code>Agent</code>。练习里两个框架共用同一个 <code>ScriptedModel</code>，测试确认了模型收到的 prompt 结构完全一样（<code>system</code>、<code>user</code>、<code>assistant</code>、<code>tool</code> 四种消息）。Mastra 在这之上加了 workflow、memory、storage、HTTP 服务、Studio 调试界面。</li>
+<li>OpenAI Agents SDK 是独立的一套：自己的 <code>Model</code> 接口、自己的消息格式（Responses API 的 item：<code>message</code>、<code>function_call</code>、<code>function_call_result</code>），和 Python 版的概念一一对应（agent、handoff、guardrail、session、<code>RunState</code>）。</li>
+</ul>
+<p>所以“AI SDK 还是 Mastra”不完全是二选一：Mastra 本身就站在 AI SDK 上。真正的选择是：只要模型层和工具循环（AI SDK），还是要一个带存储和流程编排的框架（Mastra），还是要 OpenAI 那套 agent 抽象（Agents SDK）。</p>
+<h2 id="2-用-ts-写这些代码要先知道的对照-go">2. 用 TS 写这些代码要先知道的（对照 Go）</h2>
+<p>练习代码用到的 TS 写法，对照 4.4 课的 Go 版本逐条说明。</p>
+<p><strong>schema 是值，不是标签。</strong> Go 里参数说明写在结构体标签上，框架用反射推断 JSON Schema：</p>
+<div class="hl"><pre><span></span><code><span class="kd">type</span><span class="w"> </span><span class="nx">DocQuery</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">Query</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="s">`json:"query" jsonschema:"要搜索的关键词"`</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>TS 的类型在运行时不存在，没法反射，所以三个框架都要求你传一个运行时的 schema 对象，通常是 zod：</p>
+<div class="hl"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">input</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">z</span><span class="p">.</span><span class="nx">object</span><span class="p">({</span><span class="w"> </span><span class="nx">orderId</span><span class="o">:</span><span class="w"> </span><span class="kt">z.string</span><span class="p">().</span><span class="nx">describe</span><span class="p">(</span><span class="s1">'订单号，例如 A1'</span><span class="p">)</span><span class="w"> </span><span class="p">});</span>
+<span class="kr">type</span><span class="w"> </span><span class="nx">Input</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">z</span><span class="p">.</span><span class="nx">infer</span><span class="o">&lt;</span><span class="ow">typeof</span><span class="w"> </span><span class="nx">input</span><span class="o">&gt;</span><span class="p">;</span><span class="w"> </span><span class="c1">// { orderId: string }</span>
+</code></pre></div>
+
+<p><code>z.object(...)</code> 是一个普通的值，既能在运行时校验，又能用 <code>z.infer</code> 推出静态类型。框架拿到它，一边生成给模型看的 JSON Schema，一边在执行工具前校验参数。所以 TS 里不会出现 4.4 课“两个库标签语法不同”的问题：三家都收 zod（Mastra 还收 Valibot、JSON Schema；OpenAI Agents SDK 要求 zod 4）。</p>
+<p><strong>工具是对象字面量，不是实现接口的类型。</strong> Go 的 Eino 工具要实现 <code>Info</code> 和 <code>InvokableRun</code> 两个方法；TS 里直接写一个对象：</p>
+<div class="hl"><pre><span></span><code><span class="nx">tool</span><span class="p">({</span>
+<span class="w">  </span><span class="nx">description</span><span class="o">:</span><span class="w"> </span><span class="s1">'按订单号查询订单金额'</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">inputSchema</span><span class="o">:</span><span class="w"> </span><span class="kt">z.object</span><span class="p">({</span><span class="w"> </span><span class="nx">orderId</span><span class="o">:</span><span class="w"> </span><span class="kt">z.string</span><span class="p">()</span><span class="w"> </span><span class="p">}),</span>
+<span class="w">  </span><span class="nx">execute</span><span class="o">:</span><span class="w"> </span><span class="kt">async</span><span class="w"> </span><span class="p">({</span><span class="w"> </span><span class="nx">orderId</span><span class="w"> </span><span class="p">})</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">shop</span><span class="p">.</span><span class="nx">lookup</span><span class="p">(</span><span class="nx">orderId</span><span class="p">),</span>
+<span class="p">});</span>
+</code></pre></div>
+
+<p><code>execute</code> 的参数类型由 <code>inputSchema</code> 推断出来，<code>({ orderId })</code> 是解构，相当于 Go 里先 <code>json.Unmarshal</code> 到结构体再取字段，只是这一步由框架做了。返回值不用自己序列化成字符串：AI SDK 和 Mastra 把对象作为 <code>{ type: 'json', value }</code> 交给模型，OpenAI Agents SDK 把它 <code>JSON.stringify</code> 成文本。</p>
+<p><strong><code>async</code> / <code>await</code> 和并发。</strong> Go 里并发执行几个工具要自己开 goroutine、用 <code>sync.WaitGroup</code> 等；TS 的 <code>async</code> 函数返回 Promise，框架用 <code>Promise.all</code> 一类的方式同时等多个工具。单线程事件循环下“并发”的意思是：一个工具在 <code>await</code> 网络或定时器时，另一个工具可以开始执行。练习的 <code>Shop.lookup</code> 里有一个 <code>await setTimeout</code>，测试用 <code>maxInFlight</code> 记录同时在执行的个数，结果是 2。</p>
+<p><strong>可选属性和展开。</strong> 练习的 tsconfig 开了 <code>exactOptionalPropertyTypes</code>：可选属性不能显式赋 <code>undefined</code>。所以代码里常见这种写法：</p>
+<div class="hl"><pre><span></span><code><span class="p">...(</span><span class="nx">opts</span><span class="p">.</span><span class="nx">stopWhen</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">stopWhen</span><span class="o">:</span><span class="w"> </span><span class="kt">opts.stopWhen</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="p">{}),</span>
+</code></pre></div>
+
+<p>意思是“有值才加这个字段”，相当于 Go 里 <code>if opts.StopWhen != nil { cfg.StopWhen = opts.StopWhen }</code>。</p>
+<p><strong>错误。</strong> Go 返回 <code>error</code>；TS 抛异常，<code>await</code> 一个被 reject 的 Promise 就会在调用处抛出。测试里用 <code>await expect(promise).rejects.toBeInstanceOf(MaxTurnsExceededError)</code> 断言抛出的错误类型，相当于 Go 的 <code>errors.As</code>。</p>
+<h2 id="3-vercel-ai-sdk">3. Vercel AI SDK</h2>
+<h3 id="31-generatetext-和-toolloopagent">3.1 generateText 和 ToolLoopAgent</h3>
+<p>AI SDK 有两个入口跑工具循环：函数 <code>generateText</code> / <code>streamText</code>，和类 <code>ToolLoopAgent</code>。后者把模型、指令、工具、循环设置打包成一个可复用的对象，<code>generate()</code> 和 <code>stream()</code> 接受的参数和前者基本一样。</p>
+<div class="hl"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">agent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">ToolLoopAgent</span><span class="p">({</span>
+<span class="w">  </span><span class="nx">model</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">instructions</span><span class="o">:</span><span class="w"> </span><span class="s1">'你是客服 agent，需要时调用工具。'</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">tools</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">lookup_order</span><span class="p">,</span><span class="w"> </span><span class="nx">refund</span><span class="w"> </span><span class="p">},</span>
+<span class="p">});</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">r</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">agent</span><span class="p">.</span><span class="nx">generate</span><span class="p">({</span><span class="w"> </span><span class="nx">prompt</span><span class="o">:</span><span class="w"> </span><span class="s1">'查一下 A1'</span><span class="w"> </span><span class="p">});</span>
+<span class="nx">r</span><span class="p">.</span><span class="nx">text</span><span class="p">;</span><span class="w">       </span><span class="c1">// 最终回答</span>
+<span class="nx">r</span><span class="p">.</span><span class="nx">steps</span><span class="p">;</span><span class="w">      </span><span class="c1">// 每一步的模型输出、工具调用、工具结果</span>
+<span class="nx">r</span><span class="p">.</span><span class="nx">stoppedBy</span><span class="p">;</span><span class="w">  </span><span class="c1">// 'model' | 'stop-condition' | 'tool-without-execute' | 'approval'</span>
+</code></pre></div>
+
+<p>测试检查了第二次调用模型时的 prompt：<code>instructions</code> 变成最前面的 <code>system</code> 消息，然后是 <code>user</code>、带 <code>tool-call</code> 的 <code>assistant</code>、带 <code>tool-result</code> 的 <code>tool</code>。工具返回的对象原样作为 <code>{ type: 'json', value: { orderId: 'A1', amount: 120 } }</code> 交给模型。（测试验证过）</p>
+<p><strong>两个入口的默认步数不一样，这是最容易踩的坑。</strong></p>
+<ul>
+<li><code>ToolLoopAgent</code> 默认 <code>stopWhen: isStepCount(20)</code>。用默认值撞到上限时会打一条警告，提示你显式设置。</li>
+<li><code>generateText</code> / <code>streamText</code> 默认 <code>isStepCount(1)</code>：只调一次模型。如果模型要工具，工具<strong>会执行</strong>，但不会再调模型去看工具结果，所以 <code>text</code> 是空字符串，<code>stoppedBy</code> 是 <code>'stop-condition'</code>。（测试验证过）</li>
+</ul>
+<p>很多人第一次用 <code>generateText</code> 加工具，发现“工具执行了但模型什么也没说”，原因就在这里。要循环，显式传 <code>stopWhen</code>。</p>
+<h3 id="32-一步是什么stopwhen-什么时候检查">3.2 一步是什么，stopWhen 什么时候检查</h3>
+<p>文档的定义：一步是一次模型生成，加上执行这次生成要求的本地工具。<code>stopWhen</code> 只在最后一步有工具结果时检查。所以 <code>isStepCount(2)</code> 的行为是：</p>
+<ol>
+<li>第 1 步：模型要 <code>lookup_order(A1)</code>，执行。</li>
+<li>第 2 步：模型要 <code>lookup_order(A2)</code>，<strong>执行</strong>。</li>
+<li>检查 <code>stopWhen</code>：已经 2 步，停。</li>
+</ol>
+<p>模型调用 2 次，工具执行 2 次，第 2 步工具的结果没有交给模型。结果不抛错：<code>stoppedBy: 'stop-condition'</code>，<code>finishReason: 'tool-calls'</code>（<code>finishReason</code> 只描述最后一次模型调用），<code>text</code> 为空。（测试验证过）</p>
+<p>这和 4.4 课 Eino 的 <code>MaxIterations</code> 数法一样（都是模型调用次数），区别是 Eino 撞到上限报错，AI SDK 正常返回。所以用 AI SDK 时要看 <code>stoppedBy</code>，不能只看有没有异常。</p>
+<p><code>stopWhen</code> 可以是数组（任意一个满足就停），内置的还有 <code>hasToolCall('done')</code>（调到某个工具就停）和 <code>isLoopFinished()</code>（不设上限）。自定义条件是一个函数，参数里有所有步骤，可以按 token 用量估算成本来停。</p>
+<h3 id="33-工具错误三种都交给模型">3.3 工具错误：三种都交给模型</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>情况</th>
+<th>7.0.183 实测行为</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>execute</code> 抛错</td>
+<td>变成 <code>{ type: 'error-text', value: 'Error: 订单 Z9 不存在' }</code> 交给模型，循环继续</td>
+</tr>
+<tr>
+<td>工具名不存在</td>
+<td>变成 <code>error-text</code>，内容是 <code>AI_NoSuchToolError: Model tried to call unavailable tool 'cancel_order'. Available tools: lookup_order, refund.</code>，循环继续</td>
+</tr>
+<tr>
+<td>参数不符合 schema</td>
+<td>变成 <code>error-text</code>，内容以 <code>AI_InvalidToolInputError</code> 开头，带上 zod 的校验错误，循环继续</td>
+</tr>
+</tbody>
+</table></div>
+<p>（测试验证过）</p>
+<p>和 4.4 课对照：Eino 默认“工具不存在”让整次运行失败，Genkit 参数不合 schema 时整个 <code>Generate</code> 失败；AI SDK 三种都交给模型，让它自己纠正。工具名不存在的提示里还列出了可用的工具，模型很容易改对。</p>
+<p>如前所述，Tools 文档的 “Handling Errors” 一节写的是 <code>generateText</code> 会抛出这两种错误，和实测不符。写错误处理代码时，用 <code>onToolExecutionEnd</code> 回调或检查 <code>steps[].content</code> 里 <code>type === 'tool-error'</code> 的部分，不要指望 <code>try/catch</code> 能捕获到。</p>
+<h3 id="34-并发和流式">3.4 并发和流式</h3>
+<p>同一步里模型要了多个工具，默认并发执行；<code>toolCallConcurrency: 1</code> 改成按模型给出的顺序逐个执行（后一个要看到前一个的副作用时用）。练习的测试让两个 <code>lookup_order</code> 各等 20 毫秒，<code>maxInFlight</code> 是 2。（测试验证过）</p>
+<p><code>agent.stream()</code> 返回的结果上有两个流：<code>stream</code>（7.0 之前叫 <code>fullStream</code>）是所有事件，<code>textStream</code> 只有文字。一次“查订单再回答”的事件序列：</p>
+<div class="hl"><pre><span></span><code>start
+start-step  tool-call  tool-result  finish-step
+start-step  text-start  text-delta × 5  text-end  finish-step
+finish
+</code></pre></div>
+
+<p>（测试验证过）每个 <code>start-step</code> / <code>finish-step</code> 包住一步。前端用 <code>useChat</code> 时，这些事件会被转换成 UI 消息流，工具调用变成消息的 <code>parts</code>。</p>
+<h3 id="35-toolapproval审批">3.5 toolApproval：审批</h3>
+<p>7.0 起，审批策略写在调用或 agent 上：</p>
+<div class="hl"><pre><span></span><code><span class="ow">new</span><span class="w"> </span><span class="nx">ToolLoopAgent</span><span class="p">({</span>
+<span class="w">  </span><span class="nx">model</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">tools</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">lookup_order</span><span class="p">,</span><span class="w"> </span><span class="nx">refund</span><span class="w"> </span><span class="p">},</span>
+<span class="w">  </span><span class="nx">toolApproval</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">refund</span><span class="o">:</span><span class="w"> </span><span class="kt">async</span><span class="w"> </span><span class="p">({</span><span class="w"> </span><span class="nx">amount</span><span class="w"> </span><span class="p">})</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">(</span><span class="nx">amount</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">500</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="s1">'user-approval'</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="kc">undefined</span><span class="p">),</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="p">});</span>
+</code></pre></div>
+
+<p>策略返回四种状态之一：<code>'not-applicable'</code>（照常执行，<code>undefined</code> 等同于它）、<code>'approved'</code>（自动批准并记录）、<code>'denied'</code>（自动拒绝，可以带 <code>reason</code>）、<code>'user-approval'</code>（停下等人）。也可以传一个函数统一处理所有工具，参数里有完整的工具调用。</p>
+<p>流程是两次调用：</p>
+<div class="hl"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">messages</span><span class="o">:</span><span class="w"> </span><span class="kt">ModelMessage</span><span class="p">[]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[{</span><span class="w"> </span><span class="nx">role</span><span class="o">:</span><span class="w"> </span><span class="s1">'user'</span><span class="p">,</span><span class="w"> </span><span class="nx">content</span><span class="o">:</span><span class="w"> </span><span class="s1">'给 A2 退 800'</span><span class="w"> </span><span class="p">}];</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">r1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">agent</span><span class="p">.</span><span class="nx">generate</span><span class="p">({</span><span class="w"> </span><span class="nx">messages</span><span class="w"> </span><span class="p">});</span>
+<span class="c1">// r1.stoppedBy === 'approval'，r1.content 里有 tool-approval-request</span>
+<span class="nx">messages</span><span class="p">.</span><span class="nx">push</span><span class="p">(...</span><span class="nx">r1</span><span class="p">.</span><span class="nx">responseMessages</span><span class="p">);</span>
+<span class="nx">messages</span><span class="p">.</span><span class="nx">push</span><span class="p">({</span>
+<span class="w">  </span><span class="nx">role</span><span class="o">:</span><span class="w"> </span><span class="s1">'tool'</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">content</span><span class="o">:</span><span class="w"> </span><span class="p">[{</span><span class="w"> </span><span class="kr">type</span><span class="o">:</span><span class="w"> </span><span class="s1">'tool-approval-response'</span><span class="p">,</span><span class="w"> </span><span class="nx">approvalId</span><span class="p">,</span><span class="w"> </span><span class="nx">approved</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="w"> </span><span class="p">}],</span>
+<span class="p">});</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">r2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">agent</span><span class="p">.</span><span class="nx">generate</span><span class="p">({</span><span class="w"> </span><span class="nx">messages</span><span class="w"> </span><span class="p">});</span><span class="w"> </span><span class="c1">// 先执行工具，再调模型</span>
+</code></pre></div>
+
+<p>要点：</p>
+<ul>
+<li><strong>状态就是消息历史。</strong> 没有 checkpoint store，也没有 runId。<code>responseMessages</code> 里有带 <code>tool-call</code> 和 <code>tool-approval-request</code> 的 assistant 消息，你把它和人的决定一起追加到历史里，下次调用时 SDK 发现有已批准的调用，先执行工具，再调模型。练习的测试把 <code>messages</code> 经过 <code>JSON.stringify</code> / <code>JSON.parse</code> 往返一次，交给另一个 agent 实例、另一个模型对象，第二个模型只被调用一次。（测试验证过）</li>
+<li><strong>拒绝时</strong>模型看到 <code>{ type: 'execution-denied', reason: '超过单笔额度' }</code>，工具不执行。文档建议在指令里写上“工具没被批准时不要重试”，否则模型可能反复申请。（测试验证过）</li>
+<li><strong>不满足条件的调用不受影响</strong>：60 元的退款直接执行，<code>stoppedBy</code> 是 <code>'model'</code>。（测试验证过）</li>
+<li>恢复时 SDK 会重新按 schema 校验参数，并<strong>重新执行一次审批策略</strong>；策略在服务端判定为拒绝的调用，即使客户端送来 <code>approved: true</code> 也不会执行。</li>
+</ul>
+<h3 id="36-历史由客户端保存时审批可以被篡改">3.6 历史由客户端保存时：审批可以被篡改</h3>
+<p><code>useChat</code> 的标准用法里，服务端不存对话，每次请求由前端把完整的消息历史发回来。这意味着审批相关的消息也来自客户端。文档的 Security Considerations 一节专门讲了这个问题，练习把它写成了测试：</p>
+<ol>
+<li>模型要给 A2 退 800，停在审批。审批人看到的是 A2。</li>
+<li>客户端在发回的历史里把 <code>tool-call</code> 的 <code>orderId</code> 改成 B9，附上 <code>approved: true</code>。</li>
+<li>服务端重新校验：参数仍符合 schema，策略重新执行，800 仍然需要审批，而客户端说批准了。结果：<strong>按 B9 退了 800</strong>。（测试验证过）</li>
+</ol>
+<p>解决办法是 <code>experimental_toolApprovalSecret</code>：配上之后，SDK 签发审批请求时用 HMAC 对工具名、调用 ID、参数签名，签名放在 <code>tool-approval-request</code> 里；恢复时校验，对不上就抛 <code>AI_InvalidToolApprovalSignatureError</code>，工具不执行。测试里同样的篡改在签名开启后被拒绝，未篡改的历史正常执行。（测试验证过）</p>
+<p>部署在多个实例上时，所有实例要用同一个密钥。不想依赖客户端保存历史，就在服务端存（数据库按会话 ID 存消息），前端只发新消息，这也是 3.5 课状态管理的结论。</p>
+<h3 id="37-其他值得知道的">3.7 其他值得知道的</h3>
+<ul>
+<li><code>prepareStep</code>：每一步开始前调用，可以换模型、改 <code>temperature</code>、限制可用工具（<code>activeTools</code>）、改写消息做上下文压缩。返回的消息覆盖会作为之后各步的基础。</li>
+<li><code>runtimeContext</code> 和 <code>toolsContext</code>：前者是整个循环共享的状态，<code>prepareStep</code> 和回调里都能读；后者按工具名分配，工具用 <code>contextSchema</code> 声明自己需要什么，只能看到自己那一份。API key 这类东西放 <code>toolsContext</code>，不要放进 prompt。</li>
+<li>生命周期回调：<code>onStart</code>、<code>onStepStart</code>、<code>onToolExecutionStart</code>、<code>onToolExecutionEnd</code>、<code>onStepEnd</code>、<code>onEnd</code>。回调里抛出的错误会被吞掉，不影响生成。</li>
+<li>测试工具：<code>ai/test</code> 导出 <code>MockLanguageModelV4</code>，可以给一个响应数组，按顺序返回；<code>doGenerateCalls</code> / <code>doStreamCalls</code> 记录每次调用收到的参数。练习的 <code>ScriptedModel</code> 就是继承它，加了从脚本生成流式分片的逻辑。注意要把 <code>doGenerate</code> / <code>doStream</code> 传给父类构造函数，父类在包装函数里记录调用；构造之后再给 <code>this.doGenerate</code> 赋值会绕过记录，<code>doGenerateCalls</code> 永远是空的。</li>
+</ul>
+<h2 id="4-mastra">4. Mastra</h2>
+<h3 id="41-agent-和工具">4.1 Agent 和工具</h3>
+<div class="hl"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">lookup_order</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">createTool</span><span class="p">({</span>
+<span class="w">  </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="s1">'lookup_order'</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">description</span><span class="o">:</span><span class="w"> </span><span class="s1">'按订单号查询订单金额'</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">inputSchema</span><span class="o">:</span><span class="w"> </span><span class="kt">z.object</span><span class="p">({</span><span class="w"> </span><span class="nx">orderId</span><span class="o">:</span><span class="w"> </span><span class="kt">z.string</span><span class="p">()</span><span class="w"> </span><span class="p">}),</span>
+<span class="w">  </span><span class="nx">execute</span><span class="o">:</span><span class="w"> </span><span class="kt">async</span><span class="w"> </span><span class="p">({</span><span class="w"> </span><span class="nx">orderId</span><span class="w"> </span><span class="p">})</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">shop</span><span class="p">.</span><span class="nx">lookup</span><span class="p">(</span><span class="nx">orderId</span><span class="p">),</span>
+<span class="p">});</span>
+
+<span class="kd">const</span><span class="w"> </span><span class="nx">support</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">Agent</span><span class="p">({</span>
+<span class="w">  </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="s1">'support'</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="s1">'support'</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">instructions</span><span class="o">:</span><span class="w"> </span><span class="s1">'你是客服 agent，需要时调用工具。'</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">model</span><span class="o">:</span><span class="w"> </span><span class="s1">'openai/gpt-6.1-sol'</span><span class="p">,</span><span class="w">     </span><span class="c1">// 模型路由字符串；也可以传 AI SDK 的模型对象</span>
+<span class="w">  </span><span class="nx">tools</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">lookup_order</span><span class="w"> </span><span class="p">},</span>
+<span class="p">});</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">mastra</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">Mastra</span><span class="p">({</span><span class="w"> </span><span class="nx">agents</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">support</span><span class="w"> </span><span class="p">},</span><span class="w"> </span><span class="nx">storage</span><span class="w"> </span><span class="p">});</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">r</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">mastra</span><span class="p">.</span><span class="nx">getAgent</span><span class="p">(</span><span class="s1">'support'</span><span class="p">).</span><span class="nx">generate</span><span class="p">(</span><span class="s1">'查一下 A1'</span><span class="p">);</span>
+</code></pre></div>
+
+<ul>
+<li>工具必须用 <code>createTool</code> 创建，<code>execute(inputData, context)</code> 只有这一种签名，第一个参数已经按 <code>inputSchema</code> 校验过。文档特意强调普通对象当工具会静默失败。</li>
+<li>模型可以是字符串 <code>'provider/model'</code>，Mastra 自己的模型路由会按前缀找对应的环境变量（<code>OPENAI_API_KEY</code> 等）。练习里传的是 AI SDK 的 <code>MockLanguageModelV4</code> 子类，和 AI SDK 部分共用。</li>
+<li>审批、<code>suspend()</code> 要靠 storage 里的快照恢复，所以 agent 要注册到带 <code>storage</code> 的 <code>Mastra</code> 实例上，再用 <code>mastra.getAgent()</code> 取出来用。没有配 storage 时会报 “snapshot not found”。练习用 <code>@mastra/core/storage</code> 的 <code>InMemoryStore</code>；生产换成 Postgres、LibSQL 等持久化的 storage。</li>
+</ul>
+<h3 id="42-默认-maxsteps-是-5">4.2 默认 maxSteps 是 5</h3>
+<p><code>Agent.generate()</code> 的参考文档写着：<code>maxSteps</code> 控制顺序调用模型的最大次数，默认 5。实测：模型一直要工具，第 5 次调用后停下，5 个工具都执行了，<code>finishReason: 'tool-calls'</code>，<code>text</code> 为空，不抛错。（测试验证过）</p>
+<p>这和 AI SDK 的 <code>isStepCount</code> 数法一样（Mastra 底层的循环就是照 AI SDK 的步骤模型做的），但默认值小得多：<code>ToolLoopAgent</code> 是 20，Mastra 是 5。一个要查好几个订单、再调用退款的任务，默认设置下很可能做到一半就停了，而且不报错。要改，在 <code>generate</code> 的选项里传 <code>maxSteps</code>，或者在 agent 的 <code>defaultOptions</code> 里设。</p>
+<h3 id="43-工具错误">4.3 工具错误</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>情况</th>
+<th>1.86.0 实测行为</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>execute</code> 抛错</td>
+<td><code>{ type: 'error-text', value: '订单 Z9 不存在' }</code>，只有错误消息，没有 <code>Error:</code> 前缀</td>
+</tr>
+<tr>
+<td>工具名不存在</td>
+<td><code>error-text</code>：<code>Tool "cancel_order" not found. Available tools: lookup_order, refund, refund_checked. Call tools by their exact name only — never add prefixes, namespaces, or colons.</code></td>
+</tr>
+<tr>
+<td>参数不符合 schema</td>
+<td><code>{ type: 'json', value: { error: true, message: 'Tool input validation failed for lookup_order. Please fix the following errors and try again:\n- orderId: Invalid input: expected string, received number ...', validationErrors } }</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>（测试验证过）三种都交给模型、循环继续，和 AI SDK 一致。参数错误的提示写得很“面向模型”：逐个字段列出问题，末尾附上模型给的原始参数。工具名不存在时还专门提醒模型不要加前缀和冒号，这是在处理模型给 MCP 工具名加命名空间的常见错误。</p>
+<p>另一个细节：工具定义了 <code>outputSchema</code> 而返回值不符合时，Mastra 把校验错误交给模型，模型会以为调用失败而重试。对已经产生副作用的工具（下单、退款），文档建议设 <code>outputValidation: 'warn'</code>，只记日志、原样返回结果。</p>
+<h3 id="44-人工审批两种机制">4.4 人工审批：两种机制</h3>
+<p><strong>执行前审批</strong>：工具上设 <code>requireApproval: true</code>，或者调用时传 <code>requireToolApproval: true</code>（对所有工具生效，也可以是一个按工具名和参数判断的函数）。<code>generate()</code> 碰到需要审批的调用就返回：</p>
+<div class="hl"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">r1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">agent</span><span class="p">.</span><span class="nx">generate</span><span class="p">(</span><span class="s1">'给 A2 退 800'</span><span class="p">);</span>
+<span class="nx">r1</span><span class="p">.</span><span class="nx">finishReason</span><span class="p">;</span><span class="w">    </span><span class="c1">// 'suspended'</span>
+<span class="nx">r1</span><span class="p">.</span><span class="nx">suspendPayload</span><span class="p">;</span><span class="w">  </span><span class="c1">// { toolCallId: 'c1', toolName: 'refund', args: { orderId: 'A2', amount: 800 }, ... }</span>
+<span class="nx">r1</span><span class="p">.</span><span class="nx">runId</span><span class="p">;</span>
+
+<span class="k">await</span><span class="w"> </span><span class="nx">agent</span><span class="p">.</span><span class="nx">approveToolCallGenerate</span><span class="p">({</span><span class="w"> </span><span class="nx">runId</span><span class="o">:</span><span class="w"> </span><span class="kt">r1.runId</span><span class="p">,</span><span class="w"> </span><span class="nx">toolCallId</span><span class="o">:</span><span class="w"> </span><span class="s1">'c1'</span><span class="w"> </span><span class="p">});</span>
+<span class="c1">// 或者</span>
+<span class="k">await</span><span class="w"> </span><span class="nx">agent</span><span class="p">.</span><span class="nx">declineToolCallGenerate</span><span class="p">({</span><span class="w"> </span><span class="nx">runId</span><span class="o">:</span><span class="w"> </span><span class="kt">r1.runId</span><span class="p">,</span><span class="w"> </span><span class="nx">toolCallId</span><span class="o">:</span><span class="w"> </span><span class="s1">'c1'</span><span class="p">,</span><span class="w"> </span><span class="nx">reason</span><span class="o">:</span><span class="w"> </span><span class="s1">'超过单笔额度'</span><span class="w"> </span><span class="p">});</span>
+</code></pre></div>
+
+<p>流式版本对应 <code>stream()</code> 的 <code>tool-call-approval</code> 事件和 <code>approveToolCall</code> / <code>declineToolCall</code>。</p>
+<p><strong>执行中暂停</strong>：工具在 <code>execute</code> 里调用 <code>suspend()</code>，带上自己定义的数据（<code>suspendSchema</code>），恢复时从 <code>context.agent.resumeData</code> 拿到答复（<code>resumeSchema</code>）：</p>
+<div class="hl"><pre><span></span><code><span class="nx">execute</span><span class="o">:</span><span class="w"> </span><span class="kt">async</span><span class="w"> </span><span class="p">({</span><span class="w"> </span><span class="nx">orderId</span><span class="p">,</span><span class="w"> </span><span class="nx">amount</span><span class="w"> </span><span class="p">},</span><span class="w"> </span><span class="nx">ctx</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">decision</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">ctx</span><span class="o">?</span><span class="p">.</span><span class="nx">agent</span><span class="o">?</span><span class="p">.</span><span class="nx">resumeData</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">approved</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kc">undefined</span><span class="p">;</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">amount</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">500</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">decision</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="kc">undefined</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">ctx</span><span class="o">!</span><span class="p">.</span><span class="nx">agent</span><span class="o">!</span><span class="p">.</span><span class="nx">suspend</span><span class="p">({</span><span class="w"> </span><span class="nx">question</span><span class="o">:</span><span class="w"> </span><span class="sb">`批准给 </span><span class="si">${</span><span class="nx">orderId</span><span class="si">}</span><span class="sb"> 退 </span><span class="si">${</span><span class="nx">amount</span><span class="si">}</span><span class="sb"> 吗？`</span><span class="w"> </span><span class="p">});</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">decision</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">!</span><span class="nx">decision</span><span class="p">.</span><span class="nx">approved</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="s1">'退款被拒绝'</span><span class="p">;</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="nx">shop</span><span class="p">.</span><span class="nx">refund</span><span class="p">(</span><span class="nx">orderId</span><span class="p">,</span><span class="w"> </span><span class="nx">amount</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>恢复用 <code>agent.resumeGenerate({ approved: true }, { runId })</code>。文档提醒：<code>suspend()</code> 不会抛出，一定要 <code>return</code>，否则后面的代码会接着跑。和 4.4 课 Eino、Genkit 一样，恢复时 <code>execute</code> 从头再执行一次，所以暂停之前不能有副作用。</p>
+<p>测试验证的行为：</p>
+<ul>
+<li>第一个 <code>Mastra</code> 实例跑到 <code>suspended</code>；另一个 <code>Mastra</code> 实例（新的模型对象）只要用同一个 storage，就能用 <code>runId</code> 批准，工具执行，模型只被调用一次。拒绝时模型看到的工具结果是拒绝原因。（测试验证过）</li>
+<li><code>suspend()</code> 的数据在 <code>suspendPayload.suspendPayload</code> 里（外层是工具调用的信息），<code>resumeGenerate</code> 之后工具拿到答复完成退款。（测试验证过）</li>
+<li>参数不合 schema 的调用不会进入审批，直接把校验错误交给模型。</li>
+</ul>
+<p>进程重启以后不知道 runId 时，用 <code>agent.listSuspendedRuns({ threadId, resourceId })</code> 从 storage 里找回挂起的运行；处理恢复的进程中途崩溃，可以用 <code>recoverResume({ runId })</code> 在任意进程里按已记录的决定继续。这些都依赖持久化的 storage。</p>
+<p>和 AI SDK 对照：AI SDK 的审批状态在消息历史里，谁拿着历史谁就能恢复；Mastra 的状态在服务端 storage 里，客户端只拿 runId，3.6 节那种篡改参数的问题不存在，代价是你必须配 storage。</p>
+<h3 id="45-workflow">4.5 workflow</h3>
+<p>Mastra 的另一半是 workflow：用类型化的步骤拼出确定的流程，和 4.4 课 Eino 的 <code>compose.Graph</code> 是同一类东西。练习的工单分流：</p>
+<div class="hl"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">classify</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">createStep</span><span class="p">({</span><span class="w"> </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="s1">'classify'</span><span class="p">,</span><span class="w"> </span><span class="nx">inputSchema</span><span class="o">:</span><span class="w"> </span><span class="kt">Ticket</span><span class="p">,</span><span class="w"> </span><span class="nx">outputSchema</span><span class="o">:</span><span class="w"> </span><span class="kt">Classified</span><span class="p">,</span><span class="w"> </span><span class="nx">execute</span><span class="o">:</span><span class="w"> </span><span class="kt">...</span><span class="w"> </span><span class="p">});</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">approve</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">createStep</span><span class="p">({</span>
+<span class="w">  </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="s1">'approve'</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">inputSchema</span><span class="o">:</span><span class="w"> </span><span class="kt">Classified</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">outputSchema</span><span class="o">:</span><span class="w"> </span><span class="kt">TriageOutput</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">suspendSchema</span><span class="o">:</span><span class="w"> </span><span class="kt">z.object</span><span class="p">({</span><span class="w"> </span><span class="nx">question</span><span class="o">:</span><span class="w"> </span><span class="kt">z.string</span><span class="p">()</span><span class="w"> </span><span class="p">}),</span>
+<span class="w">  </span><span class="nx">resumeSchema</span><span class="o">:</span><span class="w"> </span><span class="kt">z.object</span><span class="p">({</span><span class="w"> </span><span class="nx">approved</span><span class="o">:</span><span class="w"> </span><span class="kt">z.boolean</span><span class="p">()</span><span class="w"> </span><span class="p">}),</span>
+<span class="w">  </span><span class="nx">execute</span><span class="o">:</span><span class="w"> </span><span class="kt">async</span><span class="w"> </span><span class="p">({</span><span class="w"> </span><span class="nx">inputData</span><span class="p">,</span><span class="w"> </span><span class="nx">resumeData</span><span class="p">,</span><span class="w"> </span><span class="nx">suspend</span><span class="w"> </span><span class="p">})</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">inputData</span><span class="p">.</span><span class="nx">amount</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">500</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">resumeData</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="kc">undefined</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">suspend</span><span class="p">({</span><span class="w"> </span><span class="nx">question</span><span class="o">:</span><span class="w"> </span><span class="sb">`批准给 </span><span class="si">${</span><span class="nx">inputData</span><span class="p">.</span><span class="nx">orderId</span><span class="si">}</span><span class="sb"> 退 </span><span class="si">${</span><span class="nx">inputData</span><span class="p">.</span><span class="nx">amount</span><span class="si">}</span><span class="sb"> 吗？`</span><span class="w"> </span><span class="p">});</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="p">...</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="p">});</span>
+
+<span class="nx">createWorkflow</span><span class="p">({</span><span class="w"> </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="s1">'triage'</span><span class="p">,</span><span class="w"> </span><span class="nx">inputSchema</span><span class="o">:</span><span class="w"> </span><span class="kt">Ticket</span><span class="p">,</span><span class="w"> </span><span class="nx">outputSchema</span><span class="o">:</span><span class="w"> </span><span class="kt">TriageOutput</span><span class="w"> </span><span class="p">})</span>
+<span class="w">  </span><span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="nx">classify</span><span class="p">)</span>
+<span class="w">  </span><span class="p">.</span><span class="nx">branch</span><span class="p">([</span>
+<span class="w">    </span><span class="p">[</span><span class="k">async</span><span class="w"> </span><span class="p">({</span><span class="w"> </span><span class="nx">inputData</span><span class="w"> </span><span class="p">})</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">inputData</span><span class="p">.</span><span class="nx">kind</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s1">'refund'</span><span class="p">,</span><span class="w"> </span><span class="nx">approve</span><span class="p">],</span>
+<span class="w">    </span><span class="p">[</span><span class="k">async</span><span class="w"> </span><span class="p">({</span><span class="w"> </span><span class="nx">inputData</span><span class="w"> </span><span class="p">})</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">inputData</span><span class="p">.</span><span class="nx">kind</span><span class="w"> </span><span class="o">!==</span><span class="w"> </span><span class="s1">'refund'</span><span class="p">,</span><span class="w"> </span><span class="nx">human</span><span class="p">],</span>
+<span class="w">  </span><span class="p">])</span>
+<span class="w">  </span><span class="p">.</span><span class="nx">commit</span><span class="p">();</span>
+</code></pre></div>
+
+<p>行为细节：</p>
+<ul>
+<li>相邻步骤的 <code>outputSchema</code> 和 <code>inputSchema</code> 要对得上，类型错误在编译期由 TS 报出（Eino 是在 <code>AddEdge</code> 时运行期报）。</li>
+<li><code>branch</code> 的条件按顺序判断，只执行匹配的分支。结果以步骤 id 为键：走了人工分支，<code>result</code> 是 <code>{ human: { result: '已转人工：T1' } }</code>。（测试验证过）</li>
+<li>运行用 <code>workflow.createRun()</code> 拿到 run，再 <code>run.start({ inputData })</code>。步骤 suspend 时返回 <code>status: 'suspended'</code>，<code>suspended</code> 是 <code>[['approve']]</code>（每个挂起步骤一条从顶层到它的路径，嵌套 workflow 时路径更长），<code>suspendPayload</code> 是 <code>{ approve: { question: '批准给 A2 退 800 吗？' } }</code>。（测试验证过）</li>
+<li>恢复：另一个 Mastra 实例用 <code>createRun({ runId })</code> 拿回同一个 run，<code>run.resume({ step: 'approve', resumeData: { approved: true } })</code>。挂起的步骤从头再执行一次（测试里 <code>approve</code> 的执行计数是 2），已经完成的 <code>classify</code> 不重跑（<code>lookup</code> 只调用了一次）。（测试验证过）</li>
+</ul>
+<p>workflow 还有 <code>.parallel()</code>、<code>.foreach()</code>、<code>.dowhile()</code> / <code>.dountil()</code>、<code>.sleep()</code>、<code>.map()</code>，步骤也可以直接是一个 agent 或工具。Mastra 的 agent 和 workflow 共用同一套快照存储，这也是 agent 的审批能跨实例恢复的原因。</p>
+<h2 id="5-openai-agents-sdk-js">5. OpenAI Agents SDK (JS)</h2>
+<h3 id="51-和-python-版一样的结构">5.1 和 Python 版一样的结构</h3>
+<div class="hl"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">agent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">Agent</span><span class="p">({</span>
+<span class="w">  </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="s1">'support'</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">instructions</span><span class="o">:</span><span class="w"> </span><span class="s1">'你是客服 agent，需要时调用工具。'</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">model</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">tools</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="nx">lookup_order</span><span class="p">,</span><span class="w"> </span><span class="nx">refund</span><span class="p">],</span>
+<span class="p">});</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">r</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">run</span><span class="p">(</span><span class="nx">agent</span><span class="p">,</span><span class="w"> </span><span class="s1">'查一下 A1'</span><span class="p">);</span>
+<span class="nx">r</span><span class="p">.</span><span class="nx">finalOutput</span><span class="p">;</span>
+</code></pre></div>
+
+<p>4.2 课讲的 Runner 循环、handoff、guardrail、session 在 JS 版里都有，名字从 snake_case 改成 camelCase（<code>max_turns</code> → <code>maxTurns</code>，<code>needs_approval</code> → <code>needsApproval</code>）。几处值得看的地方：</p>
+<ul>
+<li><strong>模型接口是 Responses 风格的。</strong> 自己实现 <code>Model</code> 只需要 <code>getResponse(request)</code> 和 <code>getStreamedResponse(request)</code>。<code>request.systemInstructions</code> 单独放指令，<code>request.input</code> 是 item 列表：<code>message</code>、<code>function_call</code>、<code>function_call_result</code>。测试检查了第二次调用时 input 的三项和工具结果的格式：对象被 <code>JSON.stringify</code> 成文本，<code>{ type: 'text', text: '{"orderId":"A1","amount":120}' }</code>。（测试验证过）</li>
+<li>0.22.0 自带测试工具 <code>@openai/agents/testing</code>，里面有一个 <code>ScriptedModel</code>。练习自己写了一个，是为了让你看清 <code>Model</code> 接口，正式项目可以直接用自带的。</li>
+<li><strong>trace 默认上传。</strong> 测试里调了 <code>setTracingDisabled(true)</code>。生产环境默认会把 trace 发到 OpenAI 后台，用别家模型或有数据合规要求时注意关掉或换 trace 处理器。</li>
+</ul>
+<h3 id="52-maxturns默认-10超过抛错">5.2 maxTurns：默认 10，超过抛错</h3>
+<p><code>maxTurns</code> 默认 10（源码 <code>DEFAULT_MAX_TURNS = 10</code>），数的是模型调用次数。设成 2：第 1、2 次调用要的工具都执行了，第 3 次调用前检查到超限，抛 <code>MaxTurnsExceededError</code>。模型调用 2 次，工具执行 2 次。（测试验证过）</p>
+<p>和 AI SDK、Mastra 数法相同，区别在于<strong>抛错</strong>。4.2 课讲过可以用 <code>errorHandlers</code> 按错误类型返回兜底输出，不让 run 以异常结束。</p>
+<h3 id="53-工具错误">5.3 工具错误</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>情况</th>
+<th>0.22.0 实测行为</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>execute</code> 抛错</td>
+<td>模型看到固定文案 <code>An error occurred while running the tool.</code>，<strong>没有原因</strong></td>
+</tr>
+<tr>
+<td>参数不符合 schema</td>
+<td>同上，固定文案</td>
+</tr>
+<tr>
+<td>工具名不存在</td>
+<td>默认抛 <code>ModelBehaviorError: Tool cancel_order not found in agent support.</code>；<code>toolNotFoundBehavior: 'return_error_to_model'</code> 时模型看到 <code>Tool 'cancel_order' not found.</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>（测试验证过）</p>
+<p>默认文案不带原因，好处是不会把内部错误信息泄露给模型（进而泄露给用户），坏处是模型不知道哪里错了，只能瞎试或者放弃。需要让模型知道原因，给工具设 <code>errorFunction: (ctx, error) =&gt; '工具出错：' + error.message</code>；设成 <code>null</code> 则不兜底，工具抛错时整个 run 抛 <code>ToolCallError</code>。写课时在沙箱里试过这两种设置。</p>
+<h3 id="54-needsapproval-和-runstate">5.4 needsApproval 和 RunState</h3>
+<div class="hl"><pre><span></span><code><span class="nx">tool</span><span class="p">({</span>
+<span class="w">  </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="s1">'refund'</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">parameters</span><span class="o">:</span><span class="w"> </span><span class="kt">z.object</span><span class="p">({</span><span class="w"> </span><span class="nx">orderId</span><span class="o">:</span><span class="w"> </span><span class="kt">z.string</span><span class="p">(),</span><span class="w"> </span><span class="nx">amount</span><span class="o">:</span><span class="w"> </span><span class="kt">z.number</span><span class="p">()</span><span class="w"> </span><span class="p">}),</span>
+<span class="w">  </span><span class="nx">needsApproval</span><span class="o">:</span><span class="w"> </span><span class="kt">async</span><span class="w"> </span><span class="p">(</span><span class="nx">_ctx</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">amount</span><span class="w"> </span><span class="p">})</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">amount</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">500</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">execute</span><span class="o">:</span><span class="w"> </span><span class="kt">async</span><span class="w"> </span><span class="p">({</span><span class="w"> </span><span class="nx">orderId</span><span class="p">,</span><span class="w"> </span><span class="nx">amount</span><span class="w"> </span><span class="p">})</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">shop</span><span class="p">.</span><span class="nx">refund</span><span class="p">(</span><span class="nx">orderId</span><span class="p">,</span><span class="w"> </span><span class="nx">amount</span><span class="p">),</span>
+<span class="p">});</span>
+
+<span class="kd">const</span><span class="w"> </span><span class="nx">r1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">run</span><span class="p">(</span><span class="nx">agent</span><span class="p">,</span><span class="w"> </span><span class="s1">'给 A2 退 800'</span><span class="p">);</span>
+<span class="nx">r1</span><span class="p">.</span><span class="nx">interruptions</span><span class="p">;</span><span class="w">           </span><span class="c1">// [{ type: 'tool_approval_item', name: 'refund', arguments: '{"orderId":"A2","amount":800}' }]</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">saved</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">r1</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">toString</span><span class="p">();</span><span class="w">   </span><span class="c1">// 存进数据库</span>
+
+<span class="c1">// 另一个进程</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">RunState</span><span class="p">.</span><span class="nx">fromString</span><span class="p">(</span><span class="nx">agent</span><span class="p">,</span><span class="w"> </span><span class="nx">saved</span><span class="p">);</span>
+<span class="nx">state</span><span class="p">.</span><span class="nx">approve</span><span class="p">(</span><span class="nx">state</span><span class="p">.</span><span class="nx">getInterruptions</span><span class="p">()[</span><span class="mf">0</span><span class="p">]);</span><span class="w">   </span><span class="c1">// 或 state.reject(...)</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">r2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">run</span><span class="p">(</span><span class="nx">agent</span><span class="p">,</span><span class="w"> </span><span class="nx">state</span><span class="p">);</span>
+</code></pre></div>
+
+<ul>
+<li>状态是 <code>RunState</code> 序列化成的 JSON 字符串（测试里约 3 KB），包含对话、当前 agent、待审批的调用。恢复时要传一个<strong>同样定义的</strong> agent：工具的实现不在字符串里，只有名字。测试用新的 agent 实例和新的模型对象恢复，模型只被调用一次。（测试验证过）</li>
+<li>拒绝时模型看到固定文案 <code>Tool execution was not approved.</code>，工具不执行。（测试验证过）</li>
+<li>小额退款 <code>needsApproval</code> 返回 false，直接执行，<code>interruptions</code> 为空。（测试验证过）</li>
+</ul>
+<p>和前两家对照：AI SDK 的状态是消息历史（你存），Mastra 的状态是 storage 快照（框架存，你只拿 runId），OpenAI 是一个不透明的字符串（你存，但内容由框架定义）。这三种和 4.4 课 Genkit（<code>History()</code>）、Eino（<code>CheckPointStore</code>）、MCP（<code>RequestState</code>）正好又是一组对照。</p>
+<h2 id="6-同一件事三个框架怎么写">6. 同一件事，三个框架怎么写</h2>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>问题</th>
+<th>Vercel AI SDK 7</th>
+<th>Mastra 1.86</th>
+<th>OpenAI Agents JS 0.22</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>循环上限</td>
+<td><code>stopWhen: isStepCount(n)</code></td>
+<td><code>maxSteps</code></td>
+<td><code>maxTurns</code></td>
+</tr>
+<tr>
+<td>默认上限</td>
+<td><code>ToolLoopAgent</code> 20；<code>generateText</code> 1</td>
+<td>5</td>
+<td>10</td>
+</tr>
+<tr>
+<td>上限数的是</td>
+<td>模型调用次数</td>
+<td>模型调用次数</td>
+<td>模型调用次数</td>
+</tr>
+<tr>
+<td>撞到上限</td>
+<td>正常返回，<code>stoppedBy: 'stop-condition'</code></td>
+<td>正常返回，<code>finishReason: 'tool-calls'</code></td>
+<td>抛 <code>MaxTurnsExceededError</code></td>
+</tr>
+<tr>
+<td>最后一步要的工具</td>
+<td>执行</td>
+<td>执行</td>
+<td>执行</td>
+</tr>
+<tr>
+<td>工具抛错</td>
+<td>错误消息交给模型</td>
+<td>错误消息交给模型</td>
+<td>固定文案交给模型，<code>errorFunction</code> 可改</td>
+</tr>
+<tr>
+<td>工具不存在</td>
+<td>交给模型，附可用工具列表</td>
+<td>交给模型，附可用工具列表</td>
+<td>默认抛 <code>ModelBehaviorError</code>，可改</td>
+</tr>
+<tr>
+<td>参数不合 schema</td>
+<td>交给模型，附 zod 错误</td>
+<td>交给模型，逐字段列出</td>
+<td>固定文案交给模型</td>
+</tr>
+<tr>
+<td>同一步多个工具</td>
+<td>默认并发，<code>toolCallConcurrency</code> 限制</td>
+<td>并发</td>
+<td>并发</td>
+</tr>
+<tr>
+<td>审批声明在哪</td>
+<td>调用 / agent 的 <code>toolApproval</code></td>
+<td>工具 <code>requireApproval</code>，或调用的 <code>requireToolApproval</code></td>
+<td>工具 <code>needsApproval</code></td>
+</tr>
+<tr>
+<td>审批期间的状态</td>
+<td>消息历史（你存）</td>
+<td>storage 快照（框架存），对外是 runId</td>
+<td><code>RunState</code> 字符串（你存）</td>
+</tr>
+<tr>
+<td>自动拒绝并告诉模型原因</td>
+<td>策略返回 <code>{ type: 'denied', reason }</code></td>
+<td><code>hooks.beforeToolCall</code> 返回 <code>{ proceed: false, output }</code></td>
+<td>工具输入 guardrail 返回 <code>rejectContent</code></td>
+</tr>
+<tr>
+<td>恢复时工具</td>
+<td>执行一次</td>
+<td><code>requireApproval</code>：执行一次；<code>suspend()</code>：从头再执行</td>
+<td>执行一次</td>
+</tr>
+</tbody>
+</table></div>
+<p>练习的 <code>compare.test.ts</code> 用同一个“模型一直要工具”的脚本跑三家：上限都设 2 时，三家都是模型调用 2 次、工具执行 2 次，AI SDK 和 Mastra 的 <code>text</code> 是空字符串，OpenAI 抛错；不设上限时，三家分别在第 20、5、10 次调用后停下。（测试验证过）</p>
+<p><strong>同一个“上限”，三种结束方式。</strong> 写服务时最危险的是 AI SDK 和 Mastra 的静默结束：接口返回 200、回答是空的。上线前给每个 agent 显式设上限，并在 <code>stoppedBy</code> / <code>finishReason</code> 是“被上限截断”时走单独的处理（重试、提示用户、记告警）。</p>
+<h2 id="7-怎么选">7. 怎么选</h2>
+<ul>
+<li><strong>Next.js / React 前端 + 一两个模型调用 + 几个工具</strong>：Vercel AI SDK。<code>useChat</code>、UI 消息流、各家 provider 都现成，<code>ToolLoopAgent</code> 足够应付大部分 agent 场景。注意 3.6 节的审批签名，以及历史放在客户端的信任问题。</li>
+<li><strong>需要持久化的 agent（审批隔天才来、多实例部署）、确定流程和 agent 混着用、想要现成的 memory 和服务端</strong>：Mastra。它站在 AI SDK 的模型层上，换模型不用改代码；workflow 的 suspend / resume 和 agent 的审批共用存储。代价是框架大、更新快、默认 <code>maxSteps</code> 只有 5。</li>
+<li><strong>主要用 OpenAI 模型、团队里同时有 Python 和 TS、想用 handoff / guardrail / Responses 的服务端能力</strong>：OpenAI Agents SDK。Python 和 JS 两版概念一致，4.2 课的东西可以直接搬过来。</li>
+<li><strong>工具要给多个框架、多种语言共用</strong>：和 4.4 课一样，放进 MCP 服务端。AI SDK 有 <code>@ai-sdk/mcp</code>，Mastra 有 <code>@mastra/mcp</code>，OpenAI Agents SDK 有 <code>MCPServerStdio</code> / <code>MCPServerStreamableHttp</code>。</li>
+<li><strong>只调一个模型、一两个工具</strong>：可能三个都不需要，这是 4.6 课的话题。</li>
+</ul>
+<h2 id="8-练习代码导读">8. 练习代码导读</h2>
+<p><code>projects/28-ts-ecosystem/</code> 里的文件：</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>文件</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>src/script.ts</code></td>
+<td><code>ScriptedModel</code>：继承 AI SDK 的 <code>MockLanguageModelV4</code>，按脚本返回文字或工具调用，支持流式；<code>callCount</code>、<code>promptAt</code>、<code>lastMessageAt</code> 方便断言。AI SDK 和 Mastra 共用</td>
+</tr>
+<tr>
+<td><code>src/shop.ts</code></td>
+<td>三家共用的业务：订单库、退款账本、<code>maxInFlight</code> 并发计数；审批阈值 500</td>
+</tr>
+<tr>
+<td><code>src/aisdk.ts</code></td>
+<td><code>shopTools</code>、<code>supportAgent</code>（<code>toolApproval</code> 策略、可选的签名密钥）、<code>pendingApprovals</code>、<code>approvalMessage</code></td>
+</tr>
+<tr>
+<td><code>src/mastra.ts</code></td>
+<td><code>mastraTools</code>（<code>requireApproval</code> 的 <code>refund</code>、自己 <code>suspend()</code> 的 <code>refund_checked</code>）、<code>buildMastra</code>、工单分流 workflow</td>
+</tr>
+<tr>
+<td><code>src/openai.ts</code></td>
+<td><code>ScriptedOpenAIModel</code>（实现 <code>Model</code> 接口）、<code>openaiTools</code>（<code>needsApproval</code>）、<code>supportAgent</code>、<code>restore</code></td>
+</tr>
+<tr>
+<td><code>src/*.test.ts</code></td>
+<td>25 个测试：<code>aisdk.test.ts</code> 9 个、<code>mastra.test.ts</code> 8 个、<code>openai.test.ts</code> 6 个、<code>compare.test.ts</code> 2 个</td>
+</tr>
+</tbody>
+</table></div>
+<p>运行：</p>
+<div class="hl"><pre><span></span><code>cd projects/28-ts-ecosystem
+npm install
+npm run typecheck
+npm test
+</code></pre></div>
+
+<p>需要 Node 22 以上（AI SDK 7 的要求，Mastra 要求 22.13 以上）。跑到“默认上限”那个测试时，AI SDK 会打一条 <code>isStepCount(20)</code> 的警告，这是预期的。</p>
+<h2 id="9-常见的坑">9. 常见的坑</h2>
+<ul>
+<li><strong><code>generateText</code> 加了工具却没有回答。</strong> 默认只走一步，要传 <code>stopWhen</code>。</li>
+<li><strong>以为撞到上限会报错。</strong> AI SDK 和 Mastra 都是正常返回，要检查 <code>stoppedBy</code> / <code>finishReason</code>。</li>
+<li><strong>Mastra 的 <code>maxSteps</code> 默认只有 5。</strong> 多工具任务会静默截断。</li>
+<li><strong>照着 v5 / v6 的示例写 AI SDK 7。</strong> <code>stepCountIs</code>、<code>system</code>、<code>fullStream</code>、工具上的 <code>needsApproval</code>、<code>experimental_context</code> 都改了名或废弃了。</li>
+<li><strong>相信文档说 <code>generateText</code> 会抛 <code>NoSuchToolError</code>。</strong> 7.0.183 实测是交给模型，循环继续。</li>
+<li><strong>审批历史由客户端保存却没签名。</strong> 客户端可以改参数再附上批准，见 3.6 节。配 <code>experimental_toolApprovalSecret</code>，或者把历史存在服务端。</li>
+<li><strong>Mastra 没配 storage 就用审批。</strong> 恢复时报 “snapshot not found”。<code>InMemoryStore</code> 只适合测试，进程退出就丢。</li>
+<li><strong>Mastra 的 <code>suspend()</code> 后面没写 <code>return</code>。</strong> <code>suspend()</code> 不抛出，后面的代码会继续执行。</li>
+<li><strong>Mastra 在 <code>generate()</code> 里传 <code>hooks</code>，以为审批恢复后还在。</strong> 调用级的 <code>hooks</code> 不会存进快照，<code>approveToolCallGenerate</code> 恢复时不带上它们，拦截不会生效。要么把 hooks 配在 agent 上，要么恢复时再传一次。练习 3 的参考答案里有这个测试。</li>
+<li><strong>Mastra 工具返回值不符合 <code>outputSchema</code>。</strong> 模型会以为调用失败而重试，有副作用的工具设 <code>outputValidation: 'warn'</code>。</li>
+<li><strong>OpenAI Agents SDK 的工具错误模型看不到原因。</strong> 默认是固定文案，需要时设 <code>errorFunction</code>。</li>
+<li><strong>OpenAI Agents SDK 恢复 <code>RunState</code> 时传了不同的 agent。</strong> 工具实现不在序列化的字符串里，按名字找；工具改名后旧状态恢复不了。</li>
+<li><strong>自己写的 AI SDK 假模型在构造后给 <code>this.doGenerate</code> 赋值。</strong> 会绕过 <code>MockLanguageModelV4</code> 的调用记录。</li>
+<li><strong>三家的“步数”按同一个意思理解。</strong> 三家都数模型调用次数，但默认值是 20 / 5 / 10，撞到之后的行为也不同。</li>
+</ul>
+<h2 id="10-练习">10. 练习</h2>
+<h3 id="练习-1读懂并跑通必做">练习 1：读懂并跑通（必做）</h3>
+<ul>
+<li><code>npm install &amp;&amp; npm run typecheck &amp;&amp; npm test</code>，25 个测试全部通过。</li>
+<li>读 <code>aisdk.test.ts</code> 里“历史由客户端保存时可能被篡改”那个测试，回答：签名绑定了哪三样东西？为什么服务端重新执行审批策略也挡不住这种篡改？</li>
+<li>把 <code>compare.test.ts</code> 第一个测试的上限从 2 改成 3，先预测三家的模型调用次数、工具执行次数、是否抛错，再改断言跑一遍。</li>
+<li>给 AI SDK 写一个测试：同一步里两个 <code>lookup_order</code>，分别在默认设置和 <code>toolCallConcurrency: 1</code> 下运行，断言 <code>maxInFlight</code> 分别是 2 和 1，后者耗时不少于两次延迟之和。</li>
+</ul>
+<h3 id="练习-2统一的审批接口必做">练习 2：统一的审批接口（必做）</h3>
+<p>三个框架的审批状态放在三个不同的地方。写一个统一接口，让上层代码不关心用的是哪家：</p>
+<div class="hl"><pre><span></span><code><span class="kr">type</span><span class="w"> </span><span class="nx">Pending</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w"> </span><span class="nx">tool</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w"> </span><span class="nx">args</span><span class="o">:</span><span class="w"> </span><span class="kt">unknown</span><span class="w"> </span><span class="p">};</span>
+<span class="kr">type</span><span class="w"> </span><span class="nx">Step</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">done</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="p">;</span><span class="w"> </span><span class="nx">text</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">done</span><span class="o">:</span><span class="w"> </span><span class="kt">false</span><span class="p">;</span><span class="w"> </span><span class="nx">pending</span><span class="o">:</span><span class="w"> </span><span class="kt">Pending</span><span class="p">[];</span><span class="w"> </span><span class="nx">token</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="p">};</span>
+
+<span class="kd">interface</span><span class="w"> </span><span class="nx">HumanApproval</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">start</span><span class="p">(</span><span class="nx">prompt</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">Step</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">decide</span><span class="p">(</span><span class="nx">token</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">approved</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">Step</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<ul>
+<li><code>token</code> 是要存进数据库的全部状态：AI SDK 是消息历史的 JSON，Mastra 是 runId（真正的状态在 storage 里），OpenAI 是 <code>RunState.toString()</code>。</li>
+<li><code>decide</code> 每次都<strong>新建</strong> agent 和模型对象，模拟请求落在另一台机器上。</li>
+<li>AI SDK 版打开签名。</li>
+<li>用 <code>describe.each</code> 对三个实现跑同一组测试：批准时退款执行、拒绝时不执行，两种情况下最终回答都来自第二段脚本。</li>
+</ul>
+<h3 id="练习-3硬性拒绝选做">练习 3：硬性拒绝（选做）</h3>
+<p>单笔超过 5000 的退款不问人，直接拒绝，并把原因告诉模型。三家各用自己的机制实现：</p>
+<ul>
+<li>AI SDK：<code>toolApproval</code> 返回 <code>{ type: 'denied', reason }</code>。</li>
+<li>Mastra：给 <code>buildMastra</code> 加一个 <code>hooks</code> 选项，在 agent 上配 <code>beforeToolCall</code>，超限时返回 <code>{ proceed: false, output: 原因 }</code>。注意 <code>refund</code> 设了 <code>requireApproval: true</code>，看看拦截发生在审批之前还是之后。再写一个测试，把 hooks 只传给 <code>generate()</code> 而不是 agent，然后批准，观察会发生什么。</li>
+<li>OpenAI：给工具加 <code>inputGuardrails</code>，用 <code>defineToolInputGuardrail</code> 返回 <code>{ behavior: { type: 'rejectContent', message: 原因 } }</code>。</li>
+</ul>
+<p>每家断言：退款没执行，模型下一轮看到的工具结果是原因文字。</p>
+<h2 id="11-自测题">11. 自测题</h2>
+<ol>
+<li><code>generateText</code> 不传 <code>stopWhen</code>、模型要调工具时，工具会执行吗？模型调用几次？<code>text</code> 是什么？</li>
+<li><code>ToolLoopAgent</code> 的 <code>stopWhen: isStepCount(2)</code>，模型一直要工具，模型调用几次？工具执行几次？会抛错吗？怎么知道是被上限截断的？</li>
+<li>AI SDK 7.0.183 里，工具抛错、工具名不存在、参数不合 schema，模型分别看到什么？</li>
+<li>AI SDK 的审批流程需要几次调用？审批期间的状态存在哪？</li>
+<li>为什么审批历史由客户端保存时，服务端重新执行审批策略也不够？<code>experimental_toolApprovalSecret</code> 怎么解决？</li>
+<li>Mastra 为什么能直接用 AI SDK 的模型对象？</li>
+<li>Mastra 的 <code>maxSteps</code> 默认多少？撞到上限时 <code>generate()</code> 返回什么？</li>
+<li>Mastra 的 <code>requireApproval</code> 和工具里调 <code>suspend()</code> 有什么区别？各自用什么方法恢复？</li>
+<li>Mastra 的审批为什么必须配 storage？另一个实例怎么恢复？</li>
+<li>Mastra workflow 恢复时，挂起的步骤和已完成的步骤分别怎样？</li>
+<li>OpenAI Agents SDK JS 的 <code>maxTurns</code> 默认多少？撞到上限时怎样？</li>
+<li>OpenAI Agents SDK JS 的工具抛错时，模型默认看到什么？怎么改？</li>
+<li><code>RunState.fromString</code> 为什么要传 agent？</li>
+<li>三个框架都把上限设成 2，结束方式有什么不同？上线前该做什么？</li>
+</ol>
+<h2 id="12-自测题答案">12. 自测题答案</h2>
+<ol>
+<li>会执行。<code>generateText</code> 默认 <code>isStepCount(1)</code>，只调一次模型；这一步里模型要的工具会执行，但不会再调模型看结果，所以 <code>text</code> 是空字符串，<code>stoppedBy</code> 是 <code>'stop-condition'</code>。</li>
+<li>模型调用 2 次，工具执行 2 次（第 2 步要的工具也执行），不抛错。看 <code>stoppedBy === 'stop-condition'</code>；<code>finishReason</code> 是 <code>'tool-calls'</code>，它只描述最后一次模型调用。</li>
+<li>三种都作为 <code>error-text</code> 交给模型，循环继续。工具抛错是 <code>Error: &lt;消息&gt;</code>；工具名不存在是 <code>AI_NoSuchToolError: ... Available tools: ...</code>，附可用工具列表；参数不合 schema 是 <code>AI_InvalidToolInputError</code> 加 zod 的校验错误。</li>
+<li>两次。第一次 <code>generate</code> 以 <code>stoppedBy: 'approval'</code> 结束，<code>content</code> 里有 <code>tool-approval-request</code>；把 <code>responseMessages</code> 和一条含 <code>tool-approval-response</code> 的 tool 消息追加到历史，第二次 <code>generate</code> 先执行（或不执行）工具再调模型。状态就是消息历史，没有 runId 或 checkpoint。</li>
+<li>篡改后的参数（比如把订单号改掉）仍然符合 schema，策略重新执行的结论也还是“需要审批”，而客户端附上了 <code>approved: true</code>，服务端没法知道人批准的是不是这组参数。签名把工具名、工具调用 ID、参数绑在一起，用服务端的密钥做 HMAC；恢复时重新计算，对不上就抛 <code>AI_InvalidToolApprovalSignatureError</code>，工具不执行。自动拒绝的调用不签名，客户端也没法把它改成批准。</li>
+<li>Mastra 的 agent 底层就是按 AI SDK 的模型接口规范调用模型的，<code>@mastra/core</code> 同时依赖 AI SDK v5、v6、v7 三代 provider 规范，所以任何 AI SDK provider 的模型对象（包括 <code>MockLanguageModelV4</code>）都能直接传给 <code>Agent</code> 的 <code>model</code>。</li>
+<li>5。撞到上限时正常返回，<code>finishReason</code> 是 <code>'tool-calls'</code>，<code>text</code> 为空，不抛错；第 5 步要的工具也执行了。</li>
+<li><code>requireApproval</code> 在 <code>execute</code> 之前停，框架给出工具名和参数，恢复用 <code>approveToolCallGenerate</code> / <code>declineToolCallGenerate</code>（流式用 <code>approveToolCall</code> / <code>declineToolCall</code>），批准后 <code>execute</code> 执行一次。<code>suspend()</code> 在 <code>execute</code> 里面停，带自定义数据，恢复用 <code>resumeGenerate(resumeData, { runId })</code>（流式用 <code>resumeStream</code>），<code>execute</code> 从头再执行一次，从 <code>context.agent.resumeData</code> 读答复。</li>
+<li>挂起的运行以快照形式存在 storage 里，恢复要从 storage 读回来；没配 storage 会报 “snapshot not found”。另一个实例只要用同一个 storage（生产里是同一个数据库），拿 runId 调审批或恢复方法即可，模型和工具都可以是新对象。</li>
+<li>挂起的步骤从头再执行一次，这次 <code>resumeData</code> 有值；已完成的步骤不重跑，它们的输出在快照里。</li>
+<li>10，数模型调用次数。超过时抛 <code>MaxTurnsExceededError</code>；最后一次调用要的工具已经执行了。可以用 <code>errorHandlers</code> 返回兜底输出。</li>
+<li>固定文案 <code>An error occurred while running the tool.</code>，不带原因。给工具设 <code>errorFunction: (ctx, error) =&gt; ...</code> 自定义交给模型的文字；设成 <code>null</code> 时不兜底，run 抛 <code>ToolCallError</code>。</li>
+<li>序列化的字符串里只有工具名、对话和待审批的调用，没有工具的实现（函数没法序列化）。恢复时要靠 agent 上同名的工具来执行，所以传进去的 agent 要和中断时定义一致。</li>
+<li>三家都是模型调用 2 次、工具执行 2 次。AI SDK 和 Mastra 正常返回，回答为空；OpenAI 抛 <code>MaxTurnsExceededError</code>。上线前给每个 agent 显式设上限，并在被截断时单独处理（检查 <code>stoppedBy</code> / <code>finishReason</code>，或捕获异常），不要把空回答直接返回给用户。</li>
+</ol>
+<h2 id="13-参考答案">13. 参考答案</h2>
+<h3 id="练习-1">练习 1</h3>
+<ul>
+<li>签名绑定工具名、工具调用 ID 和参数。服务端重新执行的审批策略只能判断“这组参数需不需要审批”，判断不了“人批准的是不是这组参数”；客户端改了参数又附上批准，策略的结论仍是“需要审批且已批准”。</li>
+<li>上限 3：三家都是模型调用 3 次、工具执行 3 次（脚本里正好有 3 个工具调用）；AI SDK 和 Mastra 正常返回、<code>text</code> 为空，OpenAI 抛 <code>MaxTurnsExceededError</code>。</li>
+<li>并发测试：</li>
+</ul>
+<div class="hl"><pre><span></span><code><span class="nx">it</span><span class="p">.</span><span class="nx">each</span><span class="p">([[</span><span class="kc">undefined</span><span class="p">,</span><span class="w"> </span><span class="mf">2</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="mf">1</span><span class="p">,</span><span class="w"> </span><span class="mf">1</span><span class="p">]]</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="kd">const</span><span class="p">)(</span><span class="s1">'toolCallConcurrency=%s → 峰值 %i'</span><span class="p">,</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="p">(</span><span class="nx">limit</span><span class="p">,</span><span class="w"> </span><span class="nx">peak</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">shop</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">Shop</span><span class="p">(</span><span class="kc">undefined</span><span class="p">,</span><span class="w"> </span><span class="mf">20</span><span class="p">);</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">ScriptedModel</span><span class="p">([</span>
+<span class="w">    </span><span class="nx">calls</span><span class="p">(</span>
+<span class="w">      </span><span class="p">{</span><span class="w"> </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="s1">'c1'</span><span class="p">,</span><span class="w"> </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="s1">'lookup_order'</span><span class="p">,</span><span class="w"> </span><span class="nx">input</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">orderId</span><span class="o">:</span><span class="w"> </span><span class="s1">'A1'</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">},</span>
+<span class="w">      </span><span class="p">{</span><span class="w"> </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="s1">'c2'</span><span class="p">,</span><span class="w"> </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="s1">'lookup_order'</span><span class="p">,</span><span class="w"> </span><span class="nx">input</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">orderId</span><span class="o">:</span><span class="w"> </span><span class="s1">'A3'</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">},</span>
+<span class="w">    </span><span class="p">),</span>
+<span class="w">    </span><span class="nx">say</span><span class="p">(</span><span class="s1">'ok'</span><span class="p">),</span>
+<span class="w">  </span><span class="p">]);</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">agent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">ToolLoopAgent</span><span class="p">({</span>
+<span class="w">    </span><span class="nx">model</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">tools</span><span class="o">:</span><span class="w"> </span><span class="kt">shopTools</span><span class="p">(</span><span class="nx">shop</span><span class="p">),</span>
+<span class="w">    </span><span class="p">...(</span><span class="nx">limit</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">toolCallConcurrency</span><span class="o">:</span><span class="w"> </span><span class="kt">limit</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="p">{}),</span>
+<span class="w">  </span><span class="p">});</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">t0</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">Date</span><span class="p">.</span><span class="nx">now</span><span class="p">();</span>
+<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">agent</span><span class="p">.</span><span class="nx">generate</span><span class="p">({</span><span class="w"> </span><span class="nx">prompt</span><span class="o">:</span><span class="w"> </span><span class="s1">'q'</span><span class="w"> </span><span class="p">});</span>
+<span class="w">  </span><span class="nx">expect</span><span class="p">(</span><span class="nx">shop</span><span class="p">.</span><span class="nx">maxInFlight</span><span class="p">).</span><span class="nx">toBe</span><span class="p">(</span><span class="nx">peak</span><span class="p">);</span>
+<span class="w">  </span><span class="nx">expect</span><span class="p">(</span><span class="nx">shop</span><span class="p">.</span><span class="nx">lookups</span><span class="p">).</span><span class="nx">toEqual</span><span class="p">([</span><span class="s1">'A1'</span><span class="p">,</span><span class="w"> </span><span class="s1">'A3'</span><span class="p">]);</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">limit</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="mf">1</span><span class="p">)</span><span class="w"> </span><span class="nx">expect</span><span class="p">(</span><span class="nb">Date</span><span class="p">.</span><span class="nx">now</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nx">t0</span><span class="p">).</span><span class="nx">toBeGreaterThanOrEqual</span><span class="p">(</span><span class="mf">40</span><span class="p">);</span>
+<span class="p">});</span>
+</code></pre></div>
+
+<p><code>toolCallConcurrency: 1</code> 时按模型给出的顺序逐个执行，所以 <code>lookups</code> 的顺序固定；默认并发时两个调用几乎同时开始，顺序在这个例子里也是 A1、A3，但不要依赖它。时间阈值写得宽松（40 毫秒，而不是 40 毫秒以上的精确值），避免 CI 机器的定时器误差。</p>
+<h3 id="练习-2">练习 2</h3>
+<p><code>src/approval.ts</code>：</p>
+<div class="hl"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="kr">type</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">ModelMessage</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">'ai'</span><span class="p">;</span>
+<span class="k">import</span><span class="w"> </span><span class="kr">type</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">MastraCompositeStore</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">'@mastra/core/storage'</span><span class="p">;</span>
+<span class="k">import</span><span class="w"> </span><span class="kr">type</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">RunResult</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">'@openai/agents'</span><span class="p">;</span>
+<span class="k">import</span><span class="w"> </span><span class="kr">type</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">ScriptedModel</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">'./script.js'</span><span class="p">;</span>
+<span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">approvalMessage</span><span class="p">,</span><span class="w"> </span><span class="nx">pendingApprovals</span><span class="p">,</span><span class="w"> </span><span class="nx">supportAgent</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="nx">aiAgent</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">'./aisdk.js'</span><span class="p">;</span>
+<span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">buildMastra</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">'./mastra.js'</span><span class="p">;</span>
+<span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">restore</span><span class="p">,</span><span class="w"> </span><span class="nx">run</span><span class="p">,</span><span class="w"> </span><span class="nx">supportAgent</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="nx">oaAgent</span><span class="p">,</span><span class="w"> </span><span class="kr">type</span><span class="w"> </span><span class="nx">ScriptedOpenAIModel</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">'./openai.js'</span><span class="p">;</span>
+<span class="k">import</span><span class="w"> </span><span class="kr">type</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Shop</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">'./shop.js'</span><span class="p">;</span>
+
+<span class="k">export</span><span class="w"> </span><span class="kr">type</span><span class="w"> </span><span class="nx">Pending</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w"> </span><span class="nx">tool</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w"> </span><span class="nx">args</span><span class="o">:</span><span class="w"> </span><span class="kt">unknown</span><span class="w"> </span><span class="p">};</span>
+<span class="k">export</span><span class="w"> </span><span class="kr">type</span><span class="w"> </span><span class="nx">Step</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">done</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="p">;</span><span class="w"> </span><span class="nx">text</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">done</span><span class="o">:</span><span class="w"> </span><span class="kt">false</span><span class="p">;</span><span class="w"> </span><span class="nx">pending</span><span class="o">:</span><span class="w"> </span><span class="kt">Pending</span><span class="p">[];</span><span class="w"> </span><span class="nx">token</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="p">};</span>
+
+<span class="k">export</span><span class="w"> </span><span class="kd">interface</span><span class="w"> </span><span class="nx">HumanApproval</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">start</span><span class="p">(</span><span class="nx">prompt</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">Step</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">decide</span><span class="p">(</span><span class="nx">token</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">approved</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">Step</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c1">// AI SDK：状态就是消息历史</span>
+<span class="k">export</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">aiSdkApproval</span><span class="p">(</span><span class="nx">models</span><span class="o">:</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">ScriptedModel</span><span class="p">,</span><span class="w"> </span><span class="nx">shop</span><span class="o">:</span><span class="w"> </span><span class="kt">Shop</span><span class="p">,</span><span class="w"> </span><span class="nx">secret</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nx">HumanApproval</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">agent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">aiAgent</span><span class="p">(</span><span class="nx">models</span><span class="p">(),</span><span class="w"> </span><span class="nx">shop</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">approvalSecret</span><span class="o">:</span><span class="w"> </span><span class="kt">secret</span><span class="w"> </span><span class="p">});</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">step</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span>
+<span class="w">    </span><span class="nx">messages</span><span class="o">:</span><span class="w"> </span><span class="kt">ModelMessage</span><span class="p">[],</span>
+<span class="w">    </span><span class="nx">r</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">text</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w"> </span><span class="nx">content</span><span class="o">:</span><span class="w"> </span><span class="kt">readonly</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="kr">type</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="p">}[];</span><span class="w"> </span><span class="nx">responseMessages</span><span class="o">:</span><span class="w"> </span><span class="kt">ModelMessage</span><span class="p">[]</span><span class="w"> </span><span class="p">},</span>
+<span class="w">  </span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nx">Step</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">pending</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">pendingApprovals</span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nx">content</span><span class="p">);</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">pending</span><span class="p">.</span><span class="nx">length</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="mf">0</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">done</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="p">,</span><span class="w"> </span><span class="nx">text</span><span class="o">:</span><span class="w"> </span><span class="kt">r.text</span><span class="w"> </span><span class="p">};</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nx">done</span><span class="o">:</span><span class="w"> </span><span class="kt">false</span><span class="p">,</span>
+<span class="w">      </span><span class="nx">pending</span><span class="o">:</span><span class="w"> </span><span class="kt">pending.map</span><span class="p">((</span><span class="nx">p</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">({</span><span class="w"> </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="kt">p.approvalId</span><span class="p">,</span><span class="w"> </span><span class="nx">tool</span><span class="o">:</span><span class="w"> </span><span class="kt">p.toolName</span><span class="p">,</span><span class="w"> </span><span class="nx">args</span><span class="o">:</span><span class="w"> </span><span class="kt">p.input</span><span class="w"> </span><span class="p">})),</span>
+<span class="w">      </span><span class="nx">token</span><span class="o">:</span><span class="w"> </span><span class="kt">JSON.stringify</span><span class="p">([...</span><span class="nx">messages</span><span class="p">,</span><span class="w"> </span><span class="p">...</span><span class="nx">r</span><span class="p">.</span><span class="nx">responseMessages</span><span class="p">]),</span>
+<span class="w">    </span><span class="p">};</span>
+<span class="w">  </span><span class="p">};</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">async</span><span class="w"> </span><span class="nx">start</span><span class="p">(</span><span class="nx">prompt</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="kd">const</span><span class="w"> </span><span class="nx">messages</span><span class="o">:</span><span class="w"> </span><span class="kt">ModelMessage</span><span class="p">[]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[{</span><span class="w"> </span><span class="nx">role</span><span class="o">:</span><span class="w"> </span><span class="s1">'user'</span><span class="p">,</span><span class="w"> </span><span class="nx">content</span><span class="o">:</span><span class="w"> </span><span class="kt">prompt</span><span class="w"> </span><span class="p">}];</span>
+<span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="nx">step</span><span class="p">(</span><span class="nx">messages</span><span class="p">,</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">agent</span><span class="p">().</span><span class="nx">generate</span><span class="p">({</span><span class="w"> </span><span class="nx">messages</span><span class="w"> </span><span class="p">}));</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="k">async</span><span class="w"> </span><span class="nx">decide</span><span class="p">(</span><span class="nx">token</span><span class="p">,</span><span class="w"> </span><span class="nx">id</span><span class="p">,</span><span class="w"> </span><span class="nx">approved</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="kd">const</span><span class="w"> </span><span class="nx">messages</span><span class="o">:</span><span class="w"> </span><span class="kt">ModelMessage</span><span class="p">[]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[...</span><span class="nb">JSON</span><span class="p">.</span><span class="nx">parse</span><span class="p">(</span><span class="nx">token</span><span class="p">),</span><span class="w"> </span><span class="nx">approvalMessage</span><span class="p">([{</span><span class="w"> </span><span class="nx">approvalId</span><span class="o">:</span><span class="w"> </span><span class="kt">id</span><span class="p">,</span><span class="w"> </span><span class="nx">approved</span><span class="w"> </span><span class="p">}])];</span>
+<span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="nx">step</span><span class="p">(</span><span class="nx">messages</span><span class="p">,</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">agent</span><span class="p">().</span><span class="nx">generate</span><span class="p">({</span><span class="w"> </span><span class="nx">messages</span><span class="w"> </span><span class="p">}));</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">  </span><span class="p">};</span>
+<span class="p">}</span>
+
+<span class="c1">// Mastra：状态在 storage 里，token 只是 runId</span>
+<span class="k">export</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">mastraApproval</span><span class="p">(</span><span class="nx">models</span><span class="o">:</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">ScriptedModel</span><span class="p">,</span><span class="w"> </span><span class="nx">shop</span><span class="o">:</span><span class="w"> </span><span class="kt">Shop</span><span class="p">,</span><span class="w"> </span><span class="nx">storage</span><span class="o">:</span><span class="w"> </span><span class="kt">MastraCompositeStore</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nx">HumanApproval</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">agent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">buildMastra</span><span class="p">(</span><span class="nx">models</span><span class="p">(),</span><span class="w"> </span><span class="nx">shop</span><span class="p">,</span><span class="w"> </span><span class="nx">storage</span><span class="p">).</span><span class="nx">getAgent</span><span class="p">(</span><span class="s1">'support'</span><span class="p">);</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">step</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="nx">r</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">text</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w"> </span><span class="nx">finishReason?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kc">undefined</span><span class="p">;</span><span class="w"> </span><span class="nx">runId?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kc">undefined</span><span class="p">;</span><span class="w"> </span><span class="nx">suspendPayload?</span><span class="o">:</span><span class="w"> </span><span class="kt">unknown</span><span class="w"> </span><span class="p">})</span><span class="o">:</span><span class="w"> </span><span class="nx">Step</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nx">finishReason</span><span class="w"> </span><span class="o">!==</span><span class="w"> </span><span class="s1">'suspended'</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">done</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="p">,</span><span class="w"> </span><span class="nx">text</span><span class="o">:</span><span class="w"> </span><span class="kt">r.text</span><span class="w"> </span><span class="p">};</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">suspendPayload</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">toolCallId</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w"> </span><span class="nx">toolName</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span><span class="w"> </span><span class="nx">args</span><span class="o">:</span><span class="w"> </span><span class="kt">unknown</span><span class="w"> </span><span class="p">};</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">done</span><span class="o">:</span><span class="w"> </span><span class="kt">false</span><span class="p">,</span><span class="w"> </span><span class="nx">pending</span><span class="o">:</span><span class="w"> </span><span class="p">[{</span><span class="w"> </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="kt">p.toolCallId</span><span class="p">,</span><span class="w"> </span><span class="nx">tool</span><span class="o">:</span><span class="w"> </span><span class="kt">p.toolName</span><span class="p">,</span><span class="w"> </span><span class="nx">args</span><span class="o">:</span><span class="w"> </span><span class="kt">p.args</span><span class="w"> </span><span class="p">}],</span><span class="w"> </span><span class="nx">token</span><span class="o">:</span><span class="w"> </span><span class="kt">r.runId</span><span class="o">!</span><span class="w"> </span><span class="p">};</span>
+<span class="w">  </span><span class="p">};</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">async</span><span class="w"> </span><span class="nx">start</span><span class="p">(</span><span class="nx">prompt</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="nx">step</span><span class="p">(</span><span class="k">await</span><span class="w"> </span><span class="nx">agent</span><span class="p">().</span><span class="nx">generate</span><span class="p">(</span><span class="nx">prompt</span><span class="p">));</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="k">async</span><span class="w"> </span><span class="nx">decide</span><span class="p">(</span><span class="nx">runId</span><span class="p">,</span><span class="w"> </span><span class="nx">id</span><span class="p">,</span><span class="w"> </span><span class="nx">approved</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="kd">const</span><span class="w"> </span><span class="nx">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">agent</span><span class="p">();</span>
+<span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="nx">step</span><span class="p">(</span>
+<span class="w">        </span><span class="nx">approved</span>
+<span class="w">          </span><span class="o">?</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">a</span><span class="p">.</span><span class="nx">approveToolCallGenerate</span><span class="p">({</span><span class="w"> </span><span class="nx">runId</span><span class="p">,</span><span class="w"> </span><span class="nx">toolCallId</span><span class="o">:</span><span class="w"> </span><span class="kt">id</span><span class="w"> </span><span class="p">})</span>
+<span class="w">          </span><span class="o">:</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">a</span><span class="p">.</span><span class="nx">declineToolCallGenerate</span><span class="p">({</span><span class="w"> </span><span class="nx">runId</span><span class="p">,</span><span class="w"> </span><span class="nx">toolCallId</span><span class="o">:</span><span class="w"> </span><span class="kt">id</span><span class="w"> </span><span class="p">}),</span>
+<span class="w">      </span><span class="p">);</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">  </span><span class="p">};</span>
+<span class="p">}</span>
+
+<span class="c1">// OpenAI Agents：状态是 RunState 序列化后的字符串</span>
+<span class="k">export</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">openaiApproval</span><span class="p">(</span><span class="nx">models</span><span class="o">:</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">ScriptedOpenAIModel</span><span class="p">,</span><span class="w"> </span><span class="nx">shop</span><span class="o">:</span><span class="w"> </span><span class="kt">Shop</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nx">HumanApproval</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">step</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="nx">r</span><span class="o">:</span><span class="w"> </span><span class="kt">RunResult</span><span class="o">&lt;</span><span class="nx">any</span><span class="p">,</span><span class="w"> </span><span class="nx">any</span><span class="o">&gt;</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nx">Step</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nx">interruptions</span><span class="p">.</span><span class="nx">length</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="mf">0</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">done</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="p">,</span><span class="w"> </span><span class="nx">text</span><span class="o">:</span><span class="w"> </span><span class="kt">String</span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nx">finalOutput</span><span class="p">)</span><span class="w"> </span><span class="p">};</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nx">done</span><span class="o">:</span><span class="w"> </span><span class="kt">false</span><span class="p">,</span>
+<span class="w">      </span><span class="nx">pending</span><span class="o">:</span><span class="w"> </span><span class="kt">r.interruptions.map</span><span class="p">((</span><span class="nx">i</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">({</span>
+<span class="w">        </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="nx">i</span><span class="p">.</span><span class="nx">rawItem</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">callId</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="p">}).</span><span class="nx">callId</span><span class="p">,</span>
+<span class="w">        </span><span class="nx">tool</span><span class="o">:</span><span class="w"> </span><span class="kt">i.name</span><span class="w"> </span><span class="o">??</span><span class="w"> </span><span class="s1">''</span><span class="p">,</span>
+<span class="w">        </span><span class="nx">args</span><span class="o">:</span><span class="w"> </span><span class="kt">JSON.parse</span><span class="p">(</span><span class="nx">i</span><span class="p">.</span><span class="nb">arguments</span><span class="w"> </span><span class="o">??</span><span class="w"> </span><span class="s1">'{}'</span><span class="p">),</span>
+<span class="w">      </span><span class="p">})),</span>
+<span class="w">      </span><span class="nx">token</span><span class="o">:</span><span class="w"> </span><span class="kt">r.state.toString</span><span class="p">(),</span>
+<span class="w">    </span><span class="p">};</span>
+<span class="w">  </span><span class="p">};</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">async</span><span class="w"> </span><span class="nx">start</span><span class="p">(</span><span class="nx">prompt</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="nx">step</span><span class="p">(</span><span class="k">await</span><span class="w"> </span><span class="nx">run</span><span class="p">(</span><span class="nx">oaAgent</span><span class="p">(</span><span class="nx">models</span><span class="p">(),</span><span class="w"> </span><span class="nx">shop</span><span class="p">),</span><span class="w"> </span><span class="nx">prompt</span><span class="p">));</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="k">async</span><span class="w"> </span><span class="nx">decide</span><span class="p">(</span><span class="nx">token</span><span class="p">,</span><span class="w"> </span><span class="nx">id</span><span class="p">,</span><span class="w"> </span><span class="nx">approved</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="kd">const</span><span class="w"> </span><span class="nx">agent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">oaAgent</span><span class="p">(</span><span class="nx">models</span><span class="p">(),</span><span class="w"> </span><span class="nx">shop</span><span class="p">);</span>
+<span class="w">      </span><span class="kd">const</span><span class="w"> </span><span class="nx">state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">restore</span><span class="p">(</span><span class="nx">agent</span><span class="p">,</span><span class="w"> </span><span class="nx">token</span><span class="p">);</span>
+<span class="w">      </span><span class="kd">const</span><span class="w"> </span><span class="nx">item</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">state</span><span class="p">.</span><span class="nx">getInterruptions</span><span class="p">().</span><span class="nx">find</span><span class="p">((</span><span class="nx">i</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">(</span><span class="nx">i</span><span class="p">.</span><span class="nx">rawItem</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">callId</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="p">}).</span><span class="nx">callId</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="nx">id</span><span class="p">)</span><span class="o">!</span><span class="p">;</span>
+<span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">approved</span><span class="p">)</span><span class="w"> </span><span class="nx">state</span><span class="p">.</span><span class="nx">approve</span><span class="p">(</span><span class="nx">item</span><span class="p">);</span>
+<span class="w">      </span><span class="k">else</span><span class="w"> </span><span class="nx">state</span><span class="p">.</span><span class="nx">reject</span><span class="p">(</span><span class="nx">item</span><span class="p">);</span>
+<span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="nx">step</span><span class="p">(</span><span class="k">await</span><span class="w"> </span><span class="nx">run</span><span class="p">(</span><span class="nx">agent</span><span class="p">,</span><span class="w"> </span><span class="nx">state</span><span class="p">));</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">  </span><span class="p">};</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><code>src/approval.test.ts</code>：</p>
+<div class="hl"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">InMemoryStore</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">'@mastra/core/storage'</span><span class="p">;</span>
+<span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">describe</span><span class="p">,</span><span class="w"> </span><span class="nx">expect</span><span class="p">,</span><span class="w"> </span><span class="nx">it</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">'vitest'</span><span class="p">;</span>
+<span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">aiSdkApproval</span><span class="p">,</span><span class="w"> </span><span class="nx">mastraApproval</span><span class="p">,</span><span class="w"> </span><span class="nx">openaiApproval</span><span class="p">,</span><span class="w"> </span><span class="kr">type</span><span class="w"> </span><span class="nx">HumanApproval</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">'./approval.js'</span><span class="p">;</span>
+<span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">ScriptedOpenAIModel</span><span class="p">,</span><span class="w"> </span><span class="nx">fnCall</span><span class="p">,</span><span class="w"> </span><span class="nx">reply</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">'./openai.js'</span><span class="p">;</span>
+<span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">ScriptedModel</span><span class="p">,</span><span class="w"> </span><span class="nx">call</span><span class="p">,</span><span class="w"> </span><span class="nx">say</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">'./script.js'</span><span class="p">;</span>
+<span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Shop</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">'./shop.js'</span><span class="p">;</span>
+
+<span class="c1">// 每家两段脚本：第一次请求要退款，第二次请求给最终回答</span>
+<span class="kd">function</span><span class="w"> </span><span class="nx">adapter</span><span class="p">(</span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">shop</span><span class="o">:</span><span class="w"> </span><span class="kt">Shop</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nx">HumanApproval</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">queue</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&lt;</span><span class="nx">T</span><span class="o">&gt;</span><span class="p">(</span><span class="nx">xs</span><span class="o">:</span><span class="w"> </span><span class="kt">T</span><span class="p">[])</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">xs</span><span class="p">.</span><span class="nx">shift</span><span class="p">()</span><span class="o">!</span><span class="p">;</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">refund</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">call</span><span class="p">(</span><span class="s1">'c1'</span><span class="p">,</span><span class="w"> </span><span class="s1">'refund'</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">orderId</span><span class="o">:</span><span class="w"> </span><span class="s1">'A2'</span><span class="p">,</span><span class="w"> </span><span class="nx">amount</span><span class="o">:</span><span class="w"> </span><span class="kt">800</span><span class="w"> </span><span class="p">});</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">name</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s1">'ai-sdk'</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">aiSdkApproval</span><span class="p">(</span><span class="nx">queue</span><span class="p">([</span><span class="ow">new</span><span class="w"> </span><span class="nx">ScriptedModel</span><span class="p">([</span><span class="nx">refund</span><span class="p">()]),</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">ScriptedModel</span><span class="p">([</span><span class="nx">say</span><span class="p">(</span><span class="s1">'好了'</span><span class="p">)])]),</span><span class="w"> </span><span class="nx">shop</span><span class="p">,</span><span class="w"> </span><span class="s1">'s'</span><span class="p">.</span><span class="nx">repeat</span><span class="p">(</span><span class="mf">32</span><span class="p">));</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">name</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s1">'mastra'</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">mastraApproval</span><span class="p">(</span><span class="nx">queue</span><span class="p">([</span><span class="ow">new</span><span class="w"> </span><span class="nx">ScriptedModel</span><span class="p">([</span><span class="nx">refund</span><span class="p">()]),</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">ScriptedModel</span><span class="p">([</span><span class="nx">say</span><span class="p">(</span><span class="s1">'好了'</span><span class="p">)])]),</span><span class="w"> </span><span class="nx">shop</span><span class="p">,</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">InMemoryStore</span><span class="p">());</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="nx">openaiApproval</span><span class="p">(</span>
+<span class="w">    </span><span class="nx">queue</span><span class="p">([</span>
+<span class="w">      </span><span class="ow">new</span><span class="w"> </span><span class="nx">ScriptedOpenAIModel</span><span class="p">([</span><span class="nx">fnCall</span><span class="p">(</span><span class="s1">'c1'</span><span class="p">,</span><span class="w"> </span><span class="s1">'refund'</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">orderId</span><span class="o">:</span><span class="w"> </span><span class="s1">'A2'</span><span class="p">,</span><span class="w"> </span><span class="nx">amount</span><span class="o">:</span><span class="w"> </span><span class="kt">800</span><span class="w"> </span><span class="p">})]),</span>
+<span class="w">      </span><span class="ow">new</span><span class="w"> </span><span class="nx">ScriptedOpenAIModel</span><span class="p">([</span><span class="nx">reply</span><span class="p">(</span><span class="s1">'好了'</span><span class="p">)]),</span>
+<span class="w">    </span><span class="p">]),</span>
+<span class="w">    </span><span class="nx">shop</span><span class="p">,</span>
+<span class="w">  </span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="nx">describe</span><span class="p">.</span><span class="nx">each</span><span class="p">([</span><span class="s1">'ai-sdk'</span><span class="p">,</span><span class="w"> </span><span class="s1">'mastra'</span><span class="p">,</span><span class="w"> </span><span class="s1">'openai'</span><span class="p">])(</span><span class="s1">'%s'</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="nx">name</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">it</span><span class="p">.</span><span class="nx">each</span><span class="p">([</span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="kc">false</span><span class="p">])(</span><span class="s1">'approved=%s'</span><span class="p">,</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="p">(</span><span class="nx">approved</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">shop</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">Shop</span><span class="p">();</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">adapter</span><span class="p">(</span><span class="nx">name</span><span class="p">,</span><span class="w"> </span><span class="nx">shop</span><span class="p">);</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">s1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">a</span><span class="p">.</span><span class="nx">start</span><span class="p">(</span><span class="s1">'给 A2 退 800'</span><span class="p">);</span>
+<span class="w">    </span><span class="nx">expect</span><span class="p">(</span><span class="nx">s1</span><span class="p">.</span><span class="nx">done</span><span class="p">).</span><span class="nx">toBe</span><span class="p">(</span><span class="kc">false</span><span class="p">);</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">s1</span><span class="p">.</span><span class="nx">done</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="p">;</span>
+<span class="w">    </span><span class="nx">expect</span><span class="p">(</span><span class="nx">s1</span><span class="p">.</span><span class="nx">pending</span><span class="p">).</span><span class="nx">toEqual</span><span class="p">([{</span><span class="w"> </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="kt">expect.any</span><span class="p">(</span><span class="nb">String</span><span class="p">),</span><span class="w"> </span><span class="nx">tool</span><span class="o">:</span><span class="w"> </span><span class="s1">'refund'</span><span class="p">,</span><span class="w"> </span><span class="nx">args</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">orderId</span><span class="o">:</span><span class="w"> </span><span class="s1">'A2'</span><span class="p">,</span><span class="w"> </span><span class="nx">amount</span><span class="o">:</span><span class="w"> </span><span class="kt">800</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">}]);</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">s2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">a</span><span class="p">.</span><span class="nx">decide</span><span class="p">(</span><span class="nx">s1</span><span class="p">.</span><span class="nx">token</span><span class="p">,</span><span class="w"> </span><span class="nx">s1</span><span class="p">.</span><span class="nx">pending</span><span class="p">[</span><span class="mf">0</span><span class="p">]</span><span class="o">!</span><span class="p">.</span><span class="nx">id</span><span class="p">,</span><span class="w"> </span><span class="nx">approved</span><span class="p">);</span>
+<span class="w">    </span><span class="nx">expect</span><span class="p">(</span><span class="nx">s2</span><span class="p">).</span><span class="nx">toEqual</span><span class="p">({</span><span class="w"> </span><span class="nx">done</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="p">,</span><span class="w"> </span><span class="nx">text</span><span class="o">:</span><span class="w"> </span><span class="s1">'好了'</span><span class="w"> </span><span class="p">});</span>
+<span class="w">    </span><span class="nx">expect</span><span class="p">(</span><span class="nx">shop</span><span class="p">.</span><span class="nx">refunds</span><span class="p">).</span><span class="nx">toEqual</span><span class="p">(</span><span class="nx">approved</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="p">[</span><span class="s1">'A2:800'</span><span class="p">]</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="p">[]);</span>
+<span class="w">  </span><span class="p">});</span>
+<span class="p">});</span>
+</code></pre></div>
+
+<p>几个细节：</p>
+<ul>
+<li>AI SDK 的 <code>token</code> 要包含<strong>发起请求的 user 消息</strong>和 <code>responseMessages</code>，只存后者恢复时会缺上下文。</li>
+<li>Mastra 的 <code>pending.id</code> 用的是 <code>toolCallId</code>，因为审批方法按它定位；AI SDK 用的是 <code>approvalId</code>（签名绑定的是它对应的调用）；OpenAI 用 <code>rawItem.callId</code> 在 <code>getInterruptions()</code> 里找回对应的项。三家的 id 含义不同，统一接口把它们都当成不透明字符串。</li>
+<li><code>token</code> 的大小差别很大：Mastra 只是一个 UUID，另外两家是整段对话。对话长了以后，存储和传输成本也要考虑进去。</li>
+</ul>
+<p>这段代码和测试在写课时的沙箱里跑通了，6 个测试全部通过。</p>
+<h3 id="练习-3">练习 3</h3>
+<p><code>src/mastra.ts</code> 的改动：</p>
+<div class="hl"><pre><span></span><code><span class="k">export</span><span class="w"> </span><span class="kr">type</span><span class="w"> </span><span class="nx">MastraAgentOptions</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">maxSteps?</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">hooks?</span><span class="o">:</span><span class="w"> </span><span class="kt">ConstructorParameters</span><span class="o">&lt;</span><span class="ow">typeof</span><span class="w"> </span><span class="nx">Agent</span><span class="o">&gt;</span><span class="p">[</span><span class="mf">0</span><span class="p">][</span><span class="s1">'hooks'</span><span class="p">];</span>
+<span class="p">};</span>
+
+<span class="c1">// buildMastra 里 new Agent({...}) 加一行</span>
+<span class="w">    </span><span class="p">...(</span><span class="nx">opts</span><span class="p">.</span><span class="nx">hooks</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">hooks</span><span class="o">:</span><span class="w"> </span><span class="kt">opts.hooks</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="p">{}),</span>
+</code></pre></div>
+
+<p>测试：</p>
+<div class="hl"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">InMemoryStore</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">'@mastra/core/storage'</span><span class="p">;</span>
+<span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Agent</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="nx">OAAgent</span><span class="p">,</span><span class="w"> </span><span class="nx">defineToolInputGuardrail</span><span class="p">,</span><span class="w"> </span><span class="nx">tool</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="nx">oaTool</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">'@openai/agents'</span><span class="p">;</span>
+<span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">ToolLoopAgent</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">'ai'</span><span class="p">;</span>
+<span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">describe</span><span class="p">,</span><span class="w"> </span><span class="nx">expect</span><span class="p">,</span><span class="w"> </span><span class="nx">it</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">'vitest'</span><span class="p">;</span>
+<span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">z</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">'zod'</span><span class="p">;</span>
+<span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">shopTools</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">'./aisdk.js'</span><span class="p">;</span>
+<span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">buildMastra</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">'./mastra.js'</span><span class="p">;</span>
+<span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">ScriptedOpenAIModel</span><span class="p">,</span><span class="w"> </span><span class="nx">fnCall</span><span class="p">,</span><span class="w"> </span><span class="nx">reply</span><span class="p">,</span><span class="w"> </span><span class="nx">run</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">'./openai.js'</span><span class="p">;</span>
+<span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">ScriptedModel</span><span class="p">,</span><span class="w"> </span><span class="nx">call</span><span class="p">,</span><span class="w"> </span><span class="nx">say</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">'./script.js'</span><span class="p">;</span>
+<span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Shop</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">'./shop.js'</span><span class="p">;</span>
+
+<span class="kd">const</span><span class="w"> </span><span class="nx">LIMIT</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">5000</span><span class="p">;</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">REASON</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="sb">`单笔退款超过 </span><span class="si">${</span><span class="nx">LIMIT</span><span class="si">}</span><span class="sb">，按规定不能退`</span><span class="p">;</span>
+
+<span class="nx">describe</span><span class="p">(</span><span class="s1">'硬性拒绝'</span><span class="p">,</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">it</span><span class="p">(</span><span class="s1">'AI SDK：toolApproval 返回 denied'</span><span class="p">,</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">shop</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">Shop</span><span class="p">();</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">ScriptedModel</span><span class="p">([</span><span class="nx">call</span><span class="p">(</span><span class="s1">'c1'</span><span class="p">,</span><span class="w"> </span><span class="s1">'refund'</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">orderId</span><span class="o">:</span><span class="w"> </span><span class="s1">'A2'</span><span class="p">,</span><span class="w"> </span><span class="nx">amount</span><span class="o">:</span><span class="w"> </span><span class="kt">9000</span><span class="w"> </span><span class="p">}),</span><span class="w"> </span><span class="nx">say</span><span class="p">(</span><span class="s1">'退不了'</span><span class="p">)]);</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">agent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">ToolLoopAgent</span><span class="p">({</span>
+<span class="w">      </span><span class="nx">model</span><span class="p">,</span>
+<span class="w">      </span><span class="nx">tools</span><span class="o">:</span><span class="w"> </span><span class="kt">shopTools</span><span class="p">(</span><span class="nx">shop</span><span class="p">),</span>
+<span class="w">      </span><span class="nx">toolApproval</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">refund</span><span class="o">:</span><span class="w"> </span><span class="p">({</span><span class="w"> </span><span class="nx">amount</span><span class="w"> </span><span class="p">})</span><span class="w"> </span><span class="p">=&gt;</span>
+<span class="w">          </span><span class="nx">amount</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="nx">LIMIT</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="kr">type</span><span class="o">:</span><span class="w"> </span><span class="s1">'denied'</span><span class="p">,</span><span class="w"> </span><span class="nx">reason</span><span class="o">:</span><span class="w"> </span><span class="kt">REASON</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="nx">amount</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">500</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="s1">'user-approval'</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="kc">undefined</span><span class="p">,</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">    </span><span class="p">});</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">r</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">agent</span><span class="p">.</span><span class="nx">generate</span><span class="p">({</span><span class="w"> </span><span class="nx">prompt</span><span class="o">:</span><span class="w"> </span><span class="s1">'退 9000'</span><span class="w"> </span><span class="p">});</span>
+<span class="w">    </span><span class="nx">expect</span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nx">text</span><span class="p">).</span><span class="nx">toBe</span><span class="p">(</span><span class="s1">'退不了'</span><span class="p">);</span>
+<span class="w">    </span><span class="nx">expect</span><span class="p">(</span><span class="nx">shop</span><span class="p">.</span><span class="nx">refunds</span><span class="p">).</span><span class="nx">toEqual</span><span class="p">([]);</span>
+<span class="w">    </span><span class="nx">expect</span><span class="p">(</span><span class="nx">model</span><span class="p">.</span><span class="nx">lastMessageAt</span><span class="p">(</span><span class="mf">1</span><span class="p">)).</span><span class="nx">toMatchObject</span><span class="p">({</span><span class="w"> </span><span class="nx">content</span><span class="o">:</span><span class="w"> </span><span class="p">[{</span><span class="w"> </span><span class="nx">output</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="kr">type</span><span class="o">:</span><span class="w"> </span><span class="s1">'execution-denied'</span><span class="p">,</span><span class="w"> </span><span class="nx">reason</span><span class="o">:</span><span class="w"> </span><span class="kt">REASON</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">}]</span><span class="w"> </span><span class="p">});</span>
+<span class="w">  </span><span class="p">});</span>
+
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">hooks</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">beforeToolCall</span><span class="o">:</span><span class="w"> </span><span class="p">({</span><span class="w"> </span><span class="nx">input</span><span class="w"> </span><span class="p">}</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">input</span><span class="o">:</span><span class="w"> </span><span class="kt">unknown</span><span class="w"> </span><span class="p">})</span><span class="w"> </span><span class="p">=&gt;</span>
+<span class="w">      </span><span class="p">(</span><span class="nx">input</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">amount</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="w"> </span><span class="p">}).</span><span class="nx">amount</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="nx">LIMIT</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">proceed</span><span class="o">:</span><span class="w"> </span><span class="kt">false</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="kd">const</span><span class="p">,</span><span class="w"> </span><span class="nx">output</span><span class="o">:</span><span class="w"> </span><span class="kt">REASON</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="kc">undefined</span><span class="p">,</span>
+<span class="w">  </span><span class="p">};</span>
+
+<span class="w">  </span><span class="nx">it</span><span class="p">(</span><span class="s1">'Mastra：先停在审批，批准后 hook 才拦'</span><span class="p">,</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">shop</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">Shop</span><span class="p">();</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">m</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">ScriptedModel</span><span class="p">([</span><span class="nx">call</span><span class="p">(</span><span class="s1">'c1'</span><span class="p">,</span><span class="w"> </span><span class="s1">'refund'</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">orderId</span><span class="o">:</span><span class="w"> </span><span class="s1">'A2'</span><span class="p">,</span><span class="w"> </span><span class="nx">amount</span><span class="o">:</span><span class="w"> </span><span class="kt">9000</span><span class="w"> </span><span class="p">}),</span><span class="w"> </span><span class="nx">say</span><span class="p">(</span><span class="s1">'退不了'</span><span class="p">)]);</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">agent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">buildMastra</span><span class="p">(</span><span class="nx">m</span><span class="p">,</span><span class="w"> </span><span class="nx">shop</span><span class="p">,</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">InMemoryStore</span><span class="p">(),</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">hooks</span><span class="w"> </span><span class="p">}).</span><span class="nx">getAgent</span><span class="p">(</span><span class="s1">'support'</span><span class="p">);</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">r1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">agent</span><span class="p">.</span><span class="nx">generate</span><span class="p">(</span><span class="s1">'退 9000'</span><span class="p">);</span>
+<span class="w">    </span><span class="nx">expect</span><span class="p">(</span><span class="nx">r1</span><span class="p">.</span><span class="nx">finishReason</span><span class="p">).</span><span class="nx">toBe</span><span class="p">(</span><span class="s1">'suspended'</span><span class="p">);</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">r2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">agent</span><span class="p">.</span><span class="nx">approveToolCallGenerate</span><span class="p">({</span><span class="w"> </span><span class="nx">runId</span><span class="o">:</span><span class="w"> </span><span class="kt">r1.runId</span><span class="o">!</span><span class="p">,</span><span class="w"> </span><span class="nx">toolCallId</span><span class="o">:</span><span class="w"> </span><span class="s1">'c1'</span><span class="w"> </span><span class="p">});</span>
+<span class="w">    </span><span class="nx">expect</span><span class="p">(</span><span class="nx">r2</span><span class="p">.</span><span class="nx">text</span><span class="p">).</span><span class="nx">toBe</span><span class="p">(</span><span class="s1">'退不了'</span><span class="p">);</span>
+<span class="w">    </span><span class="nx">expect</span><span class="p">(</span><span class="nx">shop</span><span class="p">.</span><span class="nx">refunds</span><span class="p">).</span><span class="nx">toEqual</span><span class="p">([]);</span>
+<span class="w">    </span><span class="nx">expect</span><span class="p">(</span><span class="nx">m</span><span class="p">.</span><span class="nx">lastMessageAt</span><span class="p">(</span><span class="mf">1</span><span class="p">)).</span><span class="nx">toMatchObject</span><span class="p">({</span><span class="w"> </span><span class="nx">content</span><span class="o">:</span><span class="w"> </span><span class="p">[{</span><span class="w"> </span><span class="nx">output</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="kr">type</span><span class="o">:</span><span class="w"> </span><span class="s1">'text'</span><span class="p">,</span><span class="w"> </span><span class="nx">value</span><span class="o">:</span><span class="w"> </span><span class="kt">REASON</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">}]</span><span class="w"> </span><span class="p">});</span>
+<span class="w">  </span><span class="p">});</span>
+
+<span class="w">  </span><span class="nx">it</span><span class="p">(</span><span class="s1">'Mastra 的坑：hooks 只传给 generate()，审批恢复时不会带上'</span><span class="p">,</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">shop</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">Shop</span><span class="p">();</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">m</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">ScriptedModel</span><span class="p">([</span><span class="nx">call</span><span class="p">(</span><span class="s1">'c1'</span><span class="p">,</span><span class="w"> </span><span class="s1">'refund'</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">orderId</span><span class="o">:</span><span class="w"> </span><span class="s1">'A2'</span><span class="p">,</span><span class="w"> </span><span class="nx">amount</span><span class="o">:</span><span class="w"> </span><span class="kt">9000</span><span class="w"> </span><span class="p">}),</span><span class="w"> </span><span class="nx">say</span><span class="p">(</span><span class="s1">'?'</span><span class="p">)]);</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">agent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">buildMastra</span><span class="p">(</span><span class="nx">m</span><span class="p">,</span><span class="w"> </span><span class="nx">shop</span><span class="p">,</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">InMemoryStore</span><span class="p">()).</span><span class="nx">getAgent</span><span class="p">(</span><span class="s1">'support'</span><span class="p">);</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">r1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">agent</span><span class="p">.</span><span class="nx">generate</span><span class="p">(</span><span class="s1">'退 9000'</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">hooks</span><span class="w"> </span><span class="p">});</span>
+<span class="w">    </span><span class="k">await</span><span class="w"> </span><span class="nx">agent</span><span class="p">.</span><span class="nx">approveToolCallGenerate</span><span class="p">({</span><span class="w"> </span><span class="nx">runId</span><span class="o">:</span><span class="w"> </span><span class="kt">r1.runId</span><span class="o">!</span><span class="p">,</span><span class="w"> </span><span class="nx">toolCallId</span><span class="o">:</span><span class="w"> </span><span class="s1">'c1'</span><span class="w"> </span><span class="p">});</span>
+<span class="w">    </span><span class="nx">expect</span><span class="p">(</span><span class="nx">shop</span><span class="p">.</span><span class="nx">refunds</span><span class="p">).</span><span class="nx">toEqual</span><span class="p">([</span><span class="s1">'A2:9000'</span><span class="p">]);</span><span class="w"> </span><span class="c1">// 拦截没有生效</span>
+<span class="w">  </span><span class="p">});</span>
+
+<span class="w">  </span><span class="nx">it</span><span class="p">(</span><span class="s1">'OpenAI：工具输入 guardrail 返回 rejectContent'</span><span class="p">,</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">shop</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">Shop</span><span class="p">();</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">limit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">defineToolInputGuardrail</span><span class="p">({</span>
+<span class="w">      </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="s1">'refund_limit'</span><span class="p">,</span>
+<span class="w">      </span><span class="nx">run</span><span class="o">:</span><span class="w"> </span><span class="kt">async</span><span class="w"> </span><span class="p">({</span><span class="w"> </span><span class="nx">toolCall</span><span class="w"> </span><span class="p">})</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kd">const</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">amount</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">JSON</span><span class="p">.</span><span class="nx">parse</span><span class="p">(</span><span class="nx">toolCall</span><span class="p">.</span><span class="nb">arguments</span><span class="p">)</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">amount</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="w"> </span><span class="p">};</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">behavior</span><span class="o">:</span><span class="w"> </span><span class="kt">amount</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="nx">LIMIT</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="kr">type</span><span class="o">:</span><span class="w"> </span><span class="s1">'rejectContent'</span><span class="p">,</span><span class="w"> </span><span class="nx">message</span><span class="o">:</span><span class="w"> </span><span class="kt">REASON</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="kr">type</span><span class="o">:</span><span class="w"> </span><span class="s1">'allow'</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">};</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">    </span><span class="p">});</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">refund</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">oaTool</span><span class="p">({</span>
+<span class="w">      </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="s1">'refund'</span><span class="p">,</span>
+<span class="w">      </span><span class="nx">description</span><span class="o">:</span><span class="w"> </span><span class="s1">'退款'</span><span class="p">,</span>
+<span class="w">      </span><span class="nx">parameters</span><span class="o">:</span><span class="w"> </span><span class="kt">z.object</span><span class="p">({</span><span class="w"> </span><span class="nx">orderId</span><span class="o">:</span><span class="w"> </span><span class="kt">z.string</span><span class="p">(),</span><span class="w"> </span><span class="nx">amount</span><span class="o">:</span><span class="w"> </span><span class="kt">z.number</span><span class="p">()</span><span class="w"> </span><span class="p">}),</span>
+<span class="w">      </span><span class="nx">inputGuardrails</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="nx">limit</span><span class="p">],</span>
+<span class="w">      </span><span class="nx">execute</span><span class="o">:</span><span class="w"> </span><span class="kt">async</span><span class="w"> </span><span class="p">({</span><span class="w"> </span><span class="nx">orderId</span><span class="p">,</span><span class="w"> </span><span class="nx">amount</span><span class="w"> </span><span class="p">})</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">shop</span><span class="p">.</span><span class="nx">refund</span><span class="p">(</span><span class="nx">orderId</span><span class="p">,</span><span class="w"> </span><span class="nx">amount</span><span class="p">),</span>
+<span class="w">    </span><span class="p">});</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">ScriptedOpenAIModel</span><span class="p">([</span><span class="nx">fnCall</span><span class="p">(</span><span class="s1">'c1'</span><span class="p">,</span><span class="w"> </span><span class="s1">'refund'</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">orderId</span><span class="o">:</span><span class="w"> </span><span class="s1">'A2'</span><span class="p">,</span><span class="w"> </span><span class="nx">amount</span><span class="o">:</span><span class="w"> </span><span class="kt">9000</span><span class="w"> </span><span class="p">}),</span><span class="w"> </span><span class="nx">reply</span><span class="p">(</span><span class="s1">'退不了'</span><span class="p">)]);</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">r</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">run</span><span class="p">(</span><span class="ow">new</span><span class="w"> </span><span class="nx">OAAgent</span><span class="p">({</span><span class="w"> </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="s1">'s'</span><span class="p">,</span><span class="w"> </span><span class="nx">model</span><span class="p">,</span><span class="w"> </span><span class="nx">tools</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="nx">refund</span><span class="p">]</span><span class="w"> </span><span class="p">}),</span><span class="w"> </span><span class="s1">'退 9000'</span><span class="p">);</span>
+<span class="w">    </span><span class="nx">expect</span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nx">finalOutput</span><span class="p">).</span><span class="nx">toBe</span><span class="p">(</span><span class="s1">'退不了'</span><span class="p">);</span>
+<span class="w">    </span><span class="nx">expect</span><span class="p">(</span><span class="nx">shop</span><span class="p">.</span><span class="nx">refunds</span><span class="p">).</span><span class="nx">toEqual</span><span class="p">([]);</span>
+<span class="w">    </span><span class="nx">expect</span><span class="p">(</span><span class="nx">model</span><span class="p">.</span><span class="nx">lastInputAt</span><span class="p">(</span><span class="mf">1</span><span class="p">)).</span><span class="nx">toMatchObject</span><span class="p">({</span><span class="w"> </span><span class="nx">output</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="kr">type</span><span class="o">:</span><span class="w"> </span><span class="s1">'text'</span><span class="p">,</span><span class="w"> </span><span class="nx">text</span><span class="o">:</span><span class="w"> </span><span class="kt">REASON</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">});</span>
+<span class="w">  </span><span class="p">});</span>
+<span class="p">});</span>
+</code></pre></div>
+
+<p>结论：</p>
+<ul>
+<li>AI SDK 把“拒绝”做成了审批策略的一种结果，同一个函数里写允许、问人、拒绝三种情况，最清楚。</li>
+<li>Mastra 的 <code>requireApproval</code> 在 hook 之前生效：9000 的退款先问了人，人批准之后 hook 才把它拦下。也就是说审批人可能批准一笔最终不会执行的退款。想先拦后问，用调用级的 <code>requireToolApproval</code> 函数对超限的调用返回 false，或者干脆不给 <code>refund</code> 设 <code>requireApproval</code>，在 hook 里判断。</li>
+<li>Mastra 调用级的 <code>hooks</code> 不会存进快照：第二个 Mastra 测试里，hooks 只传给了 <code>generate()</code>，<code>approveToolCallGenerate</code> 恢复时没有它，9000 的退款真的执行了。安全相关的拦截要配在 agent 上，或者每次恢复时都显式传入。</li>
+<li>OpenAI 用工具 guardrail 实现，<code>rejectContent</code> 的消息作为工具结果交给模型；<code>throwException</code> 则让整个 run 抛错。</li>
+</ul>
+<p>这段代码和测试在写课时的沙箱里跑通了（4 个测试）。</p>
+<h2 id="完成标准">完成标准</h2>
+<ul>
+<li><code>npm run typecheck</code> 零错误，<code>npm test</code> 25 个测试全部通过。</li>
+<li>能说出 <code>generateText</code> 和 <code>ToolLoopAgent</code> 的默认步数，以及三家撞到上限时的行为差别。</li>
+<li>能说清楚三家对工具抛错、工具不存在、参数错误的默认处理，以及各自怎么改。</li>
+<li>能写出三家的人工审批流程，说明审批期间的状态在哪、由谁保存、怎么在另一个实例上恢复。</li>
+<li>能解释审批历史由客户端保存时的篡改风险，以及签名如何防住它。</li>
+<li>练习 2 完成：同一组测试在三个实现上通过。</li>
+<li>能根据项目情况在 AI SDK、Mastra、OpenAI Agents SDK 之间做出选择，并说出理由。</li>
+</ul>
+    <nav class="pager"><a class="prev" href="04-04-go-ecosystem.html"><span>← 上一课 4.4</span>Go 生态：Eino、Genkit Go 与官方 MCP Go SDK</a></nav>
+    <p class="foot">© 2026 duang777 · 课件源文件：<a href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/notes/04-frameworks/05-ts-ecosystem.md">notes/04-frameworks/05-ts-ecosystem.md</a></p>
+  </article>
+</div>
+<script>
+document.getElementById("theme-toggle").addEventListener("click",function(){var r=document.documentElement,n=r.getAttribute("data-theme")==="light"?"dark":"light";r.setAttribute("data-theme",n);try{localStorage.setItem("x-theme",n)}catch(e){}});
+document.querySelectorAll('article pre').forEach(function(pre){
+  var b=document.createElement('button');b.className='code__copy';b.textContent='复制';
+  b.onclick=function(){navigator.clipboard.writeText(pre.innerText).then(function(){b.textContent='已复制';setTimeout(function(){b.textContent='复制'},1200)})};
+  pre.parentNode.insertBefore(b,pre);
+});
+var links=[].slice.call(document.querySelectorAll('.toc a')),map={};
+links.forEach(function(a){map[decodeURIComponent(a.getAttribute('href').slice(1))]=a});
+var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting&&map[e.target.id]){links.forEach(function(l){l.classList.remove('on')});map[e.target.id].classList.add('on')}})},{rootMargin:'-80px 0px -70% 0px'});
+document.querySelectorAll('article h1[id],article h2[id]').forEach(function(h){io.observe(h)});
+</script>
+</body>
+</html>

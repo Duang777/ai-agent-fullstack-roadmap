@@ -263,14 +263,14 @@
         <section class="stats" data-reveal>
           <div class="stat"><span class="stat__fig x-mono">14</span><span class="stat__label">模块</span></div>
           <div class="stat"><span class="stat__fig x-mono">84</span><span class="stat__label">知识点</span></div>
-          <div class="stat"><span class="stat__fig x-mono">Day 22</span><span class="stat__label">今天</span></div>
+          <div class="stat"><span class="stat__fig x-mono">Day 23</span><span class="stat__label">今天</span></div>
           <div class="stat"><span class="stat__fig x-mono">20/84</span><span class="stat__label">已完成</span></div>
         </section>
 
         <section class="section" id="progress" data-nav="进度">
           <div class="head" data-reveal>
             <p class="head__eyebrow x-kicker">当前进度</p>
-            <h2 class="x-h2">00 基础功底、01 LLM 原理与使用、02 工具调用与协议全部完成；03 Agent 架构已完成 3.1–3.3，3.4–3.7 练习进行中，模块 03 课件全部完成；04 框架与 SDK 进行中，4.1 LangGraph、4.2 OpenAI Agents SDK、4.3 Claude Agent SDK、4.4 Go 生态已发布。</h2>
+            <h2 class="x-h2">00 基础功底、01 LLM 原理与使用、02 工具调用与协议全部完成；03 Agent 架构已完成 3.1–3.3，3.4–3.7 练习进行中，模块 03 课件全部完成；04 框架与 SDK 进行中，4.1 LangGraph、4.2 OpenAI Agents SDK、4.3 Claude Agent SDK、4.4 Go 生态、4.5 TS 生态已发布。</h2>
             <p class="head__sub">学完且有笔记或代码产出，才在 ROADMAP 里打勾。</p>
           </div>
           <div class="x-progress" data-reveal>
@@ -810,6 +810,25 @@
                 <dd><span class="chip x-chip x-chip--live">进行中</span></dd>
               </dl>
             </article>
+            <article class="step">
+              <div class="step__intro">
+                <p class="step__num x-step-num">4.5</p>
+                <p class="step__eyebrow">进行中 · 04 框架与 SDK</p>
+              </div>
+              <div>
+                <h3>TS 生态：Vercel AI SDK、Mastra 与 OpenAI Agents SDK (JS)</h3>
+                <p class="sub">同一个客服 agent 用三个真库各写一遍：默认步数、撞到上限的结束方式、三类工具错误的去向、人工审批的状态放在哪。顺带用测试复现了“客户端篡改审批历史”，以及签名怎么防住它。</p>
+                <div class="links" style="margin-top: 16px">
+                  <a class="x-btn x-btn--primary" href="notes/04-05-ts-ecosystem.html">在线阅读</a>
+                </div>
+              </div>
+              <dl class="step__panel">
+                <dt>课件</dt>
+                <dd><span class="chip x-chip x-chip--done">已完成</span></dd>
+                <dt>练习</dt>
+                <dd><span class="chip x-chip x-chip--live">进行中</span></dd>
+              </dl>
+            </article>
           </div>
         </section>
 
@@ -820,6 +839,21 @@
           </div>
           <ol class="timeline" data-reveal>
             <li class="is-current">
+              <p class="timeline__when"><span class="x-mono">Day 23 · 2026-11-26</span></p>
+              <div class="timeline__what">
+                <p><strong>TS 生态：同一个 agent，三个框架各写一遍</strong></p>
+                <ul>
+                  <li>默认步数：ToolLoopAgent 20、generateText 1、Mastra 5、OpenAI 10；三家都数模型调用</li>
+                  <li>撞到上限：AI SDK 和 Mastra 正常返回空回答，OpenAI 抛 MaxTurnsExceededError</li>
+                  <li>工具不存在：AI SDK 和 Mastra 交给模型并列出可用工具，OpenAI 默认抛错</li>
+                  <li>审批状态：AI SDK 在消息历史里，Mastra 在 storage 快照里，OpenAI 在 RunState 字符串里</li>
+                  <li>历史放在客户端时，改掉参数再附上批准就能绕过审批；开签名后恢复直接报错</li>
+                </ul>
+                <p class="x-think">思考：你的服务撞到步数上限时，用户看到的是什么？</p>
+              </div>
+              <p><a class="x-btn x-btn--ghost" href="https://github.com/Duang777/ai-agent-fullstack-roadmap/blob/main/logs/2026-11-26.md" target="_blank" rel="noopener">日志</a></p>
+            </li>
+            <li>
               <p class="timeline__when"><span class="x-mono">Day 22 · 2026-11-16</span></p>
               <div class="timeline__what">
                 <p><strong>Go 生态：用真库，看它们和预想不一样的地方</strong></p>
